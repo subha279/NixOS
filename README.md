@@ -43,7 +43,7 @@ It also doubles as my development environment for learning and building software
 
 Area
 
-What provides
+What it provides
 
 🧊 OS
 
@@ -111,18 +111,18 @@ Interactive cleanup and system maintenance dashboard
 
 🖼️ Desktop Philosophy
 
-follows a few principles:
+principles:
 
 Declarative
-↓
+    ↓
 Reproducible
-↓
+    ↓
 Modular
-↓
+    ↓
 Maintainable
-↓
+    ↓
 Fast + keyboard driven
-↓
+    ↓
 Beautiful without unnecessary complexity
 
 The desktop should feel like one system, rather than a collection of unrelated applications.
@@ -159,7 +159,7 @@ Wallpaper changes therefore drive the visual identity of the entire environment.
               │                   │                   │
        ┌──────▼──────┐     ┌──────▼──────┐     ┌──────▼──────┐
        │  Quickshell │     │   Fuzzel    │     │    Kitty    │
-       │      UI     │     │   Launcher  │     │  Terminal   │
+       │     UI      │     │   Launcher  │     │  Terminal   │
        └─────────────┘     └─────────────┘     └─────────────┘
 
 📁 Repository Structure
@@ -171,52 +171,52 @@ NixOS/
 ├── .gitignore
 │
 ├── hosts/
-│ └── laptop/
-│ ├── default.nix
-│ └── hardware-configuration.nix
+│   └── laptop/
+│       ├── default.nix
+│       └── hardware-configuration.nix
 │
 ├── modules/
-│ ├── audio/
-│ ├── bluetooth/
-│ ├── boot/
-│ ├── core/
-│ ├── creator/
-│ ├── desktop/
-│ ├── development/
-│ ├── fonts/
-│ ├── graphics/
-│ ├── hyprland/
-│ ├── monitoring/
-│ ├── networking/
-│ ├── nvidia/
-│ ├── packages/
-│ ├── polkit/
-│ ├── power/
-│ ├── session/
-│ ├── stylix/
-│ ├── users/
-│ └── xdg/
+│   ├── audio/
+│   ├── bluetooth/
+│   ├── boot/
+│   ├── core/
+│   ├── creator/
+│   ├── desktop/
+│   ├── development/
+│   ├── fonts/
+│   ├── graphics/
+│   ├── hyprland/
+│   ├── monitoring/
+│   ├── networking/
+│   ├── nvidia/
+│   ├── packages/
+│   ├── polkit/
+│   ├── power/
+│   ├── session/
+│   ├── stylix/
+│   ├── users/
+│   └── xdg/
 │
 ├── home/
-│ ├── default.nix
-│ ├── fastfetch/
-│ ├── fuzzel/
-│ ├── git/
-│ ├── hyprland/
-│ ├── kitty/
-│ ├── neovim/
-│ ├── quickshell/
-│ ├── ssh/
-│ ├── theme/
-│ ├── xdg/
-│ └── zsh/
+│   ├── default.nix
+│   ├── fastfetch/
+│   ├── fuzzel/
+│   ├── git/
+│   ├── hyprland/
+│   ├── kitty/
+│   ├── neovim/
+│   ├── quickshell/
+│   ├── ssh/
+│   ├── theme/
+│   ├── xdg/
+│   └── zsh/
 │
 ├── lib/
-│ └── variables.nix
+│   └── variables.nix
 │
 └── scripts/
-├── check.sh
-└── cleanup.sh
+    ├── check.sh
+    └── cleanup.sh
 
 Design rule
 
@@ -236,14 +236,14 @@ laptop
 
 The primary workstation.
 
-CPU Intel
-GPU Intel + NVIDIA
-Graphics NVIDIA PRIME offload
-Kernel 6.x
-Storage ext4
-Boot EFI + GRUB
-Session Wayland
-WM Hyprland
+CPU       Intel
+GPU       Intel + NVIDIA
+Graphics  NVIDIA PRIME offload
+Kernel    6.x
+Storage   ext4
+Boot      EFI + GRUB
+Session   Wayland
+WM        Hyprland
 
 The generated hardware-configuration.nix is intentionally kept under the host because it is machine-specific.
 
@@ -272,23 +272,23 @@ The most distinctive part of the setup is the dynamic theming pipeline.
 Wallpaper workflow
 
 MOD + P
-│
-▼
+   │
+   ▼
 Fuzzel wallpaper picker
-│
-▼
+   │
+   ▼
 Select image
-│
-▼
+   │
+   ▼
 wallust extracts palette
-│
-▼
+   │
+   ▼
 awww transitions wallpaper
-│
-├──► Hyprland colors
-├──► Kitty colors
-├──► Fuzzel colors
-└──► Starship colors
+   │
+   ├──► Hyprland colors
+   ├──► Kitty colors
+   ├──► Fuzzel colors
+   └──► Starship colors
 
 The result is a desktop where the wallpaper and application chrome feel like part of the same visual system.
 
@@ -299,23 +299,25 @@ Hyprland is configured through a modular Lua-based setup rather than one large c
 home/hyprland/
 ├── hyprland.lua
 ├── config/
-│ ├── animation.lua
-│ ├── decoration.lua
-│ ├── env.lua
-│ ├── general.lua
-│ ├── input.lua
-│ ├── keybinds.lua
-│ ├── layerules.lua
-│ ├── layout.lua
-│ ├── misc.lua
-│ ├── monitor.lua
-│ ├── startup.lua
-│ ├── theme.lua
-│ └── windowrules.lua
+│   ├── animation.lua
+│   ├── decoration.lua
+│   ├── env.lua
+│   ├── general.lua
+│   ├── input.lua
+│   ├── keybinds.lua
+│   ├── layerules.lua
+│   ├── layout.lua
+│   ├── misc.lua
+│   ├── monitor.lua
+│   ├── startup.lua
+│   ├── theme.lua
+│   └── windowrules.lua
 └── scripts/
-├── launcher.sh
-├── restore-wallpaper.sh
-└── wallpaper.sh
+    ├── launcher.sh
+    ├── restore-wallpaper.sh
+    └── wallpaper.sh
+
+Hyprland is intentionally split into small modules so individualbehaviors can be changed without editing one huge configuration file.
 
 Desktop characteristics
 
@@ -345,33 +347,53 @@ Keyboard-driven navigation
 
 🧊 Quickshell — Bar
 
-The custom Quickshell UI is designed as a compact floating pill rather than a traditional full-width panel.
+The custom Quickshell UI is a compact floating pill rather than a traditionalfull-width panel.
 
-╭────────────────────────────────────────────────────╮
-│ 󱄅 │ 🔊 ☀ │ 20:42 │   tray │
-╰────────────────────────────────────────────────────╯
+<div align="center">
 
-Current components include:
+󱄅  ·  🔊  ·  ☀  ·  20:42  ·    ·    ·  tray
 
-Launcher
+</div>
 
-Volume
+Bar modules
 
-Brightness
+Module
 
-Clock
+Purpose
 
-Network
+🚀 Launcher
 
-Bluetooth
+Open the application launcher
 
-System tray
+🔊 Volume
 
-Notification integration
+Audio level and mute control
 
-Quick settings
+☀️ Brightness
 
-The shell is managed declaratively through Home Manager and runs as a user systemd service.
+Display brightness control
+
+🕐 Clock
+
+Current time
+
+ Network
+
+Network status
+
+ Bluetooth
+
+Bluetooth status
+
+🧩 Tray
+
+System tray applications
+
+⚙️ Settings
+
+Quick desktop controls
+
+The shell is managed declaratively through Home Manager and runs as a usersystemd service.
 
 🚀 Fuzzel
 
@@ -396,12 +418,12 @@ Keyboard-first navigation
 Example:
 
 ╭──────────────────────────────────────╮
-│ 󱄅 Search applications... │
+│ 󱄅   Search applications...           │
 ├──────────────────────────────────────┤
-│ 󰈹 Firefox │
-│ 󰆍 Kitty │
-│ 󰙨 Neovim │
-│ 󰀻 Thunar │
+│ 󰈹   Firefox                          │
+│ 󰆍   Kitty                            │
+│ 󰙨   Neovim                           │
+│ 󰀻   Thunar                           │
 ╰──────────────────────────────────────╯
 
 💻 Kitty
@@ -538,16 +560,16 @@ Tailwind CSS
 
 Toolchain
 
-Rust rust-analyzer · rustfmt
-C/C++ clangd · gcc · gdb · cmake
-Lua lua-language-server · stylua
-Python pyright · ruff
-Nix nixd · nixfmt
-JS/TS typescript-language-server · prettier
-Shell bash-language-server · shellcheck · shfmt
-Docker dockerfile-language-server
-TOML taplo
-Markdown marksman
+Rust       rust-analyzer · rustfmt
+C/C++      clangd · gcc · gdb · cmake
+Lua        lua-language-server · stylua
+Python     pyright · ruff
+Nix        nixd · nixfmt
+JS/TS      typescript-language-server · prettier
+Shell      bash-language-server · shellcheck · shfmt
+Docker     dockerfile-language-server
+TOML       taplo
+Markdown   marksman
 
 ⌨️ Keybindings
 
@@ -926,56 +948,11 @@ sudo nixos-rebuild switch --flake .#laptop
 
 Important: hosts/laptop/hardware-configuration.nix is machine-specific. Generate your own hardware configuration before adapting this repository to different hardware.
 
-🔄 Daily Workflow
-
-The intended workflow is deliberately simple:
-
-cd ~/NixOS
-
-# Make changes
-
-$EDITOR ...
-
-# Validate
-
-./scripts/check.sh
-
-# Review
-
-git diff
-
-# Commit
-
-git add <files>
-git commit -m "Describe the change"
-
-# Rebuild
-
-sudo nixos-rebuild switch --flake .#laptop
-
-# Push
-
-git push
-
-🔐 Public Repository Safety
-
-This is a public configuration repository.
-
-Things that should never be committed:
-
-.env
-API tokens
-passwords
-private SSH keys
-cloud credentials
-private certificates
-machine secrets
-
-The repository includes a .gitignore for common secret, environment, build and temporary files.
-
 Machine-specific configuration such as filesystem UUIDs may remain in hardware-configuration.nix because that file is required for the local NixOS installation and does not contain authentication credentials.
 
 🗺️ Roadmap
+
+An evolving configuration.
 
 Completed
 
@@ -1037,11 +1014,16 @@ It is a living personal system.
 
 The priorities are:
 
-Reproducibility +
-Maintainability +
-Performance +
-Developer experience +
-Visual consistency +
+Reproducibility
+      +
+Maintainability
+      +
+Performance
+      +
+Developer experience
+      +
+Visual consistency
+      +
 Learning
 
 Every improvement should make the system easier to understand, reproduce, or use.

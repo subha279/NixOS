@@ -77,10 +77,7 @@ require("conform").setup({
 		},
 	},
 
-	format_on_save = {
-		timeout_ms = 3000,
-		lsp_format = "fallback",
-	},
+	format_on_save = false,
 })
 
 vim.keymap.set({ "n", "v" }, "<leader>gf", function()
