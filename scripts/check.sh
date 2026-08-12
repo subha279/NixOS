@@ -1,22 +1,32 @@
 #!/usr/bin/env bash
 
 # ============================================================================
-# NixOS Configuration Validator
+# Aurora NixOS Configuration Validator
 # ============================================================================
 #
-# Designed for this repository:
+# Repository structure:
 #
-#   NixOS
-#   ├── hosts/
-#   ├── modules/
-#   ├── home/
-#   └── scripts/
+# NixOS
+# ├── hosts/
+# ├── modules/
+# ├── home/
+# └── scripts/
 #
-# Important:
+# Validates:
+#   • Git repository
+#   • Flake evaluation
+#   • Nix syntax
+#   • Required files
+#   • Neovim configuration
+#   • Lua syntax
+#   • Quickshell
+#   • Hyprland
+#   • Desktop dependencies
+#   • Neovim package declarations
+#   • Configuration ownership
+#   • Wallust/Fuzzel architecture
+#   • Generated configuration
 #
-# Neovim plugins and extraPackages are managed by Home Manager.
-# Therefore we validate their DECLARATION and the REAL Neovim configuration,
-# rather than trying to discover them from a bare `nvim -u NONE` process.
 # ============================================================================
 
 set -uo pipefail
@@ -27,35 +37,62 @@ cd "$ROOT"
 FAILED=0
 
 # ============================================================================
-# Helpers
+# UI
 # ============================================================================
 
+RESET='\033[0m'
+BOLD='\033[1m'
+DIM='\033[2m'
+
+CYAN='\033[1;36m'
+MAGENTA='\033[1;35m'
+GREEN='\033[1;32m'
+RED='\033[1;31m'
+YELLOW='\033[1;33m'
+BLUE='\033[1;34m'
+
 ok() {
-    printf '  ✓ %s\n' "$1"
+    printf "  ${GREEN}✓${RESET} %s\n" "$1"
 }
 
 fail() {
-    printf '  ✗ %s\n' "$1"
+    printf "  ${RED}✗${RESET} %s\n" "$1"
     FAILED=1
 }
 
 info() {
-    printf '  ! %s\n' "$1"
+    printf "  ${YELLOW}!${RESET} %s\n" "$1"
 }
 
 section() {
-    printf '\n\033[1;35m==> %s\033[0m\n' "$1"
+    printf "\n${MAGENTA}${BOLD}==>${RESET} ${BOLD}%s${RESET}\n" "$1"
+}
+
+subsection() {
+    printf "  ${BLUE}•${RESET} ${BOLD}%s${RESET}\n" "$1"
+}
+
+separator() {
+    printf "${DIM}────────────────────────────────────────────────────────────${RESET}\n"
 }
 
 # ============================================================================
 # Header
 # ============================================================================
 
-printf '\033[1;36m'
-printf '╭──────────────────────────────────────────────╮\n'
-printf '│          NixOS Configuration Check           │\n'
-printf '╰──────────────────────────────────────────────╯\n'
-printf '\033[0m'
+clear 2>/dev/null || true
+
+printf "${CYAN}${BOLD}"
+printf '╭────────────────────────────────────────────────────────────╮\n'
+printf '│                                                            │\n'
+printf '│              Aurora NixOS Configuration Check              │\n'
+printf '│                                                            │\n'
+printf '╰────────────────────────────────────────────────────────────╯\n'
+printf "${RESET}"
+
+printf "\n"
+printf "${DIM}Repository:${RESET} %s\n" "$ROOT"
+printf "${DIM}Branch:${RESET}     %s\n" "$(git branch --show-current 2>/dev/null || printf 'unknown')"
 
 # ============================================================================
 # 1. Repository
@@ -78,18 +115,15 @@ section "Flake"
 FLAKE_LOG="$(mktemp)"
 
 if nix flake check --no-build >"$FLAKE_LOG" 2>&1; then
-
     ok "Flake evaluation passed"
 
     if grep -q "dirty" "$FLAKE_LOG"; then
         info "Git tree is dirty"
     fi
-
 else
-
     fail "Flake check failed"
+    printf "\n"
     cat "$FLAKE_LOG"
-
 fi
 
 rm -f "$FLAKE_LOG"
@@ -108,7 +142,7 @@ while IFS= read -r -d '' file; do
     NIX_COUNT=$((NIX_COUNT + 1))
 
     if ! nix-instantiate --parse "$file" >/dev/null 2>&1; then
-        printf '  ✗ Invalid Nix syntax: %s\n' "$file"
+        printf "  ${RED}✗${RESET} Invalid Nix syntax: %s\n" "$file"
         NIX_FAILED=1
     fi
 
@@ -149,21 +183,23 @@ required_files=(
     "home/quickshell/default.nix"
     "home/quickshell/config/shell.qml"
 
-    "home/fuzzel/default.nix"
+    # Wallust / Fuzzel architecture
+    "home/hyprland/wallust/wallust.toml"
+    "home/hyprland/wallust/templates/fuzzel.ini"
+    "home/hyprland/scripts/launcher.sh"
+    "home/hyprland/scripts/wallpaper.sh"
 )
 
 for file in "${required_files[@]}"; do
-
     if [[ -f "$file" ]]; then
         ok "$file"
     else
         fail "Missing: $file"
     fi
-
 done
 
 # ============================================================================
-# 5. Neovim
+# 5. Neovim files
 # ============================================================================
 
 section "Neovim"
@@ -235,7 +271,7 @@ if command -v nvim >/dev/null 2>&1; then
     if nvim \
         --headless \
         -u NONE \
-        '+lua local files = vim.fn.glob("'"$ROOT"'/home/**/*.lua", false, true); for _, f in ipairs(files) do local fn, err = loadfile(f); if not fn then error(f .. ": " .. err) end end' \
+        "+lua local files = vim.fn.glob('$ROOT/home/**/*.lua', false, true); for _, f in ipairs(files) do local fn, err = loadfile(f); if not fn then error(f .. ': ' .. err) end end" \
         '+qa!' \
         >"$LUA_LOG" 2>&1; then
 
@@ -264,7 +300,7 @@ section "Quickshell"
 
 if command -v qs >/dev/null 2>&1; then
 
-    if systemctl --user is-active --quiet quickshell; then
+    if systemctl --user is-active --quiet quickshell.service; then
         ok "Quickshell service is running"
     else
         info "Quickshell service is not currently running"
@@ -336,7 +372,7 @@ for cmd in "${desktop_commands[@]}"; do
 done
 
 # ============================================================================
-# 11. Neovim declaration
+# 11. Neovim declarations
 # ============================================================================
 
 section "Neovim packages"
@@ -448,15 +484,63 @@ fi
 # Fuzzel
 # ---------------------------------------------------------------------------
 
-if grep -qE '^[[:space:]]*fuzzel[[:space:]]*$' \
-    "$ROOT/modules/desktop/applications.nix" 2>/dev/null &&
-    [[ -f "$ROOT/home/fuzzel/default.nix" ]]; then
+subsection "Fuzzel / Wallust"
 
-    ok "Fuzzel package/config ownership is clean"
+# Fuzzel package should be installed by the system module.
+if grep -qE '^[[:space:]]*fuzzel[[:space:]]*$' \
+    "$ROOT/modules/desktop/applications.nix" 2>/dev/null; then
+
+    ok "Fuzzel package declared"
 
 else
 
-    info "Fuzzel ownership could not be verified"
+    fail "Fuzzel package declaration not found"
+
+fi
+
+# Static Fuzzel module should NOT exist anymore.
+if [[ ! -f "$ROOT/home/fuzzel/default.nix" ]]; then
+
+    ok "No duplicate Home Manager Fuzzel module"
+
+else
+
+    info "Legacy home/fuzzel/default.nix still exists"
+
+fi
+
+# Wallust template should exist.
+if [[ -f "$ROOT/home/hyprland/wallust/templates/fuzzel.ini" ]]; then
+
+    ok "Fuzzel theme owned by Wallust"
+
+else
+
+    fail "Wallust Fuzzel template not found"
+
+fi
+
+# Launcher should reference the generated Wallust config.
+if grep -q '\.cache/wallust/fuzzel\.ini' \
+    "$ROOT/home/hyprland/scripts/launcher.sh" 2>/dev/null; then
+
+    ok "Launcher uses Wallust-generated Fuzzel configuration"
+
+else
+
+    fail "Launcher is not using Wallust Fuzzel configuration"
+
+fi
+
+# Wallpaper picker should reference the generated Wallust config.
+if grep -q '\.cache/wallust/fuzzel\.ini' \
+    "$ROOT/home/hyprland/scripts/wallpaper.sh" 2>/dev/null; then
+
+    ok "Wallpaper picker uses Wallust-generated Fuzzel configuration"
+
+else
+
+    fail "Wallpaper picker is not using Wallust Fuzzel configuration"
 
 fi
 
@@ -482,7 +566,7 @@ fi
 section "Generated configuration"
 
 generated_files=(
-    "$HOME/.config/fuzzel/fuzzel.ini"
+    "$HOME/.cache/wallust/fuzzel.ini"
     "$HOME/.config/quickshell/shell.qml"
     "$HOME/.config/hypr/hyprland.lua"
 )
@@ -492,41 +576,144 @@ for file in "${generated_files[@]}"; do
     if [[ -e "$file" ]]; then
         ok "$file"
     else
-        info "Not currently deployed: $file"
+        info "Not currently generated: $file"
     fi
 
 done
 
 # ============================================================================
+# 14. Wallust
+# ============================================================================
+
+section "Wallust"
+
+WALLUST_CONFIG="$ROOT/home/hyprland/wallust/wallust.toml"
+
+if [[ -f "$WALLUST_CONFIG" ]]; then
+
+    ok "Wallust configuration exists"
+
+    if grep -q 'fuzzel\.template = "fuzzel\.ini"' \
+        "$WALLUST_CONFIG"; then
+
+        ok "Fuzzel template registered with Wallust"
+
+    else
+
+        fail "Fuzzel template is not registered with Wallust"
+
+    fi
+
+    if grep -q 'fuzzel\.target = "\~/.cache/wallust/fuzzel\.ini"' \
+        "$WALLUST_CONFIG"; then
+
+        ok "Fuzzel target uses Wallust cache"
+
+    else
+
+        info "Could not verify Wallust Fuzzel target"
+
+    fi
+
+else
+
+    fail "Wallust configuration not found"
+
+fi
+
+# ============================================================================
+# 15. Aurora Layer Rules
+# ============================================================================
+
+section "Aurora layer rules"
+
+LAYER_RULES="$ROOT/home/hyprland/config/layerules.lua"
+
+if [[ -f "$LAYER_RULES" ]]; then
+
+    ok "Layer rules file exists"
+
+    if grep -q 'namespace = "\^launcher\$"' "$LAYER_RULES"; then
+        ok "Launcher blur rule declared"
+    else
+        fail "Launcher blur rule missing"
+    fi
+
+    if grep -q 'namespace = "\^aurora-bar\$"' "$LAYER_RULES"; then
+        ok "Aurora bar blur rule declared"
+    else
+        fail "Aurora bar blur rule missing"
+    fi
+
+    if grep -q 'namespace = "\^aurora-notifications\$"' "$LAYER_RULES"; then
+        ok "Aurora notification blur rule declared"
+    else
+        fail "Aurora notification blur rule missing"
+    fi
+
+else
+
+    fail "Hyprland layer rules file not found"
+
+fi
+
+# ============================================================================
+# 16. Git status
+# ============================================================================
+
+section "Git status"
+
+if git diff --quiet && git diff --cached --quiet; then
+
+    ok "Working tree clean"
+
+else
+
+    info "Uncommitted changes detected"
+
+    printf "\n"
+    git status --short
+
+fi
+
+# ============================================================================
 # Final result
 # ============================================================================
 
-printf '\n'
+printf "\n"
+
+separator
+
+printf "\n"
 
 if [[ "$FAILED" -eq 0 ]]; then
 
-    printf '\033[1;32m'
-    printf '╭──────────────────────────────────────────────╮\n'
-    printf '│          ✓ Configuration is healthy          │\n'
-    printf '╰──────────────────────────────────────────────╯\n'
-    printf '\033[0m'
+    printf "${GREEN}${BOLD}"
+    printf '╭────────────────────────────────────────────────────────────╮\n'
+    printf '│                                                            │\n'
+    printf '│            ✓  Configuration is healthy                     │\n'
+    printf '│                                                            │\n'
+    printf '╰────────────────────────────────────────────────────────────╯\n'
+    printf "${RESET}"
 
-    printf '\n'
-    printf 'Safe to run:\n'
-    printf '  sudo nixos-rebuild switch --flake .#laptop\n'
+    printf "\n"
+    printf "${DIM}Safe to run:${RESET}\n"
+    printf "  ${CYAN}sudo nixos-rebuild switch --flake .#laptop${RESET}\n"
 
     exit 0
 
 else
 
-    printf '\033[1;31m'
-    printf '╭──────────────────────────────────────────────╮\n'
-    printf '│       ✗ Problems require attention           │\n'
-    printf '╰──────────────────────────────────────────────╯\n'
-    printf '\033[0m'
+    printf "${RED}${BOLD}"
+    printf '╭────────────────────────────────────────────────────────────╮\n'
+    printf '│                                                            │\n'
+    printf '│             ✗  Problems require attention                  │\n'
+    printf '│                                                            │\n'
+    printf '╰────────────────────────────────────────────────────────────╯\n'
+    printf "${RESET}"
 
-    printf '\n'
-    printf 'Fix the problems above before rebuilding.\n'
+    printf "\n"
+    printf "${YELLOW}Fix the problems above before rebuilding.${RESET}\n"
 
     exit 1
 
