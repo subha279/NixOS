@@ -1,0 +1,2 @@
+module Shell.Services
+singleton NotificationServer 1.0 NotificationServer.qml

@@ -1,0 +1,44 @@
+# ==========================================
+# Wallust Generated Starship Configuration
+# DO NOT EDIT
+# ==========================================
+
+palette = "wallust"
+
+[palettes.wallust]
+
+base00 = "{{background}}"
+base01 = "{{color0}}"
+base02 = "{{color1}}"
+base03 = "{{color2}}"
+base04 = "{{color3}}"
+base05 = "{{foreground}}"
+base06 = "{{color7}}"
+base07 = "{{color15}}"
+
+base08 = "{{color1}}"
+base09 = "{{color3}}"
+base0A = "{{color11}}"
+base0B = "{{color2}}"
+base0C = "{{color6}}"
+base0D = "{{color4}}"
+base0E = "{{color5}}"
+base0F = "{{color8}}"
+
+black = "{{color0}}"
+red = "{{color1}}"
+green = "{{color2}}"
+yellow = "{{color3}}"
+blue = "{{color4}}"
+magenta = "{{color5}}"
+cyan = "{{color6}}"
+white = "{{color7}}"
+
+bright-black = "{{color8}}"
+bright-red = "{{color9}}"
+bright-green = "{{color10}}"
+bright-yellow = "{{color11}}"
+bright-blue = "{{color12}}"
+bright-magenta = "{{color13}}"
+bright-cyan = "{{color14}}"
+bright-white = "{{color15}}"

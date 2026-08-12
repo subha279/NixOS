@@ -1,0 +1,17 @@
+backend = "fastresize"
+palette = "dark16"
+check_contrast = true
+
+[templates]
+
+hyprland.template = "colors.lua"
+hyprland.target = "~/.cache/wallust/colors.lua"
+
+kitty.template = "kitty.conf"
+kitty.target = "~/.cache/wallust/kitty.conf"
+
+starship.template = "starship.toml"
+starship.target = "~/.cache/wallust/starship.toml"
+
+fuzzel.template = "fuzzel.ini"
+fuzzel.target = "~/.cache/wallust/fuzzel.ini"
