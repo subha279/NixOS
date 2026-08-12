@@ -1,4 +1,4 @@
-# ❄️ Aurora NixOS
+# ❄️ NixOS
 
 > My personal **NixOS + Hyprland** configuration — focused on a clean, fast, keyboard-driven Wayland desktop and a practical development environment.
 
