@@ -7,10 +7,10 @@
 -- ==========================================================
 
 hl.layer_rule({
-	name = "fuzzel-glass",
+	name = "launcher-glass",
 
 	match = {
-		namespace = "^fuzzel$",
+		namespace = "^launcher$",
 	},
 
 	blur = true,
