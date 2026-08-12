@@ -532,8 +532,8 @@ else
 
 fi
 
-# Wallpaper picker should reference the generated Wallust config.
-if grep -q '\.cache/wallust/fuzzel\.ini' \
+# Wallpaper picker uses the Wallust cache directory.
+if grep -qE 'FUZZEL_CONFIG=.*fuzzel\.ini|CACHE_DIR=.*wallust' \
     "$ROOT/home/hyprland/scripts/wallpaper.sh" 2>/dev/null; then
 
     ok "Wallpaper picker uses Wallust-generated Fuzzel configuration"
@@ -543,7 +543,6 @@ else
     fail "Wallpaper picker is not using Wallust Fuzzel configuration"
 
 fi
-
 # ---------------------------------------------------------------------------
 # Quickshell
 # ---------------------------------------------------------------------------
