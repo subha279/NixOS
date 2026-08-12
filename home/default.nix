@@ -11,7 +11,6 @@
     ./neovim
     ./hyprland
     ./quickshell
-    ./fuzzel
   ];
 
   home.username = "subha";
