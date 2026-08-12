@@ -1,520 +1,1061 @@
-╭──────────────────────────────────────────────────────────────────────────╮
-│ │
-│ ███████╗██╗ ██╗██████╗ ██╗ ██╗ █████╗ ██████╗ ███████╗ │
-│ ██╔════╝██║ ██║██╔══██╗██║ ██║██╔══██╗██╔═══██╗██╔════╝ │
-│ ███████╗██║ ██║██████╔╝███████║███████║██║ ██║███████╗ │
-│ ╚════██║██║ ██║██╔══██╗██╔══██║██╔══██║██║ ██║╚════██║ │
-│ ███████║╚██████╔╝██████╔╝██║ ██║██║ ██║╚██████╔╝███████║ │
-│ ╚══════╝ ╚═════╝ ╚═════╝ ╚═╝ ╚═╝╚═╝ ╚═╝ ╚═════╝ ╚══════╝ │
-│ a beautiful, functional Linux dotfiles │
-│ │
-╰──────────────────────────────────────────────────────────────────────────╯
+<div align="center">
 
-A fully declarative **[NixOS](https://nixos.org)** + **[Home Manager](https://github.com/nix-community/home-manager)** setup powered by **[Stylix](https://github.com/danth/stylix)**, with the [Hyprland](https://hyprland.org) Wayland compositor, a custom [Quickshell](https://quickshell.outfoxxed.de) desktop shell, and an "Aurora" themed [Neovim](https://neovim.io) — all wallpaper color-synced by **[Wallust](https://github.com/explosion-mental/wallust)**.
+❄️ NixOS
 
-> _Flake description: "Subha's NixOS Configuration" — username: `subha279`_
+A declarative, polished Linux desktop built around NixOS + Hyprland
 
----
+<p>
+  <strong>Reproducible.</strong>
+  <strong>Minimal.</strong>
+  <strong>Fast.</strong>
+  <strong>Beautiful.</strong>
+</p>
 
-## Table of Contents
+<p>
+  <a href="https://nixos.org/">NixOS</a> ·
+  <a href="https://github.com/nix-community/home-manager">Home Manager</a> ·
+  <a href="https://hyprland.org/">Hyprland</a> ·
+  <a href="https://quickshell.outfoxxed.me/">Quickshell</a> ·
+  <a href="https://github.com/danth/stylix">Stylix</a> ·
+  <a href="https://github.com/explosion-mental/wallust">Wallust</a> ·
+  <a href="https://neovim.io/">Neovim</a>
+</p>
 
-- [Features](#-features)
-- [Directory Structure](#-directory-structure)
-- [Hosts](#-hosts)
-- [System Core](#-system-core)
-- [Desktop & Theming](#-desktop--theming)
-- [Installed Programs](#-installed-programs)
-- [Keybindings](#-keybindings)
-  - [Hyprland](#hyprland)
-  - [Neovim](#neovim)
-  - [Zsh](#zsh)
-- [Neovim Deep Dive](#-neovim-deep-dive)
-- [Scripts](#-scripts)
-- [Usage](#-usage)
-- [Theming Pipeline](#-theming-pipeline)
+<img src="https://img.shields.io/badge/NixOS-26.05-5277C3?style=for-the-badge&logo=nixos&logoColor=white" alt="NixOS 26.05">
+<img src="https://img.shields.io/badge/Wayland-Hyprland-58E1FF?style=for-the-badge" alt="Hyprland">
+<img src="https://img.shields.io/badge/Config-Declarative-8A2BE2?style=for-the-badge" alt="Declarative configuration">
 
----
+</div>
 
-## ✦ Features
+✦ About
 
-- **Flake-based** NixOS + Home Manager in a single repository, two host configurations
-- **Hyprland** on Wayland with a Lua-driven config (`hyprland.lua`)
-- **Quickshell** "Aurora" status bar — pill-shaped glass top bar with volume, brightness, clock, network, bluetooth and tray
-- **Fuzzel** launcher with wallpaper previews and glass blur
-- **Sticky wallpaper theming** — pick a wallpaper, `awww` + `wallust` re-theme **Hyprland, Kitty, Starship and Fuzzel** live
-- **Stylix** dark polarity with automatic GTK/Qt theming
-- **Neovim** with 16 LSP servers, Treesitter, blink.cmp completion, Conform/Lint pipelines, custom "Aurora" colorscheme
-- **NVIDIA PRIME offload** support for the laptop
-- **Utility scripts** — config validator (`check.sh`) and an interactive maintenance dashboard (`cleanup.sh`)
+My personal NixOS configuration and Linux desktop environment.
 
----
+The goal is simple:
 
-## 📁 Directory Structure
+Build a Linux workstation that is reproducible, keyboard-driven, visually cohesive, and pleasant to use every day.
 
-```
+Almost everything is declared in Nix and Home Manager. The desktop is built around Hyprland, with a custom Quickshell shell, Stylix for system-wide theming, and Wallust + awww for dynamic wallpaper-driven colors.
+
+It also doubles as my development environment for learning and building software — especially Linux, open source, systems programming, Rust, C/C++, and web development.
+
+✨ Highlights
+
+Area
+
+What provides
+
+🧊 OS
+
+Declarative NixOS configuration using flakes
+
+🪟 Window Manager
+
+Hyprland on Wayland
+
+🖥️ Desktop Shell
+
+Custom Quickshell bar
+
+🎨 Theming
+
+Stylix + Wallust wallpaper color generation
+
+🖼️ Wallpaper
+
+awww with animated transitions
+
+🚀 Launcher
+
+Fuzzel with icons and wallpaper previews
+
+💻 Terminal
+
+Kitty + dynamic Wallust colors
+
+🧠 Editor
+
+Neovim with LSP, Treesitter, completion, formatting and diagnostics
+
+🐚 Shell
+
+Zsh + Starship + fzf + zoxide
+
+🎮 Graphics
+
+Intel + NVIDIA PRIME offload
+
+🔔 Notifications
+
+libnotify / notify-send
+
+🔊 Audio
+
+PipeWire + WirePlumber
+
+📡 Networking
+
+NetworkManager + applet
+
+🔵 Bluetooth
+
+BlueZ + Blueman
+
+🛠️ Validation
+
+Custom configuration health checker
+
+🧹 Maintenance
+
+Interactive cleanup and system maintenance dashboard
+
+🖼️ Desktop Philosophy
+
+follows a few principles:
+
+Declarative
+↓
+Reproducible
+↓
+Modular
+↓
+Maintainable
+↓
+Fast + keyboard driven
+↓
+Beautiful without unnecessary complexity
+
+The desktop should feel like one system, rather than a collection of unrelated applications.
+
+Wallpaper changes therefore drive the visual identity of the entire environment.
+
+🧭 Architecture
+
+                         ┌──────────────────┐
+                         │      flake.nix   │
+                         └────────┬─────────┘
+                                  │
+                 ┌────────────────┴────────────────┐
+                 │                                 │
+        ┌────────▼────────┐              ┌────────▼────────┐
+        │     NixOS       │              │  Home Manager   │
+        │     modules     │              │      home/      │
+        └────────┬────────┘              └────────┬────────┘
+                 │                                │
+        ┌────────▼────────┐              ┌────────▼────────┐
+        │ System services │              │ User programs   │
+        │ Hardware        │              │ Dotfiles        │
+        │ Networking      │              │ Applications    │
+        └────────┬────────┘              └────────┬────────┘
+                 │                                │
+                 └────────────────┬───────────────┘
+                                  │
+                         ┌────────▼────────┐
+                         │    Hyprland     │
+                         │     Wayland     │
+                         └────────┬────────┘
+                                  │
+              ┌───────────────────┼───────────────────┐
+              │                   │                   │
+       ┌──────▼──────┐     ┌──────▼──────┐     ┌──────▼──────┐
+       │  Quickshell │     │   Fuzzel    │     │    Kitty    │
+       │      UI     │     │   Launcher  │     │  Terminal   │
+       └─────────────┘     └─────────────┘     └─────────────┘
+
+📁 Repository Structure
+
 NixOS/
-├── flake.nix                  # Flake entrypoint, inputs (nixpkgs, home-manager, stylix)
+├── flake.nix
 ├── flake.lock
-├── lib/
-│   └── variables.nix          # Shared variables (user, email, host, timezone, locale)
+├── README.md
+├── .gitignore
+│
 ├── hosts/
-│   ├── laptop/                # Host: "subha" with NVIDIA, power, development
-│   │   ├── default.nix
-│   │   └── hardware-configuration.nix
-│   └── vm/                    # Host: "vm" (minimal desktop)
-│       ├── default.nix
-│       └── hardware-configuration.nix
-├── modules/                   # System-level NixOS modules
-│   ├── audio/ bluetooth/ boot/ core/ creator/ desktop/ development/
-│   ├── fonts/ graphics/ hyprland/ monitoring/ networking/ nvidia/
-│   ├── packages/ polkit/ power/ session/ stylix/ users/ xdg/
-├── home/                      # Home Manager user configuration
-│   ├── default.nix
-│   ├── fastfetch/ fuzzel/ git/ hyprland/ kitty/ neovim/
-│   ├── quickshell/ ssh/ theme/ xdg/ zsh/
+│ └── laptop/
+│ ├── default.nix
+│ └── hardware-configuration.nix
+│
+├── modules/
+│ ├── audio/
+│ ├── bluetooth/
+│ ├── boot/
+│ ├── core/
+│ ├── creator/
+│ ├── desktop/
+│ ├── development/
+│ ├── fonts/
+│ ├── graphics/
+│ ├── hyprland/
+│ ├── monitoring/
+│ ├── networking/
+│ ├── nvidia/
+│ ├── packages/
+│ ├── polkit/
+│ ├── power/
+│ ├── session/
+│ ├── stylix/
+│ ├── users/
+│ └── xdg/
+│
+├── home/
+│ ├── default.nix
+│ ├── fastfetch/
+│ ├── fuzzel/
+│ ├── git/
+│ ├── hyprland/
+│ ├── kitty/
+│ ├── neovim/
+│ ├── quickshell/
+│ ├── ssh/
+│ ├── theme/
+│ ├── xdg/
+│ └── zsh/
+│
+├── lib/
+│ └── variables.nix
+│
 └── scripts/
-    ├── check.sh               # NixOS configuration validator
-    └── cleanup.sh             # Interactive maintenance dashboard
-```
+├── check.sh
+└── cleanup.sh
+
+Design rule
+
+System-wide configuration belongs in modules/.
+
+User-level configuration belongs in home/.
+
+Machine-specific configuration belongs in hosts/.
+
+Shared values belong in lib/.
+
+That separation keeps the configuration easier to understand and extend.
+
+🖥️ Host
+
+laptop
+
+The primary workstation.
 
----
+CPU Intel
+GPU Intel + NVIDIA
+Graphics NVIDIA PRIME offload
+Kernel 6.x
+Storage ext4
+Boot EFI + GRUB
+Session Wayland
+WM Hyprland
 
-## 🖥️ Hosts
+The generated hardware-configuration.nix is intentionally kept under the host because it is machine-specific.
 
-| Host     | Hostname | Description                                                       |
-| -------- | -------- | ----------------------------------------------------------------- |
-| `laptop` | `subha`  | Full desktop: NVIDIA PRIME, power management, dev + creator stack |
-| `vm`     | —        | Minimal desktop: core + Hyprland + Stylix + monitoring            |
+🎨 Theming System
 
-**Laptop hardware** (from `hardware-configuration.nix`):
+The most distinctive part of the setup is the dynamic theming pipeline.
 
-- Intel CPU (`kvm-intel` kernel module), NVIDIA GPU via **PRIME offload** (`intelBusId PCI:0@0:2:0`, `nvidiaBusId PCI:1@0:0:0`, open kernel modules)
-- ext4 root, vfat `/boot`, x86_64-linux
+                 Wallpaper
+                     │
+                     ▼
+                  Wallust
+                     │
+             ┌───────┼────────┐
+             │       │        │
+             ▼       ▼        ▼
+          Hyprland  Kitty   Fuzzel
+             │       │        │
+             └───────┼────────┘
+                     │
+                     ▼
+                  Starship
+                     │
+                     ▼
+              Entire desktop
 
----
+Wallpaper workflow
 
-## 🧠 System Core
+MOD + P
+│
+▼
+Fuzzel wallpaper picker
+│
+▼
+Select image
+│
+▼
+wallust extracts palette
+│
+▼
+awww transitions wallpaper
+│
+├──► Hyprland colors
+├──► Kitty colors
+├──► Fuzzel colors
+└──► Starship colors
 
-| Setting         | Value                      |
-| --------------- | -------------------------- |
-| OS              | NixOS 26.05 (stateVersion) |
-| Nix features    | `nix-command`, `flakes`    |
-| Unfree packages | allowed                    |
-| Timezone        | `Asia/Kolkata`             |
-| Locale          | `en_US.UTF-8`              |
-| Console keymap  | `us`                       |
-| Bootloader      | GRUB + EFI                 |
-| Default shell   | Zsh (for user `subha`)     |
-| Sudo            | enabled                    |
-| User groups     | `wheel`, `networkmanager`  |
+The result is a desktop where the wallpaper and application chrome feel like part of the same visual system.
 
-**System services**
+🪟 Hyprland
 
-- `networkmanager` + openssh (firewall opened, root login disabled)
-- PipeWire (Pulse + ALSA + JACK) with rtkit
-- Bluetooth with Blueman, power-on at boot
-- `gvfs`, `udisks2`, polkit, `power-profiles-daemon`, `upower`, WiFi powersave
-- XDG Desktop Portals (`gtk`, `hyprland`)
-
----
-
-## 🎨 Desktop & Theming
-
-### Stylix theme
-
-| Aspect   | Choice                                    |
-| -------- | ----------------------------------------- |
-| Polarity | `dark`                                    |
-| Mono     | JetBrains Mono Nerd Font                  |
-| Sans     | Inter                                     |
-| Serif    | Noto Sans                                 |
-| Emoji    | Noto Color Emoji                          |
-| Cursor   | Bibata-Modern-Classic (size 24)           |
-| Icons    | Papirus-Dark / Papirus                    |
-| Targets  | GTK + Qt auto-themed                      |
-| Source   | Generated live from the current wallpaper |
-
-### Hyprland
-
-- **Lua configuration** split into modules (`env`, `monitor`, `theme`, `general`, `decoration`, `animation`, `input`, `layout`, `windowrules`, `layerules`, `startup`, `keybinds`, `misc`)
-- Dwindle layout, no borders, `border_size 0`, gaps 2/10, 10px rounded corners (power 2)
-- Glass look: blur (5 passes, xray), soft shadows, inactive window dimming
-- Butter-smooth bezier animations (easeOutQuint, bounce, overshot…) — `preserve_split`, master layout, scrolling layout pre-configured
-- Touchpad tuned (natural scroll, tap-to-click, palm rejection) + 3-finger workspace gesture
-- Window rules for Thunar dialogs, Blueman, nm-connection-editor and floating pavucontrol
-- Layer rules: glass blur on Fuzzel (`ignore_alpha 0.35`, top order) and the Quickshell bar
-
-### Quickshell — "Aurora" bar
+Hyprland is configured through a modular Lua-based setup rather than one large configuration file.
 
-A floating pill-shaped top bar (`aurora-bar` namespace) with rounded modules:
-Volume → Brightness → Clock (`HH:mm`) → Network → Bluetooth → System tray, separated by hairlines, with a soft glass shadow, driven by a custom `Theme.qml` singleton (accent `#b58cff` / `#cc16161f` glass backgrounds).
+home/hyprland/
+├── hyprland.lua
+├── config/
+│ ├── animation.lua
+│ ├── decoration.lua
+│ ├── env.lua
+│ ├── general.lua
+│ ├── input.lua
+│ ├── keybinds.lua
+│ ├── layerules.lua
+│ ├── layout.lua
+│ ├── misc.lua
+│ ├── monitor.lua
+│ ├── startup.lua
+│ ├── theme.lua
+│ └── windowrules.lua
+└── scripts/
+├── launcher.sh
+├── restore-wallpaper.sh
+└── wallpaper.sh
 
-### Terminal — Kitty
+Desktop characteristics
 
-- JetBrains Mono Nerd Font 12pt, 85% background opacity + 48px blur
-- Powerline **tab bar** (slanted, top-aligned) with per-tab activity indicator
-- 10000-line scrollback, `.` from the shell, socket remote control, copy on select
-- Colors swapped live on wallpaper change via `kitty.remote` sockets
+Wayland-first workflow
 
-### Launcher — Fuzzel
+Dwindle layout
 
-`JetBrains Mono Nerd Font:size=11`, 42% width, 14px radius border, Papirus-Dark icons, wallpaper thumbnail previews (`image-size-ratio 0.35`), fully Stylix-colored.
-
-### Shell — Zsh + Starship
-
-- Autosuggestions, syntax highlighting, history substring search, 100k shared history
-- **fzf** & **zoxide** shell integration
-- Starship prompt that hot-swaps to the wallust-generated config (`~/.cache/wallust/starship.toml`)
-
-### Fastfetch
-
-`config.jsonc` shows: title, OS, host, kernel, uptime, packages, shell, display, DE, WM, theme, icons, font, cursor, terminal, CPU, GPU, memory, swap, disk, local IP, battery, adapter, locale + 16-color swatch.
-
----
-
-## 📦 Installed Programs
-
-### Desktop
-
-| Category     | Programs                                                                                         |
-| ------------ | ------------------------------------------------------------------------------------------------ |
-| Browser      | Firefox (Wayland)                                                                                |
-| File manager | Thunar + thunar-volman, gvfs, tumbler, ffmpegthumbnailer                                         |
-| Archives     | p7zip, unar, file-roller, zip, unzip                                                             |
-| Audio        | pavucontrol, PipeWire (Pulse/ALSA/JACK)                                                          |
-| Theming      | nwg-look, qt6ct, kvantum                                                                         |
-| Network      | networkmanagerapplet                                                                             |
-| Screenshot   | grim, slurp, swappy                                                                              |
-| Images       | Gwenview                                                                                         |
-| Auth         | polkit-kde-agent-1                                                                               |
-| Wallpaper    | awww, wallust                                                                                    |
-| Launcher     | fuzzel                                                                                           |
-| Notify       | libnotify (notify-send)                                                                          |
-| Misc         | xdg-utils, cliphist, wl-clipboard, hyprcursor, brightnessctl, playerctl, libinput, wayland-utils |
-
-### Creator
-
-| Program         | Notes                                                 |
-| --------------- | ----------------------------------------------------- |
-| OBS Studio      | CUDA support enabled                                  |
-| DaVinci Resolve | `.desktop` entry with `nvidia-offload` (X11 override) |
-| ffmpeg          | Full multimedia suite                                 |
-| VLC             | Video player                                          |
-| LibreOffice     | `libreoffice-fresh`                                   |
-| GIMP            | Image editing                                         |
-| Blender         | 3D creation                                           |
-
-### Development
-
-| Stack             | Tools                                                    |
-| ----------------- | -------------------------------------------------------- |
-| C / C++           | gcc, clang, gnumake, cmake, pkg-config, gdb, clang-tools |
-| Rust              | rustc, cargo, rustfmt, clippy, rust-analyzer             |
-| JavaScript / Node | nodejs, pnpm, typescript-language-server                 |
-| Python            | python3, pyright, ruff                                   |
-| Containers        | podman, podman-compose                                   |
-| Git               | git, git-lfs, gitsigns / lazygit in nvim                 |
-| Shell             | shellcheck, shfmt, bash-language-server                  |
-| Debugging         | strace, lldb, gdb                                        |
-| Docs              | man-pages, man-pages-posix                               |
-| Enhancement       | opencode (AI coding CLI)                                 |
-
-### Monitoring
-
-`btop`, `htop`, `iotop`, `iftop`, `lsof`, `lm_sensors`, `pciutils`, `usbutils`
-
-### CLI (zsh)
-
-| Tool     | Purpose        |
-| -------- | -------------- |
-| bat      | better `cat`   |
-| eza      | better `ls`    |
-| fd       | better `find`  |
-| fzf      | fuzzy finder   |
-| rg       | better `grep`  |
-| jq       | JSON processor |
-| zoxide   | smart `cd`     |
-| starship | prompt         |
-
-### Core utilities
-
-`git`, `curl`, `wget`, `tree`, `file`, `which`, `killall`
-
----
-
-## ⌨️ Keybindings
-
-### Hyprland
-
-> `MOD` = **SUPER** (⊞ Windows key)
-
-**Applications & shortcuts**
-
-| Keys              | Action                                     |
-| ----------------- | ------------------------------------------ |
-| `MOD + T`         | Launch terminal (Kitty)                    |
-| `MOD + E`         | Launch file manager (Thunar)               |
-| `MOD + B`         | Launch browser (Firefox)                   |
-| `MOD + A`         | Open launcher (Fuzzel)                     |
-| `MOD + I`         | Toggle Quickshell settings (IPC)           |
-| `MOD + P`         | Wallpaper picker (fuzzel + wallust + awww) |
-| `MOD + Q`         | Close focused window                       |
-| `MOD + X`         | Exit / shutdown Hyprland                   |
-| `MOD + SHIFT + S` | Screenshot region (grim + slurp + swappy)  |
-| `MOD + V`         | Toggle floating window                     |
-| `MOD + J`         | Toggle split layout                        |
-
-**Focus & workspaces**
-
-| Keys                      | Action                        |
-| ------------------------- | ----------------------------- |
-| `MOD + ← ↑ → ↓`           | Move focus by direction       |
-| `MOD + 1` … `MOD + 0`     | Focus workspace 1–10          |
-| `MOD + SHIFT + 1` … `+ 0` | Move window to workspace 1–10 |
-| `MOD + scroll down / up`  | Next / previous workspace     |
-| `MOD + left click drag`   | Move / drag window            |
-| `MOD + right click drag`  | Resize window                 |
-
-**Hardware keys** (locked, repeat-enabled)
-
-| Keys                                        | Action                      |
-| ------------------------------------------- | --------------------------- |
-| `XF86AudioRaiseVolume` / `LowerVolume`      | Volume +5% / −5% (`wpctl`)  |
-| `XF86AudioMute`                             | Toggle speaker mute         |
-| `XF86AudioMicMute`                          | Toggle mic mute             |
-| `XF86MonBrightnessUp` / `Down`              | Brightness +5% / −5%        |
-| `XF86AudioNext` / `Prev` / `Play` / `Pause` | Media control (`playerctl`) |
-
-### Neovim
-
-> Leader = **Space**
-
-**General**
-
-| Keys                 | Action                     |
-| -------------------- | -------------------------- |
-| `Esc`                | Clear search highlight     |
-| `C-d` / `C-u`        | Half-page scroll, centered |
-| `n` / `N`            | Next/prev search, centered |
-| `<` / `>` (visual)   | Re-indent, keep selection  |
-| `J` / `K` (visual)   | Move lines up/down         |
-| `<leader>p` (visual) | Paste without yanking      |
-| `<leader>dd`         | Delete without yanking     |
-
-**Buffers**
-
-| Keys         | Action                  |
-| ------------ | ----------------------- |
-| `<leader>bn` | Next buffer             |
-| `<leader>bp` | Previous buffer         |
-| `<leader>bd` | Delete buffer           |
-| `<leader>bb` | Buffer list (Telescope) |
-
-**Windows**
-
-| Keys                          | Action                |
-| ----------------------------- | --------------------- |
-| `C-h` / `C-j` / `C-k` / `C-l` | Navigate windows      |
-| `<leader>ws`                  | Horizontal split      |
-| `<leader>wv`                  | Vertical split        |
-| `<leader>wc`                  | Close window          |
-| `<leader>we`                  | Equalize window sizes |
-| `C-↑/↓`                       | Resize height ±2      |
-| `C-←/→`                       | Resize width ±2       |
-
-**Tabs**
-
-| Keys         | Action       |
-| ------------ | ------------ |
-| `<leader>tn` | New tab      |
-| `<leader>tc` | Close tab    |
-| `<leader>tl` | Next tab     |
-| `<leader>th` | Previous tab |
-
-**Terminal**
-
-| Keys                   | Action              |
-| ---------------------- | ------------------- |
-| `<leader>tt`           | Open terminal split |
-| `Esc Esc` (terminal)   | Exit insert mode    |
-| `C-h/j/k/l` (terminal) | Navigate windows    |
-
-**Telescope (find)**
-
-| Keys         | Action            |
-| ------------ | ----------------- |
-| `<leader>ff` | Find files        |
-| `<leader>fg` | Live grep         |
-| `<leader>fb` | Buffers           |
-| `<leader>fh` | Help tags         |
-| `<leader>fr` | Recent files      |
-| `<leader>fc` | Commands          |
-| `<leader>fk` | Keymaps           |
-| `<leader>fs` | Document symbols  |
-| `<leader>fS` | Workspace symbols |
-| `<leader>fd` | Diagnostics       |
-
-**Explorer (NvimTree)**
-
-| Keys            | Action                           |
-| --------------- | -------------------------------- |
-| `<leader>e`     | Toggle explorer                  |
-| `<leader>E`     | Focus explorer                   |
-| `<leader>ef`    | Reveal current file              |
-| `<leader>ec`    | Collapse all                     |
-| `<leader>er`    | Refresh                          |
-| `l` / `Enter`   | Open file / folder (tree)        |
-| `h`             | Close folder                     |
-| `s` / `i`       | Open vertical / horizontal split |
-| `P`             | Preview                          |
-| `a` / `r` / `d` | Create / rename / delete         |
-| `c` / `x` / `p` | Copy / cut / paste               |
-| `R` / `u` / `.` | Refresh / parent / set root      |
-
-**LSP**
-
-| Keys         | Action                     |
-| ------------ | -------------------------- |
-| `gd` / `gD`  | Definition / declaration   |
-| `gi`         | Implementation             |
-| `gr`         | References                 |
-| `gt`         | Type definition            |
-| `K`          | Hover documentation        |
-| `C-k`        | Signature help             |
-| `<leader>lr` | Rename                     |
-| `<leader>la` | Code actions               |
-| `<leader>ld` | Line diagnostics (float)   |
-| `[d` / `]d`  | Previous / next diagnostic |
-| `<leader>lh` | Toggle inlay hints         |
-
-**Git (gitsigns)**
-
-| Keys         | Action                 |
-| ------------ | ---------------------- |
-| `]g` / `[g`  | Next / previous hunk   |
-| `<leader>gh` | Preview hunk           |
-| `<leader>gb` | Blame line             |
-| `<leader>gd` | Diff                   |
-| `<leader>gr` | Reset hunk             |
-| `<leader>gS` | Stage hunk / selection |
-| `<leader>gf` | Format (conform)       |
-| `<leader>lg` | LazyGit (snacks)       |
-
-**Diagnostics (trouble)**
-
-| Keys         | Action             |
-| ------------ | ------------------ |
-| `<leader>xx` | Toggle diagnostics |
-| `<leader>xX` | Buffer diagnostics |
-| `<leader>xs` | Symbols            |
-| `<leader>xl` | Location list      |
-| `<leader>xq` | Quickfix list      |
-
-**Quickfix**
-
-| Keys         | Action         |
-| ------------ | -------------- |
-| `<leader>co` | Open quickfix  |
-| `<leader>cc` | Close quickfix |
-| `<leader>cn` | Next item      |
-| `<leader>cp` | Previous item  |
-
-**History, help & completion**
-
-| Keys            | Action                     |
-| --------------- | -------------------------- |
-| `<leader>:`     | Command history            |
-| `<leader>/`     | Search history             |
-| `<leader>hh`    | Help (Telescope)           |
-| `C-space`       | Show completion / docs     |
-| `C-e`           | Hide completion            |
-| `Enter`         | Accept completion          |
-| `Tab` / `S-Tab` | Next / previous completion |
-
-**Dashboard** (`[f]` Find File, `[r]` Recent, `[g]` Grep, `[n]` New File, `[c]` Config, `[q]` Quit)
-
-### Zsh
-
-| Alias | Command      |
-| ----- | ------------ |
-| `ls`  | `eza`        |
-| `ll`  | `eza -lah`   |
-| `la`  | `eza -a`     |
-| `lt`  | `eza --tree` |
-| `v`   | `nvim`       |
-| `c`   | `clear`      |
-| `..`  | `cd ../`     |
-
----
-
-## 🐉 Neovim Deep Dive
-
-**Plugins**
-
-| Plugin          | Role                                       |
-| --------------- | ------------------------------------------ |
-| blink.cmp       | Completion (LSP/path/buffer)               |
-| nvim-lspconfig  | LSP management                             |
-| nvim-treesitter | Syntax (all grammars)                      |
-| telescope-nvim  | Fuzzy search                               |
-| gitsigns-nvim   | Git signs + hunk ops                       |
-| conform-nvim    | Format-on-save (per filetype)              |
-| nvim-lint       | Lint-on-write (ruff, eslint_d, shellcheck) |
-| trouble-nvim    | Diagnostics UI                             |
-| which-key-nvim  | Keymap guides (modern preset)              |
-| lualine-nvim    | Custom "Aurora" statusline                 |
-| snacks-nvim     | Bigfile, notifier, lazygit…                |
-| nvim-tree-lua   | File explorer (nerd glyphs)                |
-
-**16 LSP servers** — lua_ls, rust-analyzer (full inlay hints), ts_ls, pyright, clangd, nixd, bashls, jsonls, html, cssls, eslint, yamlls, marksman, tailwindcss, dockerls, taplo
-
-**Formatters** — stylua, rustfmt, ruff_format, prettier, nixfmt, shfmt, taplo, clang_format
-
-**Linters** — ruff, eslint_d, shellcheck
-
-Custom **Aurora** colorscheme (`colors/aurora.lua`) — purple/violet/blue/cyan palette with `#CBA6F7` accents; a matching `aurora-forest` and `aurora-frost` variant are also included.
-
----
-
-## 🔧 Scripts
-
-| Script       | Purpose                                                                                                                                                                   |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `check.sh`   | Validates the repo: git, `nix flake check`, Nix syntax, required files, Neovim config load + Lua parse, Quickshell/Hyprland health, declared plugins & LSP tools          |
-| `cleanup.sh` | Interactive maintenance dashboard: flake check → dry-build → generation cleanup (keeps 5) → GC → store optimize/verify, systemd health, store usage — all via an fzf menu |
-
----
-
-## 🚀 Usage
-
-```bash
-# Validate everything before rebuilding
+Minimal borders
+
+Small gaps
+
+Rounded corners
+
+Blur and shadows
+
+Smooth animations
+
+Floating application rules
+
+Touchpad tuning
+
+Workspace gestures
+
+Dynamic wallpaper colors
+
+Keyboard-driven navigation
+
+🧊 Quickshell — Bar
+
+The custom Quickshell UI is designed as a compact floating pill rather than a traditional full-width panel.
+
+╭────────────────────────────────────────────────────╮
+│ 󱄅 │ 🔊 ☀ │ 20:42 │   tray │
+╰────────────────────────────────────────────────────╯
+
+Current components include:
+
+Launcher
+
+Volume
+
+Brightness
+
+Clock
+
+Network
+
+Bluetooth
+
+System tray
+
+Notification integration
+
+Quick settings
+
+The shell is managed declaratively through Home Manager and runs as a user systemd service.
+
+🚀 Fuzzel
+
+The launcher is intentionally compact and visual.
+
+Features include:
+
+Papirus icons
+
+Nerd Font prompt
+
+Stylix colors
+
+Rounded glass-style UI
+
+Application search
+
+Wallpaper preview support
+
+Keyboard-first navigation
+
+Example:
+
+╭──────────────────────────────────────╮
+│ 󱄅 Search applications... │
+├──────────────────────────────────────┤
+│ 󰈹 Firefox │
+│ 󰆍 Kitty │
+│ 󰙨 Neovim │
+│ 󰀻 Thunar │
+╰──────────────────────────────────────╯
+
+💻 Kitty
+
+Kitty is the primary terminal.
+
+Configured with:
+
+JetBrains Mono Nerd Font
+
+Dynamic Wallust colors
+
+Transparent/glass appearance
+
+Blur
+
+Powerline-style tabs
+
+Large scrollback
+
+Clipboard integration
+
+Socket remote control
+
+Live theme updates
+
+🐚 Zsh
+
+The shell environment is built around:
+
+Zsh
+
+Starship
+
+fzf
+
+zoxide
+
+bat
+
+eza
+
+fd
+
+ripgrep
+
+jq
+
+Everyday aliases
+
+Alias
+
+Command
+
+ls
+
+eza
+
+ll
+
+eza -lah
+
+la
+
+eza -a
+
+lt
+
+eza --tree
+
+v
+
+nvim
+
+c
+
+clear
+
+..
+
+cd ../
+
+🧠 Neovim
+
+Neovim is configured as a full development environment rather than a basic text editor.
+
+Core stack
+
+Neovim
+├── blink.cmp
+├── nvim-lspconfig
+├── Treesitter
+├── Telescope
+├── Gitsigns
+├── Conform
+├── nvim-lint
+├── Trouble
+├── which-key
+├── Lualine
+├── Snacks
+└── NvimTree
+
+Language tooling
+
+Configured development environments include:
+
+Rust
+
+C / C++
+
+Lua
+
+Nix
+
+Python
+
+TypeScript / JavaScript
+
+HTML / CSS
+
+JSON
+
+YAML
+
+Bash
+
+Docker
+
+Markdown
+
+TOML
+
+Tailwind CSS
+
+Toolchain
+
+Rust rust-analyzer · rustfmt
+C/C++ clangd · gcc · gdb · cmake
+Lua lua-language-server · stylua
+Python pyright · ruff
+Nix nixd · nixfmt
+JS/TS typescript-language-server · prettier
+Shell bash-language-server · shellcheck · shfmt
+Docker dockerfile-language-server
+TOML taplo
+Markdown marksman
+
+⌨️ Keybindings
+
+MOD = Super / Windows keyNeovim leader = Space
+
+Hyprland
+
+Key
+
+Action
+
+MOD + T
+
+Terminal
+
+MOD + E
+
+File manager
+
+MOD + B
+
+Browser
+
+MOD + A
+
+Launcher
+
+MOD + I
+
+Quickshell settings
+
+MOD + P
+
+Wallpaper picker
+
+MOD + Q
+
+Close window
+
+MOD + X
+
+Exit Hyprland
+
+MOD + SHIFT + S
+
+Screenshot
+
+MOD + V
+
+Toggle floating
+
+MOD + J
+
+Toggle split
+
+MOD + 1…0
+
+Workspace 1–10
+
+MOD + SHIFT + 1…0
+
+Move window to workspace
+
+MOD + Arrow Keys
+
+Focus direction
+
+MOD + Mouse
+
+Move / resize windows
+
+Hardware controls
+
+Key
+
+Action
+
+XF86AudioRaiseVolume
+
+Volume +5%
+
+XF86AudioLowerVolume
+
+Volume −5%
+
+XF86AudioMute
+
+Toggle mute
+
+XF86AudioMicMute
+
+Toggle microphone mute
+
+XF86MonBrightnessUp
+
+Brightness +5%
+
+XF86MonBrightnessDown
+
+Brightness −5%
+
+XF86AudioNext
+
+Next track
+
+XF86AudioPrev
+
+Previous track
+
+XF86AudioPlay
+
+Play
+
+XF86AudioPause
+
+Pause
+
+🔎 Neovim Navigation
+
+A few of the most-used mappings:
+
+Key
+
+Action
+
+<leader>ff
+
+Find files
+
+<leader>fg
+
+Live grep
+
+<leader>fb
+
+Buffers
+
+<leader>fr
+
+Recent files
+
+<leader>fd
+
+Diagnostics
+
+<leader>e
+
+File explorer
+
+gd
+
+Definition
+
+gr
+
+References
+
+K
+
+Hover documentation
+
+<leader>lr
+
+Rename
+
+<leader>la
+
+Code action
+
+<leader>xx
+
+Diagnostics
+
+<leader>lg
+
+LazyGit
+
+<leader>tt
+
+Terminal
+
+<leader>bn
+
+Next buffer
+
+<leader>bp
+
+Previous buffer
+
+For the complete keymap, see the Neovim configuration.
+
+📦 Software
+
+Desktop
+
+Firefox
+
+Thunar
+
+File Roller
+
+Pavucontrol
+
+Blueman
+
+qt6ct
+
+Kvantum
+
+NetworkManager applet
+
+grim
+
+slurp
+
+swappy
+
+Gwenview
+
+Fuzzel
+
+Quickshell
+
+awww
+
+Wallust
+
+libnotify
+
+Creator
+
+OBS Studio
+
+FFmpeg
+
+VLC
+
+LibreOffice
+
+GIMP
+
+Blender
+
+DaVinci Resolve integration
+
+Development
+
+GCC
+
+Clang
+
+CMake
+
+GDB
+
+LLDB
+
+Rust
+
+Node.js
+
+pnpm
+
+Python
+
+Podman
+
+Git
+
+Git LFS
+
+ShellCheck
+
+shfmt
+
+strace
+
+Monitoring
+
+btop
+
+htop
+
+iotop
+
+iftop
+
+lsof
+
+lm_sensors
+
+pciutils
+
+usbutils
+
+🛠️ Validation & Maintenance
+
+The repository includes custom scripts so the configuration can be checked before rebuilding.
+
+check.sh
+
+Validates things such as:
+
+Git repository state
+
+Flake evaluation
+
+Nix syntax
+
+Required files
+
+Neovim configuration
+
+Lua syntax
+
+Quickshell health
+
+Hyprland configuration
+
+Desktop dependencies
+
+Neovim development tools
+
+Plugins
+
+Generated configuration
+
+Run:
+
 ./scripts/check.sh
 
-# Rebuild the laptop
+cleanup.sh
+
+Provides an interactive maintenance workflow for:
+
+Flake checks
+
+Dry builds
+
+Nix generation cleanup
+
+Garbage collection
+
+Store optimization
+
+Store verification
+
+systemd health
+
+Disk/store usage
+
+Run:
+
+./scripts/cleanup.sh
+
+🚀 Installation
+
+This repository is primarily intended for my own machine, but the structure can be adapted for other NixOS systems.
+
+1. Clone
+
+git clone git@github.com:subha279/NixOS.git
+cd NixOS
+
+2. Inspect
+
+nix flake check
+
+3. Validate
+
+./scripts/check.sh
+
+4. Rebuild the laptop
+
 sudo nixos-rebuild switch --flake .#laptop
 
-# Rebuild the VM
-sudo nixos-rebuild switch --flake .#vm
+Important: hosts/laptop/hardware-configuration.nix is machine-specific. Generate your own hardware configuration before adapting this repository to different hardware.
 
-# Switch only Home Manager parts
-home-manager switch --flake .#subha
+🔄 Daily Workflow
 
-# Maintenance dashboard
-./scripts/cleanup.sh
-```
+The intended workflow is deliberately simple:
 
----
+cd ~/NixOS
 
-## 🎨 Theming Pipeline
+# Make changes
 
-1. `MOD + P` → fuzzel menu of `~/Wallpapers`
-2. `wallust run <image>` regenerates palettes from the wallpaper
-3. `awww img` crossfades the wallpaper with a grow transition
-4. Kitty terminals get live-recolored over their Unix sockets
-5. Kitty, Starship, Fuzzel and Hyprland all hot-swap to the new colors
-6. `restore-wallpaper.sh` restores everything on next login
+$EDITOR ...
 
----
+# Validate
 
-Made with ❤ and flakes — **Subha**.
+./scripts/check.sh
+
+# Review
+
+git diff
+
+# Commit
+
+git add <files>
+git commit -m "Describe the change"
+
+# Rebuild
+
+sudo nixos-rebuild switch --flake .#laptop
+
+# Push
+
+git push
+
+🔐 Public Repository Safety
+
+This is a public configuration repository.
+
+Things that should never be committed:
+
+.env
+API tokens
+passwords
+private SSH keys
+cloud credentials
+private certificates
+machine secrets
+
+The repository includes a .gitignore for common secret, environment, build and temporary files.
+
+Machine-specific configuration such as filesystem UUIDs may remain in hardware-configuration.nix because that file is required for the local NixOS installation and does not contain authentication credentials.
+
+🗺️ Roadmap
+
+Completed
+
+NixOS flakes
+
+Modular NixOS architecture
+
+Home Manager integration
+
+Hyprland Wayland desktop
+
+Custom Quickshell shell
+
+Stylix theming
+
+Wallust wallpaper theming
+
+awww wallpaper transitions
+
+Fuzzel launcher
+
+Dynamic Kitty / Starship theming
+
+Neovim development environment
+
+Volume and brightness controls
+
+Notification integration
+
+Polkit authentication
+
+NVIDIA PRIME offload
+
+Repository validation scripts
+
+Planned
+
+More Quickshell widgets
+
+Better system controls / quick settings
+
+More desktop automation
+
+Improved notification center
+
+More reusable host modules
+
+Better installation documentation
+
+Automated CI checks
+
+More hardware profiles
+
+🤝 Philosophy
+
+This configuration is not intended to be a universal NixOS distribution.
+
+It is a living personal system.
+
+The priorities are:
+
+Reproducibility +
+Maintainability +
+Performance +
+Developer experience +
+Visual consistency +
+Learning
+
+Every improvement should make the system easier to understand, reproduce, or use.
+
+📜 License
+
+This configuration is intended to be shared as an open-source personal configuration.
+
+If you use parts of it, feel free to adapt them to your own system.
+
+<div align="center">
+
+❄️ Built with Nix · Wayland · Hyprland · Neovim
+
+Made with ❤️ and flakes by Subha
+
+</div>
