@@ -1,9 +1,29 @@
 # ==========================================
 # Wallust Generated Starship Configuration
-# DO NOT EDIT
+# Generated config: ~/.cache/wallust/starship.toml
 # ==========================================
 
 palette = "wallust"
+
+add_newline = false
+command_timeout = 1000
+scan_timeout = 30
+
+# ==========================================
+# ONE-LINE PROMPT
+# ==========================================
+
+format = """
+$os\
+$directory\
+$git_branch\
+$git_status\
+$cmd_duration\
+$character"""
+
+# ==========================================
+# WALLUST PALETTE
+# ==========================================
 
 [palettes.wallust]
 
@@ -42,3 +62,105 @@ bright-blue = "{{color12}}"
 bright-magenta = "{{color13}}"
 bright-cyan = "{{color14}}"
 bright-white = "{{color15}}"
+
+# ==========================================
+# OS
+# ==========================================
+
+[os]
+
+disabled = false
+format = "[$symbol ]($style)"
+
+[os.symbols]
+
+NixOS = ""
+
+# ==========================================
+# DIRECTORY
+# ==========================================
+
+[directory]
+
+style = "bold base0D"
+format = "[$path]($style)[$read_only]($read_only_style) "
+
+home_symbol = "~"
+
+truncation_length = 3
+truncate_to_repo = false
+
+truncation_symbol = "…/"
+
+read_only = " 󰌾"
+read_only_style = "base08"
+
+# ==========================================
+# GIT BRANCH
+# ==========================================
+
+[git_branch]
+
+symbol = "󰘬 "
+
+style = "bold base0E"
+
+format = "[$symbol$branch]($style) "
+
+# ==========================================
+# GIT STATUS
+# ==========================================
+
+[git_status]
+
+style = "bold base08"
+
+format = "[$all_status$ahead_behind]($style) "
+
+conflicted = "󰞇 "
+
+ahead = "⇡${count}"
+behind = "⇣${count}"
+
+diverged = "⇕${ahead_count}/${behind_count}"
+
+up_to_date = ""
+
+untracked = "?"
+stashed = "󰏗 "
+modified = "!"
+staged = "+"
+renamed = "»"
+deleted = "✘"
+
+typechanged = "󰜄 "
+
+# ==========================================
+# COMMAND DURATION
+# ==========================================
+
+[cmd_duration]
+
+min_time = 1000
+
+style = "base09"
+
+format = "󰔟 [$duration]($style) "
+
+# ==========================================
+# PROMPT CHARACTER
+# ==========================================
+
+[character]
+
+success_symbol = "[❯](bold base0B)"
+
+error_symbol = "[❯](bold base08)"
+
+vimcmd_symbol = "[❮](bold base0E)"
+
+vimcmd_replace_one_symbol = "[❮](bold base0A)"
+
+vimcmd_replace_symbol = "[❮](bold base0A)"
+
+vimcmd_visual_symbol = "[❮](bold base0E)"
