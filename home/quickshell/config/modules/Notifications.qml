@@ -51,14 +51,14 @@ PanelWindow {
                 Layout.preferredWidth: 340
                 Layout.preferredHeight: 86
 
-                radius: 16
+                radius: 14
 
                 color: Core.Theme.background
 
                 border.width: 1
                 border.color: Core.Theme.border
 
-                opacity: 1.0
+                opacity: 0.98
 
                 RowLayout {
                     anchors.fill: parent

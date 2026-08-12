@@ -59,7 +59,7 @@ PanelWindow {
 
             color: "#000000"
 
-            opacity: 0.12
+            opacity: Core.Theme.shadowOpacity
         }
 
         RowLayout {

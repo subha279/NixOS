@@ -4,23 +4,37 @@ import QtQuick
 
 QtObject {
     // ============================================================
-    // Aurora / Stylix glass palette
+    // Aurora Glass Design System
     // ============================================================
 
+    // Main glass surface
     readonly property color background: "#cc16161f"
+
+    // Solid surface for menus / important UI
     readonly property color backgroundSolid: "#f216161f"
 
+    // Text
     readonly property color foreground: "#f2f2f5"
     readonly property color foregroundMuted: "#a8a8b3"
 
+    // Accent
     readonly property color accent: "#b58cff"
     readonly property color accentSoft: "#6f5aa8"
 
-    readonly property color border: "#30ffffff"
-    readonly property color separator: "#20ffffff"
+    // Glass borders
+    readonly property color border: "#35ffffff"
+    readonly property color separator: "#25ffffff"
 
-    readonly property color hover: "#18ffffff"
-    readonly property color pressed: "#28ffffff"
+    // Interaction states
+    readonly property color hover: "#20ffffff"
+    readonly property color pressed: "#35ffffff"
+
+    // ============================================================
+    // Glass
+    // ============================================================
+
+    readonly property real glassOpacity: 0.80
+    readonly property real shadowOpacity: 0.12
 
     // ============================================================
     // Layout
