@@ -6,8 +6,29 @@
 
     dotDir = "${config.xdg.configHome}/zsh";
 
-    # Set this before Starship's Zsh integration initializes.
+    # ==================================================
+    # Shell Options
+    # ==================================================
+
+    setOptions = [
+      "AUTO_CD"
+      "AUTO_PUSHD"
+      "PUSHD_IGNORE_DUPS"
+      "PUSHD_SILENT"
+      "EXTENDED_GLOB"
+      "NO_BEEP"
+      "INTERACTIVE_COMMENTS"
+    ];
+
+    # ==================================================
+    # Shell Environment
+    # ==================================================
+
     envExtra = ''
+      # ------------------------------------------------
+      # Wallust → Starship
+      # ------------------------------------------------
+
       if [[ -f "$HOME/.cache/wallust/starship.toml" ]]; then
         export STARSHIP_CONFIG="$HOME/.cache/wallust/starship.toml"
       else
@@ -16,8 +37,13 @@
     '';
   };
 
+  # ====================================================
+  # Starship
+  # ====================================================
+
   programs.starship = {
     enable = true;
+
     enableZshIntegration = true;
   };
 }

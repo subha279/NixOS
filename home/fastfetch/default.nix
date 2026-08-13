@@ -5,5 +5,5 @@
     enable = true;
   };
 
-  xdg.configFile."fastfetch/config.jsonc".source = ./config/config.jsonc;
+  xdg.configFile."fastfetch".source = ./config;
 }
