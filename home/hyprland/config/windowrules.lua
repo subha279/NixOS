@@ -65,3 +65,19 @@ hl.window_rule({
 	opacity = "0.97 0.97",
 	dim_around = true,
 })
+
+--------------------------------------------------
+-- Firefox Glass
+--------------------------------------------------
+
+hl.window_rule({
+	name = "firefox-glass",
+
+	match = {
+		class = "^firefox$",
+	},
+
+	opacity = "0.90 override 0.90 override 1.0 override",
+
+	xray = true,
+})
