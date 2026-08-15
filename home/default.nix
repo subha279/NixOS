@@ -11,6 +11,7 @@
     ./neovim
     ./hyprland
     ./quickshell
+    ./obsidian
   ];
 
   home.username = "subha";
