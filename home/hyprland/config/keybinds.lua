@@ -19,16 +19,15 @@ hl.bind(mainMod .. " + T", hl.dsp.exec_cmd(vars.terminal))
 
 local closeWindowBind = hl.bind(mainMod .. " + Q", hl.dsp.window.close())
 
-hl.bind(
-	mainMod .. " + X",
-	hl.dsp.exec_cmd("command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch exit")
-)
-
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(vars.fileManager))
 
 hl.bind(mainMod .. " + B", hl.dsp.exec_cmd(vars.browser))
 
 hl.bind(mainMod .. " + A", hl.dsp.exec_cmd(vars.menu))
+
+hl.bind(mainMod .. " + C", hl.dsp.exec_cmd(vars.guieditor))
+
+hl.bind(mainMod .. " + N", hl.dsp.exec_cmd(vars.note))
 
 hl.bind(mainMod .. " + I", hl.dsp.exec_cmd("qs ipc call island toggleSettings"))
 
@@ -36,9 +35,7 @@ hl.bind(mainMod .. " + I", hl.dsp.exec_cmd("qs ipc call island toggleSettings"))
 -- Window Management
 --------------------------------------------------
 
-hl.bind(mainMod .. " + V", hl.dsp.window.float({ action = "toggle" }))
-
-hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit"))
+hl.bind(mainMod .. " + F", hl.dsp.window.float({ action = "toggle" }))
 
 --------------------------------------------------
 -- Screenshot

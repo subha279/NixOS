@@ -13,6 +13,7 @@
     git-lfs
     shellcheck
     opencode
+    zed-editor
 
     # Rust
     rustc

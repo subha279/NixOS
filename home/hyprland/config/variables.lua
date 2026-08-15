@@ -23,13 +23,11 @@ M.fileManager = "thunar"
 
 M.editor = "nvim"
 
+M.guieditor = "zeditor"
+
+M.note = "obsidian"
+
 M.menu = "$HOME/.config/hypr/scripts/launcher.sh"
-
---------------------------------------------------
--- Lock Screen
---------------------------------------------------
-
---M.lock = "hyprlock"
 
 --------------------------------------------------
 -- Screenshot
