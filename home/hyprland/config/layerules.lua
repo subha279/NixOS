@@ -23,6 +23,15 @@ hl.layer_rule({
 	order = 10,
 })
 
+hl.layer_rule({
+	name = "fuzzel",
+	match = {
+		namespace = "^launcher$",
+	},
+
+	blur = true,
+	ignore_alpha = 0.20,
+})
 -- ==========================================================
 -- Aurora Bar
 -- ==========================================================

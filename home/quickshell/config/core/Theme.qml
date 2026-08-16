@@ -53,7 +53,7 @@ QtObject {
     readonly property color hover: "#14ffffff"
     readonly property color pressed: "#26ffffff"
 
-    // Text colour to place ON an accent fill (today's date, toggle
+    // Text colour to place on an accent fill (today's date, toggle
     // knobs, badges). Always the deep ink, never white.
     readonly property color accentForeground: "#16161f"
 
@@ -90,14 +90,9 @@ QtObject {
     readonly property int fontSizeLarge: 13
     readonly property int iconSize: 16
 
-    readonly property string uiFontFamily:
-        "Inter"
-
-    readonly property string monoFontFamily:
+    readonly property string fontFamily:
         "JetBrains Mono Nerd Font"
 
-    readonly property string iconFontFamily:
-        "JetBrains Mono Nerd Font"
     // ============================================================
     // Popup geometry
     // ============================================================

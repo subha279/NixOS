@@ -112,6 +112,100 @@ QtObject {
     readonly property string bellOff: "\udb80\udc9a"    // F009A
     readonly property string bellBadge: "\udb81\udf9e"  // F079E
 
+    // App-class glyphs. These are only ever a FALLBACK: a toast
+    // prefers the real themed icon the sending app advertises, and
+    // drops to one of these when the app supplies nothing usable.
+    readonly property string alert: "\udb80\udc26"        // F0026
+    readonly property string alertCircle: "\udb80\udc28"  // F0028
+    readonly property string email: "\udb80\uddee"        // F01EE
+    readonly property string message: "\udb80\udf61"      // F0361
+    readonly property string musicNote: "\udb80\udf87"    // F0387
+    readonly property string download: "\udb80\uddda"     // F01DA
+    readonly property string folder: "\udb80\ude4b"       // F024B
+    readonly property string terminal: "\udb80\udd8d"      // F018D
+    readonly property string image: "\udb80\udee9"        // F02E9
+    readonly property string power: "\udb81\udc25"        // F0425
+    readonly property string web: "\udb81\udd9f"          // F059F
+    readonly property string timer: "\udb81\udd1b"        // F051B
+
+    // Best-effort app-name -> glyph mapping. Substring matching on
+    // a lowercased name, most specific first. Unknown apps get the
+    // bell, which is always a truthful answer for a notification.
+    function forApp(appName) {
+        const n = String(appName === undefined ? "" : appName).toLowerCase()
+
+        if (n === "")
+            return bell
+
+        if (n.indexOf("thunderbird") >= 0 || n.indexOf("mail") >= 0
+                || n.indexOf("gmail") >= 0 || n.indexOf("evolution") >= 0)
+            return email
+
+        if (n.indexOf("discord") >= 0 || n.indexOf("telegram") >= 0
+                || n.indexOf("signal") >= 0 || n.indexOf("slack") >= 0
+                || n.indexOf("element") >= 0 || n.indexOf("whatsapp") >= 0
+                || n.indexOf("chat") >= 0 || n.indexOf("message") >= 0)
+            return message
+
+        if (n.indexOf("spotify") >= 0 || n.indexOf("music") >= 0
+                || n.indexOf("mpd") >= 0 || n.indexOf("vlc") >= 0
+                || n.indexOf("mpv") >= 0 || n.indexOf("audacious") >= 0)
+            return musicNote
+
+        if (n.indexOf("firefox") >= 0 || n.indexOf("chrom") >= 0
+                || n.indexOf("brave") >= 0 || n.indexOf("librewolf") >= 0
+                || n.indexOf("qutebrowser") >= 0)
+            return web
+
+        if (n.indexOf("transmission") >= 0 || n.indexOf("qbittorrent") >= 0
+                || n.indexOf("download") >= 0 || n.indexOf("wget") >= 0)
+            return download
+
+        if (n.indexOf("nautilus") >= 0 || n.indexOf("thunar") >= 0
+                || n.indexOf("dolphin") >= 0 || n.indexOf("nemo") >= 0
+                || n.indexOf("file") >= 0)
+            return folder
+
+        if (n.indexOf("screenshot") >= 0 || n.indexOf("grim") >= 0
+                || n.indexOf("flameshot") >= 0 || n.indexOf("satty") >= 0)
+            return camera
+
+        if (n.indexOf("gimp") >= 0 || n.indexOf("image") >= 0
+                || n.indexOf("viewer") >= 0 || n.indexOf("imv") >= 0)
+            return image
+
+        if (n.indexOf("kitty") >= 0 || n.indexOf("alacritty") >= 0
+                || n.indexOf("foot") >= 0 || n.indexOf("term") >= 0
+                || n.indexOf("shell") >= 0 || n.indexOf("zsh") >= 0)
+            return terminal
+
+        if (n.indexOf("volume") >= 0 || n.indexOf("audio") >= 0
+                || n.indexOf("pipewire") >= 0 || n.indexOf("pulse") >= 0)
+            return volumeHigh
+
+        if (n.indexOf("battery") >= 0 || n.indexOf("upower") >= 0)
+            return batteryAlert
+
+        if (n.indexOf("power") >= 0 || n.indexOf("logout") >= 0)
+            return power
+
+        if (n.indexOf("network") >= 0 || n.indexOf("wifi") >= 0
+                || n.indexOf("nm-") >= 0)
+            return wifi3
+
+        if (n.indexOf("blue") >= 0)
+            return bluetooth
+
+        if (n.indexOf("calendar") >= 0 || n.indexOf("remind") >= 0)
+            return calendar
+
+        if (n.indexOf("timer") >= 0 || n.indexOf("clock") >= 0
+                || n.indexOf("alarm") >= 0 || n.indexOf("pomodoro") >= 0)
+            return timer
+
+        return bell
+    }
+
     // ------------------------------------------------------------
     // Generic UI
     // ------------------------------------------------------------
