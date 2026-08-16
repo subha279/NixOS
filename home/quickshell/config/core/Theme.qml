@@ -90,9 +90,14 @@ QtObject {
     readonly property int fontSizeLarge: 13
     readonly property int iconSize: 16
 
-    readonly property string fontFamily:
+    readonly property string uiFontFamily:
+        "Inter"
+
+    readonly property string monoFontFamily:
         "JetBrains Mono Nerd Font"
 
+    readonly property string iconFontFamily:
+        "JetBrains Mono Nerd Font"
     // ============================================================
     // Popup geometry
     // ============================================================
