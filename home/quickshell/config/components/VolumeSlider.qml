@@ -125,7 +125,7 @@ Item {
                 : Core.Theme.foreground
 
             border.width: 2
-            border.color: Core.Theme.onAccent
+            border.color: Core.Theme.accentForeground
 
             Behavior on width {
                 NumberAnimation {

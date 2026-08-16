@@ -143,7 +143,7 @@ Item {
             font.pixelSize: 9
             font.weight: Font.DemiBold
 
-            color: Core.Theme.onAccent
+            color: Core.Theme.accentForeground
         }
     }
 

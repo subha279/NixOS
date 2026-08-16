@@ -496,7 +496,7 @@ Components.PopupSurface {
                             : Font.Normal
 
                         color: dayCell.today
-                            ? Core.Theme.onAccent
+                            ? Core.Theme.accentForeground
                             : (popup.isWeekend(dayCell.index)
                                 ? Core.Theme.foregroundMuted
                                 : Core.Theme.foreground)
