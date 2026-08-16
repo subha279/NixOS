@@ -56,8 +56,8 @@ QtObject {
 
     // Distance from the top of the screen to the bar window.
     // Popups use this to convert bar coordinates into screen ones.
-    readonly property int barMarginTop: 8
 
+    readonly property int barMarginTop: 8
     readonly property int radius: 999
     readonly property int radiusMenu: 18
     readonly property int radiusRow: 12
@@ -82,7 +82,7 @@ QtObject {
 
     // Vertical distance between the bottom of the bar pill and the
     // top of a dropdown. Keep this small so menus feel attached.
-    readonly property int popupGap: 4
+    readonly property int popupGap: 2
 
     readonly property int rowHeight: 42
 

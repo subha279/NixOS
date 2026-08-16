@@ -229,7 +229,7 @@ Item {
             Core.PopupManager.toggle(
                 "network",
                 p.x + root.width / 2,
-                p.y + Core.Theme.barMarginTop
+                p.x + Core.Theme.barMarginTop
             )
 
             if (Core.PopupManager.isOpen("network"))

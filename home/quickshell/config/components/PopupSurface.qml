@@ -80,12 +80,10 @@ PanelWindow {
 
     color: "transparent"
 
-    // Reserve no space of our own...
-    exclusiveZone: 0
-
     // ...AND ignore the bar's exclusive zone. Without this the
     // compositor pushes this window below the bar's reserved
     // strip, which is what created the big gap under the pill.
+
     exclusionMode: ExclusionMode.Ignore
 
     visible: root.open || root.rendering
@@ -134,6 +132,8 @@ PanelWindow {
     // ------------------------------------------------------------
     // Geometry driven by the content
     // ------------------------------------------------------------
+    readonly property real barBottomY:
+        Core.Theme.barMarginTop + 10 + Core.Theme.pillHeight
 
     readonly property real naturalHeight:
         contentHost.implicitHeight + Core.Theme.padding * 2
@@ -201,9 +201,7 @@ PanelWindow {
             )
         )
 
-        y: Math.round(
-            Core.PopupManager.anchorBottom + Core.Theme.popupGap)
-
+        y: Math.round(root.barBottomY + Core.Theme.popupGap)
         // --------------------------------------------------------
         // The rubbery part: a spring drives the height, so any
         // change in the number of rows overshoots and settles.
