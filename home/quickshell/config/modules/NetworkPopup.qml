@@ -766,7 +766,7 @@ Components.PopupSurface {
                             items.push({ separator: true })
 
                             items.push({
-                                icon: "\udb80\udcb4",
+                                icon: "\udb80\uddb4",
                                 label: "Forget network",
                                 danger: true,
                                 action: function() {

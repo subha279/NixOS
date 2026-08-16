@@ -192,7 +192,7 @@ Item {
                     x: root.toggled ? track.width - width - 3 : 3
 
                     color: root.toggled
-                        ? "#16161f"
+                        ? Core.Theme.onAccent
                         : Core.Theme.foregroundMuted
 
                     Behavior on x {

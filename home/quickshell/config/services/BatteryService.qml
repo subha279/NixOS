@@ -255,18 +255,18 @@ Singleton {
 
     readonly property color color: {
         if (!root.available)
-            return "#a8a8b3"
+            return "#9b98ad"
 
         if (root.critical)
-            return "#ff7b8a"
+            return "#e58fa0"
 
         if (root.low)
-            return "#ffcc70"
+            return "#e6c68f"
 
         if (root.charging || root.full)
-            return "#7ee2a8"
+            return "#8fd3a8"
 
-        return "#f2f2f5"
+        return "#e6e4ef"
     }
 
     function profileIcon(value) {

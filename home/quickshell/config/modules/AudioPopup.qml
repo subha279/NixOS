@@ -244,7 +244,7 @@ Components.PopupSurface {
                 anchors.verticalCenter: parent.verticalCenter
 
                 text: popup.svc.sinks.length +
-                      (popup.showOutputs ? "  \u2303" : "  \u2304")
+                      (popup.showOutputs ? "  \udb80\udd43" : "  \udb80\udd40")
 
                 font.family: Core.Theme.fontFamily
                 font.pixelSize: Core.Theme.fontSizeSmall
@@ -493,7 +493,7 @@ Components.PopupSurface {
                 anchors.verticalCenter: parent.verticalCenter
 
                 text: popup.svc.sources.length +
-                      (popup.showInputs ? "  \u2303" : "  \u2304")
+                      (popup.showInputs ? "  \udb80\udd43" : "  \udb80\udd40")
 
                 font.family: Core.Theme.fontFamily
                 font.pixelSize: Core.Theme.fontSizeSmall

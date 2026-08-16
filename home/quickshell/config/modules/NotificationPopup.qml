@@ -158,7 +158,7 @@ Components.PopupSurface {
 
             actions: [
                 {
-                    icon: "\udb80\udcb4",
+                    icon: "\udb80\uddb4",
                     tooltip: "Clear all",
                     action: function() {
                         popup.clearAll()
@@ -182,7 +182,7 @@ Components.PopupSurface {
 
             radius: Core.Theme.radiusRow
 
-            color: "#22ffcc70"
+            color: "#22e6c68f"
 
             Behavior on height {
                 NumberAnimation {
@@ -624,7 +624,7 @@ Components.PopupSurface {
                                     }
                                 },
                                 {
-                                    icon: "\udb80\udcb4",
+                                    icon: "\udb80\uddb4",
                                     label: "Clear all",
                                     danger: true,
                                     action: function() {

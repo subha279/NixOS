@@ -425,7 +425,7 @@ Components.PopupSurface {
 
                 radius: Core.Theme.radiusRow
 
-                color: "#22ffcc70"
+                color: "#22e6c68f"
 
                 Text {
                     anchors.fill: parent

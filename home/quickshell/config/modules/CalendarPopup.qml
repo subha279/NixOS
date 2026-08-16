@@ -213,7 +213,7 @@ Components.PopupSurface {
                 Text {
                     anchors.centerIn: parent
 
-                    text: "\udb80\udf41"
+                    text: "\udb80\udd41"
 
                     font.family: Core.Theme.fontFamily
                     font.pixelSize: 14
@@ -317,7 +317,7 @@ Components.PopupSurface {
                 Text {
                     anchors.centerIn: parent
 
-                    text: "\udb80\udf42"
+                    text: "\udb80\udd42"
 
                     font.family: Core.Theme.fontFamily
                     font.pixelSize: 14
@@ -496,7 +496,7 @@ Components.PopupSurface {
                             : Font.Normal
 
                         color: dayCell.today
-                            ? "#16161f"
+                            ? Core.Theme.onAccent
                             : (popup.isWeekend(dayCell.index)
                                 ? Core.Theme.foregroundMuted
                                 : Core.Theme.foreground)
@@ -551,7 +551,7 @@ Components.PopupSurface {
                 Text {
                     anchors.centerIn: parent
 
-                    text: "\udb80\udeed  Today"
+                    text: "\udb80\udced  Today"
 
                     font.family: Core.Theme.fontFamily
                     font.pixelSize: Core.Theme.fontSizeSmall

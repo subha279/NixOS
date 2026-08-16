@@ -7,45 +7,65 @@ QtObject {
     // Aurora Glass Design System
     // ============================================================
 
+    // The base is a soft, slightly warm ink rather than pure
+    // black. Pure black against a wallpaper reads as a hole; a
+    // touch of blue-violet lets the panel sit in the image.
+    readonly property color ink: "#1a1a24"
+    readonly property color inkDeep: "#12121a"
+
     // Main glass surface
-    readonly property color background: "#cc16161f"
+    readonly property color background: "#d91a1a24"
 
     // Solid surface for menus / important UI
-    readonly property color backgroundSolid: "#f216161f"
+    readonly property color backgroundSolid: "#f51a1a24"
 
-    // Raised surface inside menus (rows, fields)
-    readonly property color surface: "#14ffffff"
-    readonly property color surfaceHover: "#22ffffff"
-    readonly property color surfaceActive: "#2eb58cff"
+    // Raised surfaces inside menus (rows, fields).
+    // Kept as low-alpha white so they pick up whatever is behind
+    // the glass instead of fighting it with a fixed colour.
+    readonly property color surface: "#0fffffff"
+    readonly property color surfaceHover: "#19ffffff"
+    readonly property color surfaceActive: "#24b3a4f5"
 
-    // Text
-    readonly property color foreground: "#f2f2f5"
-    readonly property color foregroundMuted: "#a8a8b3"
-    readonly property color foregroundFaint: "#6e6e7a"
+    // Text — three steps is enough. Anything more reads as noise.
+    readonly property color foreground: "#e6e4ef"
+    readonly property color foregroundMuted: "#9b98ad"
+    readonly property color foregroundFaint: "#605d75"
 
-    // Accent
-    readonly property color accent: "#b58cff"
-    readonly property color accentSoft: "#6f5aa8"
+    // Accent: a desaturated lavender. The old #b58cff was a fully
+    // saturated violet that glowed against everything next to it.
+    readonly property color accent: "#b3a4f5"
+    readonly property color accentSoft: "#6a5f9e"
+    readonly property color accentDim: "#3a3455"
 
-    // Semantic
-    readonly property color success: "#7ee2a8"
-    readonly property color warning: "#ffcc70"
-    readonly property color danger: "#ff7b8a"
+    // Semantic colours are muted to roughly the same chroma as the
+    // accent, so nothing shouts louder than anything else.
+    readonly property color success: "#8fd3a8"
+    readonly property color warning: "#e6c68f"
+    readonly property color danger: "#e58fa0"
+    readonly property color info: "#8fb8d3"
 
-    // Glass borders
-    readonly property color border: "#35ffffff"
-    readonly property color separator: "#25ffffff"
+    // Glass borders — deliberately faint. A hard 1px white border
+    // is the fastest way to make a panel look cheap.
+    readonly property color border: "#24ffffff"
+    readonly property color separator: "#16ffffff"
 
     // Interaction states
-    readonly property color hover: "#20ffffff"
-    readonly property color pressed: "#35ffffff"
+    readonly property color hover: "#14ffffff"
+    readonly property color pressed: "#26ffffff"
+
+    // Text colour to place ON an accent fill (today's date, toggle
+    // knobs, badges). Always the deep ink, never white.
+    readonly property color accentForeground: "#16161f"
 
     // ============================================================
     // Glass
     // ============================================================
 
     readonly property real glassOpacity: 0.80
-    readonly property real shadowOpacity: 0.12
+
+    // A slightly deeper shadow lets the popups detach from the
+    // wallpaper without needing a brighter border.
+    readonly property real shadowOpacity: 0.20
 
     // ============================================================
     // Layout

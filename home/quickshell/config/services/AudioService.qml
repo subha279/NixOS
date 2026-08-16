@@ -191,13 +191,13 @@ Singleton {
     // Icons
     // ------------------------------------------------------------
 
-    readonly property string iconHigh: "\udb81\udf7e"
-    readonly property string iconMedium: "\udb81\udf80"
-    readonly property string iconLow: "\udb81\udf7f"
-    readonly property string iconOff: "\udb81\udf81"
+    readonly property string iconHigh: "\udb81\udd7e"
+    readonly property string iconMedium: "\udb81\udd80"
+    readonly property string iconLow: "\udb81\udd7f"
+    readonly property string iconOff: "\udb81\udd81"
 
-    readonly property string iconMic: "\udb81\udd6c"
-    readonly property string iconMicOff: "\udb81\udd6d"
+    readonly property string iconMic: "\udb80\udf6c"
+    readonly property string iconMicOff: "\udb80\udf6d"
 
     readonly property string iconSpeaker: "\udb81\udd8f"
     readonly property string iconHeadset: "\udb81\udcd0"
