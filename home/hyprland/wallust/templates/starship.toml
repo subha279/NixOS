@@ -1,67 +1,102 @@
 # ==========================================
-# Wallust Generated Starship Configuration
-# Generated config: ~/.cache/wallust/starship.toml
+# STARSHIP
+# Aurora UI / Purple Accent
 # ==========================================
-
-palette = "wallust"
+# Independent theme.
+# No Wallust dependency.
+#
+# Designed to match:
+# - dark navy/charcoal surfaces
+# - lavender/purple accent
+# - bright white text
+# - cool gray secondary text
+# ==========================================
 
 add_newline = false
 command_timeout = 1000
 scan_timeout = 30
+follow_symlinks = false
+
+palette = "aurora"
+
 
 # ==========================================
-# ONE-LINE PROMPT
+# PROMPT
 # ==========================================
 
 format = """
 $os\
 $directory\
+${custom.giturl}\
 $git_branch\
+${custom.git_worktree}\
 $git_status\
+$package\
+$nodejs\
+$bun\
+$c\
+$rust\
+$golang\
+$php\
+$java\
+$kotlin\
+$haskell\
+$python\
+$docker_context\
 $cmd_duration\
 $character"""
 
+
 # ==========================================
-# WALLUST PALETTE
+# AURORA PALETTE
 # ==========================================
 
-[palettes.wallust]
+[palettes.aurora]
 
-base00 = "{{background}}"
-base01 = "{{color0}}"
-base02 = "{{color1}}"
-base03 = "{{color2}}"
-base04 = "{{color3}}"
-base05 = "{{foreground}}"
-base06 = "{{color7}}"
-base07 = "{{color15}}"
+# ------------------------------------------
+# Main surfaces
+# ------------------------------------------
 
-base08 = "{{color1}}"
-base09 = "{{color3}}"
-base0A = "{{color11}}"
-base0B = "{{color2}}"
-base0C = "{{color6}}"
-base0D = "{{color4}}"
-base0E = "{{color5}}"
-base0F = "{{color8}}"
+bg = "#171D27"
+surface = "#202733"
+surface2 = "#2A3240"
+surface3 = "#343D4D"
 
-black = "{{color0}}"
-red = "{{color1}}"
-green = "{{color2}}"
-yellow = "{{color3}}"
-blue = "{{color4}}"
-magenta = "{{color5}}"
-cyan = "{{color6}}"
-white = "{{color7}}"
+# ------------------------------------------
+# Text
+# ------------------------------------------
 
-bright-black = "{{color8}}"
-bright-red = "{{color9}}"
-bright-green = "{{color10}}"
-bright-yellow = "{{color11}}"
-bright-blue = "{{color12}}"
-bright-magenta = "{{color13}}"
-bright-cyan = "{{color14}}"
-bright-white = "{{color15}}"
+text = "#F4F5F7"
+text_soft = "#D7DBE2"
+muted = "#A8AFBB"
+dim = "#7F8897"
+
+# ------------------------------------------
+# Primary accent
+# ------------------------------------------
+
+purple = "#A875FF"
+purple_bright = "#B98AFF"
+purple_soft = "#9B7AE8"
+purple_dark = "#7350B8"
+
+# ------------------------------------------
+# Cool accents
+# ------------------------------------------
+
+blue = "#8AA4FF"
+cyan = "#82D9E8"
+
+# ------------------------------------------
+# Status
+# ------------------------------------------
+
+green = "#7FE0A5"
+yellow = "#F3D27A"
+orange = "#F2A76B"
+red = "#F27F8A"
+pink = "#E59AEF"
+
 
 # ==========================================
 # OS
@@ -70,11 +105,35 @@ bright-white = "{{color15}}"
 [os]
 
 disabled = false
+
+style = "bold text"
+
 format = "[$symbol ]($style)"
 
 [os.symbols]
 
 NixOS = ""
+
+Linux = "󰌽"
+Arch = "󰣇"
+Artix = "󰣇"
+Ubuntu = "󰕈"
+Fedora = "󰣛"
+Debian = "󰣚"
+Gentoo = "󰣨"
+Manjaro = ""
+Mint = "󰣭"
+SUSE = ""
+Raspbian = "󰐿"
+Alpine = ""
+Amazon = ""
+Android = ""
+CentOS = ""
+Redhat = "󱄛"
+RedHatEnterprise = "󱄛"
+Macos = ""
+Windows = "󰍲"
+
 
 # ==========================================
 # DIRECTORY
@@ -82,7 +141,8 @@ NixOS = ""
 
 [directory]
 
-style = "bold base0D"
+style = "bold text"
+
 format = "[$path]($style)[$read_only]($read_only_style) "
 
 home_symbol = "~"
@@ -93,7 +153,55 @@ truncate_to_repo = false
 truncation_symbol = "…/"
 
 read_only = " 󰌾"
-read_only_style = "base08"
+read_only_style = "bold red"
+
+[directory.substitutions]
+
+Documents = "󰈙 "
+Downloads = " "
+Music = " "
+Pictures = " "
+Developer = "󰲋 "
+Others = " "
+
+
+# ==========================================
+# GIT REMOTE
+# ==========================================
+
+[custom.giturl]
+
+description = "Display symbol for remote Git server"
+
+command = """
+GIT_REMOTE=$(git remote get-url origin 2>/dev/null)
+
+case "$GIT_REMOTE" in
+    *github*)
+        echo ""
+        ;;
+    *gitlab*)
+        echo ""
+        ;;
+    *bitbucket*)
+        echo ""
+        ;;
+    *git*)
+        echo ""
+        ;;
+    *)
+        echo ""
+        ;;
+esac
+"""
+
+when = "git rev-parse --is-inside-work-tree 2>/dev/null"
+
+format = "[$output](bold purple) "
+
+require_repo = true
+ignore_timeout = true
+
 
 # ==========================================
 # GIT BRANCH
@@ -101,11 +209,42 @@ read_only_style = "base08"
 
 [git_branch]
 
-symbol = "󰘬 "
+symbol = " "
 
-style = "bold base0E"
+# Purple badge with bright text,
+# matching the purple controls in the UI.
 
-format = "[$symbol$branch]($style) "
+format = "[](purple)[ $symbol$branch ](bold bg bg:purple)[](purple) "
+
+
+# ==========================================
+# GIT WORKTREE
+# ==========================================
+
+[custom.git_worktree]
+
+description = "Show indicator when inside a Git worktree"
+
+command = """
+if git rev-parse --git-dir >/dev/null 2>&1; then
+    common_dir=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null)
+    git_dir=$(git rev-parse --path-format=absolute --git-dir 2>/dev/null)
+
+    if [ "$common_dir" != "$git_dir" ]; then
+        echo "⛓"
+    fi
+fi
+"""
+
+when = "git rev-parse --is-inside-work-tree >/dev/null 2>&1"
+
+format = "[$output](bold purple) "
+
+style = "bold purple"
+
+require_repo = true
+ignore_timeout = true
+
 
 # ==========================================
 # GIT STATUS
@@ -113,27 +252,224 @@ format = "[$symbol$branch]($style) "
 
 [git_status]
 
-style = "bold base08"
+style = "bold text"
 
-format = "[$all_status$ahead_behind]($style) "
+format = "[$untracked$staged$modified$renamed$deleted$conflicted$stashed$typechanged$ahead_behind]($style) "
 
-conflicted = "󰞇 "
+# ------------------------------------------
+# Working tree
+# ------------------------------------------
 
-ahead = "⇡${count}"
-behind = "⇣${count}"
+untracked = "[?](bold red)"
 
-diverged = "⇕${ahead_count}/${behind_count}"
+staged = "[+](bold green)"
+
+modified = "[!](bold yellow)"
+
+renamed = "[»](bold blue)"
+
+deleted = "[-](bold red)"
+
+conflicted = "[✖](bold red)"
+
+stashed = "[≡](bold purple)"
+
+typechanged = "[󰜄](bold cyan)"
+
+# ------------------------------------------
+# Remote
+# ------------------------------------------
+
+ahead = "[⇡${count}](bold cyan)"
+
+behind = "[⇣${count}](bold orange)"
+
+diverged = "[⇕⇡${ahead_count}⇣${behind_count}](bold pink)"
 
 up_to_date = ""
 
-untracked = "?"
-stashed = "󰏗 "
-modified = "!"
-staged = "+"
-renamed = "»"
-deleted = "✘"
 
-typechanged = "󰜄 "
+# ==========================================
+# PACKAGE
+# ==========================================
+
+[package]
+
+disabled = false
+
+symbol = "󰏗 "
+
+style = "bold purple"
+
+format = "[$symbol$version]($style) "
+
+
+# ==========================================
+# NODE.JS
+# ==========================================
+
+[nodejs]
+
+symbol = ""
+
+style = "bold green"
+
+format = "[$symbol( $version)]($style) "
+
+
+# ==========================================
+# BUN
+# ==========================================
+
+[bun]
+
+symbol = "🥟"
+
+style = "bold orange"
+
+format = "[$symbol( $version)]($style) "
+
+detect_files = [
+    "bun.lock",
+    "bun.lockb",
+]
+
+
+# ==========================================
+# C
+# ==========================================
+
+[c]
+
+symbol = " "
+
+style = "bold blue"
+
+format = "[$symbol( $version)]($style) "
+
+
+# ==========================================
+# RUST
+# ==========================================
+
+[rust]
+
+symbol = ""
+
+style = "bold orange"
+
+format = "[$symbol( $version)]($style) "
+
+
+# ==========================================
+# GO
+# ==========================================
+
+[golang]
+
+symbol = ""
+
+style = "bold cyan"
+
+format = "[$symbol( $version)]($style) "
+
+detect_files = [
+    "go.mod",
+]
+
+
+# ==========================================
+# PHP
+# ==========================================
+
+[php]
+
+symbol = ""
+
+style = "bold purple"
+
+format = "[$symbol( $version)]($style) "
+
+
+# ==========================================
+# JAVA
+# ==========================================
+
+[java]
+
+symbol = " "
+
+style = "bold red"
+
+format = "[$symbol( $version)]($style) "
+
+
+# ==========================================
+# KOTLIN
+# ==========================================
+
+[kotlin]
+
+symbol = ""
+
+style = "bold pink"
+
+format = "[$symbol( $version)]($style) "
+
+
+# ==========================================
+# HASKELL
+# ==========================================
+
+[haskell]
+
+symbol = ""
+
+style = "bold purple"
+
+format = "[$symbol( $version)]($style) "
+
+
+# ==========================================
+# PYTHON
+# ==========================================
+
+[python]
+
+symbol = ""
+
+style = "bold yellow"
+
+format = "[$symbol( $version)]($style) "
+
+
+# ==========================================
+# DOCKER
+# ==========================================
+
+[docker_context]
+
+symbol = ""
+
+style = "bold cyan"
+
+format = "[$symbol( $context)]($style) "
+
+
+# ==========================================
+# TIME
+# ==========================================
+
+[time]
+
+disabled = true
+
+time_format = "%R"
+
+style = "bold muted"
+
+format = "[󰥔 $time]($style) "
+
 
 # ==========================================
 # COMMAND DURATION
@@ -143,9 +479,10 @@ typechanged = "󰜄 "
 
 min_time = 1000
 
-style = "base09"
+style = "bold muted"
 
 format = "󰔟 [$duration]($style) "
+
 
 # ==========================================
 # PROMPT CHARACTER
@@ -153,14 +490,14 @@ format = "󰔟 [$duration]($style) "
 
 [character]
 
-success_symbol = "[❯](bold base0B)"
+success_symbol = "[❯](bold purple)"
 
-error_symbol = "[❯](bold base08)"
+error_symbol = "[❯](bold red)"
 
-vimcmd_symbol = "[❮](bold base0E)"
+vimcmd_symbol = "[❮](bold cyan)"
 
-vimcmd_replace_one_symbol = "[❮](bold base0A)"
+vimcmd_replace_one_symbol = "[❮](bold pink)"
 
-vimcmd_replace_symbol = "[❮](bold base0A)"
+vimcmd_replace_symbol = "[❮](bold pink)"
 
-vimcmd_visual_symbol = "[❮](bold base0E)"
+vimcmd_visual_symbol = "[❮](bold purple)"
