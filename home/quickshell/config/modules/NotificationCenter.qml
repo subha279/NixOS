@@ -6,7 +6,11 @@ import "../core" as Core
 import "../services" as Services
 
 // ================================================================
-// Bluetooth bar module
+// Notification center bar module (leftmost slot)
+// ----------------------------------------------------------------
+//   left click    toggle the notification panel
+//   right click   clear every notification
+//   middle click  toggle do-not-disturb
 // ================================================================
 
 Item {
@@ -16,13 +20,18 @@ Item {
     implicitHeight: Core.Theme.moduleHeight
 
     readonly property bool menuOpen:
-        Core.PopupManager.isOpen("bluetooth")
+        Core.PopupManager.isOpen("notifications")
 
-    readonly property bool powered:
-        Services.BluetoothService.powered
+    readonly property var list:
+        Services.NotificationServer.notifications
 
-    readonly property int connectedCount:
-        Services.BluetoothService.connectedCount
+    readonly property int count:
+        (root.list && root.list.values)
+            ? root.list.values.length
+            : 0
+
+    // Do-not-disturb is shared with the panel through PopupManager.
+    readonly property bool dnd: Core.PopupManager.dnd
 
     Rectangle {
         anchors.fill: parent
@@ -47,18 +56,19 @@ Item {
 
         anchors.centerIn: parent
 
-        text: !root.powered
-            ? "\udb80\udcb2"
-            : root.connectedCount > 0
-                ? "\udb80\udcb1"
-                : "\udb80\udcaf"
+        // bell / bell-badge / bell-off
+        text: root.dnd
+            ? "\udb80\udc9a"
+            : root.count > 0
+                ? "\udb81\udf9e"
+                : "\udb80\udc9c"
 
         font.family: Core.Theme.fontFamily
         font.pixelSize: Core.Theme.iconSize
 
-        color: !root.powered
-            ? Core.Theme.foregroundMuted
-            : root.connectedCount > 0
+        color: root.dnd
+            ? Core.Theme.foregroundFaint
+            : root.count > 0
                 ? Core.Theme.accent
                 : Core.Theme.foreground
 
@@ -68,7 +78,6 @@ Item {
             }
         }
 
-        // Little pop whenever the icon changes
         onTextChanged: popAnim.restart()
 
         SequentialAnimation {
@@ -94,46 +103,47 @@ Item {
     }
 
     // ------------------------------------------------------------
-    // Scanning pulse
+    // Unread count badge
     // ------------------------------------------------------------
 
     Rectangle {
         anchors.top: parent.top
         anchors.right: parent.right
 
-        anchors.topMargin: 5
-        anchors.rightMargin: 4
+        anchors.topMargin: 2
+        anchors.rightMargin: 0
 
-        width: 5
-        height: 5
+        width: Math.max(13, badgeText.implicitWidth + 6)
+        height: 13
 
-        radius: 3
+        radius: 7
 
         color: Core.Theme.accent
 
-        opacity: Services.BluetoothService.discovering ? 1.0 : 0.0
+        visible: root.count > 0 && !root.dnd
 
-        Behavior on opacity {
+        scale: (root.count > 0 && !root.dnd) ? 1.0 : 0.0
+
+        Behavior on scale {
             NumberAnimation {
-                duration: 180
+                duration: 260
+                easing.type: Easing.OutBack
+                easing.overshoot: 2.4
             }
         }
 
-        SequentialAnimation on scale {
-            running: Services.BluetoothService.discovering
-            loops: Animation.Infinite
+        Text {
+            id: badgeText
 
-            NumberAnimation {
-                to: 1.6
-                duration: 480
-                easing.type: Easing.InOutQuad
-            }
+            anchors.centerIn: parent
 
-            NumberAnimation {
-                to: 1.0
-                duration: 480
-                easing.type: Easing.InOutQuad
-            }
+            text: root.count > 9 ? "9+" : root.count
+
+            font.family: Core.Theme.fontFamily
+            font.pixelSize: 9
+            font.weight: Font.DemiBold
+
+            color: "#16161f"
         }
     }
 
@@ -151,42 +161,44 @@ Item {
 
         onClicked: function(event) {
             if (event.button === Qt.MiddleButton) {
-                Services.BluetoothService.togglePowered()
+                Core.PopupManager.dnd = !Core.PopupManager.dnd
                 return
             }
 
             if (event.button === Qt.RightButton) {
-                Services.BluetoothService.openManager()
+                root.clearAll()
                 return
             }
 
             const p = root.mapToItem(null, 0, root.height)
 
             Core.PopupManager.toggle(
-                "bluetooth",
+                "notifications",
                 p.x + root.width / 2,
                 p.y + Core.Theme.barMarginTop
             )
         }
-
-        onWheel: function(event) {
-            if (event.angleDelta.y === 0)
-                return
-
-            Services.BluetoothService.togglePowered()
-        }
     }
 
-    Binding {
-        target: Services.BluetoothService
-        property: "fastPoll"
-        value: root.menuOpen
+    function dismiss(n) {
+        if (!n)
+            return
+
+        // Prefer dismiss(); fall back to expire() on older builds.
+        if (typeof n.dismiss === "function")
+            n.dismiss()
+        else if (typeof n.expire === "function")
+            n.expire()
     }
 
-    // Stop scanning when the menu closes — saves battery
-    onMenuOpenChanged: {
-        if (!root.menuOpen
-            && Services.BluetoothService.discovering)
-            Services.BluetoothService.setDiscovering(false)
+    function clearAll() {
+        if (!root.list || !root.list.values)
+            return
+
+        // Copy first — dismissing mutates the live model.
+        const snapshot = root.list.values.slice()
+
+        for (let i = 0; i < snapshot.length; i++)
+            root.dismiss(snapshot[i])
     }
 }

@@ -1,2 +1,6 @@
 module Shell.Services
+
 singleton NotificationServer 1.0 NotificationServer.qml
+singleton NetworkService 1.0 NetworkService.qml
+singleton BluetoothService 1.0 BluetoothService.qml
+singleton BatteryService 1.0 BatteryService.qml

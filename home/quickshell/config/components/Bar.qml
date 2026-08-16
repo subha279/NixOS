@@ -6,34 +6,51 @@ import Quickshell.Wayland
 
 import "../core" as Core
 import "../modules" as Modules
+import "../services" as Services
+
+// ================================================================
+// Bar
+// ----------------------------------------------------------------
+// The window now spans the FULL screen width (with a click-through
+// mask everywhere except the pill). That means any module can call
+// mapToItem(null, ...) and get real screen coordinates, which is
+// what the dropdowns use to position themselves under the icon.
+// ================================================================
 
 PanelWindow {
     id: root
 
-    anchors.top: true
+    anchors {
+        top: true
+        left: true
+        right: true
+    }
 
-    margins.top: 8
+    margins.top: Core.Theme.barMarginTop
 
-    implicitWidth: pill.width + 20
-    implicitHeight: pill.height + 20
+    implicitHeight: Core.Theme.pillHeight + 20
 
     color: "transparent"
 
     exclusiveZone:
-        pill.height + margins.top + 4
+        Core.Theme.pillHeight + margins.top + 4
 
-    WlrLayershell.namespace:
-        "aurora-bar"
+    WlrLayershell.namespace: "aurora-bar"
+
+    // Only the pill itself receives input
+    mask: Region {
+        item: pill
+    }
 
     Rectangle {
         id: pill
 
-        anchors.centerIn: parent
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.verticalCenter: parent.verticalCenter
 
         height: Core.Theme.pillHeight
 
-        width:
-            content.implicitWidth + 24
+        width: content.implicitWidth + 24
 
         radius: height / 2
 
@@ -43,6 +60,15 @@ PanelWindow {
         border.color: Core.Theme.border
 
         antialiasing: true
+
+        // Width changes (e.g. tray items appearing) feel springy too
+        Behavior on width {
+            SpringAnimation {
+                spring: 4.0
+                damping: 0.45
+                epsilon: 0.25
+            }
+        }
 
         // --------------------------------------------------------
         // Subtle glass shadow
@@ -68,6 +94,20 @@ PanelWindow {
             anchors.centerIn: parent
 
             spacing: 3
+
+            // ====================================================
+            // Notification center (leftmost)
+            // ====================================================
+
+            Modules.NotificationCenter {
+                id: notificationCenter
+
+                Layout.preferredWidth: 30
+                Layout.preferredHeight:
+                    Core.Theme.moduleHeight
+            }
+
+            Separator {}
 
             // ====================================================
             // Volume
@@ -106,20 +146,46 @@ PanelWindow {
             Separator {}
 
             // ====================================================
-            // System tray
+            // Network (Wi-Fi + Ethernet, one slot)
             // ====================================================
+
             Modules.Network {
-              Layout.preferredWidth: 30
-              Layout.preferredHeight:
-              Core.Theme.moduleHeight
+                Layout.preferredWidth: 30
+                Layout.preferredHeight:
+                    Core.Theme.moduleHeight
             }
 
+            // ====================================================
+            // Bluetooth
+            // ====================================================
+
             Modules.Bluetooth {
-              Layout.preferredWidth: 30
-              Layout.preferredHeight:
-              Core.Theme.moduleHeight
+                Layout.preferredWidth: 30
+                Layout.preferredHeight:
+                    Core.Theme.moduleHeight
             }
+
             Separator {}
+
+            // ====================================================
+            // Battery (auto-hides on desktops)
+            // ====================================================
+
+            Modules.Battery {
+                Layout.preferredWidth: 58
+                Layout.preferredHeight:
+                    Core.Theme.moduleHeight
+            }
+
+            // Hidden together with the battery module so desktops
+            // don't get a dangling divider.
+            Separator {
+                visible: Services.BatteryService.available
+            }
+
+            // ====================================================
+            // System tray
+            // ====================================================
 
             Modules.Tray {
                 Layout.preferredHeight:

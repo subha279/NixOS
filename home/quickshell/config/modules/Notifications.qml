@@ -33,6 +33,11 @@ PanelWindow {
     property var notifications:
         Services.NotificationServer.notifications
 
+    // Do-not-disturb silences the toasts. They are still collected
+    // and remain readable in the notification panel.
+    visible: !Core.PopupManager.dnd
+            && !Core.PopupManager.isOpen("notifications")
+
     ColumnLayout {
         id: notificationColumn
 
