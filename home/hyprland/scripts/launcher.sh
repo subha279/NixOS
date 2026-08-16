@@ -2,10 +2,16 @@
 
 set -euo pipefail
 
-RUNTIME_CONFIG="$HOME/.cache/wallust/fuzzel.ini"
+# Fuzzel's visual theme is managed by Aurora.
+#
+# Active theme:
+#
+#   ~/.config/aurora/active-fuzzel.conf
+#
+# The main Fuzzel configuration:
+#
+#   ~/.config/fuzzel/fuzzel.ini
+#
+# ============================================================
 
-if [[ -f "$RUNTIME_CONFIG" ]]; then
-  exec fuzzel --config="$RUNTIME_CONFIG"
-else
-  exec fuzzel
-fi
+exec fuzzel

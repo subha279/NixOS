@@ -1,142 +1,364 @@
 pragma Singleton
 
 import QtQuick
+import Quickshell
+import Quickshell.Io
 
 QtObject {
+    id: theme
+
     // ============================================================
-    // Aurora Glass Design System
+    // Aurora Runtime Theme
     // ============================================================
 
-    // The base is a soft, slightly warm ink rather than pure
-    // black. Pure black against a wallpaper reads as a hole; a
-    // touch of blue-violet lets the panel sit in the image.
-    readonly property color ink: "#1a1a24"
-    readonly property color inkDeep: "#12121a"
+    readonly property string auroraDirectory:
+        Quickshell.env("HOME") + "/.config/aurora"
 
-    // Main glass surface
-    readonly property color background: "#d91a1a24"
+    readonly property string activeThemePath:
+        auroraDirectory + "/active-theme"
 
-    // Solid surface for menus / important UI
-    readonly property color backgroundSolid: "#f51a1a24"
 
-    // Raised surfaces inside menus (rows, fields).
-    // Kept as low-alpha white so they pick up whatever is behind
-    // the glass instead of fighting it with a fixed colour.
-    readonly property color surface: "#0fffffff"
-    readonly property color surfaceHover: "#19ffffff"
-    readonly property color surfaceActive: "#24b3a4f5"
+    // ============================================================
+    // Active Theme
+    // ============================================================
 
-    // Text — three steps is enough. Anything more reads as noise.
-    readonly property color foreground: "#e6e4ef"
-    readonly property color foregroundMuted: "#9b98ad"
-    readonly property color foregroundFaint: "#605d75"
+    property var activeThemeFile: FileView {
+        path: theme.activeThemePath
 
-    // Accent: a desaturated lavender. The old #b58cff was a fully
-    // saturated violet that glowed against everything next to it.
-    readonly property color accent: "#b3a4f5"
-    readonly property color accentSoft: "#6a5f9e"
-    readonly property color accentDim: "#3a3455"
+        watchChanges: true
+        blockLoading: true
 
-    // Semantic colours are muted to roughly the same chroma as the
-    // accent, so nothing shouts louder than anything else.
-    readonly property color success: "#8fd3a8"
-    readonly property color warning: "#e6c68f"
-    readonly property color danger: "#e58fa0"
-    readonly property color info: "#8fb8d3"
+        onFileChanged: {
+            this.reload()
+            theme.themeFile.reload()
+        }
+    }
 
-    // Glass borders — deliberately faint. A hard 1px white border
-    // is the fastest way to make a panel look cheap.
-    readonly property color border: "#24ffffff"
-    readonly property color separator: "#16ffffff"
 
-    // Interaction states
-    readonly property color hover: "#14ffffff"
-    readonly property color pressed: "#26ffffff"
+    // ============================================================
+    // Active Theme ID
+    // ============================================================
 
-    // Text colour to place on an accent fill (today's date, toggle
-    // knobs, badges). Always the deep ink, never white.
-    readonly property color accentForeground: "#16161f"
+    readonly property string activeTheme:
+        activeThemeFile.loaded
+            ? activeThemeFile.text().trim()
+            : "aurora"
+
+
+    // ============================================================
+    // Active Theme JSON
+    // ============================================================
+
+    property var themeFile: FileView {
+        path:
+            theme.auroraDirectory
+            + "/themes/"
+            + theme.activeTheme
+            + ".json"
+
+        watchChanges: true
+        blockLoading: true
+
+        onFileChanged: {
+            this.reload()
+        }
+    }
+
+
+    // ============================================================
+    // Parsed Theme
+    // ============================================================
+
+    readonly property var data: {
+        if (!theme.themeFile.loaded)
+            return ({});
+
+        try {
+            return JSON.parse(theme.themeFile.text());
+        } catch (error) {
+            console.warn(
+                "Aurora Theme: invalid JSON:",
+                error
+            );
+
+            return ({});
+        }
+    }
+
+
+    readonly property var colors:
+        data.colors || ({})
+
+    readonly property var ui:
+        data.ui || ({})
+
+
+    // ============================================================
+    // Background
+    // ============================================================
+
+    readonly property color background:
+        colors.background || "#181D25"
+
+    readonly property color backgroundDark:
+        colors.backgroundDark || "#141920"
+
+
+    // ============================================================
+    // Surfaces
+    // ============================================================
+
+    readonly property color surface:
+        colors.surface || "#282E37"
+
+    readonly property color surfaceHover:
+        colors.surfaceHover || "#303743"
+
+    readonly property color surfaceActive:
+        colors.surfaceActive || "#363D49"
+
+
+    // ============================================================
+    // Borders
+    // ============================================================
+
+    readonly property color border:
+        colors.border || "#3B4350"
+
+    readonly property color borderFocus:
+        colors.borderFocus || "#A970FF"
+
+    readonly property color separator:
+        colors.separator || "#343B47"
+
+
+    // ============================================================
+    // Text
+    // ============================================================
+
+    readonly property color text:
+        colors.text || "#F2F3F7"
+
+    readonly property color textSecondary:
+        colors.textSecondary || "#B9BEC8"
+
+    readonly property color textMuted:
+        colors.textMuted || "#858D9A"
+
+
+    // ============================================================
+    // Accent
+    // ============================================================
+
+    readonly property color accent:
+        colors.accent || "#A970FF"
+
+    readonly property color accentHover:
+        colors.accentHover || "#B98AFF"
+
+    readonly property color accentActive:
+        colors.accentActive || "#C7A6FF"
+
+    readonly property color accentMuted:
+        colors.accentMuted || "#55406F"
+
+    readonly property color accentForeground:
+        colors.accentForeground || "#181D25"
+
+
+    // ============================================================
+    // Semantic States
+    // ============================================================
+
+    readonly property color success:
+        colors.success || "#8FE3A5"
+
+    readonly property color warning:
+        colors.warning || "#FFD479"
+
+    readonly property color error:
+        colors.error || "#FF7F96"
+
+    readonly property color info:
+        colors.info || "#8FB8FF"
+
+
+    // ============================================================
+    // Compatibility Aliases
+    // ============================================================
+
+    readonly property color foreground:
+        text
+
+    readonly property color foregroundMuted:
+        textSecondary
+
+    readonly property color foregroundFaint:
+        textMuted
+
+    readonly property color danger:
+        error
+
+    readonly property color accentSoft:
+        accentMuted
+
+    readonly property color accentDim:
+        accentMuted
+
+    readonly property color hover:
+        surfaceHover
+
+    readonly property color pressed:
+        surfaceActive
+
 
     // ============================================================
     // Glass
     // ============================================================
 
-    readonly property real glassOpacity: 0.80
+    readonly property real glassOpacity:
+        0.80
 
-    // A slightly deeper shadow lets the popups detach from the
-    // wallpaper without needing a brighter border.
-    readonly property real shadowOpacity: 0.20
+    readonly property color backgroundGlass:
+        Qt.rgba(
+            background.r,
+            background.g,
+            background.b,
+            glassOpacity
+        )
+
+    readonly property color backgroundSolid:
+        background
+
 
     // ============================================================
-    // Layout
+    // UI
     // ============================================================
 
-    readonly property int pillHeight: 32
-    readonly property int moduleHeight: 30
+    readonly property int borderWidth:
+        ui.borderWidth || 2
 
-    // Distance from the top of the screen to the bar window.
-    // Popups use this to convert bar coordinates into screen ones.
-    readonly property int barMarginTop: 8
+    readonly property int radius:
+        ui.radius || 10
 
-    readonly property int radius: 999
-    readonly property int radiusMenu: 18
-    readonly property int radiusRow: 12
+    readonly property int radiusSmall:
+        ui.radiusSmall || 6
 
-    readonly property int padding: 10
-    readonly property int spacing: 6
+    readonly property int radiusLarge:
+        ui.radiusLarge || 18
 
-    readonly property int fontSize: 12
-    readonly property int fontSizeSmall: 10
-    readonly property int fontSizeLarge: 13
-    readonly property int iconSize: 16
+    readonly property int iconSize:
+        ui.iconSize || 16
+
+    readonly property int fontSize:
+        ui.fontSize || 12
+
+    readonly property int fontSizeSmall:
+        ui.fontSizeSmall || 10
+
+    readonly property int fontSizeLarge:
+        ui.fontSizeLarge || 14
+
+    readonly property real shadowOpacity:
+        ui.shadowOpacity || 0.20
+
+
+    // ============================================================
+    // Existing QuickShell Geometry
+    // ============================================================
+
+    readonly property int pillHeight:
+        32
+
+    readonly property int moduleHeight:
+        30
+
+    readonly property int barMarginTop:
+        8
+
+    readonly property int radiusMenu:
+        18
+
+    readonly property int radiusRow:
+        12
+
+    readonly property int padding:
+        10
+
+    readonly property int spacing:
+        6
+
+
+    // ============================================================
+    // Typography
+    // ============================================================
 
     readonly property string fontFamily:
         "JetBrains Mono Nerd Font"
 
-    // ============================================================
-    // Popup geometry
-    // ============================================================
-
-    readonly property int popupWidth: 340
-    readonly property int popupMaxHeight: 460
-
-    // Vertical distance between the bottom of the bar pill and the
-    // top of a dropdown. Keep this small so menus feel attached.
-    readonly property int popupGap: 2
-
-    readonly property int rowHeight: 42
 
     // ============================================================
-    // Motion — the "rubbery / organic" feel
+    // Popup Geometry
     // ============================================================
 
-    // Spring used for the popup's height as content grows / shrinks.
-    readonly property real springStiffness: 3.2
-    readonly property real springDamping: 0.32
-    readonly property real springEpsilon: 0.25
-    readonly property real springMass: 1.1
+    readonly property int popupWidth:
+        340
 
-    // Fade + slide of the inner content
-    readonly property int durFast: 120
-    readonly property int durBase: 200
-    readonly property int durSlow: 320
+    readonly property int popupMaxHeight:
+        460
 
-    // Open / close of the whole card
-    readonly property int durOpen: 360
-    readonly property int durClose: 200
+    readonly property int popupGap:
+        2
 
-    readonly property real overshoot: 1.6
+    readonly property int rowHeight:
+        42
+
 
     // ============================================================
-    // Collapsing bar
+    // Animation
     // ============================================================
 
-    // How long the modules take to slide out / fold away when the
-    // pointer enters or leaves the pill.
-    readonly property int barRevealDuration: 380
-    readonly property int barHideDuration: 260
+    readonly property real springStiffness:
+        3.2
 
-    // Grace period before the bar folds back up, so brushing past
-    // the pill doesn't cause a flicker.
-    readonly property int barCollapseDelay: 260
+    readonly property real springDamping:
+        0.32
+
+    readonly property real springEpsilon:
+        0.25
+
+    readonly property real springMass:
+        1.1
+
+    readonly property int durFast:
+        120
+
+    readonly property int durBase:
+        200
+
+    readonly property int durSlow:
+        320
+
+    readonly property int durOpen:
+        360
+
+    readonly property int durClose:
+        200
+
+    readonly property real overshoot:
+        1.6
+
+
+    // ============================================================
+    // Collapsing Bar
+    // ============================================================
+
+    readonly property int barRevealDuration:
+        380
+
+    readonly property int barHideDuration:
+        260
+
+    readonly property int barCollapseDelay:
+        260
 }

@@ -3,36 +3,70 @@
 -- https://wiki.hypr.land/Configuring/Variables/
 --------------------------------------------------
 
+--------------------------------------------------
+-- Load Active Aurora Theme
+--------------------------------------------------
+
 local home = os.getenv("HOME")
 
-local runtime_colors = home .. "/.cache/wallust/colors.lua"
+local themePath = home .. "/.config/aurora/active-theme.lua"
 
-local ok, wallust = pcall(dofile, runtime_colors)
+local ok, theme = pcall(dofile, themePath)
 
-local colors
+if not ok or not theme then
+	local fallback = home .. "/.config/aurora/themes/aurora.lua"
 
-if ok and wallust then
-	colors = wallust
-else
-	colors = require("stylix-colors")
+	ok, theme = pcall(dofile, fallback)
 end
 
-local active_border = colors.color14
-local inactive_border = colors.color8
+if not ok or not theme then
+	error("Aurora: unable to load theme in general.lua")
+end
+
+local ui = theme.ui
+
+--------------------------------------------------
+-- General
+--------------------------------------------------
 
 hl.config({
+
 	general = {
+
+		--------------------------------------------------
+		-- Gaps
+		--------------------------------------------------
+
 		gaps_in = 2,
+
 		gaps_out = 10,
 
-		border_size = 2,
+		--------------------------------------------------
+		-- Borders
+		--
+		-- Controlled by:
+		--
+		-- lib/themes.nix
+		--
+		--------------------------------------------------
 
-		["col.active_border"] = active_border,
-		["col.inactive_border"] = inactive_border,
+		border_size = ui.borderWidth,
 
-		resize_on_border = true,
+		--------------------------------------------------
+		-- Resize
+		--------------------------------------------------
+
+		resize_on_border = false,
+
+		--------------------------------------------------
+		-- Tearing
+		--------------------------------------------------
 
 		allow_tearing = false,
+
+		--------------------------------------------------
+		-- Layout
+		--------------------------------------------------
 
 		layout = "dwindle",
 	},

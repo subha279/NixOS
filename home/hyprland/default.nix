@@ -83,10 +83,6 @@ in
 
   xdg.configFile."wallust/templates/kitty.conf".source = ./wallust/templates/kitty.conf;
 
-  xdg.configFile."wallust/templates/starship.toml".source = ./wallust/templates/starship.toml;
-
-  xdg.configFile."wallust/templates/fuzzel.ini".source = ./wallust/templates/fuzzel.ini;
-
   # ==========================================
   # Wallpaper Scripts
   # ==========================================

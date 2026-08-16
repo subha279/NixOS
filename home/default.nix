@@ -12,6 +12,7 @@
     ./hyprland
     ./quickshell
     ./obsidian
+    ./theme
   ];
 
   home.username = "subha";
