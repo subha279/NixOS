@@ -20,6 +20,8 @@ Scope {
     NetworkPopup {}
     BluetoothPopup {}
     BatteryPopup {}
+    AudioPopup {}
+    CalendarPopup {}
     NotificationPopup {}
 
     // Transient notification toasts (top right)

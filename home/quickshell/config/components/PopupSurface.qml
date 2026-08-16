@@ -80,10 +80,10 @@ PanelWindow {
 
     color: "transparent"
 
-    // ...AND ignore the bar's exclusive zone. Without this the
-    // compositor pushes this window below the bar's reserved
-    // strip, which is what created the big gap under the pill.
-
+    // Ignore mode already implies a zero exclusive zone. Do NOT
+    // also set exclusiveZone here — assigning it flips
+    // exclusionMode back to Normal and the bar's reserved strip
+    // pushes this whole window down.
     exclusionMode: ExclusionMode.Ignore
 
     visible: root.open || root.rendering
@@ -132,6 +132,15 @@ PanelWindow {
     // ------------------------------------------------------------
     // Geometry driven by the content
     // ------------------------------------------------------------
+
+    // Screen-space Y of the bottom edge of the bar pill.
+    //
+    // Bar window: margins.top = barMarginTop, implicitHeight =
+    // pillHeight + 20, and the pill is vertically centred, so it
+    // starts 10px into the window.
+    //
+    // Computed from constants that definitely exist so a missing
+    // Theme property can never turn this into NaN.
     readonly property real barBottomY:
         Core.Theme.barMarginTop + 10 + Core.Theme.pillHeight
 
@@ -201,7 +210,11 @@ PanelWindow {
             )
         )
 
+        // Every module lives in the same pill, so the vertical
+        // anchor is always the same number. Deriving it per-click
+        // from mapToItem was the source of all the drift.
         y: Math.round(root.barBottomY + Core.Theme.popupGap)
+
         // --------------------------------------------------------
         // The rubbery part: a spring drives the height, so any
         // change in the number of rows overshoots and settles.

@@ -193,7 +193,7 @@ Item {
             Core.PopupManager.toggle(
                 "battery",
                 p.x + root.width / 2,
-                p.x + Core.Theme.barMarginTop
+                p.y + Core.Theme.barMarginTop
             )
         }
 

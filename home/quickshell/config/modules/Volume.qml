@@ -1,10 +1,18 @@
 import QtQuick
-import QtQuick.Layouts
 
 import Quickshell
-import Quickshell.Services.Pipewire
 
 import "../core" as Core
+import "../services" as Services
+
+// ================================================================
+// Volume (bar module)
+// ----------------------------------------------------------------
+// Left click   : open the audio dropdown
+// Right click  : mute / unmute the output
+// Middle click : mute / unmute the microphone
+// Scroll       : change the output volume
+// ================================================================
 
 Item {
     id: root
@@ -12,92 +20,125 @@ Item {
     implicitWidth: 58
     implicitHeight: Core.Theme.moduleHeight
 
-    property var sink:
-        Pipewire.defaultAudioSink
+    readonly property var svc: Services.AudioService
 
-    PwObjectTracker {
-        objects:
-            root.sink ? [root.sink] : []
-    }
+    readonly property bool menuOpen:
+        Core.PopupManager.isOpen("audio")
 
     Rectangle {
         anchors.fill: parent
 
         radius: height / 2
 
-        color:
-            mouse.containsMouse
+        color: root.menuOpen
+            ? Core.Theme.surfaceActive
+            : (mouse.containsMouse
                 ? Core.Theme.hover
-                : "transparent"
+                : "transparent")
 
         Behavior on color {
             ColorAnimation {
-                duration: 100
+                duration: 120
             }
         }
     }
 
-    RowLayout {
+    Row {
         anchors.centerIn: parent
 
         spacing: 5
 
         Text {
-            text: {
+            id: icon
 
-                if (!root.sink ||
-                    !root.sink.audio)
-                    return "󰖁"
+            anchors.verticalCenter: parent.verticalCenter
 
-                if (root.sink.audio.muted)
-                    return "󰖁"
+            text: root.svc.icon
 
-                if (root.sink.audio.volume <= 0.01)
-                    return "󰕿"
+            font.family: Core.Theme.fontFamily
+            font.pixelSize: Core.Theme.iconSize
 
-                if (root.sink.audio.volume < 0.5)
-                    return "󰖀"
+            color: root.svc.muted
+                ? Core.Theme.foregroundMuted
+                : (root.menuOpen
+                    ? Core.Theme.accent
+                    : Core.Theme.foreground)
 
-                return "󰕾"
+            Behavior on color {
+                ColorAnimation {
+                    duration: 120
+                }
             }
 
-            font.family:
-                Core.Theme.fontFamily
+            // Springy pop whenever the icon changes.
+            onTextChanged: popAnim.restart()
 
-            font.pixelSize:
-                Core.Theme.iconSize
+            SequentialAnimation {
+                id: popAnim
 
-            color:
-                root.sink &&
-                root.sink.audio &&
-                root.sink.audio.muted
-                    ? Core.Theme.foregroundMuted
-                    : Core.Theme.foreground
+                NumberAnimation {
+                    target: icon
+                    property: "scale"
+                    to: 1.22
+                    duration: 110
+                    easing.type: Easing.OutCubic
+                }
+
+                NumberAnimation {
+                    target: icon
+                    property: "scale"
+                    to: 1.0
+                    duration: 260
+                    easing.type: Easing.OutBack
+                    easing.overshoot: 2.2
+                }
+            }
         }
 
         Text {
-            text: {
+            anchors.verticalCenter: parent.verticalCenter
 
-                if (!root.sink ||
-                    !root.sink.audio)
-                    return "0%"
+            text: root.svc.volumePercent + "%"
 
-                return Math.round(
-                    root.sink.audio.volume * 100
-                ) + "%"
+            font.family: Core.Theme.fontFamily
+            font.pixelSize: Core.Theme.fontSize
+            font.weight: Font.Medium
+
+            color: root.svc.muted
+                ? Core.Theme.foregroundMuted
+                : Core.Theme.foreground
+
+            renderType: Text.NativeRendering
+        }
+    }
+
+    // Small badge in the corner while the microphone is muted, so
+    // you can tell at a glance without opening anything.
+    Rectangle {
+        id: micBadge
+
+        anchors.right: parent.right
+        anchors.rightMargin: 1
+        anchors.top: parent.top
+        anchors.topMargin: 2
+
+        width: 8
+        height: 8
+
+        radius: 4
+
+        color: Core.Theme.danger
+
+        visible: root.svc.source !== null && root.svc.micMuted
+
+        scale: visible ? 1.0 : 0.0
+
+        Behavior on scale {
+            NumberAnimation {
+                duration: 260
+                easing.type: Easing.OutBack
+                easing.overshoot: 2.4
             }
-
-            font.family:
-                Core.Theme.fontFamily
-
-            font.pixelSize:
-                Core.Theme.fontSize
-
-            font.weight:
-                Font.Medium
-
-            color:
-                Core.Theme.foreground
         }
     }
 
@@ -108,55 +149,44 @@ Item {
 
         hoverEnabled: true
 
-        cursorShape:
-            Qt.PointingHandCursor
+        cursorShape: Qt.PointingHandCursor
 
         acceptedButtons:
             Qt.LeftButton |
-            Qt.RightButton
+            Qt.RightButton |
+            Qt.MiddleButton
 
         onClicked: function(event) {
 
-            if (!root.sink ||
-                !root.sink.audio)
-                return
-
-            if (event.button === Qt.LeftButton) {
-                root.sink.audio.muted =
-                    !root.sink.audio.muted
-            }
-
             if (event.button === Qt.RightButton) {
-                Quickshell.execDetached([
-                    "pavucontrol"
-                ])
+                root.svc.toggleOutputMute()
+                return
             }
+
+            if (event.button === Qt.MiddleButton) {
+                root.svc.toggleMicMute()
+                return
+            }
+
+            // Bar coordinates -> screen coordinates. Only x is
+            // used; the popup derives its own y from the theme.
+            const p = root.mapToItem(null, 0, root.height)
+
+            Core.PopupManager.toggle(
+                "audio",
+                p.x + root.width / 2,
+                p.y + Core.Theme.barMarginTop
+            )
         }
 
         onWheel: function(event) {
 
-            if (!root.sink ||
-                !root.sink.audio)
-                return
-
             const step = 0.05
 
-            if (event.angleDelta.y > 0) {
-
-                root.sink.audio.volume =
-                    Math.min(
-                        1.0,
-                        root.sink.audio.volume + step
-                    )
-
-            } else {
-
-                root.sink.audio.volume =
-                    Math.max(
-                        0.0,
-                        root.sink.audio.volume - step
-                    )
-            }
+            root.svc.stepVolume(
+                root.svc.sink,
+                event.angleDelta.y > 0 ? step : -step
+            )
         }
     }
 }

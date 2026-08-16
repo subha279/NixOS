@@ -56,8 +56,8 @@ QtObject {
 
     // Distance from the top of the screen to the bar window.
     // Popups use this to convert bar coordinates into screen ones.
-
     readonly property int barMarginTop: 8
+
     readonly property int radius: 999
     readonly property int radiusMenu: 18
     readonly property int radiusRow: 12
@@ -106,4 +106,17 @@ QtObject {
     readonly property int durClose: 200
 
     readonly property real overshoot: 1.6
+
+    // ============================================================
+    // Collapsing bar
+    // ============================================================
+
+    // How long the modules take to slide out / fold away when the
+    // pointer enters or leaves the pill.
+    readonly property int barRevealDuration: 380
+    readonly property int barHideDuration: 260
+
+    // Grace period before the bar folds back up, so brushing past
+    // the pill doesn't cause a flicker.
+    readonly property int barCollapseDelay: 260
 }
