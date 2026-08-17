@@ -2,62 +2,55 @@
 
 set -euo pipefail
 
-
-# ============================================================
+# ============================================================================
 # Aurora Wallpaper Picker
-# ============================================================
+# ============================================================================
 #
-# Wallpaper selection uses Fuzzel.
+# Wallpaper selection is completely independent from theming.
 #
-# Fuzzel's theme comes from:
+# Wallpaper:
+#   ~/Wallpapers
 #
-#   ~/.config/aurora/active-fuzzel.conf
+# State:
+#   ~/.cache/aurora/current-wallpaper
 #
-# Wallust is temporarily retained below for the remaining
-# legacy dynamic-color pipeline.
+# Theme colors:
+#   lib/themes.nix
 #
-# It will be removed in a later migration step.
-#
-# ============================================================
-
+# IMPORTANT:
+#   This script NEVER generates colors.
+#   This script NEVER invokes legacy dynamic color generator.
+# ============================================================================
 
 WALLPAPER_DIR="$HOME/Wallpapers"
-
-CACHE_DIR="$HOME/.cache/wallust"
-
-RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
-
+CACHE_DIR="$HOME/.cache/aurora"
+CURRENT_WALLPAPER="$CACHE_DIR/current-wallpaper"
 
 mkdir -p "$CACHE_DIR"
 
-
-# ============================================================
+# ============================================================================
 # Notifications
-# ============================================================
+# ============================================================================
 
 notify() {
     notify-send "$1" "$2" >/dev/null 2>&1 || true
 }
 
-
-# ============================================================
-# Validate Wallpaper Directory
-# ============================================================
+# ============================================================================
+# Validate wallpaper directory
+# ============================================================================
 
 if [[ ! -d "$WALLPAPER_DIR" ]]; then
-
     notify \
         "Wallpaper" \
         "Directory not found: $WALLPAPER_DIR"
 
     exit 1
-
 fi
 
-
-# ============================================================
-# Find Wallpapers
-# ============================================================
+# ============================================================================
+# Find wallpapers
+# ============================================================================
 
 mapfile -t wallpapers < <(
     find "$WALLPAPER_DIR" \
@@ -71,43 +64,26 @@ mapfile -t wallpapers < <(
         sort
 )
 
-
 if ((${#wallpapers[@]} == 0)); then
-
     notify \
         "Wallpaper" \
         "No wallpapers found in $WALLPAPER_DIR"
 
     exit 1
-
 fi
 
-
-# ============================================================
-# Build Fuzzel Menu
-# ============================================================
-#
-# Column 1:
-#   Display name
-#
-# Column 2:
-#   Absolute wallpaper path
-#
-# Icon:
-#   Wallpaper itself
-#
-# ============================================================
+# ============================================================================
+# Build Fuzzel menu
+# ============================================================================
 
 menu() {
 
     local wallpaper
     local name
 
-
     for wallpaper in "${wallpapers[@]}"; do
 
         name="$(basename "$wallpaper")"
-
 
         printf '%s\t%s\0icon\x1f%s\n' \
             "$name" \
@@ -115,25 +91,18 @@ menu() {
             "$wallpaper"
 
     done
-
 }
 
-
-# ============================================================
-# Wallpaper Picker
-# ============================================================
+# ============================================================================
+# Wallpaper picker
+# ============================================================================
 #
-# We deliberately do NOT pass a Wallust Fuzzel configuration.
-#
-# Fuzzel loads:
-#
-#   ~/.config/fuzzel/fuzzel.ini
-#
-# which includes:
+# Fuzzel uses the Aurora-generated theme:
 #
 #   ~/.config/aurora/active-fuzzel.conf
 #
-# ============================================================
+# through the normal Fuzzel configuration.
+# ============================================================================
 
 selected="$(
     menu |
@@ -148,17 +117,15 @@ selected="$(
             --cache="$CACHE_DIR/fuzzel-wallpapers"
 )"
 
-
-# ============================================================
+# ============================================================================
 # Cancel
-# ============================================================
+# ============================================================================
 
 [[ -z "$selected" ]] && exit 0
 
-
-# ============================================================
-# Validate Selection
-# ============================================================
+# ============================================================================
+# Validate selection
+# ============================================================================
 
 if [[ ! -f "$selected" ]]; then
 
@@ -167,113 +134,41 @@ if [[ ! -f "$selected" ]]; then
         "Selected wallpaper does not exist"
 
     exit 1
-
 fi
 
-
-# ============================================================
-# Generate Wallust Colors
-# ============================================================
-#
-# TEMPORARY
-#
-# Wallust is still used by the remaining legacy theme
-# consumers. This will be removed after those consumers
-# have migrated to Aurora.
-#
-# ============================================================
-
-if command -v wallust >/dev/null 2>&1; then
-
-    wallust run "$selected" \
-        >/dev/null 2>&1 || true
-
-fi
-
-
-# ============================================================
-# Change Wallpaper
-# ============================================================
+# ============================================================================
+# Change wallpaper
+# ============================================================================
 
 awww img "$selected" \
     --transition-type grow \
     --transition-duration 0.7 \
     >/dev/null 2>&1
 
+# ============================================================================
+# Remember current wallpaper
+# ============================================================================
 
-# ============================================================
-# Update Running Kitty Terminals
-# ============================================================
-#
-# TEMPORARY LEGACY WALLUST SUPPORT
-#
-# Aurora theme switching already handles Kitty directly.
-#
-# This block is retained only because wallpaper changes still
-# generate Wallust colors for the old pipeline.
-#
-# It will be removed when Wallust is completely retired.
-#
-# ============================================================
+printf '%s\n' "$selected" > "$CURRENT_WALLPAPER"
 
-KITTY_COLORS="$CACHE_DIR/kitty.conf"
-
-
-if [[ -f "$KITTY_COLORS" ]]; then
-
-
-    while IFS= read -r socket; do
-
-
-        kitten @ \
-            --to "unix:$socket" \
-            set-colors \
-            --configured \
-            --all \
-            "$KITTY_COLORS" \
-            >/dev/null 2>&1 || true
-
-
-    done < <(
-
-        find "$RUNTIME_DIR" \
-            -maxdepth 1 \
-            -type s \
-            -name 'kitty-*' \
-            -printf '%p\n' \
-            2>/dev/null
-
-    )
-
-fi
-
-
-# ============================================================
-# Remember Current Wallpaper
-# ============================================================
-
-printf '%s\n' "$selected" \
-    > "$CACHE_DIR/current-wallpaper"
-
-
-# ============================================================
+# ============================================================================
 # Reload Hyprland
-# ============================================================
+# ============================================================================
 #
-# The current Hyprland theme remains Wallust-driven for now.
+# Wallpaper changes do not regenerate the theme.
 #
-# This will be removed from the wallpaper pipeline when
-# Hyprland finishes migrating to Aurora.
+# The Aurora theme remains controlled by:
 #
-# ============================================================
+#   lib/themes.nix
+#
+# ============================================================================
 
 hyprctl reload \
     >/dev/null 2>&1 || true
 
-
-# ============================================================
+# ============================================================================
 # Notification
-# ============================================================
+# ============================================================================
 
 notify \
     "Wallpaper" \

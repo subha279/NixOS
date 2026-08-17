@@ -1,295 +1,495 @@
 -- ============================================================================
--- Lualine
--- Aurora statusline
+-- Aurora Lualine
+-- ============================================================================
+--
+-- Minimal • Information-rich • Glass-friendly • Aurora-native
+--
+-- Theme source:
+--
+--     ~/.config/aurora/active-theme.lua
+--
+-- Features:
+--
+--   • Live Aurora theme switching
+--   • Git branch / diff
+--   • Diagnostics
+--   • LSP clients
+--   • Project / file
+--   • Search count
+--   • Macro recording
+--   • File encoding
+--   • Filetype
+--   • Progress / location
+--   • Clock
+--
+-- IMPORTANT:
+--
+-- Lualine intentionally avoids a large opaque background.
+-- Hyprland is responsible for the glass / blur effect.
+--
 -- ============================================================================
 
 local M = {}
 
 -- ============================================================================
--- Aurora palette
+-- Theme
 -- ============================================================================
 
-local colors = {
-	bg = "#141218",
-	bg_alt = "#1b1820",
-	bg_soft = "#211d27",
+local function get_theme()
+	local path = vim.fn.expand("~/.config/aurora/active-theme.lua")
 
-	fg = "#e6e0e9",
-	muted = "#9d99a5",
+	local ok, theme = pcall(dofile, path)
 
-	purple = "#d0bcff",
-	purple_dark = "#bca5f2",
-
-	blue = "#7aa2f7",
-	cyan = "#D0BCFF",
-
-	green = "#7fff9a",
-	yellow = "#ffda72",
-	red = "#ff728f",
-	orange = "#ffb86c",
-
-	border = "#302b36",
-}
-
--- ============================================================================
--- Mode component
--- ============================================================================
-
-local function mode_icon()
-	local mode = vim.fn.mode()
-
-	local icons = {
-		n = "󱄅 ",
-		i = "󰏫",
-		v = "󰈈",
-		V = "󰈈",
-		["\22"] = "󰈈",
-		c = "󰘳",
-		s = "󰒉",
-		S = "󰒉",
-		R = "󰑕",
-		t = "󰆍",
-	}
-
-	return icons[mode] or "󰘳"
-end
-
-local function mode_name()
-	local mode = vim.fn.mode()
-
-	local names = {
-		n = "NORMAL",
-		i = "INSERT",
-		v = "VISUAL",
-		V = "V-LINE",
-		["\22"] = "V-BLOCK",
-		c = "COMMAND",
-		s = "SELECT",
-		S = "S-LINE",
-		R = "REPLACE",
-		t = "TERMINAL",
-	}
-
-	return names[mode] or mode
-end
-
--- ============================================================================
--- File information
--- ============================================================================
-
-local function filename()
-	local name = vim.fn.expand("%:t")
-
-	if name == "" then
-		return "󰈔 No Name"
+	if not ok then
+		return nil
 	end
 
-	return "󰈔 " .. name
-end
-
-local function file_modified()
-	if vim.bo.modified then
-		return "●"
+	if type(theme) ~= "table" then
+		return nil
 	end
 
-	return ""
+	if type(theme.colors) ~= "table" then
+		return nil
+	end
+
+	return theme
+end
+
+local function colors()
+	local theme = get_theme()
+
+	if theme and theme.colors then
+		return theme.colors
+	end
+
+	return {}
 end
 
 -- ============================================================================
--- Git
+-- Safe Color Helpers
 -- ============================================================================
 
-local function git_branch()
-	local branch = vim.b.gitsigns_head
+local function color(name, fallback)
+	local c = colors()
 
-	if not branch or branch == "" then
+	return c[name] or fallback
+end
+
+local function fg(name)
+	return color(name, nil)
+end
+
+-- ============================================================================
+-- Project
+-- ============================================================================
+
+local function cwd()
+	local dir = vim.fn.getcwd()
+
+	if dir == "" then
 		return ""
 	end
 
-	return "󰊢 " .. branch
-end
+	local home = vim.fn.expand("~")
 
--- ============================================================================
--- Diagnostics
--- ============================================================================
-
-local function diagnostics()
-	local diagnostics = vim.diagnostic.get(0)
-
-	if #diagnostics == 0 then
-		return ""
+	if dir == home then
+		return "󰋜 ~"
 	end
 
-	local errors = 0
-	local warnings = 0
-	local hints = 0
-	local info = 0
-
-	for _, diagnostic in ipairs(diagnostics) do
-		if diagnostic.severity == vim.diagnostic.severity.ERROR then
-			errors = errors + 1
-		elseif diagnostic.severity == vim.diagnostic.severity.WARN then
-			warnings = warnings + 1
-		elseif diagnostic.severity == vim.diagnostic.severity.HINT then
-			hints = hints + 1
-		elseif diagnostic.severity == vim.diagnostic.severity.INFO then
-			info = info + 1
-		end
+	if vim.startswith(dir, home .. "/") then
+		dir = "~" .. dir:sub(#home + 1)
 	end
 
-	local result = {}
+	local tail = vim.fn.fnamemodify(dir, ":t")
 
-	if errors > 0 then
-		table.insert(result, "󰅚 " .. errors)
+	if tail == "" then
+		return dir
 	end
 
-	if warnings > 0 then
-		table.insert(result, "󰀪 " .. warnings)
-	end
-
-	if info > 0 then
-		table.insert(result, "󰋼 " .. info)
-	end
-
-	if hints > 0 then
-		table.insert(result, "󰌵 " .. hints)
-	end
-
-	return table.concat(result, " ")
+	return "󰉋 " .. tail
 end
 
 -- ============================================================================
 -- LSP
 -- ============================================================================
 
-local function lsp()
+local function lsp_clients()
 	local clients = vim.lsp.get_clients({
-		bufnr = vim.api.nvim_get_current_buf(),
+		bufnr = 0,
 	})
 
 	if #clients == 0 then
-		return "󰒎 No LSP"
+		return ""
 	end
 
 	local names = {}
 
 	for _, client in ipairs(clients) do
-		table.insert(names, client.name)
+		if client.name and client.name ~= "" then
+			names[#names + 1] = client.name
+		end
 	end
+
+	if #names == 0 then
+		return ""
+	end
+
+	table.sort(names)
 
 	return "󰒋 " .. table.concat(names, ", ")
 end
 
 -- ============================================================================
--- Filetype
+-- Search
 -- ============================================================================
 
-local function filetype()
-	local ft = vim.bo.filetype
+local function search_count()
+	local ok, result = pcall(vim.fn.searchcount, {
+		maxcount = 999,
+		timeout = 100,
+	})
 
-	if ft == "" then
-		return "󰈔 TEXT"
-	end
-
-	return "󰈔 " .. ft
-end
-
--- ============================================================================
--- Git diff
--- ============================================================================
-
-local function git_diff()
-	if not vim.b.gitsigns_status_dict then
+	if not ok or type(result) ~= "table" then
 		return ""
 	end
 
-	local diff = vim.b.gitsigns_status_dict
-
-	local result = {}
-
-	if diff.added and diff.added > 0 then
-		table.insert(result, " " .. diff.added)
+	if not result.total or result.total == 0 then
+		return ""
 	end
 
-	if diff.changed and diff.changed > 0 then
-		table.insert(result, " " .. diff.changed)
+	if not result.current or result.current == 0 then
+		return ""
 	end
 
-	if diff.removed and diff.removed > 0 then
-		table.insert(result, " " .. diff.removed)
-	end
-
-	return table.concat(result, " ")
+	return string.format("󰍉 %d/%d", result.current, result.total)
 end
 
 -- ============================================================================
--- Mode colors
+-- File State
 -- ============================================================================
 
-local mode_colors = {
-	n = colors.purple,
-	i = colors.green,
-	v = colors.blue,
-	V = colors.blue,
-	["\22"] = colors.blue,
-	c = colors.yellow,
-	s = colors.blue,
-	S = colors.blue,
-	R = colors.red,
-	t = colors.cyan,
+local function file_state()
+	local parts = {}
+
+	if vim.bo.modified then
+		parts[#parts + 1] = "●"
+	end
+
+	if vim.bo.readonly then
+		parts[#parts + 1] = ""
+	end
+
+	if vim.bo.modifiable == false then
+		parts[#parts + 1] = "󰌾"
+	end
+
+	return table.concat(parts, " ")
+end
+
+-- ============================================================================
+-- Macro Recording
+-- ============================================================================
+
+local function recording()
+	local reg = vim.fn.reg_recording()
+
+	if reg == "" then
+		return ""
+	end
+
+	return "󰑋 @" .. reg
+end
+
+-- ============================================================================
+-- Mode
+-- ============================================================================
+
+local mode_map = {
+	n = "NORMAL",
+	no = "NORMAL",
+	nov = "NORMAL",
+	noV = "NORMAL",
+	["no\22"] = "NORMAL",
+
+	i = "INSERT",
+	ic = "INSERT",
+	ix = "INSERT",
+
+	v = "VISUAL",
+	vs = "VISUAL",
+
+	V = "V-LINE",
+	Vs = "V-LINE",
+
+	["\22"] = "V-BLOCK",
+	["\22s"] = "V-BLOCK",
+
+	c = "COMMAND",
+	cv = "EX",
+	ce = "EX",
+
+	R = "REPLACE",
+	Rv = "REPLACE",
+
+	s = "SELECT",
+	S = "S-LINE",
+	["\19"] = "S-BLOCK",
+
+	t = "TERMINAL",
 }
 
+local function mode()
+	local current = vim.fn.mode()
+
+	return mode_map[current] or current:upper()
+end
+
 -- ============================================================================
--- Setup
+-- Mode Color
 -- ============================================================================
 
-function M.setup()
-	require("lualine").setup({
+local function mode_color()
+	local current = vim.fn.mode()
+	local c = colors()
+
+	if current == "i" or current == "ic" or current == "ix" then
+		return {
+			fg = c.accentForeground,
+			bg = c.success,
+			gui = "bold",
+		}
+	end
+
+	if current == "v" or current == "V" or current == "\22" or current == "vs" or current == "Vs" then
+		return {
+			fg = c.accentForeground,
+			bg = c.info,
+			gui = "bold",
+		}
+	end
+
+	if current == "R" or current == "Rv" then
+		return {
+			fg = c.accentForeground,
+			bg = c.warning,
+			gui = "bold",
+		}
+	end
+
+	if current == "c" or current == "cv" or current == "ce" then
+		return {
+			fg = c.accentForeground,
+			bg = c.accentHover or c.accent,
+			gui = "bold",
+		}
+	end
+
+	return {
+		fg = c.accentForeground,
+		bg = c.accent,
+		gui = "bold",
+	}
+end
+
+-- ============================================================================
+-- Dynamic Theme
+-- ============================================================================
+
+local function build_theme()
+	local c = colors()
+
+	return {
+		normal = {
+			a = mode_color(),
+
+			b = {
+				fg = c.text,
+				bg = "NONE",
+			},
+
+			c = {
+				fg = c.textSecondary,
+				bg = "NONE",
+			},
+
+			x = {
+				fg = c.textSecondary,
+				bg = "NONE",
+			},
+
+			y = {
+				fg = c.text,
+				bg = "NONE",
+			},
+
+			z = {
+				fg = c.textSecondary,
+				bg = "NONE",
+			},
+		},
+
+		insert = {
+			a = mode_color(),
+
+			b = {
+				fg = c.text,
+				bg = "NONE",
+			},
+
+			c = {
+				fg = c.textSecondary,
+				bg = "NONE",
+			},
+		},
+
+		visual = {
+			a = mode_color(),
+
+			b = {
+				fg = c.text,
+				bg = "NONE",
+			},
+
+			c = {
+				fg = c.textSecondary,
+				bg = "NONE",
+			},
+		},
+
+		replace = {
+			a = mode_color(),
+
+			b = {
+				fg = c.text,
+				bg = "NONE",
+			},
+
+			c = {
+				fg = c.textSecondary,
+				bg = "NONE",
+			},
+		},
+
+		command = {
+			a = mode_color(),
+
+			b = {
+				fg = c.text,
+				bg = "NONE",
+			},
+
+			c = {
+				fg = c.textSecondary,
+				bg = "NONE",
+			},
+		},
+
+		select = {
+			a = mode_color(),
+
+			b = {
+				fg = c.text,
+				bg = "NONE",
+			},
+
+			c = {
+				fg = c.textSecondary,
+				bg = "NONE",
+			},
+		},
+
+		inactive = {
+			a = {
+				fg = c.textMuted,
+				bg = "NONE",
+			},
+
+			b = {
+				fg = c.textMuted,
+				bg = "NONE",
+			},
+
+			c = {
+				fg = c.textMuted,
+				bg = "NONE",
+			},
+
+			x = {
+				fg = c.textMuted,
+				bg = "NONE",
+			},
+
+			y = {
+				fg = c.textMuted,
+				bg = "NONE",
+			},
+
+			z = {
+				fg = c.textMuted,
+				bg = "NONE",
+			},
+		},
+	}
+end
+
+-- ============================================================================
+-- Configuration
+-- ============================================================================
+
+local function build_config()
+	local c = colors()
+
+	return {
 		options = {
-			theme = "auto",
+			theme = build_theme(),
 
 			globalstatus = true,
+
+			disabled_filetypes = {
+				statusline = {
+					"dashboard",
+					"alpha",
+					"starter",
+					"NvimTree",
+					"neo-tree",
+					"TelescopePrompt",
+					"TelescopeResults",
+					"lazy",
+					"mason",
+				},
+			},
+
+			section_separators = {
+				left = "",
+				right = "",
+			},
 
 			component_separators = {
 				left = "│",
 				right = "│",
 			},
 
-			section_separators = {
-				left = "",
-				right = "",
-			},
+			always_divide_middle = true,
 
-			disabled_filetypes = {
-				"dashboard",
-				"NvimTree",
-				"snacks_dashboard",
-				"lazy",
-				"mason",
-			},
+			always_show_tabline = false,
 
 			refresh = {
-				statusline = 100,
-				winbar = 100,
+				statusline = 1000,
+				tabline = 1000,
+				winbar = 1000,
 			},
 		},
 
+		-- ======================================================================
+		-- LEFT
+		-- ======================================================================
+
 		sections = {
-
-			-- ======================================================================
-			-- LEFT
-			-- ======================================================================
-
 			lualine_a = {
 				{
-					mode_icon,
-					color = function()
-						return {
-							fg = colors.bg,
-							bg = mode_colors[vim.fn.mode()] or colors.purple,
-							gui = "bold",
-						}
-					end,
+					mode,
+
+					color = mode_color,
 
 					padding = {
 						left = 1,
@@ -299,30 +499,15 @@ function M.setup()
 			},
 
 			lualine_b = {
-
 				{
-					mode_name,
+					"branch",
 
-					color = function()
-						return {
-							fg = mode_colors[vim.fn.mode()] or colors.purple,
-							bg = colors.bg_alt,
-							gui = "bold",
-						}
-					end,
-
-					padding = {
-						left = 1,
-						right = 1,
-					},
-				},
-
-				{
-					filename,
+					icon = "󰘬",
 
 					color = {
-						fg = colors.fg,
-						bg = colors.bg_alt,
+						fg = c.accent,
+						bg = "NONE",
+						gui = "bold",
 					},
 
 					padding = {
@@ -332,11 +517,64 @@ function M.setup()
 				},
 
 				{
-					file_modified,
+					"diff",
 
-					color = {
-						fg = colors.yellow,
-						bg = colors.bg_alt,
+					symbols = {
+						added = "＋",
+						modified = "～",
+						removed = "－",
+					},
+
+					diff_color = {
+						added = {
+							fg = c.success,
+						},
+
+						modified = {
+							fg = c.warning,
+						},
+
+						removed = {
+							fg = c.error,
+						},
+					},
+
+					padding = {
+						left = 0,
+						right = 1,
+					},
+				},
+
+				{
+					"diagnostics",
+
+					sources = {
+						"nvim_diagnostic",
+					},
+
+					symbols = {
+						error = "󰅚 ",
+						warn = "󰀪 ",
+						info = "󰋽 ",
+						hint = "󰌵 ",
+					},
+
+					diagnostics_color = {
+						error = {
+							fg = c.error,
+						},
+
+						warn = {
+							fg = c.warning,
+						},
+
+						info = {
+							fg = c.info,
+						},
+
+						hint = {
+							fg = c.success,
+						},
 					},
 
 					padding = {
@@ -346,63 +584,78 @@ function M.setup()
 				},
 			},
 
+			-- ==================================================================
+			-- CENTER
+			-- ==================================================================
+
 			lualine_c = {
-
 				{
-					git_branch,
+					cwd,
 
 					color = {
-						fg = colors.purple,
-						bg = colors.bg,
+						fg = c.textMuted,
+						bg = "NONE",
 					},
 
 					padding = {
-						left = 1,
+						left = 0,
 						right = 1,
 					},
 				},
 
 				{
-					git_diff,
+					"filename",
+
+					path = 1,
+
+					shorting_target = 40,
+
+					symbols = {
+						modified = " ●",
+						readonly = " ",
+						unnamed = "[No Name]",
+					},
 
 					color = {
-						fg = colors.green,
-						bg = colors.bg,
+						fg = c.text,
+						bg = "NONE",
+						gui = "bold",
 					},
 
 					padding = {
-						left = 1,
+						left = 0,
 						right = 1,
 					},
 				},
 
 				{
-					diagnostics,
+					file_state,
 
-					color = {
-						fg = colors.red,
-						bg = colors.bg,
-					},
+					color = function()
+						return {
+							fg = vim.bo.modified and c.warning or c.textMuted,
+							bg = "NONE",
+						}
+					end,
 
 					padding = {
-						left = 1,
-						right = 1,
+						left = 0,
+						right = 0,
 					},
 				},
 			},
 
-			-- ======================================================================
+			-- ==================================================================
 			-- RIGHT
-			-- ======================================================================
+			-- ==================================================================
 
 			lualine_x = {
-
 				{
-					lsp,
+					lsp_clients,
 
 					color = {
-						fg = colors.cyan,
-						bg = colors.bg,
+						fg = c.info,
+						bg = "NONE",
 					},
 
 					padding = {
@@ -412,15 +665,30 @@ function M.setup()
 				},
 
 				{
-					filetype,
+					search_count,
 
 					color = {
-						fg = colors.blue,
-						bg = colors.bg,
+						fg = c.accent,
+						bg = "NONE",
 					},
 
 					padding = {
-						left = 1,
+						left = 0,
+						right = 1,
+					},
+				},
+
+				{
+					recording,
+
+					color = {
+						fg = c.error,
+						bg = "NONE",
+						gui = "bold",
+					},
+
+					padding = {
+						left = 0,
 						right = 1,
 					},
 				},
@@ -428,9 +696,59 @@ function M.setup()
 				{
 					"encoding",
 
+					show_bomb = true,
+
+					fmt = function(value)
+						if value == "utf-8" then
+							return "󰉿"
+						end
+
+						return "󰉿 " .. value
+					end,
+
 					color = {
-						fg = colors.muted,
-						bg = colors.bg,
+						fg = c.textMuted,
+						bg = "NONE",
+					},
+
+					padding = {
+						left = 0,
+						right = 1,
+					},
+				},
+
+				{
+					"filetype",
+
+					colored = true,
+
+					color = {
+						fg = c.accent,
+						bg = "NONE",
+					},
+
+					padding = {
+						left = 0,
+						right = 1,
+					},
+				},
+			},
+
+			-- ==================================================================
+			-- POSITION
+			-- ==================================================================
+
+			lualine_y = {
+				{
+					"progress",
+
+					fmt = function(value)
+						return "󰦖 " .. value
+					end,
+
+					color = {
+						fg = c.textSecondary,
+						bg = "NONE",
 					},
 
 					padding = {
@@ -438,101 +756,96 @@ function M.setup()
 						right = 1,
 					},
 				},
-			},
-
-			lualine_y = {
 
 				{
-					"progress",
+					"location",
+
+					fmt = function(value)
+						return "󰍒 " .. value
+					end,
 
 					color = {
-						fg = colors.purple,
-						bg = colors.bg_alt,
+						fg = c.text,
+						bg = "NONE",
 						gui = "bold",
 					},
 
 					padding = {
-						left = 1,
+						left = 0,
 						right = 1,
 					},
 				},
 			},
 
+			-- ==================================================================
+			-- CLOCK
+			-- ==================================================================
+
 			lualine_z = {
-
 				{
-					"location",
-
-					color = function()
-						return {
-							fg = colors.bg,
-							bg = mode_colors[vim.fn.mode()] or colors.purple,
-							gui = "bold",
-						}
+					function()
+						return os.date("%H:%M")
 					end,
+
+					icon = "󰥔",
+
+					color = {
+						fg = c.textMuted,
+						bg = "NONE",
+					},
 
 					padding = {
 						left = 1,
-						right = 1,
+						right = 0,
 					},
 				},
 			},
 		},
-
-		-- ========================================================================
-		-- INACTIVE WINDOWS
-		-- ========================================================================
-
-		inactive_sections = {
-
-			lualine_a = {},
-
-			lualine_b = {
-				{
-					filename,
-
-					color = {
-						fg = colors.muted,
-						bg = colors.bg,
-					},
-				},
-			},
-
-			lualine_c = {},
-
-			lualine_x = {
-				{
-					filetype,
-
-					color = {
-						fg = colors.muted,
-						bg = colors.bg,
-					},
-				},
-			},
-
-			lualine_y = {
-				{
-					"location",
-
-					color = {
-						fg = colors.muted,
-						bg = colors.bg,
-					},
-				},
-			},
-
-			lualine_z = {},
-		},
-
-		extensions = {
-			"nvim-tree",
-			"quickfix",
-			"fugitive",
-			"lazy",
-			"trouble",
-		},
-	})
+	}
 end
+
+-- ============================================================================
+-- Setup
+-- ============================================================================
+
+function M.setup()
+	local ok, lualine = pcall(require, "lualine")
+
+	if not ok then
+		return false
+	end
+
+	lualine.setup(build_config())
+
+	vim.schedule(function()
+		vim.cmd("redrawstatus!")
+	end)
+
+	return true
+end
+
+-- ============================================================================
+-- Live Theme Refresh
+-- ============================================================================
+
+function M.refresh_theme()
+	local ok, lualine = pcall(require, "lualine")
+
+	if not ok then
+		return false
+	end
+
+	lualine.setup(build_config())
+
+	vim.schedule(function()
+		vim.cmd("redrawstatus!")
+	end)
+
+	return true
+end
+
+-- ============================================================================
+-- Return
+-- ============================================================================
 
 return M

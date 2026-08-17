@@ -1,6 +1,13 @@
 -- ============================================================================
--- NvimTree
--- Aurora File Explorer
+-- Aurora NvimTree
+-- ============================================================================
+--
+-- File explorer for Aurora Neovim.
+--
+-- Theme:
+--
+--     ui/nvimtree-theme.lua
+--
 -- ============================================================================
 
 vim.g.loaded_netrw = 1
@@ -9,7 +16,7 @@ vim.g.loaded_netrwPlugin = 1
 local api = require("nvim-tree.api")
 
 -- ============================================================================
--- Keymaps inside NvimTree
+-- NvimTree Buffer Keymaps
 -- ============================================================================
 
 local function on_attach(bufnr)
@@ -23,34 +30,59 @@ local function on_attach(bufnr)
 		}
 	end
 
-	-- Keep NvimTree's useful defaults.
+	-- Keep NvimTree defaults.
 	api.config.mappings.default_on_attach(bufnr)
 
+	-- ========================================================================
 	-- Navigation
+	-- ========================================================================
+
 	vim.keymap.set("n", "l", api.node.open.edit, opts("Open"))
+
 	vim.keymap.set("n", "<CR>", api.node.open.edit, opts("Open"))
+
 	vim.keymap.set("n", "h", api.node.navigate.parent_close, opts("Close folder"))
 
+	-- ========================================================================
 	-- Preview
+	-- ========================================================================
+
 	vim.keymap.set("n", "P", api.node.open.preview, opts("Preview"))
 
+	-- ========================================================================
 	-- Splits
+	-- ========================================================================
+
 	vim.keymap.set("n", "s", api.node.open.vertical, opts("Open vertical split"))
 
 	vim.keymap.set("n", "i", api.node.open.horizontal, opts("Open horizontal split"))
 
+	-- ========================================================================
 	-- Files
+	-- ========================================================================
+
 	vim.keymap.set("n", "a", api.fs.create, opts("Create"))
+
 	vim.keymap.set("n", "r", api.fs.rename, opts("Rename"))
+
 	vim.keymap.set("n", "d", api.fs.remove, opts("Delete"))
 
+	-- ========================================================================
 	-- Clipboard
+	-- ========================================================================
+
 	vim.keymap.set("n", "c", api.fs.copy.node, opts("Copy"))
+
 	vim.keymap.set("n", "x", api.fs.cut, opts("Cut"))
+
 	vim.keymap.set("n", "p", api.fs.paste, opts("Paste"))
 
+	-- ========================================================================
 	-- Tree
+	-- ========================================================================
+
 	vim.keymap.set("n", "R", api.tree.reload, opts("Refresh"))
+
 	vim.keymap.set("n", "u", api.tree.change_root_to_parent, opts("Parent directory"))
 
 	vim.keymap.set("n", ".", api.tree.change_root_to_node, opts("Set root"))
@@ -63,8 +95,9 @@ end
 -- ============================================================================
 
 require("nvim-tree").setup({
+
 	-- ========================================================================
-	-- Window
+	-- View
 	-- ========================================================================
 
 	view = {
@@ -72,17 +105,17 @@ require("nvim-tree").setup({
 
 		width = 34,
 
-		-- Explicitly disable floating mode.
-		float = {
-			enable = false,
-		},
-
 		preserve_window_proportions = true,
 
 		number = false,
+
 		relativenumber = false,
 
 		signcolumn = "yes",
+
+		float = {
+			enable = false,
+		},
 	},
 
 	-- ========================================================================
@@ -98,6 +131,10 @@ require("nvim-tree").setup({
 
 		root_folder_label = false,
 
+		-- ----------------------------------------------------------------------
+		-- Indent markers
+		-- ----------------------------------------------------------------------
+
 		indent_markers = {
 			enable = true,
 
@@ -111,6 +148,10 @@ require("nvim-tree").setup({
 				none = " ",
 			},
 		},
+
+		-- ----------------------------------------------------------------------
+		-- Icons
+		-- ----------------------------------------------------------------------
 
 		icons = {
 			show = {
@@ -244,7 +285,7 @@ require("nvim-tree").setup({
 	},
 
 	-- ========================================================================
-	-- Current file tracking
+	-- Current File Tracking
 	-- ========================================================================
 
 	update_focused_file = {
@@ -256,7 +297,7 @@ require("nvim-tree").setup({
 	},
 
 	-- ========================================================================
-	-- UI
+	-- Cursor / Root
 	-- ========================================================================
 
 	hijack_cursor = false,
@@ -275,17 +316,17 @@ require("nvim-tree").setup({
 })
 
 -- ============================================================================
--- Global keymaps
+-- Global Keymaps
 -- ============================================================================
 
 local map = vim.keymap.set
 
--- Toggle explorer
+-- Toggle
 map("n", "<leader>e", api.tree.toggle, {
 	desc = "Explorer: Toggle",
 })
 
--- Focus explorer
+-- Focus
 map("n", "<leader>E", api.tree.focus, {
 	desc = "Explorer: Focus",
 })
@@ -295,7 +336,7 @@ map("n", "<leader>ef", api.tree.find_file, {
 	desc = "Explorer: Find current file",
 })
 
--- Collapse everything
+-- Collapse
 map("n", "<leader>ec", api.tree.collapse_all, {
 	desc = "Explorer: Collapse all",
 })

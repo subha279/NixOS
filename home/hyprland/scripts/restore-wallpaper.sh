@@ -2,31 +2,53 @@
 
 set -euo pipefail
 
-CACHE_FILE="$HOME/.cache/wallust/current-wallpaper"
+# ============================================================================
+# Aurora Wallpaper Restore
+# ============================================================================
+#
+# Restores the last selected wallpaper.
+#
+# This script ONLY restores the wallpaper.
+#
+# It does NOT:
+#   • generate colors
+#   • invoke legacy dynamic color generator
+#   • modify Kitty
+#   • modify Fuzzel
+#   • modify Starship
+#   • regenerate Hyprland colors
+# ============================================================================
 
-# Nothing to restore yet
+CACHE_FILE="$HOME/.cache/aurora/current-wallpaper"
+
+# ============================================================================
+# Nothing to restore
+# ============================================================================
+
 if [[ ! -f "$CACHE_FILE" ]]; then
-  exit 0
+    exit 0
 fi
 
 WALLPAPER="$(cat "$CACHE_FILE")"
 
+# ============================================================================
 # Wallpaper was removed
+# ============================================================================
+
 if [[ ! -f "$WALLPAPER" ]]; then
-  exit 0
+    exit 0
 fi
 
-# Give the Wayland session/awww daemon a moment
+# ============================================================================
+# Give the Wayland session / awww daemon a moment
+# ============================================================================
+
 sleep 1
 
+# ============================================================================
 # Restore wallpaper
+# ============================================================================
+
 awww img "$WALLPAPER" \
-  --transition-type none \
-  >/dev/null 2>&1
-
-# Regenerate colors
-wallust run "$WALLPAPER" \
-  >/dev/null 2>&1
-
-# Reload Hyprland
-hyprctl reload >/dev/null 2>&1
+    --transition-type none \
+    >/dev/null 2>&1

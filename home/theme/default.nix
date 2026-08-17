@@ -158,6 +158,8 @@ let
     let
       theme = themeData.themes.${themeId};
       colors = theme.colors;
+      fonts = themeData.global.fonts;
+      ui = themeData.global.ui;
     in
     ''
       # ========================================================
@@ -171,6 +173,14 @@ let
       # Source:
       #   ~/NixOS/lib/themes.nix
       # ========================================================
+
+      # --------------------------------------------------------
+      # Typography
+      # --------------------------------------------------------
+
+      font_family ${fonts.terminal.name}
+
+      font_size ${toString ui.fontSize}
 
 
       # --------------------------------------------------------

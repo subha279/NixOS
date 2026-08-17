@@ -1,50 +1,145 @@
 -- ============================================================================
--- nvim-lint
+-- Aurora nvim-lint
+-- ============================================================================
+--
+-- Linting engine.
+--
+-- nvim-lint owns:
+--
+--   • External linters
+--   • Automatic linting
+--   • Buffer diagnostics
+--
+-- Diagnostic colors are intentionally NOT defined here.
+--
+-- They are controlled by:
+--
+--     ui/theme.lua
+--     lsp/init.lua
+--
 -- ============================================================================
 
-local lint = require("lint")
+local M = {}
 
-lint.linters_by_ft = {
-	python = {
-		"ruff",
-	},
+-- ============================================================================
+-- Setup
+-- ============================================================================
 
-	javascript = {
-		"eslint_d",
-	},
+function M.setup()
+	local ok, lint = pcall(require, "lint")
 
-	javascriptreact = {
-		"eslint_d",
-	},
+	if not ok then
+		vim.notify("Aurora: nvim-lint could not be loaded\n" .. tostring(lint), vim.log.levels.WARN)
 
-	typescript = {
-		"eslint_d",
-	},
+		return false
+	end
 
-	typescriptreact = {
-		"eslint_d",
-	},
+	-- ========================================================================
+	-- Linters
+	-- ========================================================================
 
-	sh = {
-		"shellcheck",
-	},
+	lint.linters_by_ft = {
+		python = {
+			"ruff",
+		},
 
-	bash = {
-		"shellcheck",
-	},
-}
+		javascript = {
+			"eslint_d",
+		},
 
-local group = vim.api.nvim_create_augroup("NvimLint", {
-	clear = true,
-})
+		javascriptreact = {
+			"eslint_d",
+		},
 
-vim.api.nvim_create_autocmd({
-	"BufWritePost",
-	"BufReadPost",
-	"InsertLeave",
-}, {
-	group = group,
-	callback = function()
+		typescript = {
+			"eslint_d",
+		},
+
+		typescriptreact = {
+			"eslint_d",
+		},
+
+		sh = {
+			"shellcheck",
+		},
+
+		bash = {
+			"shellcheck",
+		},
+	}
+
+	-- ========================================================================
+	-- Automatic linting
+	-- ========================================================================
+
+	local group = vim.api.nvim_create_augroup("AuroraNvimLint", {
+		clear = true,
+	})
+
+	vim.api.nvim_create_autocmd({
+		"BufWritePost",
+		"BufReadPost",
+		"InsertLeave",
+	}, {
+		group = group,
+
+		callback = function()
+			-- Only lint normal file buffers.
+			if vim.bo.buftype ~= "" then
+				return
+			end
+
+			if not vim.api.nvim_buf_is_valid(0) then
+				return
+			end
+
+			lint.try_lint()
+		end,
+	})
+
+	-- ========================================================================
+	-- Manual lint
+	-- ========================================================================
+
+	vim.keymap.set("n", "<leader>ll", function()
 		lint.try_lint()
-	end,
-})
+	end, {
+		desc = "Lint: Run",
+	})
+
+	return true
+end
+
+-- ============================================================================
+-- Live Aurora Refresh
+-- ============================================================================
+--
+-- nvim-lint uses Neovim diagnostic highlight groups.
+-- Those are managed by Aurora's diagnostic/theme system.
+--
+-- This function therefore only redraws the UI.
+--
+-- ============================================================================
+
+function M.refresh_theme()
+	vim.schedule(function()
+		vim.cmd("redraw!")
+		vim.cmd("redrawstatus!")
+	end)
+
+	return true
+end
+
+-- ============================================================================
+-- IMPORTANT
+-- ============================================================================
+--
+-- init.lua loads this module directly:
+--
+--     require("plugins.lint")
+--
+-- ============================================================================
+
+M.setup()
+
+return M

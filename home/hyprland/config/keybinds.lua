@@ -25,11 +25,14 @@ hl.bind(mainMod .. " + B", hl.dsp.exec_cmd(vars.browser))
 
 hl.bind(mainMod .. " + A", hl.dsp.exec_cmd(vars.menu))
 
-hl.bind(mainMod .. " + C", hl.dsp.exec_cmd(vars.guieditor))
+hl.bind(mainMod .. " + Z", hl.dsp.exec_cmd(vars.guieditor))
 
 hl.bind(mainMod .. " + N", hl.dsp.exec_cmd(vars.note))
 
 hl.bind(mainMod .. " + I", hl.dsp.exec_cmd("qs ipc call island toggleSettings"))
+
+-- Change Colorscheme
+hl.bind(mainMod .. " + C", hl.dsp.exec_cmd(vars.colorscheme))
 
 --------------------------------------------------
 -- Window Management

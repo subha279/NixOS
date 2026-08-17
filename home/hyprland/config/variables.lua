@@ -29,6 +29,8 @@ M.note = "obsidian"
 
 M.menu = "$HOME/.config/hypr/scripts/launcher.sh"
 
+M.colorscheme = "$HOME/.local/bin/aurora-theme"
+
 --------------------------------------------------
 -- Screenshot
 --------------------------------------------------

@@ -56,7 +56,7 @@ hl.config({
 		-- Resize
 		--------------------------------------------------
 
-		resize_on_border = false,
+		resize_on_border = true,
 
 		--------------------------------------------------
 		-- Tearing

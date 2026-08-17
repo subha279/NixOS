@@ -68,6 +68,9 @@
 
       # File Manager
       nvim-tree-lua
+
+      # Dashboard
+      alpha-nvim
     ];
 
     # Tools available directly to Neovim.
@@ -109,6 +112,12 @@
       gdb
       cmake
       pkg-config
+
+      # ======================================================================
+      # Git / VCS
+      # ======================================================================
+
+      lazygit
     ];
   };
 

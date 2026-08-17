@@ -38,12 +38,12 @@
     #
     # IMPORTANT:
     #
-    # ZLE configuration belongs in initExtra because
+    # ZLE configuration belongs in initContent because
     # envExtra is loaded from .zshenv.
     #
     # ==================================================
 
-    initExtra = ''
+    initContent = ''
       # ==================================================
       # Aurora Live Starship Refresh
       # ==================================================

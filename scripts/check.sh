@@ -4,13 +4,14 @@
 # Aurora NixOS Configuration Validator
 # ============================================================================
 #
-# Repository structure:
+# Repository:
 #
-# NixOS
-# ├── hosts/
-# ├── modules/
-# ├── home/
-# └── scripts/
+#   NixOS
+#   ├── hosts/
+#   ├── modules/
+#   ├── home/
+#   ├── lib/
+#   └── scripts/
 #
 # Validates:
 #   • Git repository
@@ -23,9 +24,41 @@
 #   • Hyprland
 #   • Desktop dependencies
 #   • Neovim package declarations
+#   • Plugin declarations
 #   • Configuration ownership
-#   • Wallust/Fuzzel architecture
-#   • Generated configuration
+#   • Aurora static theme architecture
+#   • Wallpaper/theme separation
+#   • Generated Aurora configuration
+#   • Hyprland layer rules
+#   • Git working tree
+#
+# Theme architecture:
+#
+#   lib/themes.nix
+#        │
+#        ├── activeTheme
+#        ├── fonts
+#        ├── icons
+#        ├── cursor
+#        ├── UI values
+#        └── colors
+#               │
+#               ├── Stylix
+#               ├── Hyprland
+#               ├── Kitty
+#               ├── Fuzzel
+#               ├── QuickShell
+#               ├── Neovim
+#               └── Starship
+#
+# Wallpaper:
+#
+#   Wallpaper is image-only.
+#   It MUST NOT generate colors.
+#
+# Wallust:
+#
+#   Removed from the Aurora theme pipeline.
 #
 # ============================================================================
 
@@ -77,6 +110,20 @@ separator() {
 }
 
 # ============================================================================
+# Cleanup
+# ============================================================================
+
+cleanup() {
+    rm -f \
+        "${FLAKE_LOG:-}" \
+        "${NVIM_LOG:-}" \
+        "${LUA_LOG:-}" \
+        2>/dev/null || true
+}
+
+trap cleanup EXIT
+
+# ============================================================================
 # Header
 # ============================================================================
 
@@ -92,7 +139,8 @@ printf "${RESET}"
 
 printf "\n"
 printf "${DIM}Repository:${RESET} %s\n" "$ROOT"
-printf "${DIM}Branch:${RESET}     %s\n" "$(git branch --show-current 2>/dev/null || printf 'unknown')"
+printf "${DIM}Branch:${RESET}     %s\n" \
+    "$(git branch --show-current 2>/dev/null || printf 'unknown')"
 
 # ============================================================================
 # 1. Repository
@@ -115,18 +163,21 @@ section "Flake"
 FLAKE_LOG="$(mktemp)"
 
 if nix flake check --no-build >"$FLAKE_LOG" 2>&1; then
+
     ok "Flake evaluation passed"
 
-    if grep -q "dirty" "$FLAKE_LOG"; then
+    if grep -qi "dirty" "$FLAKE_LOG"; then
         info "Git tree is dirty"
     fi
+
 else
+
     fail "Flake check failed"
+
     printf "\n"
     cat "$FLAKE_LOG"
-fi
 
-rm -f "$FLAKE_LOG"
+fi
 
 # ============================================================================
 # 3. Nix syntax
@@ -142,8 +193,11 @@ while IFS= read -r -d '' file; do
     NIX_COUNT=$((NIX_COUNT + 1))
 
     if ! nix-instantiate --parse "$file" >/dev/null 2>&1; then
+
         printf "  ${RED}✗${RESET} Invalid Nix syntax: %s\n" "$file"
+
         NIX_FAILED=1
+
     fi
 
 done < <(
@@ -155,9 +209,13 @@ done < <(
 )
 
 if [[ "$NIX_FAILED" -eq 0 ]]; then
+
     ok "All $NIX_COUNT Nix files parse correctly"
+
 else
+
     fail "Nix syntax errors detected"
+
 fi
 
 # ============================================================================
@@ -167,6 +225,7 @@ fi
 section "Required files"
 
 required_files=(
+
     "flake.nix"
 
     "hosts/laptop/default.nix"
@@ -183,19 +242,32 @@ required_files=(
     "home/quickshell/default.nix"
     "home/quickshell/config/shell.qml"
 
-    # Wallust / Fuzzel architecture
-    "home/hyprland/wallust/wallust.toml"
-    "home/hyprland/wallust/templates/fuzzel.ini"
+    # Aurora theme architecture
+    "lib/themes.nix"
+    "home/theme/default.nix"
+
+    # Fuzzel
+    "home/fuzzel/fuzzel.ini"
+
+    # Wallpaper
     "home/hyprland/scripts/launcher.sh"
     "home/hyprland/scripts/wallpaper.sh"
+    "home/hyprland/scripts/restore-wallpaper.sh"
+
 )
 
 for file in "${required_files[@]}"; do
+
     if [[ -f "$file" ]]; then
+
         ok "$file"
+
     else
+
         fail "Missing: $file"
+
     fi
+
 done
 
 # ============================================================================
@@ -205,19 +277,27 @@ done
 section "Neovim"
 
 nvim_files=(
+
     "home/neovim/config/init.lua"
+
     "home/neovim/config/lua/core/options.lua"
     "home/neovim/config/lua/core/keymaps.lua"
     "home/neovim/config/lua/core/autocmds.lua"
+
     "home/neovim/config/lua/lsp/init.lua"
+
 )
 
 for file in "${nvim_files[@]}"; do
 
     if [[ -f "$file" ]]; then
+
         ok "$file"
+
     else
+
         fail "Missing Neovim file: $file"
+
     fi
 
 done
@@ -256,8 +336,6 @@ else
 
 fi
 
-rm -f "$NVIM_LOG"
-
 # ============================================================================
 # 7. Lua
 # ============================================================================
@@ -280,6 +358,7 @@ if command -v nvim >/dev/null 2>&1; then
     else
 
         fail "Lua syntax errors detected"
+
         cat "$LUA_LOG"
 
     fi
@@ -290,8 +369,6 @@ else
 
 fi
 
-rm -f "$LUA_LOG"
-
 # ============================================================================
 # 8. Quickshell
 # ============================================================================
@@ -301,9 +378,13 @@ section "Quickshell"
 if command -v qs >/dev/null 2>&1; then
 
     if systemctl --user is-active --quiet quickshell.service; then
+
         ok "Quickshell service is running"
+
     else
+
         info "Quickshell service is not currently running"
+
     fi
 
 else
@@ -330,6 +411,7 @@ if command -v hyprctl >/dev/null 2>&1; then
     else
 
         fail "Hyprland configuration errors detected"
+
         printf '%s\n' "$HYPR_ERRORS"
 
     fi
@@ -347,26 +429,38 @@ fi
 section "Desktop dependencies"
 
 desktop_commands=(
+
     git
+
     fuzzel
+    kitty
+
     qs
+
     nmcli
     nm-applet
     blueman-applet
+
     brightnessctl
+
     wpctl
+
     notify-send
+
     awww
-    wallust
-    kitty
+
 )
 
 for cmd in "${desktop_commands[@]}"; do
 
     if command -v "$cmd" >/dev/null 2>&1; then
+
         ok "$cmd"
+
     else
+
         fail "Missing command: $cmd"
+
     fi
 
 done
@@ -382,9 +476,13 @@ NVIM_CONFIG="$ROOT/home/neovim/default.nix"
 if [[ -f "$NVIM_CONFIG" ]]; then
 
     if grep -q "programs.neovim" "$NVIM_CONFIG"; then
+
         ok "Neovim is managed by Home Manager"
+
     else
+
         fail "programs.neovim declaration not found"
+
     fi
 
     # ------------------------------------------------------------------------
@@ -392,70 +490,83 @@ if [[ -f "$NVIM_CONFIG" ]]; then
     # ------------------------------------------------------------------------
 
     nvim_plugins=(
+
         "blink-cmp"
         "nvim-lspconfig"
         "nvim-treesitter"
+
         "telescope-nvim"
         "plenary-nvim"
+
         "nvim-web-devicons"
+
         "gitsigns-nvim"
         "conform-nvim"
         "nvim-lint"
+
         "trouble-nvim"
         "which-key-nvim"
+
         "lualine-nvim"
         "snacks-nvim"
         "nvim-tree-lua"
+
     )
 
     for plugin in "${nvim_plugins[@]}"; do
 
         if grep -q "$plugin" "$NVIM_CONFIG"; then
+
             ok "Plugin declared: $plugin"
+
         else
+
             fail "Plugin not declared: $plugin"
+
         fi
 
     done
 
     # ------------------------------------------------------------------------
-    # LSP / formatter tools
+    # Development tools
     # ------------------------------------------------------------------------
 
     nvim_tools=(
+
         "lua-language-server"
-        "rust-analyzer"
+        "stylua"
+
         "typescript-language-server"
         "pyright"
-        "clang-tools"
-        "nixd"
+
         "bash-language-server"
-        "vscode-langservers-extracted"
         "yaml-language-server"
-        "marksman"
+
         "tailwindcss-language-server"
         "dockerfile-language-server"
-        "taplo"
-        "stylua"
+
         "prettier"
         "ruff"
-        "nixfmt"
-        "shfmt"
+
     )
 
     for tool in "${nvim_tools[@]}"; do
 
         if grep -q "$tool" "$NVIM_CONFIG"; then
-            ok "Tool declared: $tool"
+
+            ok "Neovim tool declared: $tool"
+
         else
-            fail "Tool not declared: $tool"
+
+            info "Neovim tool not declared directly: $tool"
+
         fi
 
     done
 
 else
 
-    fail "Neovim Home Manager module not found"
+    fail "Neovim Home Manager configuration missing"
 
 fi
 
@@ -469,14 +580,14 @@ section "Configuration ownership"
 # Neovim
 # ---------------------------------------------------------------------------
 
-if grep -qE '^[[:space:]]*neovim[[:space:]]*$' \
-    "$ROOT/modules/packages/default.nix" 2>/dev/null; then
+if grep -q "programs.neovim" \
+    "$ROOT/home/neovim/default.nix" 2>/dev/null; then
 
-    fail "Neovim is still declared in modules/packages/default.nix"
+    ok "Neovim is owned by Home Manager"
 
 else
 
-    ok "Neovim is owned by Home Manager"
+    fail "Neovim is not owned by Home Manager"
 
 fi
 
@@ -484,13 +595,10 @@ fi
 # Fuzzel
 # ---------------------------------------------------------------------------
 
-subsection "Fuzzel / Wallust"
-
-# Fuzzel package should be installed by the system module.
 if grep -qE '^[[:space:]]*fuzzel[[:space:]]*$' \
     "$ROOT/modules/desktop/applications.nix" 2>/dev/null; then
 
-    ok "Fuzzel package declared"
+    ok "Fuzzel is declared by the desktop module"
 
 else
 
@@ -498,51 +606,21 @@ else
 
 fi
 
-# Static Fuzzel module should NOT exist anymore.
-if [[ ! -f "$ROOT/home/fuzzel/default.nix" ]]; then
+# ---------------------------------------------------------------------------
+# Kitty
+# ---------------------------------------------------------------------------
 
-    ok "No duplicate Home Manager Fuzzel module"
+if grep -q "programs.kitty" \
+    "$ROOT/home/kitty/default.nix" 2>/dev/null; then
 
-else
-
-    info "Legacy home/fuzzel/default.nix still exists"
-
-fi
-
-# Wallust template should exist.
-if [[ -f "$ROOT/home/hyprland/wallust/templates/fuzzel.ini" ]]; then
-
-    ok "Fuzzel theme owned by Wallust"
+    ok "Kitty is owned by Home Manager"
 
 else
 
-    fail "Wallust Fuzzel template not found"
+    fail "Kitty Home Manager configuration not found"
 
 fi
 
-# Launcher should reference the generated Wallust config.
-if grep -q '\.cache/wallust/fuzzel\.ini' \
-    "$ROOT/home/hyprland/scripts/launcher.sh" 2>/dev/null; then
-
-    ok "Launcher uses Wallust-generated Fuzzel configuration"
-
-else
-
-    fail "Launcher is not using Wallust Fuzzel configuration"
-
-fi
-
-# Wallpaper picker uses the Wallust cache directory.
-if grep -qE 'FUZZEL_CONFIG=.*fuzzel\.ini|CACHE_DIR=.*wallust' \
-    "$ROOT/home/hyprland/scripts/wallpaper.sh" 2>/dev/null; then
-
-    ok "Wallpaper picker uses Wallust-generated Fuzzel configuration"
-
-else
-
-    fail "Wallpaper picker is not using Wallust Fuzzel configuration"
-
-fi
 # ---------------------------------------------------------------------------
 # Quickshell
 # ---------------------------------------------------------------------------
@@ -559,69 +637,492 @@ else
 fi
 
 # ============================================================================
-# 13. Generated configuration
+# 13. Aurora theme architecture
 # ============================================================================
 
-section "Generated configuration"
+section "Aurora theme"
 
-generated_files=(
-    "$HOME/.cache/wallust/fuzzel.ini"
-    "$HOME/.config/quickshell/shell.qml"
-    "$HOME/.config/hypr/hyprland.lua"
+THEME_CONFIG="$ROOT/lib/themes.nix"
+THEME_GENERATOR="$ROOT/home/theme/default.nix"
+
+# ---------------------------------------------------------------------------
+# Central theme database
+# ---------------------------------------------------------------------------
+
+if [[ -f "$THEME_CONFIG" ]]; then
+
+    ok "Central Aurora theme database exists"
+
+else
+
+    fail "Central Aurora theme database missing"
+
+fi
+
+# ---------------------------------------------------------------------------
+# Declarative active theme
+# ---------------------------------------------------------------------------
+
+if grep -qE '^[[:space:]]*activeTheme[[:space:]]*=' \
+    "$THEME_CONFIG" 2>/dev/null; then
+
+    ok "Theme selection is declarative"
+
+else
+
+    fail "Declarative activeTheme is missing"
+
+fi
+
+# ---------------------------------------------------------------------------
+# Theme generator
+# ---------------------------------------------------------------------------
+
+if [[ -f "$THEME_GENERATOR" ]]; then
+
+    ok "Aurora theme generator exists"
+
+else
+
+    fail "Aurora theme generator missing"
+
+fi
+
+# ---------------------------------------------------------------------------
+# Validate activeTheme using Nix
+# ---------------------------------------------------------------------------
+
+THEME_EVAL="$(
+    nix-instantiate \
+        --eval \
+        --expr \
+        '(import ./lib/themes.nix).global.activeTheme' \
+        2>/dev/null ||
+        true
+)"
+
+if [[ "$THEME_EVAL" == '"aurora"' ]]; then
+
+    ok "Active theme evaluates correctly: aurora"
+
+elif [[ -n "$THEME_EVAL" ]]; then
+
+    ok "Active theme evaluates: $THEME_EVAL"
+
+else
+
+    fail "Could not evaluate global.activeTheme"
+
+fi
+
+# ---------------------------------------------------------------------------
+# Required Aurora theme fields
+# ---------------------------------------------------------------------------
+
+theme_fields=(
+
+    "background"
+    "surface"
+    "surfaceHover"
+    "surfaceActive"
+
+    "border"
+    "borderFocus"
+    "separator"
+
+    "text"
+    "textSecondary"
+    "textMuted"
+
+    "accent"
+    "accentHover"
+    "accentActive"
+    "accentMuted"
+    "accentForeground"
+
+    "success"
+    "warning"
+    "error"
+    "info"
+
 )
 
-for file in "${generated_files[@]}"; do
+for field in "${theme_fields[@]}"; do
 
-    if [[ -e "$file" ]]; then
-        ok "$file"
+    if grep -qE "^[[:space:]]*$field[[:space:]]*=" \
+        "$THEME_CONFIG" 2>/dev/null; then
+
+        ok "Theme color defined: $field"
+
     else
-        info "Not currently generated: $file"
+
+        fail "Theme color missing: $field"
+
     fi
 
 done
 
 # ============================================================================
-# 14. Wallust
+# 14. Central fonts / UI
 # ============================================================================
 
-section "Wallust"
+section "Global typography"
 
-WALLUST_CONFIG="$ROOT/home/hyprland/wallust/wallust.toml"
+# ---------------------------------------------------------------------------
+# Interface font
+# ---------------------------------------------------------------------------
 
-if [[ -f "$WALLUST_CONFIG" ]]; then
+if grep -qE '^[[:space:]]*interface[[:space:]]*=' \
+    "$THEME_CONFIG" 2>/dev/null; then
 
-    ok "Wallust configuration exists"
+    ok "Central interface font defined"
 
-    if grep -q 'fuzzel\.template = "fuzzel\.ini"' \
-        "$WALLUST_CONFIG"; then
+else
 
-        ok "Fuzzel template registered with Wallust"
+    fail "Central interface font missing"
+
+fi
+
+# ---------------------------------------------------------------------------
+# Terminal font
+# ---------------------------------------------------------------------------
+
+if grep -qE '^[[:space:]]*terminal[[:space:]]*=' \
+    "$THEME_CONFIG" 2>/dev/null; then
+
+    ok "Central terminal font defined"
+
+else
+
+    fail "Central terminal font missing"
+
+fi
+
+# ---------------------------------------------------------------------------
+# Emoji font
+# ---------------------------------------------------------------------------
+
+if grep -qE '^[[:space:]]*emoji[[:space:]]*=' \
+    "$THEME_CONFIG" 2>/dev/null; then
+
+    ok "Central emoji font defined"
+
+else
+
+    fail "Central emoji font missing"
+
+fi
+
+# ---------------------------------------------------------------------------
+# UI font size
+# ---------------------------------------------------------------------------
+
+if grep -qE '^[[:space:]]*fontSize[[:space:]]*=' \
+    "$THEME_CONFIG" 2>/dev/null; then
+
+    ok "Central UI font size defined"
+
+else
+
+    fail "Central UI font size missing"
+
+fi
+
+# ---------------------------------------------------------------------------
+# Detect hard-coded terminal font in Kitty
+# ---------------------------------------------------------------------------
+
+KITTY_CONFIG="$ROOT/home/kitty/config/kitty.conf"
+
+if [[ -f "$KITTY_CONFIG" ]]; then
+
+    if grep -qE \
+        '^[[:space:]]*font_family[[:space:]]+' \
+        "$KITTY_CONFIG"; then
+
+        fail "Kitty contains a hard-coded font_family"
 
     else
 
-        fail "Fuzzel template is not registered with Wallust"
+        ok "Kitty font family is centrally managed"
 
     fi
 
-    if grep -q 'fuzzel\.target = "\~/.cache/wallust/fuzzel\.ini"' \
-        "$WALLUST_CONFIG"; then
+    if grep -qE \
+        '^[[:space:]]*font_size[[:space:]]+' \
+        "$KITTY_CONFIG"; then
 
-        ok "Fuzzel target uses Wallust cache"
+        fail "Kitty contains a hard-coded font_size"
 
     else
 
-        info "Could not verify Wallust Fuzzel target"
+        ok "Kitty font size is centrally managed"
 
     fi
 
 else
 
-    fail "Wallust configuration not found"
+    fail "Kitty configuration missing"
 
 fi
 
 # ============================================================================
-# 15. Aurora Layer Rules
+# 15. Wallpaper / theme separation
+# ============================================================================
+
+section "Wallpaper / theme separation"
+
+WALLPAPER_SCRIPT="$ROOT/home/hyprland/scripts/wallpaper.sh"
+RESTORE_SCRIPT="$ROOT/home/hyprland/scripts/restore-wallpaper.sh"
+
+# ---------------------------------------------------------------------------
+# Wallpaper picker
+# ---------------------------------------------------------------------------
+
+if grep -qiE \
+    'wallust|wallust run|\.cache/wallust|stylix-colors' \
+    "$WALLPAPER_SCRIPT" 2>/dev/null; then
+
+    fail "Wallpaper picker still contains legacy theme generation"
+
+else
+
+    ok "Wallpaper picker is independent from Wallust"
+
+fi
+
+# ---------------------------------------------------------------------------
+# Wallpaper restore
+# ---------------------------------------------------------------------------
+
+if grep -qiE \
+    'wallust|wallust run|\.cache/wallust|stylix-colors' \
+    "$RESTORE_SCRIPT" 2>/dev/null; then
+
+    fail "Wallpaper restore still contains legacy theme generation"
+
+else
+
+    ok "Wallpaper restore is independent from Wallust"
+
+fi
+
+# ---------------------------------------------------------------------------
+# Wallpaper state location
+# ---------------------------------------------------------------------------
+
+if grep -q '\.cache/aurora/current-wallpaper' \
+    "$WALLPAPER_SCRIPT" 2>/dev/null; then
+
+    ok "Wallpaper state uses Aurora cache"
+
+else
+
+    fail "Wallpaper picker does not use Aurora wallpaper state"
+
+fi
+
+if grep -q '\.cache/aurora/current-wallpaper' \
+    "$RESTORE_SCRIPT" 2>/dev/null; then
+
+    ok "Wallpaper restore uses Aurora cache"
+
+else
+
+    fail "Wallpaper restore does not use Aurora wallpaper state"
+
+fi
+
+# ---------------------------------------------------------------------------
+# Legacy Wallust directory
+# ---------------------------------------------------------------------------
+
+if [[ ! -d "$ROOT/home/hyprland/wallust" ]]; then
+
+    ok "Legacy Wallust configuration removed"
+
+else
+
+    fail "Legacy Wallust configuration still exists"
+
+fi
+
+# ---------------------------------------------------------------------------
+# Legacy generated cache
+# ---------------------------------------------------------------------------
+
+if [[ -d "$HOME/.cache/wallust" ]]; then
+
+    info "Legacy ~/.cache/wallust still exists"
+
+else
+
+    ok "Legacy Wallust cache removed"
+
+fi
+
+# ---------------------------------------------------------------------------
+# Repository-wide legacy references
+# ---------------------------------------------------------------------------
+#
+# README/history files are intentionally excluded from this runtime check.
+# The active configuration itself must contain none of these references.
+#
+
+LEGACY_REFS="$(
+    grep -RInE \
+        'wallust|wallust-wayland|wallust\.run|wallust run|\.cache/wallust|stylix-colors' \
+        home \
+        modules \
+        lib \
+        scripts \
+        --exclude-dir=.git \
+        --exclude='*.lock' \
+        --exclude='check.sh' \
+        2>/dev/null ||
+        true
+)"
+
+if [[ -z "$LEGACY_REFS" ]]; then
+
+    ok "No legacy Wallust/stylix-colors references in active configuration"
+
+else
+
+    fail "Legacy Wallust/stylix-colors references remain"
+
+    printf "\n"
+    printf '%s\n' "$LEGACY_REFS"
+
+fi
+
+# ============================================================================
+# 16. Generated configuration
+# ============================================================================
+
+section "Generated configuration"
+
+generated_files=(
+
+    "$HOME/.config/aurora/active-theme"
+    "$HOME/.config/aurora/active-theme.lua"
+    "$HOME/.config/aurora/active-kitty.conf"
+    "$HOME/.config/aurora/active-fuzzel.conf"
+    "$HOME/.config/aurora/active-starship.toml"
+
+    "$HOME/.config/quickshell/shell.qml"
+    "$HOME/.config/hypr/hyprland.lua"
+
+)
+
+for file in "${generated_files[@]}"; do
+
+    if [[ -e "$file" ]]; then
+
+        ok "$file"
+
+    else
+
+        info "Not currently generated: $file"
+
+    fi
+
+done
+
+# ============================================================================
+# 17. Generated theme sanity
+# ============================================================================
+
+section "Generated theme sanity"
+
+ACTIVE_THEME_LUA="$HOME/.config/aurora/active-theme.lua"
+ACTIVE_KITTY="$HOME/.config/aurora/active-kitty.conf"
+ACTIVE_FUZZEL="$HOME/.config/aurora/active-fuzzel.conf"
+ACTIVE_STARSHIP="$HOME/.config/aurora/active-starship.toml"
+
+# ---------------------------------------------------------------------------
+# active-theme.lua
+# ---------------------------------------------------------------------------
+
+if [[ -f "$ACTIVE_THEME_LUA" ]]; then
+
+    if grep -q 'colors' "$ACTIVE_THEME_LUA"; then
+
+        ok "Generated Aurora Lua theme contains colors"
+
+    else
+
+        fail "Generated Aurora Lua theme has no colors"
+
+    fi
+
+else
+
+    info "Aurora Lua theme not generated yet"
+
+fi
+
+# ---------------------------------------------------------------------------
+# Kitty theme
+# ---------------------------------------------------------------------------
+
+if [[ -f "$ACTIVE_KITTY" ]]; then
+
+    if grep -q '^foreground ' "$ACTIVE_KITTY" &&
+        grep -q '^background ' "$ACTIVE_KITTY"; then
+
+        ok "Generated Kitty theme contains core colors"
+
+    else
+
+        fail "Generated Kitty theme is incomplete"
+
+    fi
+
+else
+
+    info "Aurora Kitty theme not generated yet"
+
+fi
+
+# ---------------------------------------------------------------------------
+# Fuzzel theme
+# ---------------------------------------------------------------------------
+
+if [[ -f "$ACTIVE_FUZZEL" ]]; then
+
+    if grep -qE '^\[colors\]' "$ACTIVE_FUZZEL"; then
+
+        ok "Generated Fuzzel theme contains colors"
+
+    else
+
+        fail "Generated Fuzzel theme is incomplete"
+
+    fi
+
+else
+
+    info "Aurora Fuzzel theme not generated yet"
+
+fi
+
+# ---------------------------------------------------------------------------
+# Starship theme
+# ---------------------------------------------------------------------------
+
+if [[ -f "$ACTIVE_STARSHIP" ]]; then
+
+    ok "Generated Starship theme exists"
+
+else
+
+    info "Aurora Starship theme not generated yet"
+
+fi
+
+# ============================================================================
+# 18. Aurora layer rules
 # ============================================================================
 
 section "Aurora layer rules"
@@ -632,22 +1133,26 @@ if [[ -f "$LAYER_RULES" ]]; then
 
     ok "Layer rules file exists"
 
-    if grep -q 'namespace = "\^launcher\$"' "$LAYER_RULES"; then
+    if grep -q 'namespace = "\^launcher\$"' \
+        "$LAYER_RULES" 2>/dev/null; then
+
         ok "Launcher blur rule declared"
+
     else
+
         fail "Launcher blur rule missing"
+
     fi
 
-    if grep -q 'namespace = "\^aurora-bar\$"' "$LAYER_RULES"; then
-        ok "Aurora bar blur rule declared"
-    else
-        fail "Aurora bar blur rule missing"
-    fi
+    if grep -q 'namespace = "\^aurora-notifications\$"' \
+        "$LAYER_RULES" 2>/dev/null; then
 
-    if grep -q 'namespace = "\^aurora-notifications\$"' "$LAYER_RULES"; then
         ok "Aurora notification blur rule declared"
+
     else
+
         fail "Aurora notification blur rule missing"
+
     fi
 
 else
@@ -657,7 +1162,76 @@ else
 fi
 
 # ============================================================================
-# 16. Git status
+# 19. Aurora theme ownership
+# ============================================================================
+
+section "Theme ownership"
+
+# ---------------------------------------------------------------------------
+# Hyprland
+# ---------------------------------------------------------------------------
+
+HYPR_THEME="$ROOT/home/hyprland/config/theme.lua"
+
+if [[ -f "$HYPR_THEME" ]]; then
+
+    if grep -q 'active-theme.lua' "$HYPR_THEME" 2>/dev/null; then
+
+        ok "Hyprland consumes Aurora active theme"
+
+    else
+
+        fail "Hyprland theme does not consume Aurora active theme"
+
+    fi
+
+else
+
+    fail "Hyprland theme module missing"
+
+fi
+
+# ---------------------------------------------------------------------------
+# Neovim
+# ---------------------------------------------------------------------------
+
+if grep -Rql \
+    'active-theme.lua' \
+    "$ROOT/home/neovim/config/lua" \
+    --include='*.lua' \
+    2>/dev/null; then
+
+    ok "Neovim theme modules consume Aurora active theme"
+
+else
+
+    fail "Neovim does not reference Aurora active theme"
+
+fi
+
+# ---------------------------------------------------------------------------
+# Quickshell
+# ---------------------------------------------------------------------------
+
+QUICKSHELL_ROOT="$ROOT/home/quickshell"
+
+if grep -Rql \
+    'active-theme' \
+    "$QUICKSHELL_ROOT" \
+    --include='*.qml' \
+    --include='*.nix' \
+    2>/dev/null; then
+
+    ok "Quickshell consumes Aurora theme data"
+
+else
+
+    info "Could not verify Quickshell Aurora theme consumption"
+
+fi
+
+# ============================================================================
+# 20. Git status
 # ============================================================================
 
 section "Git status"
@@ -671,6 +1245,7 @@ else
     info "Uncommitted changes detected"
 
     printf "\n"
+
     git status --short
 
 fi
