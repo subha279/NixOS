@@ -1,4 +1,4 @@
-{ config, lib, ... }:
+{ lib, ... }:
 
 let
   # ============================================================
@@ -37,6 +37,8 @@ let
       ui = themeData.global.ui;
     in
     ''
+
+
       -- ========================================================
       -- Aurora Theme
       -- ${theme.name}
@@ -965,6 +967,25 @@ let
 
 in
 {
+  # ============================================================
+  # STYLIX DESKTOP INTEGRATION
+  # ============================================================
+  #
+  # Aurora controls application colors.
+  # Stylix handles desktop integration:
+  #
+  #   GTK
+  #   Qt
+  #   Fontconfig
+  #
+  # ============================================================
+
+  stylix.targets.gtk.enable = true;
+
+  stylix.targets.qt.enable = true;
+
+  stylix.targets.fontconfig.enable = true;
+
   # ============================================================
   # GENERATED AURORA THEME DATABASE
   # ============================================================

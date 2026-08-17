@@ -8,7 +8,8 @@ let
 
   themeData = import ../../lib/themes.nix;
 
-  activeTheme = themeData.themes.${themeData.global.activeTheme};
+  activeTheme =
+    themeData.themes.${themeData.global.activeTheme};
 
   colors = activeTheme.colors;
 
@@ -18,17 +19,46 @@ let
   # Central Fonts
   # ==========================================================================
 
-  interfaceFont = builtins.getAttr global.fonts.interface.package pkgs;
+  interfaceFont =
+    builtins.getAttr
+      global.fonts.interface.package
+      pkgs;
 
-  terminalFont = builtins.getAttr global.fonts.terminal.package pkgs;
+  terminalFont =
+    builtins.getAttr
+      global.fonts.terminal.package
+      pkgs;
 
-  emojiFont = builtins.getAttr global.fonts.emoji.package pkgs;
+  emojiFont =
+    builtins.getAttr
+      global.fonts.emoji.package
+      pkgs;
+
+  # ==========================================================================
+  # Central Cursor
+  # ==========================================================================
+
+  cursorPackage =
+    builtins.getAttr
+      global.cursor.package
+      pkgs;
+
+  # ==========================================================================
+  # Central Icons
+  # ==========================================================================
+
+  iconPackage =
+    builtins.getAttr
+      global.icons.package
+      pkgs;
 
   # ==========================================================================
   # Helpers
   # ==========================================================================
 
-  hex = color: lib.removePrefix "#" color;
+  hex =
+    color:
+    lib.removePrefix "#" color;
 
 in
 {
@@ -40,34 +70,22 @@ in
 
     enable = true;
 
-    # We explicitly enable the targets we want.
-    #
-    # This prevents Stylix from silently taking ownership of applications
-    # that Aurora configures itself.
+    # Aurora explicitly owns application-specific theming.
+    # Stylix remains responsible for system desktop integration.
     autoEnable = false;
 
     polarity = "dark";
 
     # ==========================================================================
-    # COLOR SOURCE
+    # STATIC AURORA COLOR SOURCE
     # ==========================================================================
     #
     # IMPORTANT:
     #
-    # Aurora is now the color authority.
+    # No wallpaper image is supplied to Stylix.
+    # No Wallust integration exists.
     #
-    # No wallpaper-generated palette.
-    # No Wallust palette.
-    #
-    # lib/themes.nix
-    #       ↓
-    #   activeTheme
-    #       ↓
-    #   Aurora colors
-    #       ↓
-    #      Stylix
-    #
-    # Stylix accepts a Base16 attribute set directly.
+    # Colors come exclusively from lib/themes.nix.
     #
     # ==========================================================================
 
@@ -75,9 +93,7 @@ in
 
       scheme = activeTheme.name;
 
-      # ------------------------------------------------------------------------
       # Base
-      # ------------------------------------------------------------------------
 
       base00 = hex colors.background;
       base01 = hex colors.surface;
@@ -89,9 +105,7 @@ in
       base06 = hex colors.text;
       base07 = hex colors.text;
 
-      # ------------------------------------------------------------------------
       # Semantic
-      # ------------------------------------------------------------------------
 
       base08 = hex colors.error;
       base09 = hex colors.warning;
@@ -106,72 +120,33 @@ in
     # ==========================================================================
     # FONTS
     # ==========================================================================
-    #
-    # The interface font comes from:
-    #
-    #     lib/themes.nix
-    #
-    # The terminal font remains independently configurable because a terminal
-    # and desktop UI have different font requirements.
-    #
-    # If you want ONE font everywhere, set interface and terminal to the same
-    # font in lib/themes.nix.
-    #
-    # ==========================================================================
 
     fonts = {
-
-      # ------------------------------------------------------------------------
-      # Interface
-      # ------------------------------------------------------------------------
 
       sansSerif = {
         package = interfaceFont;
         name = global.fonts.interface.name;
       };
 
-      # ------------------------------------------------------------------------
-      # Serif
-      # ------------------------------------------------------------------------
-      #
-      # Use the interface font as the default serif fallback as well.
-      # This keeps the system visually consistent.
-      #
       serif = {
         package = interfaceFont;
         name = global.fonts.interface.name;
       };
-
-      # ------------------------------------------------------------------------
-      # Terminal / Editor
-      # ------------------------------------------------------------------------
 
       monospace = {
         package = terminalFont;
         name = global.fonts.terminal.name;
       };
 
-      # ------------------------------------------------------------------------
-      # Emoji
-      # ------------------------------------------------------------------------
-
       emoji = {
         package = emojiFont;
         name = global.fonts.emoji.name;
       };
 
-      # ------------------------------------------------------------------------
-      # Global Font Sizes
-      # ------------------------------------------------------------------------
-
       sizes = {
-
         applications = global.ui.fontSize;
-
         desktop = global.ui.fontSize;
-
         popups = global.ui.fontSize;
-
         terminal = global.ui.fontSize;
       };
     };
@@ -181,51 +156,38 @@ in
     # ==========================================================================
 
     cursor = {
-      package = builtins.getAttr global.cursor.package pkgs;
-
+      package = cursorPackage;
       name = global.cursor.name;
-
       size = global.cursor.size;
     };
 
     # ==========================================================================
-    # ICONS
+    # ICON THEME
     # ==========================================================================
 
     icons = {
       enable = true;
 
-      package = builtins.getAttr global.icons.package pkgs;
+      package = iconPackage;
 
       dark = global.icons.name;
-
       light = global.icons.name;
     };
 
     # ==========================================================================
-    # GTK
+    # DESKTOP TARGETS
+    # ==========================================================================
+    #
+    # autoEnable = false means targets must be explicitly enabled.
+    #
+    # We intentionally keep GTK, Qt and Fontconfig under Stylix.
+    #
     # ==========================================================================
 
     targets.gtk.enable = true;
 
-    # ==========================================================================
-    # QT
-    # ==========================================================================
-
     targets.qt.enable = true;
 
-    # ==========================================================================
-    # FONTCONFIG
-    # ==========================================================================
-    #
-    # Makes the Aurora fonts the system default fonts through Fontconfig.
-    #
-    # This is particularly important for applications which don't have a
-    # dedicated Stylix target.
-    #
-    # ==========================================================================
-
     targets.fontconfig.enable = true;
-
   };
 }
