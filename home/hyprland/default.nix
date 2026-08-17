@@ -80,28 +80,6 @@
   };
 
   # ==========================================================================
-  # QuickShell
-  # ==========================================================================
-
-  systemd.user.services.quickshell = {
-    Unit = {
-      Description = "Quickshell desktop shell";
-
-      PartOf = [
-        "desktop-services.target"
-      ];
-    };
-
-    Service = {
-      ExecStart = "${pkgs.quickshell}/bin/qs";
-
-      Restart = "on-failure";
-
-      RestartSec = 2;
-    };
-  };
-
-  # ==========================================================================
   # Awww Wallpaper Daemon
   # ==========================================================================
 
