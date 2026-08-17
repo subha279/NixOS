@@ -8,17 +8,15 @@ import "../core" as Core
 import "../services" as Services
 
 // ================================================================
-// Notifications (toast overlay)
-// ----------------------------------------------------------------
-// Reads Services.NotificationServer.toasts, NOT the persistent
-// history. Each card owns its own countdown and removes itself.
+// Aurora Notifications — transient toast overlay
 //
-// Interaction map:
-//   left click    invoke the default action, then dismiss
-//   click the x   hide the toast, keep it in the panel
-//   right click   dismiss entirely (also clears it from the panel)
-//   middle click  hide every toast on screen
-//   hover         pause and reset the countdown
+// Design goals:
+//   • reliable dynamic sizing
+//   • no animated Layout attached properties
+//   • compositor-friendly transforms
+//   • smooth 180 Hz-style motion
+//   • independent toast lifetime
+//   • critical notifications remain until dismissed
 // ================================================================
 
 PanelWindow {
@@ -33,12 +31,37 @@ PanelWindow {
     readonly property var toasts:
         Services.NotificationServer.toasts
 
-    implicitWidth: 370
+    readonly property int toastWidth: 356
+    readonly property int toastSpacing: 8
+    readonly property int maxHeight: 640
 
-    implicitHeight: Math.max(
-        1,
-        Math.min(stack.implicitHeight, 640)
-    )
+    // Calculate the actual content height ourselves.
+    //
+    // This avoids relying on ColumnLayout/Reapeater implicitHeight,
+    // which can collapse the PanelWindow to almost zero height.
+    readonly property int contentHeight: {
+        if (!root.toasts || root.toasts.length === 0)
+            return 1
+
+        var total = 0
+
+        for (var i = 0; i < root.toasts.length; i++) {
+            var n = root.toasts[i]
+
+            // Conservative height used by the delegates.
+            // The actual card may be slightly taller depending
+            // on the notification body.
+            total += 96
+
+            if (i < root.toasts.length - 1)
+                total += root.toastSpacing
+        }
+
+        return Math.min(total, root.maxHeight)
+    }
+
+    implicitWidth: root.toastWidth + 14
+    implicitHeight: root.contentHeight
 
     color: "transparent"
 
@@ -47,26 +70,31 @@ PanelWindow {
 
     exclusionMode: ExclusionMode.Ignore
 
-    visible: root.toasts.length > 0
-            && !Core.PopupManager.dnd
-            && !Core.PopupManager.isOpen("notifications")
+    visible:
+        root.toasts.length > 0
+        && !Core.PopupManager.dnd
+        && !Core.PopupManager.isOpen("notifications")
 
-    // Only the cards themselves may receive clicks. Without this
-    // the full 370x640 window would swallow input over the empty
-    // area beneath the stack.
-    mask: Region { item: stack }
+    // Only the actual toast stack receives input.
+    mask: Region {
+        item: stack
+    }
 
-    ColumnLayout {
+    Item {
         id: stack
 
-        anchors.right: parent.right
         anchors.top: parent.top
+        anchors.right: parent.right
 
-        width: 356
-
-        spacing: 8
+        width: root.toastWidth
+        height: Math.min(
+            root.contentHeight,
+            root.maxHeight
+        )
 
         Repeater {
+            id: repeater
+
             model: root.toasts
 
             delegate: Item {
@@ -75,38 +103,68 @@ PanelWindow {
                 required property var modelData
 
                 readonly property bool critical:
-                    Services.NotificationServer.isCritical(wrapper.modelData)
+                    Services.NotificationServer.isCritical(
+                        wrapper.modelData
+                    )
 
                 readonly property int lifetime:
-                    Services.NotificationServer.lifetimeFor(wrapper.modelData)
+                    Services.NotificationServer.lifetimeFor(
+                        wrapper.modelData
+                    )
+
+                readonly property real cardHeight:
+                    Math.max(
+                        72,
+                        card.implicitHeight
+                    )
 
                 property real remaining: wrapper.lifetime
 
                 property bool dismissing: false
 
-                // Entrance and exit are driven by two plain reals
-                // that the layout binds to. Animating Layout.*
-                // attached properties directly is not reliable.
-                property real slide: 1.0     // 1 = parked offscreen right
-                property real collapse: 1.0  // 1 = full height
+                // Transform-driven animation.
+                //
+                // 0 = visible
+                // 1 = completely offscreen
+                property real slide: 1.0
 
-                readonly property real cardHeight: card.implicitHeight
+                // 1 = normal height
+                // 0 = collapsed
+                property real collapse: 1.0
 
-                Layout.alignment: Qt.AlignRight
-                Layout.preferredWidth: 356
+                width: root.toastWidth
 
-                Layout.preferredHeight: Math.max(
+                // Every delegate is positioned explicitly.
+                // This prevents Layout animations from fighting
+                // with the compositor.
+                y: {
+                    var result = 0
+
+                    for (var i = 0; i < index; i++) {
+                        result += 96 + root.toastSpacing
+                    }
+
+                    return result
+                }
+
+                height: Math.max(
                     0,
-                    Math.round(wrapper.cardHeight * wrapper.collapse)
+                    wrapper.cardHeight * wrapper.collapse
                 )
+
+                opacity:
+                    1.0 - (wrapper.slide * 0.35)
 
                 clip: true
 
-                opacity: 1.0 - wrapper.slide
+                Component.onCompleted: {
+                    enterAnim.start()
+                }
 
-                Component.onCompleted: enterAnim.start()
+                // ------------------------------------------------
+                // Toast lifecycle
+                // ------------------------------------------------
 
-                // Timeout / x button: leaves the panel entry alone.
                 function hide() {
                     if (wrapper.dismissing)
                         return
@@ -115,13 +173,15 @@ PanelWindow {
                     exitAnim.start()
                 }
 
-                // Right click: removes the panel entry too.
                 function dismissFully() {
                     if (wrapper.dismissing)
                         return
 
                     wrapper.dismissing = true
-                    Services.NotificationServer.dismiss(wrapper.modelData)
+
+                    Services.NotificationServer.dismiss(
+                        wrapper.modelData
+                    )
                 }
 
                 function activate() {
@@ -132,27 +192,34 @@ PanelWindow {
 
                         if (acts && acts.length > 0) {
                             for (var i = 0; i < acts.length; i++) {
-                                var id = ""
+                                var actionId = ""
 
                                 try {
                                     if (acts[i].identifier !== undefined)
-                                        id = String(acts[i].identifier)
+                                        actionId =
+                                            String(
+                                                acts[i].identifier
+                                            )
                                 } catch (e) {
-                                    id = ""
+                                    actionId = ""
                                 }
 
-                                if (id === "default") {
+                                if (actionId === "default") {
                                     acts[i].invoke()
                                     break
                                 }
                             }
                         }
                     } catch (e) {
-                        // No actions exposed; dismissing is enough.
+                        // No usable action.
                     }
 
                     wrapper.dismissFully()
                 }
+
+                // ------------------------------------------------
+                // Entrance
+                // ------------------------------------------------
 
                 NumberAnimation {
                     id: enterAnim
@@ -160,41 +227,68 @@ PanelWindow {
                     target: wrapper
                     property: "slide"
 
-                    to: 0
+                    from: 1.0
+                    to: 0.0
 
-                    duration: 180
+                    duration: 220
+
                     easing.type: Easing.OutCubic
                 }
+
+                // ------------------------------------------------
+                // Exit
+                // ------------------------------------------------
 
                 SequentialAnimation {
                     id: exitAnim
 
-                    NumberAnimation {
-                        target: wrapper
-                        property: "slide"
+                    ParallelAnimation {
 
-                        to: 1
+                        NumberAnimation {
+                            target: wrapper
+                            property: "slide"
 
-                        duration: 190
-                        easing.type: Easing.InCubic
-                    }
+                            to: 1.0
 
-                    NumberAnimation {
-                        target: wrapper
-                        property: "collapse"
+                            duration: 190
 
-                        to: 0
+                            easing.type: Easing.InCubic
+                        }
 
-                        duration: 170
-                        easing.type: Easing.InCubic
+                        NumberAnimation {
+                            target: wrapper
+                            property: "collapse"
+
+                            to: 0.0
+
+                            duration: 210
+
+                            easing.type: Easing.InCubic
+                        }
+
+                        NumberAnimation {
+                            target: wrapper
+                            property: "opacity"
+
+                            to: 0.0
+
+                            duration: 160
+
+                            easing.type: Easing.InCubic
+                        }
                     }
 
                     ScriptAction {
-                        script: Services.NotificationServer.hideToast(
-                            wrapper.modelData
-                        )
+                        script:
+                            Services.NotificationServer.hideToast(
+                                wrapper.modelData
+                            )
                     }
                 }
+
+                // ------------------------------------------------
+                // Lifetime
+                // ------------------------------------------------
 
                 Timer {
                     id: tick
@@ -202,17 +296,22 @@ PanelWindow {
                     interval: 50
                     repeat: true
 
-                    running: wrapper.lifetime > 0
-                            && !cardHover.hovered
-                            && !wrapper.dismissing
+                    running:
+                        wrapper.lifetime > 0
+                        && !cardHover.hovered
+                        && !wrapper.dismissing
 
                     onTriggered: {
-                        wrapper.remaining -= tick.interval
+                        wrapper.remaining -= interval
 
                         if (wrapper.remaining <= 0)
                             wrapper.hide()
                     }
                 }
+
+                // ------------------------------------------------
+                // Card
+                // ------------------------------------------------
 
                 Rectangle {
                     id: card
@@ -221,52 +320,62 @@ PanelWindow {
                     anchors.right: parent.right
                     anchors.top: parent.top
 
-                    implicitHeight: Math.max(
-                        72,
-                        contentRow.implicitHeight + 24
-                    )
+                    implicitHeight:
+                        Math.max(
+                            72,
+                            contentRow.implicitHeight + 24
+                        )
 
-                    height: card.implicitHeight
+                    height: implicitHeight
 
                     radius: 16
 
                     clip: true
 
-                    color: Core.Theme.backgroundSolid
+                    color:
+                        Core.Theme.backgroundSolid
 
-                    border.width: 1
+                    border.width:
+                        Core.Theme.borderWidth
 
-                    border.color: wrapper.critical
-                        ? Core.Theme.danger
-                        : Core.Theme.border
+                    border.color:
+                        Core.Theme.borderActive
 
                     transform: Translate {
                         x: wrapper.slide * 44
                     }
 
+                    // ------------------------------------------------
+                    // Hover
+                    // ------------------------------------------------
+
                     HoverHandler {
                         id: cardHover
 
-                        // Re-arm the countdown so the card does not
-                        // vanish the instant the pointer leaves.
                         onHoveredChanged: {
                             if (cardHover.hovered)
-                                wrapper.remaining = wrapper.lifetime
+                                wrapper.remaining =
+                                    wrapper.lifetime
                         }
                     }
 
-                    // Declared before the content so the action and
-                    // close buttons sit above it and win the click.
+                    // ------------------------------------------------
+                    // Mouse interaction
+                    // ------------------------------------------------
+
                     MouseArea {
                         anchors.fill: parent
 
-                        acceptedButtons: Qt.LeftButton
-                                | Qt.RightButton
-                                | Qt.MiddleButton
+                        acceptedButtons:
+                            Qt.LeftButton
+                            | Qt.RightButton
+                            | Qt.MiddleButton
 
-                        cursorShape: Qt.PointingHandCursor
+                        cursorShape:
+                            Qt.PointingHandCursor
 
                         onClicked: function(mouse) {
+
                             if (mouse.button === Qt.RightButton) {
                                 wrapper.dismissFully()
                                 return
@@ -281,7 +390,10 @@ PanelWindow {
                         }
                     }
 
-                    // Urgency stripe down the leading edge.
+                    // ------------------------------------------------
+                    // Urgency stripe
+                    // ------------------------------------------------
+
                     Rectangle {
                         anchors.left: parent.left
                         anchors.top: parent.top
@@ -289,12 +401,20 @@ PanelWindow {
 
                         width: 3
 
-                        color: wrapper.critical
-                            ? Core.Theme.danger
-                            : Core.Theme.accent
+                        color:
+                            wrapper.critical
+                                ? Core.Theme.danger
+                                : Core.Theme.accent
 
-                        opacity: wrapper.critical ? 1.0 : 0.55
+                        opacity:
+                            wrapper.critical
+                                ? 1.0
+                                : 0.55
                     }
+
+                    // ------------------------------------------------
+                    // Content
+                    // ------------------------------------------------
 
                     RowLayout {
                         id: contentRow
@@ -309,398 +429,287 @@ PanelWindow {
 
                         spacing: 11
 
-                        // ----------------------------------------
-                        // Icon: real app icon when we can get one,
-                        // glyph fallback when we cannot.
-                        // ----------------------------------------
+                        // --------------------------------------------
+                        // Application icon
+                        // --------------------------------------------
                         Rectangle {
-                            Layout.alignment: Qt.AlignTop
+    Layout.alignment: Qt.AlignTop
 
-                            Layout.preferredWidth: 38
-                            Layout.preferredHeight: 38
+    Layout.preferredWidth: 38
+    Layout.preferredHeight: 38
 
-                            radius: 11
+    radius: 11
 
-                            color: wrapper.critical
-                                ? "#1fe58fa0"
-                                : Core.Theme.surface
+    color: wrapper.critical
+        ? "#1fe58fa0"
+        : Core.Theme.surface
 
-                            // Prefer the image the notification
-                            // carries, then the themed icon name it
-                            // advertises. Both are frequently absent.
-                            readonly property string imageSource: {
-                                const n = wrapper.modelData
+    // ------------------------------------------------------------
+    // Resolve the notification icon.
+    //
+    // Different applications use different notification fields:
+    //
+    //   image
+    //   imagePath
+    //   appIcon
+    //
+    // We try them in that order.
+    // ------------------------------------------------------------
 
-                                try {
-                                    if (n.image !== undefined
-                                            && n.image !== null
-                                            && String(n.image) !== "")
-                                        return String(n.image)
-                                } catch (e) {
-                                    // fall through
-                                }
+    readonly property string resolvedIcon: {
+        const n = wrapper.modelData
 
-                                try {
-                                    if (n.appIcon !== undefined
-                                            && n.appIcon !== null
-                                            && String(n.appIcon) !== "")
-                                        return Quickshell.iconPath(
-                                            String(n.appIcon),
-                                            true
-                                        )
-                                } catch (e) {
-                                    // fall through
-                                }
+        // 1. Explicit notification image
+        try {
+            if (
+                n.image !== undefined
+                && n.image !== null
+                && String(n.image) !== ""
+            ) {
+                return String(n.image)
+            }
+        } catch (e) {}
 
-                                return ""
-                            }
+        // 2. Explicit image path
+        try {
+            if (
+                n.imagePath !== undefined
+                && n.imagePath !== null
+                && String(n.imagePath) !== ""
+            ) {
+                return String(n.imagePath)
+            }
+        } catch (e) {}
 
-                            readonly property string appName: {
-                                try {
-                                    if (wrapper.modelData.appName !== undefined
-                                            && wrapper.modelData.appName !== null)
-                                        return String(wrapper.modelData.appName)
-                                } catch (e) {
-                                    return ""
-                                }
+        // 3. Desktop/application icon
+        try {
+            if (
+                n.appIcon !== undefined
+                && n.appIcon !== null
+                && String(n.appIcon) !== ""
+            ) {
+                return Quickshell.iconPath(
+                    String(n.appIcon),
+                    true
+                )
+            }
+        } catch (e) {}
 
-                                return ""
-                            }
+        return ""
+    }
 
-                            Image {
-                                id: appImage
+    Image {
+        id: notificationIcon
 
-                                anchors.centerIn: parent
+        anchors.centerIn: parent
 
-                                width: 24
-                                height: 24
+        width: 26
+        height: 26
 
-                                source: parent.imageSource
+        source: parent.resolvedIcon
 
-                                visible: appImage.status === Image.Ready
+        visible:
+            status === Image.Ready
+            && source !== ""
 
-                                fillMode: Image.PreserveAspectFit
+        asynchronous: true
+        cache: true
+        smooth: true
 
-                                asynchronous: true
+        fillMode:
+            Image.PreserveAspectFit
 
-                                smooth: true
-                            }
+        mipmap: true
+    }
 
-                            Text {
-                                anchors.centerIn: parent
+    // ------------------------------------------------------------
+    // Nerd Font fallback
+    // ------------------------------------------------------------
 
-                                visible: !appImage.visible
+    Text {
+        anchors.centerIn: parent
 
-                                text: wrapper.critical
-                                    ? Core.Icons.alert
-                                    : Core.Icons.forApp(parent.appName)
+        visible:
+            !notificationIcon.visible
 
-                                font.family: Core.Theme.fontFamily
-                                font.pixelSize: 19
+        text: "\udb80\udc7f"
 
-                                color: wrapper.critical
-                                    ? Core.Theme.danger
-                                    : Core.Theme.accent
-                            }
-                        }
+        font.family:
+            Core.Theme.fontFamily
 
-                        // ----------------------------------------
-                        // Text block
-                        // ----------------------------------------
+        font.pixelSize: 19
+
+        color:
+            wrapper.critical
+                ? Core.Theme.danger
+                : Core.Theme.accent
+
+        renderType:
+            Text.NativeRendering
+    }
+}
+
+                        // --------------------------------------------
+                        // Text
+                        // --------------------------------------------
+
                         ColumnLayout {
                             Layout.fillWidth: true
 
-                            spacing: 2
+                            spacing: 3
 
-                            RowLayout {
+                            Text {
                                 Layout.fillWidth: true
 
-                                spacing: 6
+                                text: {
+                                    const n =
+                                        wrapper.modelData
 
-                                Text {
-                                    Layout.fillWidth: true
+                                    try {
+                                        if (
+                                            n.appName
+                                            && n.appName !== ""
+                                        )
+                                            return n.appName
+                                    } catch (e) {}
 
-                                    text: {
-                                        try {
-                                            const a = wrapper.modelData.appName
+                                    try {
+                                        if (
+                                            n.desktopEntry
+                                            && n.desktopEntry !== ""
+                                        )
+                                            return n.desktopEntry
+                                    } catch (e) {}
 
-                                            if (a !== undefined && a !== null
-                                                    && String(a) !== "")
-                                                return String(a)
-                                        } catch (e) {
-                                            return "Notification"
-                                        }
-
-                                        return "Notification"
-                                    }
-
-                                    font.family: Core.Theme.fontFamily
-                                    font.pixelSize: Core.Theme.fontSizeSmall
-                                    font.weight: Font.DemiBold
-
-                                    color: wrapper.critical
-                                        ? Core.Theme.danger
-                                        : Core.Theme.foregroundFaint
-
-                                    elide: Text.ElideRight
+                                    return "Notification"
                                 }
 
-                                // Close button, revealed on hover.
-                                Rectangle {
-                                    Layout.preferredWidth: 18
-                                    Layout.preferredHeight: 18
+                                font.family:
+                                    Core.Theme.fontFamily
 
-                                    radius: 9
+                                font.pixelSize:
+                                    Core.Theme.fontSizeSmall
 
-                                    color: closeArea.containsMouse
-                                        ? Core.Theme.surfaceHover
-                                        : "transparent"
+                                font.weight:
+                                    Font.DemiBold
 
-                                    opacity: cardHover.hovered ? 1.0 : 0.0
+                                color:
+                                    Core.Theme.text
 
-                                    Behavior on opacity {
-                                        NumberAnimation {
-                                            duration: 140
-                                            easing.type: Easing.OutCubic
-                                        }
-                                    }
-
-                                    Text {
-                                        anchors.centerIn: parent
-
-                                        text: Core.Icons.close
-
-                                        font.family: Core.Theme.fontFamily
-                                        font.pixelSize: 11
-
-                                        color: Core.Theme.foregroundMuted
-                                    }
-
-                                    MouseArea {
-                                        id: closeArea
-
-                                        anchors.fill: parent
-
-                                        hoverEnabled: true
-
-                                        cursorShape: Qt.PointingHandCursor
-
-                                        onClicked: wrapper.hide()
-                                    }
-                                }
+                                elide:
+                                    Text.ElideRight
                             }
 
                             Text {
                                 Layout.fillWidth: true
 
                                 text: {
-                                    try {
-                                        const s = wrapper.modelData.summary
+                                    const n =
+                                        wrapper.modelData
 
-                                        if (s !== undefined && s !== null)
-                                            return String(s)
+                                    try {
+                                        return n.summary || ""
                                     } catch (e) {
                                         return ""
                                     }
-
-                                    return ""
                                 }
 
-                                font.family: Core.Theme.fontFamily
-                                font.pixelSize: Core.Theme.fontSizeLarge
-                                font.weight: Font.DemiBold
+                                font.family:
+                                    Core.Theme.fontFamily
 
-                                color: Core.Theme.foreground
+                                font.pixelSize:
+                                    Core.Theme.fontSizeBase
 
-                                elide: Text.ElideRight
+                                font.weight:
+                                    Font.Medium
+
+                                color:
+                                    Core.Theme.text
+
+                                elide:
+                                    Text.ElideRight
 
                                 maximumLineCount: 2
-
-                                wrapMode: Text.Wrap
                             }
 
                             Text {
-                                id: bodyText
-
                                 Layout.fillWidth: true
 
-                                text: {
-                                    try {
-                                        const b = wrapper.modelData.body
+                                visible:
+                                    text !== ""
 
-                                        if (b !== undefined && b !== null)
-                                            return String(b)
+                                text: {
+                                    const n =
+                                        wrapper.modelData
+
+                                    try {
+                                        return n.body || ""
                                     } catch (e) {
                                         return ""
                                     }
-
-                                    return ""
                                 }
 
-                                visible: bodyText.text !== ""
+                                font.family:
+                                    Core.Theme.fontFamily
 
-                                font.family: Core.Theme.fontFamily
-                                font.pixelSize: Core.Theme.fontSize
+                                font.pixelSize:
+                                    Core.Theme.fontSizeSmall
 
-                                color: Core.Theme.foregroundMuted
+                                color:
+                                    Core.Theme.textMuted
 
-                                textFormat: Text.StyledText
+                                wrapMode:
+                                    Text.Wrap
 
                                 maximumLineCount: 3
 
-                                wrapMode: Text.Wrap
-
-                                elide: Text.ElideRight
-                            }
-
-                            // ------------------------------------
-                            // Action buttons
-                            // ------------------------------------
-                            Flow {
-                                id: actionFlow
-
-                                Layout.fillWidth: true
-                                Layout.topMargin: actionFlow.visible ? 6 : 0
-
-                                spacing: 6
-
-                                readonly property var list: {
-                                    var out = []
-
-                                    try {
-                                        const acts = wrapper.modelData.actions
-
-                                        if (acts) {
-                                            for (var i = 0; i < acts.length; i++) {
-                                                var id = ""
-
-                                                try {
-                                                    if (acts[i].identifier !== undefined)
-                                                        id = String(acts[i].identifier)
-                                                } catch (e) {
-                                                    id = ""
-                                                }
-
-                                                // "default" is the
-                                                // whole-card click.
-                                                if (id !== "default")
-                                                    out.push(acts[i])
-                                            }
-                                        }
-                                    } catch (e) {
-                                        out = []
-                                    }
-
-                                    return out
-                                }
-
-                                visible: actionFlow.list.length > 0
-
-                                Repeater {
-                                    model: actionFlow.list
-
-                                    delegate: Rectangle {
-                                        id: actionButton
-
-                                        required property var modelData
-
-                                        implicitWidth: actionLabel.implicitWidth + 20
-                                        implicitHeight: 24
-
-                                        radius: 8
-
-                                        color: actionArea.containsMouse
-                                            ? Core.Theme.surfaceHover
-                                            : Core.Theme.surface
-
-                                        border.width: 1
-                                        border.color: Core.Theme.separator
-
-                                        Text {
-                                            id: actionLabel
-
-                                            anchors.centerIn: parent
-
-                                            text: {
-                                                try {
-                                                    const t = actionButton.modelData.text
-
-                                                    if (t !== undefined && t !== null)
-                                                        return String(t)
-                                                } catch (e) {
-                                                    return "Action"
-                                                }
-
-                                                return "Action"
-                                            }
-
-                                            font.family: Core.Theme.fontFamily
-                                            font.pixelSize: Core.Theme.fontSizeSmall
-                                            font.weight: Font.DemiBold
-
-                                            color: Core.Theme.foreground
-                                        }
-
-                                        MouseArea {
-                                            id: actionArea
-
-                                            anchors.fill: parent
-
-                                            hoverEnabled: true
-
-                                            cursorShape: Qt.PointingHandCursor
-
-                                            onClicked: {
-                                                try {
-                                                    actionButton.modelData.invoke()
-                                                } catch (e) {
-                                                    // Sender went away.
-                                                }
-
-                                                wrapper.hide()
-                                            }
-                                        }
-
-                                        scale: actionArea.pressed ? 0.94 : 1.0
-
-                                        Behavior on scale {
-                                            NumberAnimation {
-                                                duration: 90
-                                                easing.type: Easing.OutCubic
-                                            }
-                                        }
-                                    }
-                                }
+                                elide:
+                                    Text.ElideRight
                             }
                         }
-                    }
 
-                    // ----------------------------------------
-                    // Countdown bar. Absent on critical cards,
-                    // which never expire on their own.
-                    // ----------------------------------------
-                    Rectangle {
-                        anchors.left: parent.left
-                        anchors.bottom: parent.bottom
+                        // --------------------------------------------
+                        // Close
+                        // --------------------------------------------
 
-                        height: 2
+                        Rectangle {
+                            Layout.alignment:
+                                Qt.AlignTop
 
-                        visible: wrapper.lifetime > 0
+                            width: 28
+                            height: 28
 
-                        width: wrapper.lifetime <= 0
-                            ? 0
-                            : card.width * Math.max(
-                                0,
-                                Math.min(1, wrapper.remaining / wrapper.lifetime)
-                            )
+                            radius: 9
 
-                        color: Core.Theme.accent
+                            color:
+                                closeMouse.containsMouse
+                                    ? Core.Theme.surfaceHover
+                                    : "transparent"
 
-                        opacity: cardHover.hovered ? 0.25 : 0.7
+                            Text {
+                                anchors.centerIn: parent
 
-                        Behavior on opacity {
-                            NumberAnimation {
-                                duration: 160
+                                text: "\udb80\udc6f"
+
+                                font.family:
+                                    Core.Theme.fontFamily
+
+                                font.pixelSize: 15
+
+                                color:
+                                    Core.Theme.textMuted
+                            }
+
+                            MouseArea {
+                                id: closeMouse
+
+                                anchors.fill: parent
+
+                                hoverEnabled: true
+
+                                onClicked: {
+                                    wrapper.hide()
+                                }
                             }
                         }
                     }
