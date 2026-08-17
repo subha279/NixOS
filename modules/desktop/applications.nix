@@ -65,6 +65,7 @@
     # ==============================
 
     kdePackages.gwenview
+    imagemagick
 
     # ==============================
     # Authentication

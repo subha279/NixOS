@@ -11,17 +11,17 @@ import "../services" as Services
 // ================================================================
 // Bar
 // ----------------------------------------------------------------
-// The window spans the FULL screen width with a click-through mask
-// everywhere except the pill.
+// Full-width Wayland layer surface.
 //
-// The pill itself is COLLAPSED by default: only the clock is shown.
-// Hovering it (or having any dropdown open) expands every other
-// module outwards with a springy reveal.
+// The visible bar is a 2px themed gradient ring with the actual
+// shell surface inset inside it.
 //
-// A single animated scalar, `reveal` (0..1), drives every module's
-// width, opacity and scale. Sharing one value keeps the whole row
-// perfectly in sync and means there is only ever one animation
-// running instead of a dozen competing ones.
+// Reveal:
+//   0 = clock only
+//   1 = fully expanded
+//
+// The entire module row remains driven by one animated `reveal`
+// value so all modules stay synchronized.
 // ================================================================
 
 PanelWindow {
@@ -44,7 +44,7 @@ PanelWindow {
 
     WlrLayershell.namespace: "aurora-bar"
 
-    // Only the pill itself receives input
+    // Only the actual pill receives input.
     mask: Region {
         item: pill
     }
@@ -53,9 +53,6 @@ PanelWindow {
     // Reveal state
     // ============================================================
 
-    // Stay open while the pointer is over the pill, and also while
-    // any dropdown is open — otherwise the module you just clicked
-    // would fold away underneath its own popup.
     readonly property bool wantExpanded:
         pillHover.hovered ||
         Core.PopupManager.current !== ""
@@ -70,8 +67,6 @@ PanelWindow {
             return
         }
 
-        // Small grace period so brushing past the clock doesn't
-        // cause the row to flicker open and shut.
         collapseTimer.restart()
     }
 
@@ -80,11 +75,14 @@ PanelWindow {
 
         interval: Core.Theme.barCollapseDelay
 
-        onTriggered: root.expanded = root.wantExpanded
+        onTriggered:
+            root.expanded = root.wantExpanded
     }
 
-    // 0 = collapsed (clock only), 1 = fully expanded.
-    property real reveal: root.expanded ? 1.0 : 0.0
+    // 0 = collapsed
+    // 1 = fully expanded
+    property real reveal:
+        root.expanded ? 1.0 : 0.0
 
     Behavior on reveal {
         SpringAnimation {
@@ -95,57 +93,67 @@ PanelWindow {
         }
     }
 
-    // Below this the modules are effectively invisible, so we drop
-    // them out of the layout entirely and reclaim their spacing.
-    readonly property bool modulesVisible: root.reveal > 0.012
+    readonly property bool modulesVisible:
+        root.reveal > 0.012
+
+    // ============================================================
+    // OUTER BORDER RING
+    // ============================================================
+    //
+    // This replaces Rectangle.border.
+    //
+    // The ring is exactly 2px because the inner pill is inset by
+    // Core.Theme.borderWidth.
+    //
+    // Hyprland active border colors:
+    //
+    //   accent       -> accentActive
+    //
+    // ============================================================
 
     Rectangle {
-        id: pill
+        id: pillBorder
 
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter
 
-        height: Core.Theme.pillHeight
+        height:
+            Core.Theme.pillHeight +
+            (Core.Theme.borderWidth * 2)
 
-        width: content.implicitWidth + 24
+        width:
+            content.implicitWidth +
+            24 +
+            (Core.Theme.borderWidth * 2)
 
-        radius: height / 2
-
-        color: Core.Theme.background
-
-        border.width: 1
-
-        border.color: root.expanded
-            ? Core.Theme.border
-            : Core.Theme.separator
-
-        Behavior on border.color {
-            ColorAnimation {
-                duration: Core.Theme.durBase
-            }
-        }
+        radius:
+            height / 2
 
         antialiasing: true
 
-        // No Behavior on width here on purpose. The width already
-        // follows `reveal`, which is spring driven; animating it a
-        // second time just adds lag.
-
         // --------------------------------------------------------
-        // Hover detection
+        // Hyprland-style active border palette
         // --------------------------------------------------------
-        //
-        // A HoverHandler is used rather than a MouseArea because it
-        // is passive: it reports hover for the whole pill including
-        // its children, without swallowing clicks or blocking the
-        // per-module MouseAreas stacked above it.
 
-        HoverHandler {
-            id: pillHover
+        gradient: Gradient {
+
+            // Diagonal-style visual approximation using the same
+            // active Hyprland palette.
+            //
+            // The border remains entirely controlled by Aurora.
+            GradientStop {
+                position: 0.0
+                color: Core.Theme.borderActive
+            }
+
+            GradientStop {
+                position: 1.0
+                color: Core.Theme.borderActiveEnd
+            }
         }
 
         // --------------------------------------------------------
-        // Subtle glass shadow
+        // Shadow
         // --------------------------------------------------------
 
         Rectangle {
@@ -153,202 +161,282 @@ PanelWindow {
 
             anchors.margins: -3
 
-            z: -1
+            z: -2
 
-            radius: pill.radius + 3
+            radius:
+                pillBorder.radius + 3
 
             color: "#000000"
 
-            opacity: Core.Theme.shadowOpacity
+            opacity:
+                Core.Theme.shadowOpacity
         }
 
-        RowLayout {
-            id: content
+        // ========================================================
+        // ACTUAL BAR SURFACE
+        // ========================================================
+
+        Rectangle {
+            id: pill
 
             anchors.centerIn: parent
 
-            spacing: 3
+            height:
+                Core.Theme.pillHeight
 
-            // ====================================================
-            // Notification center (leftmost)
-            // ====================================================
+            width:
+                content.implicitWidth + 24
 
-            Modules.NotificationCenter {
-                id: notificationCenter
+            radius:
+                height / 2
 
-                Layout.preferredWidth: 30 * root.reveal
-                Layout.preferredHeight:
-                    Core.Theme.moduleHeight
+            color:
+                Core.Theme.background
 
-                visible: root.modulesVisible
+            antialiasing: true
 
-                opacity: root.reveal
+            // ----------------------------------------------------
+            // Hover detection
+            // ----------------------------------------------------
 
-                scale: 0.55 + 0.45 * root.reveal
-            }
-
-            Separator {
-                reveal: root.reveal
-            }
-
-            // ====================================================
-            // Volume
-            // ====================================================
-
-            Modules.Volume {
-                Layout.preferredWidth: 58 * root.reveal
-                Layout.preferredHeight:
-                    Core.Theme.moduleHeight
-
-                visible: root.modulesVisible
-
-                opacity: root.reveal
-
-                scale: 0.55 + 0.45 * root.reveal
-            }
-
-            Separator {
-                reveal: root.reveal
+            HoverHandler {
+                id: pillHover
             }
 
             // ====================================================
-            // Brightness
+            // CONTENT
             // ====================================================
 
-            Modules.Brightness {
-                Layout.preferredWidth: 58 * root.reveal
-                Layout.preferredHeight:
-                    Core.Theme.moduleHeight
+            RowLayout {
+                id: content
 
-                visible: root.modulesVisible
+                anchors.centerIn: parent
 
-                opacity: root.reveal
+                spacing: 3
 
-                scale: 0.55 + 0.45 * root.reveal
-            }
+                // ==================================================
+                // Notification center
+                // ==================================================
 
-            Separator {
-                reveal: root.reveal
-            }
+                Modules.NotificationCenter {
+                    id: notificationCenter
 
-            // ====================================================
-            // Clock — the anchor. Always visible, never animated.
-            // ====================================================
+                    Layout.preferredWidth:
+                        30 * root.reveal
 
-            Modules.Clock {
-                id: clockModule
+                    Layout.preferredHeight:
+                        Core.Theme.moduleHeight
 
-                Layout.preferredWidth: clockModule.implicitWidth
-                Layout.preferredHeight:
-                    Core.Theme.moduleHeight
-            }
+                    visible:
+                        root.modulesVisible
 
-            Separator {
-                reveal: root.reveal
-            }
+                    opacity:
+                        root.reveal
 
-            // ====================================================
-            // Network (Wi-Fi + Ethernet, one slot)
-            // ====================================================
+                    scale:
+                        0.55 + 0.45 * root.reveal
+                }
 
-            Modules.Network {
-                Layout.preferredWidth: 30 * root.reveal
-                Layout.preferredHeight:
-                    Core.Theme.moduleHeight
+                Separator {
+                    reveal: root.reveal
+                }
 
-                visible: root.modulesVisible
+                // ==================================================
+                // Volume
+                // ==================================================
 
-                opacity: root.reveal
+                Modules.Volume {
+                    Layout.preferredWidth:
+                        58 * root.reveal
 
-                scale: 0.55 + 0.45 * root.reveal
-            }
+                    Layout.preferredHeight:
+                        Core.Theme.moduleHeight
 
-            // ====================================================
-            // Bluetooth
-            // ====================================================
+                    visible:
+                        root.modulesVisible
 
-            Modules.Bluetooth {
-                Layout.preferredWidth: 30 * root.reveal
-                Layout.preferredHeight:
-                    Core.Theme.moduleHeight
+                    opacity:
+                        root.reveal
 
-                visible: root.modulesVisible
+                    scale:
+                        0.55 + 0.45 * root.reveal
+                }
 
-                opacity: root.reveal
+                Separator {
+                    reveal: root.reveal
+                }
 
-                scale: 0.55 + 0.45 * root.reveal
-            }
+                // ==================================================
+                // Brightness
+                // ==================================================
 
-            Separator {
-                reveal: root.reveal
-            }
+                Modules.Brightness {
+                    Layout.preferredWidth:
+                        58 * root.reveal
 
-            // ====================================================
-            // Battery (auto-hides on desktops)
-            // ====================================================
+                    Layout.preferredHeight:
+                        Core.Theme.moduleHeight
 
-            Modules.Battery {
-                Layout.preferredWidth: 58 * root.reveal
-                Layout.preferredHeight:
-                    Core.Theme.moduleHeight
+                    visible:
+                        root.modulesVisible
 
-                visible: root.modulesVisible &&
-                         Services.BatteryService.available
+                    opacity:
+                        root.reveal
 
-                opacity: root.reveal
+                    scale:
+                        0.55 + 0.45 * root.reveal
+                }
 
-                scale: 0.55 + 0.45 * root.reveal
-            }
+                Separator {
+                    reveal: root.reveal
+                }
 
-            // Hidden together with the battery module so desktops
-            // don't get a dangling divider.
-            Separator {
-                reveal: root.reveal
+                // ==================================================
+                // Clock
+                // ==================================================
 
-                available: Services.BatteryService.available
-            }
+                Modules.Clock {
+                    id: clockModule
 
-            // ====================================================
-            // System tray
-            // ====================================================
+                    Layout.preferredWidth:
+                        clockModule.implicitWidth
 
-            Modules.Tray {
-                id: tray
+                    Layout.preferredHeight:
+                        Core.Theme.moduleHeight
+                }
 
-                Layout.preferredWidth:
-                    tray.implicitWidth * root.reveal
+                Separator {
+                    reveal: root.reveal
+                }
 
-                Layout.preferredHeight:
-                    Core.Theme.moduleHeight
+                // ==================================================
+                // Network
+                // ==================================================
 
-                visible: root.modulesVisible
+                Modules.Network {
+                    Layout.preferredWidth:
+                        30 * root.reveal
 
-                opacity: root.reveal
+                    Layout.preferredHeight:
+                        Core.Theme.moduleHeight
 
-                scale: 0.55 + 0.45 * root.reveal
+                    visible:
+                        root.modulesVisible
+
+                    opacity:
+                        root.reveal
+
+                    scale:
+                        0.55 + 0.45 * root.reveal
+                }
+
+                // ==================================================
+                // Bluetooth
+                // ==================================================
+
+                Modules.Bluetooth {
+                    Layout.preferredWidth:
+                        30 * root.reveal
+
+                    Layout.preferredHeight:
+                        Core.Theme.moduleHeight
+
+                    visible:
+                        root.modulesVisible
+
+                    opacity:
+                        root.reveal
+
+                    scale:
+                        0.55 + 0.45 * root.reveal
+                }
+
+                Separator {
+                    reveal: root.reveal
+                }
+
+                // ==================================================
+                // Battery
+                // ==================================================
+
+                Modules.Battery {
+                    Layout.preferredWidth:
+                        58 * root.reveal
+
+                    Layout.preferredHeight:
+                        Core.Theme.moduleHeight
+
+                    visible:
+                        root.modulesVisible &&
+                        Services.BatteryService.available
+
+                    opacity:
+                        root.reveal
+
+                    scale:
+                        0.55 + 0.45 * root.reveal
+                }
+
+                // --------------------------------------------------
+                // Battery separator
+                // --------------------------------------------------
+
+                Separator {
+                    reveal: root.reveal
+
+                    available:
+                        Services.BatteryService.available
+                }
+
+                // ==================================================
+                // System tray
+                // ==================================================
+
+                Modules.Tray {
+                    id: tray
+
+                    Layout.preferredWidth:
+                        tray.implicitWidth * root.reveal
+
+                    Layout.preferredHeight:
+                        Core.Theme.moduleHeight
+
+                    visible:
+                        root.modulesVisible
+
+                    opacity:
+                        root.reveal
+
+                    scale:
+                        0.55 + 0.45 * root.reveal
+                }
             }
         }
     }
 
     // ============================================================
-    // Separator component
+    // Separator
     // ============================================================
-    //
-    // Inline components cannot reach ids declared in the enclosing
-    // file, so `reveal` is passed in explicitly at every use site.
 
     component Separator: Rectangle {
+
         property real reveal: 1.0
+
         property bool available: true
 
         Layout.preferredWidth: 1
+
         Layout.preferredHeight: 16
 
-        visible: available && reveal > 0.012
+        visible:
+            available &&
+            reveal > 0.012
 
-        opacity: reveal
+        opacity:
+            reveal
 
-        color: Core.Theme.separator
+        color:
+            Core.Theme.separator
 
         radius: 1
     }

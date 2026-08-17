@@ -34,6 +34,7 @@ let
     let
       theme = themeData.themes.${themeId};
       colors = theme.colors;
+      fonts = themeData.global.fonts;
       ui = themeData.global.ui;
     in
     ''
@@ -55,7 +56,11 @@ let
         id = "${themeId}",
         name = "${theme.name}",
         description = "${theme.description}",
-
+        fonts = {
+          interface = "${fonts.interface.name}",
+          terminal = "${fonts.terminal.name}",
+          emoji = "${fonts.emoji.name}",
+          },
         colors = {
           background = "${colors.background}",
           backgroundDark = "${colors.backgroundDark}",
@@ -139,6 +144,12 @@ let
       name = themeData.themes.${themeId}.name;
 
       description = themeData.themes.${themeId}.description;
+
+      fonts = {
+        interface = themeData.global.fonts.interface.name;
+        terminal = themeData.global.fonts.terminal.name;
+        emoji = themeData.global.fonts.emoji.name;
+      };
 
       colors = themeData.themes.${themeId}.colors;
 
@@ -265,6 +276,7 @@ let
     let
       theme = themeData.themes.${themeId};
       colors = theme.colors;
+      fonts = themeData.global.fonts;
       ui = themeData.global.ui;
     in
     ''
@@ -280,6 +292,8 @@ let
       #   ~/NixOS/lib/themes.nix
       # ========================================================
 
+      [main]
+      font=${fonts.interface.name}:size=${toString ui.fontSize}
 
       [colors]
 

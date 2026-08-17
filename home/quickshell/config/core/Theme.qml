@@ -85,6 +85,8 @@ QtObject {
         }
     }
 
+    readonly property var fonts:
+        data.fonts || ({})
 
     readonly property var colors:
         data.colors || ({})
@@ -127,6 +129,10 @@ QtObject {
 
     readonly property color borderFocus:
         colors.borderFocus || "#A970FF"
+    readonly property color borderActive:
+        colors.accent || "#A970FF"
+    readonly property color borderActiveEnd:
+        colors.accentActive || "#C7A6FF"
 
     readonly property color separator:
         colors.separator || "#343B47"
@@ -294,7 +300,7 @@ QtObject {
     // ============================================================
 
     readonly property string fontFamily:
-        "JetBrains Mono Nerd Font"
+        fonts.interface || "Inter"
 
 
     // ============================================================
