@@ -120,7 +120,7 @@ Components.PopupSurface {
 
                     Behavior on color {
                         ColorAnimation {
-                            duration: 220
+                            duration: 150
                         }
                     }
                 }
@@ -194,17 +194,15 @@ Components.PopupSurface {
                         color: popup.svc.color
 
                         Behavior on width {
-                            SpringAnimation {
-                                spring: Core.Theme.springStiffness
-                                damping: 0.40
-                                mass: 1.0
-                                epsilon: Core.Theme.springEpsilon
-                            }
+                            NumberAnimation {
+                    duration: Core.Theme.durBase
+                    easing.type: Easing.OutCubic
+                }
                         }
 
                         Behavior on color {
                             ColorAnimation {
-                                duration: 260
+                                duration: 160
                             }
                         }
                     }
@@ -238,7 +236,7 @@ Components.PopupSurface {
                             to: barTrack.width
 
                             duration: 1600
-                            easing.type: Easing.InOutQuad
+                            easing.type: Easing.InOutSine
                         }
                     }
                 }
@@ -514,12 +512,10 @@ Components.PopupSurface {
                 clip: true
 
                 Behavior on height {
-                    SpringAnimation {
-                        spring: Core.Theme.springStiffness
-                        damping: 0.42
-                        mass: 1.0
-                        epsilon: Core.Theme.springEpsilon
-                    }
+                    NumberAnimation {
+                    duration: Core.Theme.durBase
+                    easing.type: Easing.OutCubic
+                }
                 }
 
                 opacity: listBox.height > 2 ? 1.0 : 0.0
@@ -611,7 +607,7 @@ Components.PopupSurface {
                             property: "opacity"
                             from: 0
                             to: 1
-                            duration: 260
+                            duration: 160
                             easing.type: Easing.OutCubic
                         }
 
@@ -619,9 +615,8 @@ Components.PopupSurface {
                             property: "scale"
                             from: 0.86
                             to: 1
-                            duration: 380
-                            easing.type: Easing.OutBack
-                            easing.overshoot: 1.8
+                            duration: 180
+                            easing.type: Easing.OutCubic
                         }
                     }
 
@@ -644,16 +639,15 @@ Components.PopupSurface {
                     displaced: Transition {
                         NumberAnimation {
                             properties: "x,y"
-                            duration: 320
-                            easing.type: Easing.OutBack
-                            easing.overshoot: 0.9
+                            duration: 170
+                            easing.type: Easing.OutCubic
                         }
                     }
 
                     addDisplaced: Transition {
                         NumberAnimation {
                             properties: "x,y"
-                            duration: 320
+                            duration: 170
                             easing.type: Easing.OutCubic
                         }
                     }
@@ -661,7 +655,7 @@ Components.PopupSurface {
                     removeDisplaced: Transition {
                         NumberAnimation {
                             properties: "x,y"
-                            duration: 260
+                            duration: 160
                             easing.type: Easing.OutCubic
                         }
                     }

@@ -85,11 +85,11 @@ PanelWindow {
         root.expanded ? 1.0 : 0.0
 
     Behavior on reveal {
-        SpringAnimation {
-            spring: 4.2
-            damping: 0.46
-            mass: 1.0
-            epsilon: 0.004
+        NumberAnimation {
+            duration: root.expanded
+                ? Core.Theme.barRevealDuration
+                : Core.Theme.barHideDuration
+            easing.type: Easing.OutCubic
         }
     }
 
@@ -232,9 +232,6 @@ PanelWindow {
 
                     opacity:
                         root.reveal
-
-                    scale:
-                        0.55 + 0.45 * root.reveal
                 }
 
                 Separator {
@@ -257,9 +254,6 @@ PanelWindow {
 
                     opacity:
                         root.reveal
-
-                    scale:
-                        0.55 + 0.45 * root.reveal
                 }
 
                 Separator {
@@ -282,9 +276,6 @@ PanelWindow {
 
                     opacity:
                         root.reveal
-
-                    scale:
-                        0.55 + 0.45 * root.reveal
                 }
 
                 Separator {
@@ -325,9 +316,6 @@ PanelWindow {
 
                     opacity:
                         root.reveal
-
-                    scale:
-                        0.55 + 0.45 * root.reveal
                 }
 
                 // ==================================================
@@ -346,9 +334,6 @@ PanelWindow {
 
                     opacity:
                         root.reveal
-
-                    scale:
-                        0.55 + 0.45 * root.reveal
                 }
 
                 Separator {
@@ -372,9 +357,6 @@ PanelWindow {
 
                     opacity:
                         root.reveal
-
-                    scale:
-                        0.55 + 0.45 * root.reveal
                 }
 
                 // --------------------------------------------------
@@ -406,9 +388,6 @@ PanelWindow {
 
                     opacity:
                         root.reveal
-
-                    scale:
-                        0.55 + 0.45 * root.reveal
                 }
             }
         }

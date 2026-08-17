@@ -162,7 +162,7 @@ PanelWindow {
 
                     to: 0
 
-                    duration: 340
+                    duration: 180
                     easing.type: Easing.OutCubic
                 }
 

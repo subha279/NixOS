@@ -336,23 +336,26 @@ QtObject {
     readonly property real springMass:
         1.1
 
+    // Motion is intentionally short and deterministic.
+    // These timings target a crisp high-refresh feel without
+    // spring overshoot or long easing tails.
     readonly property int durFast:
-        120
+        90
 
     readonly property int durBase:
-        200
+        140
 
     readonly property int durSlow:
-        320
+        190
 
     readonly property int durOpen:
-        360
+        170
 
     readonly property int durClose:
-        200
+        110
 
     readonly property real overshoot:
-        1.6
+        1.0
 
 
     // ============================================================
@@ -360,11 +363,11 @@ QtObject {
     // ============================================================
 
     readonly property int barRevealDuration:
-        380
+        150
 
     readonly property int barHideDuration:
-        260
+        100
 
     readonly property int barCollapseDelay:
-        260
+        180
 }

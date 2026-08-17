@@ -61,8 +61,7 @@ Item {
         Behavior on height {
             NumberAnimation {
                 duration: 140
-                easing.type: Easing.OutBack
-                easing.overshoot: 2.0
+                easing.type: Easing.OutCubic
             }
         }
 
@@ -93,11 +92,9 @@ Item {
             Behavior on width {
                 enabled: !root.dragging
 
-                SpringAnimation {
-                    spring: 4.0
-                    damping: 0.45
-                    mass: 0.9
-                    epsilon: 0.25
+                NumberAnimation {
+                    duration: Core.Theme.durBase
+                    easing.type: Easing.OutCubic
                 }
             }
         }
@@ -130,19 +127,16 @@ Item {
             Behavior on width {
                 NumberAnimation {
                     duration: 150
-                    easing.type: Easing.OutBack
-                    easing.overshoot: 2.4
+                    easing.type: Easing.OutCubic
                 }
             }
 
             Behavior on x {
                 enabled: !root.dragging
 
-                SpringAnimation {
-                    spring: 4.0
-                    damping: 0.45
-                    mass: 0.9
-                    epsilon: 0.25
+                NumberAnimation {
+                    duration: Core.Theme.durBase
+                    easing.type: Easing.OutCubic
                 }
             }
         }

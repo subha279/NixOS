@@ -78,13 +78,13 @@ Item {
             NumberAnimation {
                 to: 1.06
                 duration: 700
-                easing.type: Easing.InOutQuad
+                easing.type: Easing.InOutSine
             }
 
             NumberAnimation {
                 to: 1.0
                 duration: 700
-                easing.type: Easing.InOutQuad
+                easing.type: Easing.InOutSine
             }
         }
     }
@@ -131,9 +131,8 @@ Item {
                     target: icon
                     property: "scale"
                     to: 1.0
-                    duration: 260
-                    easing.type: Easing.OutBack
-                    easing.overshoot: 2.2
+                    duration: 160
+                    easing.type: Easing.OutCubic
                 }
             }
         }

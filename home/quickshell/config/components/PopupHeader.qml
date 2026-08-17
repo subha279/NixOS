@@ -123,7 +123,7 @@ Item {
                 Behavior on scale {
                     NumberAnimation {
                         duration: 110
-                        easing.type: Easing.OutBack
+                        easing.type: Easing.OutCubic
                     }
                 }
 
@@ -197,9 +197,8 @@ Item {
 
                     Behavior on x {
                         NumberAnimation {
-                            duration: 240
-                            easing.type: Easing.OutBack
-                            easing.overshoot: 1.4
+                            duration: 160
+                            easing.type: Easing.OutCubic
                         }
                     }
 

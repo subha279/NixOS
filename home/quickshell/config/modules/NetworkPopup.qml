@@ -161,7 +161,7 @@ Components.PopupSurface {
 
             Behavior on height {
                 NumberAnimation {
-                    duration: 280
+                    duration: 180
                     easing.type: Easing.OutCubic
                 }
             }
@@ -328,10 +328,9 @@ Components.PopupSurface {
             opacity: popup.passwordFor !== "" ? 1.0 : 0.0
 
             Behavior on height {
-                SpringAnimation {
-                    spring: 4.0
-                    damping: 0.45
-                    epsilon: 0.25
+                NumberAnimation {
+                    duration: Core.Theme.durBase
+                    easing.type: Easing.OutCubic
                 }
             }
 
@@ -546,11 +545,9 @@ Components.PopupSurface {
             clip: true
 
             Behavior on height {
-                SpringAnimation {
-                    spring: Core.Theme.springStiffness
-                    damping: 0.42
-                    mass: 1.0
-                    epsilon: Core.Theme.springEpsilon
+                NumberAnimation {
+                    duration: Core.Theme.durBase
+                    easing.type: Easing.OutCubic
                 }
             }
 
@@ -576,7 +573,7 @@ Components.PopupSurface {
                         property: "opacity"
                         from: 0
                         to: 1
-                        duration: 260
+                        duration: 160
                         easing.type: Easing.OutCubic
                     }
 
@@ -584,9 +581,8 @@ Components.PopupSurface {
                         property: "scale"
                         from: 0.86
                         to: 1
-                        duration: 380
-                        easing.type: Easing.OutBack
-                        easing.overshoot: 1.8
+                        duration: 180
+                        easing.type: Easing.OutCubic
                     }
                 }
 
@@ -609,16 +605,15 @@ Components.PopupSurface {
                 displaced: Transition {
                     NumberAnimation {
                         properties: "x,y"
-                        duration: 320
-                        easing.type: Easing.OutBack
-                        easing.overshoot: 0.9
+                        duration: 170
+                        easing.type: Easing.OutCubic
                     }
                 }
 
                 addDisplaced: Transition {
                     NumberAnimation {
                         properties: "x,y"
-                        duration: 320
+                        duration: 170
                         easing.type: Easing.OutCubic
                     }
                 }
@@ -626,7 +621,7 @@ Components.PopupSurface {
                 removeDisplaced: Transition {
                     NumberAnimation {
                         properties: "x,y"
-                        duration: 260
+                        duration: 160
                         easing.type: Easing.OutCubic
                     }
                 }
@@ -801,7 +796,7 @@ Components.PopupSurface {
 
             Behavior on height {
                 NumberAnimation {
-                    duration: 260
+                    duration: 160
                     easing.type: Easing.OutCubic
                 }
             }

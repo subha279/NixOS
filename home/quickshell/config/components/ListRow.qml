@@ -73,8 +73,8 @@ Rectangle {
 
         Behavior on height {
             NumberAnimation {
-                duration: 220
-                easing.type: Easing.OutBack
+                duration: 150
+                easing.type: Easing.OutCubic
             }
         }
     }

@@ -81,9 +81,8 @@ Item {
 
         Behavior on scale {
             NumberAnimation {
-                duration: 260
-                easing.type: Easing.OutBack
-                easing.overshoot: 1.6
+                duration: 160
+                easing.type: Easing.OutCubic
             }
         }
     }
@@ -137,9 +136,8 @@ Item {
 
         Behavior on scale {
             NumberAnimation {
-                duration: 260
-                easing.type: Easing.OutBack
-                easing.overshoot: 1.6
+                duration: 160
+                easing.type: Easing.OutCubic
             }
         }
     }
@@ -182,13 +180,13 @@ Item {
             NumberAnimation {
                 to: 1.5
                 duration: 500
-                easing.type: Easing.InOutQuad
+                easing.type: Easing.InOutSine
             }
 
             NumberAnimation {
                 to: 1.0
                 duration: 500
-                easing.type: Easing.InOutQuad
+                easing.type: Easing.InOutSine
             }
         }
     }

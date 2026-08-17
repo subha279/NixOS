@@ -277,11 +277,9 @@ Components.PopupSurface {
                 : 0
 
             Behavior on height {
-                SpringAnimation {
-                    spring: Core.Theme.springStiffness
-                    damping: 0.42
-                    mass: 1.0
-                    epsilon: Core.Theme.springEpsilon
+                NumberAnimation {
+                    duration: Core.Theme.durBase
+                    easing.type: Easing.OutCubic
                 }
             }
 
@@ -299,7 +297,7 @@ Components.PopupSurface {
                         properties: "opacity"
                         from: 0
                         to: 1
-                        duration: 240
+                        duration: 160
                         easing.type: Easing.OutCubic
                     }
                 }
@@ -307,9 +305,8 @@ Components.PopupSurface {
                 move: Transition {
                     NumberAnimation {
                         properties: "y"
-                        duration: 300
-                        easing.type: Easing.OutBack
-                        easing.overshoot: 0.9
+                        duration: 170
+                        easing.type: Easing.OutCubic
                     }
                 }
 
@@ -541,11 +538,9 @@ Components.PopupSurface {
                 : 0
 
             Behavior on height {
-                SpringAnimation {
-                    spring: Core.Theme.springStiffness
-                    damping: 0.42
-                    mass: 1.0
-                    epsilon: Core.Theme.springEpsilon
+                NumberAnimation {
+                    duration: Core.Theme.durBase
+                    easing.type: Easing.OutCubic
                 }
             }
 
@@ -563,7 +558,7 @@ Components.PopupSurface {
                         properties: "opacity"
                         from: 0
                         to: 1
-                        duration: 240
+                        duration: 160
                         easing.type: Easing.OutCubic
                     }
                 }
@@ -571,9 +566,8 @@ Components.PopupSurface {
                 move: Transition {
                     NumberAnimation {
                         properties: "y"
-                        duration: 300
-                        easing.type: Easing.OutBack
-                        easing.overshoot: 0.9
+                        duration: 170
+                        easing.type: Easing.OutCubic
                     }
                 }
 
@@ -657,7 +651,7 @@ Components.PopupSurface {
                     properties: "opacity"
                     from: 0
                     to: 1
-                    duration: 260
+                    duration: 160
                     easing.type: Easing.OutCubic
                 }
             }
@@ -665,9 +659,8 @@ Components.PopupSurface {
             move: Transition {
                 NumberAnimation {
                     properties: "y"
-                    duration: 300
-                    easing.type: Easing.OutBack
-                    easing.overshoot: 0.9
+                    duration: 170
+                    easing.type: Easing.OutCubic
                 }
             }
 

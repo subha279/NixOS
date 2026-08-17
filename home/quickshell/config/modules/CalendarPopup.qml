@@ -206,7 +206,7 @@ Components.PopupSurface {
                 Behavior on scale {
                     NumberAnimation {
                         duration: 110
-                        easing.type: Easing.OutBack
+                        easing.type: Easing.OutCubic
                     }
                 }
 
@@ -265,9 +265,8 @@ Components.PopupSurface {
                         target: monthText
                         property: "scale"
                         to: 1.0
-                        duration: 240
-                        easing.type: Easing.OutBack
-                        easing.overshoot: 2.2
+                        duration: 160
+                        easing.type: Easing.OutCubic
                     }
                 }
 
@@ -310,7 +309,7 @@ Components.PopupSurface {
                 Behavior on scale {
                     NumberAnimation {
                         duration: 110
-                        easing.type: Easing.OutBack
+                        easing.type: Easing.OutCubic
                     }
                 }
 
@@ -472,9 +471,8 @@ Components.PopupSurface {
                                 property: "scale"
                                 from: 0.0
                                 to: 1.0
-                                duration: 380
-                                easing.type: Easing.OutBack
-                                easing.overshoot: 2.4
+                                duration: 180
+                                easing.type: Easing.OutCubic
                             }
                         }
                     }

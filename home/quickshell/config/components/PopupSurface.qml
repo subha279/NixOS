@@ -11,10 +11,10 @@ import "../core" as Core
 // A full-width overlay layer that hosts ONE animated glass card.
 //
 // Motion design:
-//   * The card's height is driven by a SpringAnimation, so growing
-//     and shrinking overshoots slightly and settles — rubbery, not
+//   * The card's height is driven by a NumberAnimation, so growing
+//     and shrinking eases smoothly without overshoot — soft, not
 //     robotic.
-//   * The card scales from the top with an OutBack curve on open
+//   * The card scales subtly from the top with a cubic curve on open
 //     and collapses with an InCubic curve on close.
 //   * Inner content fades + slides, slightly behind the geometry,
 //     so text appears to "arrive" as the card grows and to leave
@@ -216,24 +216,24 @@ PanelWindow {
         y: Math.round(root.barBottomY + Core.Theme.popupGap)
 
         // --------------------------------------------------------
-        // The rubbery part: a spring drives the height, so any
-        // change in the number of rows overshoots and settles.
+        // The soft part: a single cubic animation drives the height.
+        // Content changes therefore settle without rubber-band motion.
         // --------------------------------------------------------
 
         height: root.open ? root.targetHeight : 0
 
         Behavior on height {
-            SpringAnimation {
-                spring: Core.Theme.springStiffness
-                damping: Core.Theme.springDamping
-                mass: Core.Theme.springMass
-                epsilon: Core.Theme.springEpsilon
+            NumberAnimation {
+                duration: root.open
+                    ? Core.Theme.durOpen
+                    : Core.Theme.durClose
+                easing.type: Easing.OutCubic
             }
         }
 
         transformOrigin: Item.Top
 
-        scale: root.open ? 1.0 : 0.9
+        scale: root.open ? 1.0 : 0.96
 
         opacity: root.open ? 1.0 : 0.0
 
@@ -242,12 +242,9 @@ PanelWindow {
                 duration: root.open
                     ? Core.Theme.durOpen
                     : Core.Theme.durClose
-
                 easing.type: root.open
-                    ? Easing.OutBack
+                    ? Easing.OutCubic
                     : Easing.InCubic
-
-                easing.overshoot: Core.Theme.overshoot
             }
         }
 
@@ -269,6 +266,13 @@ PanelWindow {
         border.color: Core.Theme.border
 
         antialiasing: true
+
+        // Cache the card while it is being scaled/faded. This keeps
+        // the transform on a stable scene-graph texture instead of
+        // forcing the whole popup subtree to be re-rasterized each
+        // frame.
+        layer.enabled: root.open || root.rendering
+        layer.smooth: true
 
         // Clipping is what makes the content look like it is being
         // revealed by the growing card.
@@ -327,7 +331,7 @@ PanelWindow {
             opacity: root.open ? 1.0 : 0.0
 
             transform: Translate {
-                y: root.open ? 0 : -10
+                y: root.open ? 0 : -6
 
                 Behavior on y {
                     NumberAnimation {
@@ -433,20 +437,20 @@ PanelWindow {
 
             antialiasing: true
 
+            layer.enabled: menuLayer.active || menuBox.opacity > 0.01
+            layer.smooth: true
+
             transformOrigin: Item.TopLeft
 
-            scale: menuLayer.active ? 1.0 : 0.85
+            scale: menuLayer.active ? 1.0 : 0.96
             opacity: menuLayer.active ? 1.0 : 0.0
 
             Behavior on scale {
                 NumberAnimation {
-                    duration: menuLayer.active ? 220 : 120
-
+                    duration: menuLayer.active ? 180 : 120
                     easing.type: menuLayer.active
-                        ? Easing.OutBack
+                        ? Easing.OutCubic
                         : Easing.InCubic
-
-                    easing.overshoot: 1.8
                 }
             }
 

@@ -86,9 +86,8 @@ Item {
                 target: icon
                 property: "scale"
                 to: 1.0
-                duration: 260
-                easing.type: Easing.OutBack
-                easing.overshoot: 2.2
+                duration: 160
+                easing.type: Easing.OutCubic
             }
         }
     }
@@ -126,13 +125,13 @@ Item {
             NumberAnimation {
                 to: 1.6
                 duration: 480
-                easing.type: Easing.InOutQuad
+                easing.type: Easing.InOutSine
             }
 
             NumberAnimation {
                 to: 1.0
                 duration: 480
-                easing.type: Easing.InOutQuad
+                easing.type: Easing.InOutSine
             }
         }
     }

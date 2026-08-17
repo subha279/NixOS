@@ -88,9 +88,8 @@ Item {
                     target: icon
                     property: "scale"
                     to: 1.0
-                    duration: 260
-                    easing.type: Easing.OutBack
-                    easing.overshoot: 2.2
+                    duration: 160
+                    easing.type: Easing.OutCubic
                 }
             }
         }
@@ -135,9 +134,8 @@ Item {
 
         Behavior on scale {
             NumberAnimation {
-                duration: 260
-                easing.type: Easing.OutBack
-                easing.overshoot: 2.4
+                duration: 160
+                easing.type: Easing.OutCubic
             }
         }
     }
