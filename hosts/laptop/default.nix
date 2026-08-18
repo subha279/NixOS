@@ -9,7 +9,6 @@
     ../../modules/networking
     ../../modules/users
     ../../modules/packages
-
     ../../modules/fonts
     ../../modules/audio
     ../../modules/bluetooth
@@ -25,7 +24,6 @@
     ../../modules/stylix
     ../../modules/development
     ../../modules/creator
-    ../../modules/ai
   ];
 
   networking.hostName = "subha";

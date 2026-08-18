@@ -11,7 +11,6 @@
 
     stylix = {
       url = "github:danth/stylix/release-26.05";
-
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -27,24 +26,6 @@
     }:
     {
       nixosConfigurations = {
-        vm = nixpkgs.lib.nixosSystem {
-          system = "x86_64-linux";
-
-          modules = [
-
-            stylix.nixosModules.stylix
-            ./hosts/vm
-
-            home-manager.nixosModules.home-manager
-
-            {
-              home-manager.useGlobalPkgs = true;
-              home-manager.useUserPackages = true;
-
-              home-manager.users.subha = import ./home;
-            }
-          ];
-        };
         laptop = nixpkgs.lib.nixosSystem {
           system = "x86_64-linux";
 
