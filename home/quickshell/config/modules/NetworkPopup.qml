@@ -544,12 +544,11 @@ Components.PopupSurface {
 
             clip: true
 
-            Behavior on height {
-                NumberAnimation {
-                    duration: Core.Theme.durBase
-                    easing.type: Easing.OutCubic
-                }
-            }
+            // Deliberately NO Behavior on height here. The card
+            // in PopupSurface animates its own height from this
+            // content already; animating both put two easing curves
+            // on the same axis, which is what made growth stutter.
+            // The list snaps, the card does the visible motion.
 
             ListView {
                 id: list

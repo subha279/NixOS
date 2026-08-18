@@ -141,8 +141,15 @@ PanelWindow {
     //
     // Computed from constants that definitely exist so a missing
     // Theme property can never turn this into NaN.
+    // The pill sits inside an outer border ring of height
+    // pillHeight + borderWidth*2, centred on the pill, so the ring
+    // extends borderWidth BELOW the pill itself. Without that term
+    // the card lands exactly on the ring and the gap vanishes.
     readonly property real barBottomY:
-        Core.Theme.barMarginTop + 10 + Core.Theme.pillHeight
+        Core.Theme.barMarginTop
+        + 10
+        + Core.Theme.pillHeight
+        + Core.Theme.borderWidth
 
     readonly property real naturalHeight:
         contentHost.implicitHeight + Core.Theme.padding * 2
@@ -262,8 +269,8 @@ PanelWindow {
 
         color: Core.Theme.backgroundSolid
 
-        border.width: 1
-        border.color: Core.Theme.border
+        border.width: 2
+        border.color: Core.Theme.borderActive
 
         antialiasing: true
 
@@ -273,10 +280,6 @@ PanelWindow {
         // frame.
         layer.enabled: root.open || root.rendering
         layer.smooth: true
-
-        // Clipping is what makes the content look like it is being
-        // revealed by the growing card.
-        clip: true
 
         // Soft drop shadow
         Rectangle {

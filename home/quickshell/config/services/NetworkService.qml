@@ -132,8 +132,32 @@ Singleton {
         return "\udb82\udd1f"
     }
 
-    // Keeps delegates alive so ListView add/remove/move transitions fire
+    // True when any field of the incoming row differs from the row
+    // already in the model.
+    function rowsDiffer(current, incoming) {
+        for (const k in incoming) {
+            if (current[k] !== incoming[k])
+                return true
+        }
+
+        return false
+    }
+
+    // Keeps delegates alive so ListView add/remove/move transitions
+    // fire. Two rules stop the list from fighting the user:
+    //
+    //   * While a menu is open (fastPoll) rows are NEVER reordered.
+    //     A poll landing mid-click used to move a row out from under
+    //     the cursor, which is the "glitch" — you press one network
+    //     and another one is suddenly there. New rows are appended
+    //     to the end instead, and the order settles on next open.
+    //
+    //   * A row is only rewritten when something actually changed.
+    //     set() on every poll rebound every delegate and restarted
+    //     their animations, which is the flicker.
     function syncModel(model, items, key) {
+        const freezeOrder = root.fastPoll
+
         for (let i = model.count - 1; i >= 0; i--) {
             const existing = model.get(i)[key]
             let stillThere = false
@@ -161,13 +185,23 @@ Singleton {
             }
 
             if (found === -1) {
-                model.insert(Math.min(j, model.count), item)
-            } else {
-                if (found !== j)
-                    model.move(found, j, 1)
+                model.insert(
+                    freezeOrder
+                        ? model.count
+                        : Math.min(j, model.count),
+                    item
+                )
 
-                model.set(j, item)
+                continue
             }
+
+            if (!freezeOrder && found !== j) {
+                model.move(found, j, 1)
+                found = j
+            }
+
+            if (root.rowsDiffer(model.get(found), item))
+                model.set(found, item)
         }
     }
 
@@ -331,6 +365,12 @@ Singleton {
                 }
 
                 // Connected first, then by signal strength
+                // Sort on BUCKETED strength, never the raw value.
+                // nmcli reports signal wobble of a few points between
+                // polls, so a raw comparison makes neighbouring APs
+                // trade places on every refresh. The ssid tiebreak
+                // guarantees a total order, so equal buckets cannot
+                // flip either.
                 list.sort(function(a, b) {
                     if (a.inUse !== b.inUse)
                         return a.inUse ? -1 : 1
@@ -338,7 +378,13 @@ Singleton {
                     if (a.saved !== b.saved)
                         return a.saved ? -1 : 1
 
-                    return b.strength - a.strength
+                    const ba = Math.round(a.strength / 10)
+                    const bb = Math.round(b.strength / 10)
+
+                    if (ba !== bb)
+                        return bb - ba
+
+                    return a.ssid < b.ssid ? -1 : (a.ssid > b.ssid ? 1 : 0)
                 })
 
                 root.activeSsid = activeSsid
@@ -572,7 +618,7 @@ Singleton {
     }
 
     property Timer pollTimer: Timer {
-        interval: root.fastPoll ? 1500 : 4000
+        interval: root.fastPoll ? 3000 : 4000
         running: true
         repeat: true
         triggeredOnStart: true

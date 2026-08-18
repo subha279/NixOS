@@ -33,6 +33,37 @@ Item {
         root.link === "ethernet"
 
     // ------------------------------------------------------------
+    // Signal tier, with a deadband
+    // ------------------------------------------------------------
+    //
+    // Raw nmcli strength moves a few points between polls. Testing
+    // it directly against 25/50/75 makes the glyph flip back and
+    // forth whenever the real value sits near a boundary. The tier
+    // only advances once the signal clears the boundary by `dead`,
+    // and only drops once it falls below by the same margin.
+
+    property int tier: 3
+
+    readonly property int rawSignal:
+        Services.NetworkService.activeSignal
+
+    onRawSignalChanged: {
+        const s = root.rawSignal
+        const bounds = [25, 50, 75]
+        const dead = 6
+
+        let t = root.tier
+
+        while (t < 3 && s >= bounds[t] + dead)
+            t++
+
+        while (t > 0 && s < bounds[t - 1] - dead)
+            t--
+
+        root.tier = t
+    }
+
+    // ------------------------------------------------------------
     // Hover / open background
     // ------------------------------------------------------------
 
@@ -98,17 +129,16 @@ Item {
             const svc = Services.NetworkService
 
             if (!svc.wifiEnabled)
-                return "\udb82\udd2d"
+                return Core.Icons.wifiOff
 
             if (!svc.wifiConnected)
-                return "\udb82\udd2f"
+                return Core.Icons.wifiNone
 
-            if (svc.activeSignal >= 75) return "\udb82\udd28"
-            if (svc.activeSignal >= 50) return "\udb82\udd25"
-            if (svc.activeSignal >= 25) return "\udb82\udd22"
+            if (root.tier >= 3) return Core.Icons.wifi3
+            if (root.tier === 2) return Core.Icons.wifi2
+            if (root.tier === 1) return Core.Icons.wifi1
 
-            return "\udb82\udd1f"
-        }
+            return Core.Icons.wifi0        }
 
         font.family: Core.Theme.fontFamily
         font.pixelSize: Core.Theme.iconSize
