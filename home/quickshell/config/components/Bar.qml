@@ -97,6 +97,52 @@ PanelWindow {
         root.reveal > 0.012
 
     // ============================================================
+    // OSD takeover
+    // ============================================================
+    //
+    // There is no separate OSD window. The bar becomes the OSD: the
+    // module row fades out, the readout fades in, and when the hold
+    // timer in OsdController expires the bar returns to the clock.
+    //
+    // Hovering always wins. If the pill is expanded or a popup is
+    // open the OSD stays out of the way instead of yanking the
+    // modules out from under the pointer — you can already see the
+    // volume module in that state.
+
+    readonly property bool osd:
+        Core.OsdController.active && !root.expanded
+
+    // ------------------------------------------------------------
+    // One animated value drives the entire OSD morph
+    // ------------------------------------------------------------
+    //
+    // 0 = module row, 1 = OSD readout. Width, both opacities and
+    // the rise all read this single value, so they physically
+    // cannot drift apart the way three separate Behaviors did.
+
+    property real osdMix:
+        root.osd ? 1.0 : 0.0
+
+    Behavior on osdMix {
+        NumberAnimation {
+            duration: Core.Theme.barRevealDuration
+            easing.type: Easing.OutCubic
+        }
+    }
+
+    // Deliberately NOT animated. content.implicitWidth is already
+    // changing every frame while the modules unfold; animating this
+    // as well meant the ring and surface were chasing a moving
+    // target and always lagged their own content. That lag is what
+    // read as an unsmooth bar. Interpolating instead means the pill
+    // tracks the row exactly, frame for frame, and still morphs
+    // when the OSD takes over.
+    readonly property real barContentWidth:
+        content.implicitWidth
+        + (osdView.implicitWidth - content.implicitWidth)
+        * root.osdMix
+
+    // ============================================================
     // OUTER BORDER RING
     // ============================================================
     //
@@ -122,7 +168,7 @@ PanelWindow {
             (Core.Theme.borderWidth * 2)
 
         width:
-            content.implicitWidth +
+            root.barContentWidth +
             24 +
             (Core.Theme.borderWidth * 2)
 
@@ -185,7 +231,7 @@ PanelWindow {
                 Core.Theme.pillHeight
 
             width:
-                content.implicitWidth + 24
+                root.barContentWidth + 24
 
             radius:
                 height / 2
@@ -207,12 +253,44 @@ PanelWindow {
             // CONTENT
             // ====================================================
 
+            // ====================================================
+            // OSD READOUT
+            // ====================================================
+            //
+            // Shares the pill with the module row below. Exactly one
+            // of the two is ever visible.
+
+            BarOsd {
+                id: osdView
+
+                anchors.centerIn: parent
+
+                // Straight off the shared mix value — no Behavior
+                // of its own, so it is exactly in step with the
+                // width and the fading module row.
+                opacity: root.osdMix
+
+                visible: root.osdMix > 0.01
+
+                // Rises into place rather than just appearing.
+                transform: Translate {
+                    y: (1.0 - root.osdMix) * 4
+                }
+            }
+
             RowLayout {
                 id: content
 
                 anchors.centerIn: parent
 
                 spacing: 3
+
+                // Fades out while the bar is acting as an OSD. The
+                // clock lives in this row, so this is what takes the
+                // time off screen and brings it back.
+                opacity: 1.0 - root.osdMix
+
+                visible: root.osdMix < 0.99
 
                 // ==================================================
                 // Notification center
@@ -317,6 +395,10 @@ PanelWindow {
                     opacity:
                         root.reveal
                 }
+
+                // --------------------------------------------------
+                // Wi-Fi / Bluetooth separator
+                // --------------------------------------------------
 
                 Separator {
                     reveal: root.reveal

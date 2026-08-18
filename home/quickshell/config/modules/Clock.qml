@@ -80,7 +80,7 @@ Item {
         font.pixelSize: Core.Theme.fontSize
         font.weight: Font.Medium
 
-        renderType: Text.NativeRendering
+        renderType: Text.QtRendering
     }
 
     MouseArea {

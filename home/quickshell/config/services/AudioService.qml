@@ -6,6 +6,8 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Services.Pipewire
 
+import "../core" as Core
+
 // ================================================================
 // AudioService
 // ----------------------------------------------------------------
@@ -186,6 +188,38 @@ Singleton {
 
     readonly property int micPercent:
         Math.round(root.micVolume * 100)
+
+    // ------------------------------------------------------------
+    // OSD triggers
+    // ------------------------------------------------------------
+    //
+    // These fire for every volume change no matter who caused it,
+    // which is the whole reason they live in the service.
+    //
+    // OsdController ignores calls until it has armed itself, so the
+    // settle from 0 to the real volume at startup does not flash a
+    // readout across the bar.
+
+    onVolumeChanged:
+        Core.OsdController.show(
+            "volume",
+            root.volume,
+            root.muted
+        )
+
+    onMutedChanged:
+        Core.OsdController.show(
+            "volume",
+            root.volume,
+            root.muted
+        )
+
+    onMicMutedChanged:
+        Core.OsdController.show(
+            "mic",
+            root.micVolume,
+            root.micMuted
+        )
 
     // ------------------------------------------------------------
     // Icons

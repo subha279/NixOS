@@ -2,9 +2,19 @@ import QtQuick
 import QtQuick.Layouts
 
 import Quickshell
-import Quickshell.Io
 
 import "../core" as Core
+import "../services" as Services
+
+// ================================================================
+// Brightness (bar module)
+// ----------------------------------------------------------------
+// Pure view. The brightnessctl process, the poll and the level all
+// moved to services/BrightnessService.qml so the OSD can observe
+// brightness without the bar module having to be alive.
+//
+// Behaviour is unchanged: wheel or click steps by 5%.
+// ================================================================
 
 Item {
     id: root
@@ -12,63 +22,8 @@ Item {
     implicitWidth: 58
     implicitHeight: Core.Theme.moduleHeight
 
-    property int level: 0
-
-    Process {
-        id: getBrightness
-
-        command: [
-            "brightnessctl",
-            "-m"
-        ]
-
-        stdout: StdioCollector {
-            onStreamFinished: {
-
-                const output =
-                    text.trim()
-
-                const match =
-                    output.match(/,(\d+)%/)
-
-                if (match) {
-                    root.level =
-                        parseInt(match[1])
-                }
-            }
-        }
-    }
-
-    function refresh() {
-        getBrightness.running = false
-        getBrightness.running = true
-    }
-
-    function change(amount) {
-
-        Quickshell.execDetached([
-            "brightnessctl",
-            "-e4",
-            "-n2",
-            "set",
-            amount
-        ])
-
-        refresh()
-    }
-
-    Component.onCompleted:
-        refresh()
-
-    Timer {
-        interval: 500
-
-        running: true
-        repeat: true
-
-        onTriggered:
-            root.refresh()
-    }
+    readonly property int level:
+        Services.BrightnessService.level
 
     Rectangle {
         anchors.fill: parent
@@ -93,7 +48,11 @@ Item {
         spacing: 5
 
         Text {
-            text: "󰃠"
+            // Ramps with the level instead of showing the same sun
+            // at 5% and at 100%.
+            text: Core.Icons.forBrightness(
+                Services.BrightnessService.fraction
+            )
 
             font.family:
                 Core.Theme.fontFamily
@@ -120,6 +79,8 @@ Item {
 
             color:
                 Core.Theme.foreground
+
+            renderType: Text.QtRendering
         }
     }
 
@@ -138,13 +99,15 @@ Item {
 
         onWheel: function(event) {
 
-            if (event.angleDelta.y > 0)
-                root.change("5%+")
-            else
-                root.change("5%-")
+            if (event.angleDelta.y === 0)
+                return
+
+            Services.BrightnessService.step(
+                event.angleDelta.y > 0
+            )
         }
 
         onClicked:
-            root.change("5%+")
+            Services.BrightnessService.step(true)
     }
 }

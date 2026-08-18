@@ -104,6 +104,30 @@ QtObject {
 
     readonly property string brightness: "\udb80\udce0"     // F00E0
 
+    // Brightness ramp, dim -> bright (mdi-brightness-4..7).
+    // Verified: F00DE, F00DF, F00E0, F00E1.
+    readonly property var brightnessRamp: [
+        "\udb80\udcde",
+        "\udb80\udcdf",
+        "\udb80\udce0",
+        "\udb80\udce1"
+    ]
+
+    // fraction is 0..1.
+    function forBrightness(fraction) {
+        const f =
+            Math.max(0, Math.min(1, fraction))
+
+        const i =
+            Math.min(
+                brightnessRamp.length - 1,
+                Math.floor(f * brightnessRamp.length)
+            )
+
+        return brightnessRamp[i]
+    }
+
+
     // ------------------------------------------------------------
     // Notifications
     // ------------------------------------------------------------

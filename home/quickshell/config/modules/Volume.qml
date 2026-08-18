@@ -107,7 +107,7 @@ Item {
                 ? Core.Theme.foregroundMuted
                 : Core.Theme.foreground
 
-            renderType: Text.NativeRendering
+            renderType: Text.QtRendering
         }
     }
 

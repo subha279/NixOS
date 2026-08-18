@@ -3,3 +3,4 @@ module Shell.Core
 singleton Theme 1.0 Theme.qml
 singleton Icons 1.0 Icons.qml
 singleton PopupManager 1.0 PopupManager.qml
+singleton OsdController 1.0 OsdController.qml

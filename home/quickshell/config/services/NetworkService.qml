@@ -618,7 +618,7 @@ Singleton {
     }
 
     property Timer pollTimer: Timer {
-        interval: root.fastPoll ? 3000 : 4000
+        interval: root.fastPoll ? 3000 : 10000
         running: true
         repeat: true
         triggeredOnStart: true
