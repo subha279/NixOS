@@ -72,6 +72,10 @@ function M.setup()
 				"prettier",
 			},
 
+			qml = {
+				"qmlformat",
+			},
+
 			css = {
 				"prettier",
 			},

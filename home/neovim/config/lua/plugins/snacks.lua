@@ -39,11 +39,8 @@ function M.setup()
 		-- ======================================================================
 
 		notifier = {
-			enabled = true,
-
-			timeout = 3000,
-
-			style = "compact",
+			-- Keep vim.notify on Neovim's default UI.
+			enabled = false,
 		},
 
 		-- ======================================================================

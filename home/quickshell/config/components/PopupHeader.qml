@@ -19,7 +19,7 @@ Item {
     property bool showToggle: false
     property bool toggled: false
 
-    signal toggleRequested()
+    signal toggleRequested
 
     // Action buttons: [{ icon, tooltip, spinning, action }]
     property var actions: []
@@ -85,9 +85,7 @@ Item {
 
                 radius: 14
 
-                color: btnMouse.containsMouse
-                    ? Core.Theme.surfaceHover
-                    : "transparent"
+                color: btnMouse.containsMouse ? Core.Theme.surfaceHover : "transparent"
 
                 Behavior on color {
                     ColorAnimation {
@@ -138,7 +136,7 @@ Item {
 
                     onClicked: {
                         if (typeof modelData.action === "function")
-                            modelData.action()
+                            modelData.action();
                     }
                 }
             }
@@ -166,14 +164,10 @@ Item {
 
                 radius: 10
 
-                color: root.toggled
-                    ? Core.Theme.accent
-                    : Core.Theme.surface
+                color: root.toggled ? Core.Theme.accent : Core.Theme.surface
 
                 border.width: 1
-                border.color: root.toggled
-                    ? Core.Theme.accent
-                    : Core.Theme.border
+                border.color: root.toggled ? Core.Theme.accent : Core.Theme.border
 
                 Behavior on color {
                     ColorAnimation {
@@ -191,9 +185,7 @@ Item {
 
                     x: root.toggled ? track.width - width - 3 : 3
 
-                    color: root.toggled
-                        ? Core.Theme.accentForeground
-                        : Core.Theme.foregroundMuted
+                    color: root.toggled ? Core.Theme.accentForeground : Core.Theme.foregroundMuted
 
                     Behavior on x {
                         NumberAnimation {

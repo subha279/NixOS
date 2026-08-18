@@ -32,26 +32,26 @@ QtObject {
     property bool dnd: false
 
     function isOpen(id) {
-        return root.current === id
+        return root.current === id;
     }
 
     function open(id, center, bottom) {
-        root.anchorCenter = center
-        root.anchorBottom = bottom
-        root.current = id
+        root.anchorCenter = center;
+        root.anchorBottom = bottom;
+        root.current = id;
     }
 
     function toggle(id, center, bottom) {
         if (root.current === id) {
-            root.close()
-            return
+            root.close();
+            return;
         }
 
-        root.open(id, center, bottom)
+        root.open(id, center, bottom);
     }
 
     function close() {
-        root.contextMenuOpen = false
-        root.current = ""
+        root.contextMenuOpen = false;
+        root.current = "";
     }
 }

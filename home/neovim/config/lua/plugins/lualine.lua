@@ -2,30 +2,11 @@
 -- Aurora Lualine
 -- ============================================================================
 --
--- Minimal • Information-rich • Glass-friendly • Aurora-native
+-- Responsive • Information-rich • Glass-friendly • Aurora-native
 --
--- Theme source:
---
---     ~/.config/aurora/active-theme.lua
---
--- Features:
---
---   • Live Aurora theme switching
---   • Git branch / diff
---   • Diagnostics
---   • LSP clients
---   • Project / file
---   • Search count
---   • Macro recording
---   • File encoding
---   • Filetype
---   • Progress / location
---   • Clock
---
--- IMPORTANT:
---
--- Lualine intentionally avoids a large opaque background.
--- Hyprland is responsible for the glass / blur effect.
+-- The layout keeps its essential context in narrow terminals and progressively
+-- reveals project, Git, LSP, file, and clock details as more width is available.
+-- Theme colors continue to come exclusively from Aurora's active theme.
 --
 -- ============================================================================
 
@@ -37,18 +18,9 @@ local M = {}
 
 local function get_theme()
 	local path = vim.fn.expand("~/.config/aurora/active-theme.lua")
-
 	local ok, theme = pcall(dofile, path)
 
-	if not ok then
-		return nil
-	end
-
-	if type(theme) ~= "table" then
-		return nil
-	end
-
-	if type(theme.colors) ~= "table" then
+	if not ok or type(theme) ~= "table" or type(theme.colors) ~= "table" then
 		return nil
 	end
 
@@ -57,75 +29,150 @@ end
 
 local function colors()
 	local theme = get_theme()
+	return theme and theme.colors or {}
+end
 
-	if theme and theme.colors then
-		return theme.colors
+local function transparent(foreground)
+	return {
+		fg = foreground,
+		bg = "NONE",
+	}
+end
+
+-- ============================================================================
+-- Responsive helpers
+-- ============================================================================
+
+local function columns()
+	return vim.o.columns
+end
+
+local function at_least(minimum)
+	return function()
+		return columns() >= minimum
+	end
+end
+
+local function truncate(text, maximum)
+	if text == nil or text == "" then
+		return ""
 	end
 
-	return {}
+	if vim.fn.strdisplaywidth(text) <= maximum then
+		return text
+	end
+
+	return vim.fn.strcharpart(text, 0, math.max(maximum - 1, 1)) .. "…"
 end
 
 -- ============================================================================
--- Safe Color Helpers
+-- Mode capsule
 -- ============================================================================
 
-local function color(name, fallback)
+local mode_labels = {
+	normal = { short = "N", long = "NORMAL" },
+	insert = { short = "I", long = "INSERT" },
+	visual = { short = "V", long = "VISUAL" },
+	replace = { short = "R", long = "REPLACE" },
+	command = { short = "C", long = "COMMAND" },
+	select = { short = "S", long = "SELECT" },
+	terminal = { short = "T", long = "TERMINAL" },
+}
+
+local function mode_kind()
+	local current = vim.fn.mode(1)
+	local first = current:sub(1, 1)
+
+	if first == "i" then
+		return "insert"
+	end
+
+	if first == "v" or current == "V" or first == "\22" then
+		return "visual"
+	end
+
+	if first == "R" then
+		return "replace"
+	end
+
+	if first == "c" then
+		return "command"
+	end
+
+	if first == "s" or current == "S" or first == "\19" then
+		return "select"
+	end
+
+	if first == "t" then
+		return "terminal"
+	end
+
+	return "normal"
+end
+
+local function mode_label()
+	local label = mode_labels[mode_kind()] or mode_labels.normal
+
+	if columns() < 72 then
+		return label.short
+	end
+
+	return label.long
+end
+
+local function mode_color()
 	local c = colors()
+	local backgrounds = {
+		normal = c.accent,
+		insert = c.success,
+		visual = c.info,
+		replace = c.warning,
+		command = c.accentHover or c.accent,
+		select = c.info,
+		terminal = c.success,
+	}
 
-	return c[name] or fallback
-end
-
-local function fg(name)
-	return color(name, nil)
+	return {
+		fg = c.accentForeground,
+		bg = backgrounds[mode_kind()] or c.accent,
+		gui = "bold",
+	}
 end
 
 -- ============================================================================
--- Project
+-- Context components
 -- ============================================================================
 
-local function cwd()
-	local dir = vim.fn.getcwd()
+local function project_name()
+	local directory = vim.fn.getcwd()
 
-	if dir == "" then
+	if directory == "" then
 		return ""
 	end
 
 	local home = vim.fn.expand("~")
 
-	if dir == home then
+	if directory == home then
 		return "󰋜 ~"
 	end
 
-	if vim.startswith(dir, home .. "/") then
-		dir = "~" .. dir:sub(#home + 1)
-	end
-
-	local tail = vim.fn.fnamemodify(dir, ":t")
-
-	if tail == "" then
-		return dir
-	end
-
-	return "󰉋 " .. tail
+	local tail = vim.fn.fnamemodify(directory, ":t")
+	return tail ~= "" and ("󱉭 " .. tail) or directory
 end
 
--- ============================================================================
--- LSP
--- ============================================================================
-
-local function lsp_clients()
-	local clients = vim.lsp.get_clients({
-		bufnr = 0,
-	})
+local function lsp_status()
+	local clients = vim.lsp.get_clients({ bufnr = 0 })
 
 	if #clients == 0 then
 		return ""
 	end
 
 	local names = {}
+	local seen = {}
 
 	for _, client in ipairs(clients) do
-		if client.name and client.name ~= "" then
+		if client.name and client.name ~= "" and not seen[client.name] then
+			seen[client.name] = true
 			names[#names + 1] = client.name
 		end
 	end
@@ -136,299 +183,125 @@ local function lsp_clients()
 
 	table.sort(names)
 
-	return "󰒋 " .. table.concat(names, ", ")
-end
+	if columns() < 118 then
+		return string.format("󰒋 %d", #names)
+	end
 
--- ============================================================================
--- Search
--- ============================================================================
+	local progress = ""
+
+	if type(vim.lsp.status) == "function" then
+		local ok, value = pcall(vim.lsp.status)
+
+		if ok and type(value) == "string" then
+			progress = value
+		end
+	end
+
+	if progress ~= "" and columns() >= 150 then
+		return "󰚩 " .. truncate(progress, 28)
+	end
+
+	return "󰒋 " .. truncate(table.concat(names, " · "), columns() >= 155 and 34 or 20)
+end
 
 local function search_count()
+	if vim.v.hlsearch == 0 then
+		return ""
+	end
+
 	local ok, result = pcall(vim.fn.searchcount, {
 		maxcount = 999,
-		timeout = 100,
+		timeout = 50,
 	})
 
-	if not ok or type(result) ~= "table" then
+	if not ok or type(result) ~= "table" or not result.total or result.total == 0 then
 		return ""
 	end
 
-	if not result.total or result.total == 0 then
-		return ""
-	end
-
-	if not result.current or result.current == 0 then
-		return ""
-	end
-
-	return string.format("󰍉 %d/%d", result.current, result.total)
+	return string.format("󰍉 %d/%d", result.current or 0, result.total)
 end
 
--- ============================================================================
--- File State
--- ============================================================================
-
-local function file_state()
-	local parts = {}
-
-	if vim.bo.modified then
-		parts[#parts + 1] = "●"
-	end
-
-	if vim.bo.readonly then
-		parts[#parts + 1] = ""
-	end
-
-	if vim.bo.modifiable == false then
-		parts[#parts + 1] = "󰌾"
-	end
-
-	return table.concat(parts, " ")
+local function has_search_count()
+	return search_count() ~= ""
 end
-
--- ============================================================================
--- Macro Recording
--- ============================================================================
 
 local function recording()
-	local reg = vim.fn.reg_recording()
+	local register = vim.fn.reg_recording()
+	return register == "" and "" or ("󰑋 @" .. register)
+end
 
-	if reg == "" then
+local function is_recording()
+	return vim.fn.reg_recording() ~= ""
+end
+
+local function encoding()
+	local value = vim.bo.fileencoding ~= "" and vim.bo.fileencoding or vim.o.encoding
+
+	if value == "" then
 		return ""
 	end
 
-	return "󰑋 @" .. reg
+	if value:lower() == "utf-8" and columns() < 150 then
+		return ""
+	end
+
+	return "󰉿 " .. value:upper()
 end
 
--- ============================================================================
--- Mode
--- ============================================================================
-
-local mode_map = {
-	n = "NORMAL",
-	no = "NORMAL",
-	nov = "NORMAL",
-	noV = "NORMAL",
-	["no\22"] = "NORMAL",
-
-	i = "INSERT",
-	ic = "INSERT",
-	ix = "INSERT",
-
-	v = "VISUAL",
-	vs = "VISUAL",
-
-	V = "V-LINE",
-	Vs = "V-LINE",
-
-	["\22"] = "V-BLOCK",
-	["\22s"] = "V-BLOCK",
-
-	c = "COMMAND",
-	cv = "EX",
-	ce = "EX",
-
-	R = "REPLACE",
-	Rv = "REPLACE",
-
-	s = "SELECT",
-	S = "S-LINE",
-	["\19"] = "S-BLOCK",
-
-	t = "TERMINAL",
-}
-
-local function mode()
-	local current = vim.fn.mode()
-
-	return mode_map[current] or current:upper()
-end
-
--- ============================================================================
--- Mode Color
--- ============================================================================
-
-local function mode_color()
-	local current = vim.fn.mode()
-	local c = colors()
-
-	if current == "i" or current == "ic" or current == "ix" then
-		return {
-			fg = c.accentForeground,
-			bg = c.success,
-			gui = "bold",
-		}
-	end
-
-	if current == "v" or current == "V" or current == "\22" or current == "vs" or current == "Vs" then
-		return {
-			fg = c.accentForeground,
-			bg = c.info,
-			gui = "bold",
-		}
-	end
-
-	if current == "R" or current == "Rv" then
-		return {
-			fg = c.accentForeground,
-			bg = c.warning,
-			gui = "bold",
-		}
-	end
-
-	if current == "c" or current == "cv" or current == "ce" then
-		return {
-			fg = c.accentForeground,
-			bg = c.accentHover or c.accent,
-			gui = "bold",
-		}
-	end
-
-	return {
-		fg = c.accentForeground,
-		bg = c.accent,
-		gui = "bold",
+local function line_ending()
+	local formats = {
+		dos = "CRLF",
+		mac = "CR",
 	}
+
+	local value = formats[vim.bo.fileformat]
+	return value and ("󰌑 " .. value) or ""
+end
+
+local function compact_filetype(name)
+	if columns() < 105 then
+		return truncate(name, 8)
+	end
+
+	return name
+end
+
+local function has_diagnostics()
+	return #vim.diagnostic.get(0) > 0
 end
 
 -- ============================================================================
--- Dynamic Theme
+-- Dynamic Aurora theme
 -- ============================================================================
 
 local function build_theme()
 	local c = colors()
+	local active = {
+		a = mode_color(),
+		b = transparent(c.text),
+		c = transparent(c.textSecondary),
+		x = transparent(c.textSecondary),
+		y = transparent(c.text),
+		z = transparent(c.textSecondary),
+	}
+	local inactive = {
+		a = transparent(c.textMuted),
+		b = transparent(c.textMuted),
+		c = transparent(c.textMuted),
+		x = transparent(c.textMuted),
+		y = transparent(c.textMuted),
+		z = transparent(c.textMuted),
+	}
 
 	return {
-		normal = {
-			a = mode_color(),
-
-			b = {
-				fg = c.text,
-				bg = "NONE",
-			},
-
-			c = {
-				fg = c.textSecondary,
-				bg = "NONE",
-			},
-
-			x = {
-				fg = c.textSecondary,
-				bg = "NONE",
-			},
-
-			y = {
-				fg = c.text,
-				bg = "NONE",
-			},
-
-			z = {
-				fg = c.textSecondary,
-				bg = "NONE",
-			},
-		},
-
-		insert = {
-			a = mode_color(),
-
-			b = {
-				fg = c.text,
-				bg = "NONE",
-			},
-
-			c = {
-				fg = c.textSecondary,
-				bg = "NONE",
-			},
-		},
-
-		visual = {
-			a = mode_color(),
-
-			b = {
-				fg = c.text,
-				bg = "NONE",
-			},
-
-			c = {
-				fg = c.textSecondary,
-				bg = "NONE",
-			},
-		},
-
-		replace = {
-			a = mode_color(),
-
-			b = {
-				fg = c.text,
-				bg = "NONE",
-			},
-
-			c = {
-				fg = c.textSecondary,
-				bg = "NONE",
-			},
-		},
-
-		command = {
-			a = mode_color(),
-
-			b = {
-				fg = c.text,
-				bg = "NONE",
-			},
-
-			c = {
-				fg = c.textSecondary,
-				bg = "NONE",
-			},
-		},
-
-		select = {
-			a = mode_color(),
-
-			b = {
-				fg = c.text,
-				bg = "NONE",
-			},
-
-			c = {
-				fg = c.textSecondary,
-				bg = "NONE",
-			},
-		},
-
-		inactive = {
-			a = {
-				fg = c.textMuted,
-				bg = "NONE",
-			},
-
-			b = {
-				fg = c.textMuted,
-				bg = "NONE",
-			},
-
-			c = {
-				fg = c.textMuted,
-				bg = "NONE",
-			},
-
-			x = {
-				fg = c.textMuted,
-				bg = "NONE",
-			},
-
-			y = {
-				fg = c.textMuted,
-				bg = "NONE",
-			},
-
-			z = {
-				fg = c.textMuted,
-				bg = "NONE",
-			},
-		},
+		normal = vim.deepcopy(active),
+		insert = vim.deepcopy(active),
+		visual = vim.deepcopy(active),
+		replace = vim.deepcopy(active),
+		command = vim.deepcopy(active),
+		select = vim.deepcopy(active),
+		terminal = vim.deepcopy(active),
+		inactive = inactive,
 	}
 end
 
@@ -441,10 +314,9 @@ local function build_config()
 
 	return {
 		options = {
+			icons_enabled = true,
 			theme = build_theme(),
-
 			globalstatus = true,
-
 			disabled_filetypes = {
 				statusline = {
 					"dashboard",
@@ -458,354 +330,213 @@ local function build_config()
 					"mason",
 				},
 			},
-
-			section_separators = {
-				left = "",
-				right = "",
-			},
-
-			component_separators = {
-				left = "│",
-				right = "│",
-			},
-
+			section_separators = { left = "", right = "" },
+			component_separators = { left = "·", right = "·" },
 			always_divide_middle = true,
-
 			always_show_tabline = false,
-
 			refresh = {
-				statusline = 1000,
+				statusline = 500,
 				tabline = 1000,
 				winbar = 1000,
 			},
 		},
 
-		-- ======================================================================
-		-- LEFT
-		-- ======================================================================
-
 		sections = {
 			lualine_a = {
 				{
-					mode,
-
+					mode_label,
 					color = mode_color,
-
-					padding = {
-						left = 1,
-						right = 1,
-					},
+					separator = { left = "", right = "" },
+					padding = { left = 1, right = 1 },
 				},
 			},
 
 			lualine_b = {
 				{
 					"branch",
-
 					icon = "󰘬",
-
+					cond = at_least(62),
 					color = {
 						fg = c.accent,
 						bg = "NONE",
 						gui = "bold",
 					},
-
-					padding = {
-						left = 1,
-						right = 1,
-					},
+					padding = { left = 1, right = 1 },
 				},
-
 				{
 					"diff",
-
+					cond = at_least(108),
 					symbols = {
-						added = "＋",
-						modified = "～",
-						removed = "－",
+						added = "+",
+						modified = "~",
+						removed = "-",
 					},
-
 					diff_color = {
-						added = {
-							fg = c.success,
-						},
-
-						modified = {
-							fg = c.warning,
-						},
-
-						removed = {
-							fg = c.error,
-						},
+						added = { fg = c.success },
+						modified = { fg = c.warning },
+						removed = { fg = c.error },
 					},
-
-					padding = {
-						left = 0,
-						right = 1,
-					},
+					padding = { left = 0, right = 1 },
 				},
-
 				{
 					"diagnostics",
-
-					sources = {
-						"nvim_diagnostic",
-					},
-
+					cond = has_diagnostics,
+					sources = { "nvim_diagnostic" },
 					symbols = {
 						error = "󰅚 ",
 						warn = "󰀪 ",
 						info = "󰋽 ",
 						hint = "󰌵 ",
 					},
-
 					diagnostics_color = {
-						error = {
-							fg = c.error,
-						},
-
-						warn = {
-							fg = c.warning,
-						},
-
-						info = {
-							fg = c.info,
-						},
-
-						hint = {
-							fg = c.success,
-						},
+						error = { fg = c.error },
+						warn = { fg = c.warning },
+						info = { fg = c.info },
+						hint = { fg = c.success },
 					},
-
-					padding = {
-						left = 0,
-						right = 1,
-					},
+					padding = { left = 0, right = 1 },
 				},
 			},
 
-			-- ==================================================================
-			-- CENTER
-			-- ==================================================================
-
 			lualine_c = {
 				{
-					cwd,
-
-					color = {
-						fg = c.textMuted,
-						bg = "NONE",
-					},
-
-					padding = {
-						left = 0,
-						right = 1,
-					},
+					project_name,
+					cond = at_least(126),
+					color = transparent(c.textMuted),
+					padding = { left = 0, right = 1 },
 				},
-
 				{
 					"filename",
-
 					path = 1,
-
-					shorting_target = 40,
-
+					shorting_target = 24,
 					symbols = {
 						modified = " ●",
 						readonly = " ",
 						unnamed = "[No Name]",
+						newfile = "[New]",
 					},
-
 					color = {
 						fg = c.text,
 						bg = "NONE",
 						gui = "bold",
 					},
-
-					padding = {
-						left = 0,
-						right = 1,
-					},
-				},
-
-				{
-					file_state,
-
-					color = function()
-						return {
-							fg = vim.bo.modified and c.warning or c.textMuted,
-							bg = "NONE",
-						}
-					end,
-
-					padding = {
-						left = 0,
-						right = 0,
-					},
+					padding = { left = 0, right = 1 },
 				},
 			},
 
-			-- ==================================================================
-			-- RIGHT
-			-- ==================================================================
-
 			lualine_x = {
 				{
-					lsp_clients,
-
-					color = {
-						fg = c.info,
-						bg = "NONE",
-					},
-
-					padding = {
-						left = 1,
-						right = 1,
-					},
-				},
-
-				{
-					search_count,
-
-					color = {
-						fg = c.accent,
-						bg = "NONE",
-					},
-
-					padding = {
-						left = 0,
-						right = 1,
-					},
-				},
-
-				{
 					recording,
-
+					cond = is_recording,
 					color = {
 						fg = c.error,
 						bg = "NONE",
 						gui = "bold",
 					},
-
-					padding = {
-						left = 0,
-						right = 1,
-					},
 				},
-
 				{
-					"encoding",
-
-					show_bomb = true,
-
-					fmt = function(value)
-						if value == "utf-8" then
-							return "󰉿"
-						end
-
-						return "󰉿 " .. value
-					end,
-
-					color = {
-						fg = c.textMuted,
-						bg = "NONE",
-					},
-
-					padding = {
-						left = 0,
-						right = 1,
-					},
+					search_count,
+					cond = has_search_count,
+					color = transparent(c.accent),
 				},
-
+				{
+					lsp_status,
+					cond = at_least(82),
+					color = transparent(c.info),
+				},
+				{
+					"filesize",
+					cond = at_least(170),
+					color = transparent(c.textMuted),
+				},
+				{
+					line_ending,
+					color = transparent(c.warning),
+				},
+				{
+					encoding,
+					color = transparent(c.textMuted),
+				},
 				{
 					"filetype",
-
 					colored = true,
-
-					color = {
-						fg = c.accent,
-						bg = "NONE",
-					},
-
-					padding = {
-						left = 0,
-						right = 1,
-					},
+					cond = at_least(68),
+					fmt = compact_filetype,
+					color = transparent(c.accent),
+					padding = { left = 0, right = 1 },
 				},
 			},
-
-			-- ==================================================================
-			-- POSITION
-			-- ==================================================================
 
 			lualine_y = {
 				{
 					"progress",
-
+					cond = at_least(94),
 					fmt = function(value)
 						return "󰦖 " .. value
 					end,
-
-					color = {
-						fg = c.textSecondary,
-						bg = "NONE",
-					},
-
-					padding = {
-						left = 1,
-						right = 1,
-					},
+					color = transparent(c.textSecondary),
+					padding = { left = 1, right = 1 },
 				},
-
 				{
 					"location",
-
 					fmt = function(value)
 						return "󰍒 " .. value
 					end,
-
 					color = {
 						fg = c.text,
 						bg = "NONE",
 						gui = "bold",
 					},
-
-					padding = {
-						left = 0,
-						right = 1,
-					},
+					padding = { left = 0, right = 1 },
 				},
 			},
-
-			-- ==================================================================
-			-- CLOCK
-			-- ==================================================================
 
 			lualine_z = {
 				{
 					function()
+						if columns() >= 182 then
+							return os.date("%a %H:%M")
+						end
+
 						return os.date("%H:%M")
 					end,
-
 					icon = "󰥔",
-
-					color = {
-						fg = c.textMuted,
-						bg = "NONE",
-					},
-
-					padding = {
-						left = 1,
-						right = 0,
-					},
+					cond = at_least(145),
+					color = transparent(c.textMuted),
+					padding = { left = 1, right = 0 },
 				},
 			},
 		},
+
+		inactive_sections = {
+			lualine_a = {},
+			lualine_b = {},
+			lualine_c = {
+				{
+					"filename",
+					path = 1,
+					color = transparent(c.textMuted),
+				},
+			},
+			lualine_x = {
+				{
+					"location",
+					color = transparent(c.textMuted),
+				},
+			},
+			lualine_y = {},
+			lualine_z = {},
+		},
+
+		tabline = {},
+		winbar = {},
+		inactive_winbar = {},
+		extensions = {},
 	}
 end
 
 -- ============================================================================
--- Setup
+-- Setup and live theme refresh
 -- ============================================================================
 
 function M.setup()
@@ -824,28 +555,8 @@ function M.setup()
 	return true
 end
 
--- ============================================================================
--- Live Theme Refresh
--- ============================================================================
-
 function M.refresh_theme()
-	local ok, lualine = pcall(require, "lualine")
-
-	if not ok then
-		return false
-	end
-
-	lualine.setup(build_config())
-
-	vim.schedule(function()
-		vim.cmd("redrawstatus!")
-	end)
-
-	return true
+	return M.setup()
 end
-
--- ============================================================================
--- Return
--- ============================================================================
 
 return M

@@ -11,12 +11,9 @@ QtObject {
     // Aurora Runtime Theme
     // ============================================================
 
-    readonly property string auroraDirectory:
-        Quickshell.env("HOME") + "/.config/aurora"
+    readonly property string auroraDirectory: Quickshell.env("HOME") + "/.config/aurora"
 
-    readonly property string activeThemePath:
-        auroraDirectory + "/active-theme"
-
+    readonly property string activeThemePath: auroraDirectory + "/active-theme"
 
     // ============================================================
     // Active Theme
@@ -29,41 +26,31 @@ QtObject {
         blockLoading: true
 
         onFileChanged: {
-            this.reload()
-            theme.themeFile.reload()
+            this.reload();
+            theme.themeFile.reload();
         }
     }
-
 
     // ============================================================
     // Active Theme ID
     // ============================================================
 
-    readonly property string activeTheme:
-        activeThemeFile.loaded
-            ? activeThemeFile.text().trim()
-            : "aurora"
-
+    readonly property string activeTheme: activeThemeFile.loaded ? activeThemeFile.text().trim() : "aurora"
 
     // ============================================================
     // Active Theme JSON
     // ============================================================
 
     property var themeFile: FileView {
-        path:
-            theme.auroraDirectory
-            + "/themes/"
-            + theme.activeTheme
-            + ".json"
+        path: theme.auroraDirectory + "/themes/" + theme.activeTheme + ".json"
 
         watchChanges: true
         blockLoading: true
 
         onFileChanged: {
-            this.reload()
+            this.reload();
         }
     }
-
 
     // ============================================================
     // Parsed Theme
@@ -76,298 +63,206 @@ QtObject {
         try {
             return JSON.parse(theme.themeFile.text());
         } catch (error) {
-            console.warn(
-                "Aurora Theme: invalid JSON:",
-                error
-            );
+            console.warn("Aurora Theme: invalid JSON:", error);
 
             return ({});
         }
     }
 
-    readonly property var fonts:
-        data.fonts || ({})
+    readonly property var fonts: data.fonts || ({})
 
-    readonly property var colors:
-        data.colors || ({})
+    readonly property var colors: data.colors || ({})
 
-    readonly property var ui:
-        data.ui || ({})
-
+    readonly property var ui: data.ui || ({})
 
     // ============================================================
     // Background
     // ============================================================
 
-    readonly property color background:
-        colors.background || "#181D25"
+    readonly property color background: colors.background || "#181D25"
 
-    readonly property color backgroundDark:
-        colors.backgroundDark || "#141920"
-
+    readonly property color backgroundDark: colors.backgroundDark || "#141920"
 
     // ============================================================
     // Surfaces
     // ============================================================
 
-    readonly property color surface:
-        colors.surface || "#282E37"
+    readonly property color surface: colors.surface || "#282E37"
 
-    readonly property color surfaceHover:
-        colors.surfaceHover || "#303743"
+    readonly property color surfaceHover: colors.surfaceHover || "#303743"
 
-    readonly property color surfaceActive:
-        colors.surfaceActive || "#363D49"
-
+    readonly property color surfaceActive: colors.surfaceActive || "#363D49"
 
     // ============================================================
     // Borders
     // ============================================================
 
-    readonly property color border:
-        colors.border || "#3B4350"
+    readonly property color border: colors.border || "#3B4350"
 
-    readonly property color borderFocus:
-        colors.borderFocus || "#A970FF"
-    readonly property color borderActive:
-        colors.accent || "#A970FF"
-    readonly property color borderActiveEnd:
-        colors.accentActive || "#C7A6FF"
+    readonly property color borderFocus: colors.borderFocus || "#A970FF"
+    readonly property color borderActive: colors.accent || "#A970FF"
+    readonly property color borderActiveEnd: colors.accentActive || "#C7A6FF"
 
-    readonly property color separator:
-        colors.separator || "#343B47"
-
+    readonly property color separator: colors.separator || "#343B47"
 
     // ============================================================
     // Text
     // ============================================================
 
-    readonly property color text:
-        colors.text || "#F2F3F7"
+    readonly property color text: colors.text || "#F2F3F7"
 
-    readonly property color textSecondary:
-        colors.textSecondary || "#B9BEC8"
+    readonly property color textSecondary: colors.textSecondary || "#B9BEC8"
 
-    readonly property color textMuted:
-        colors.textMuted || "#858D9A"
-
+    readonly property color textMuted: colors.textMuted || "#858D9A"
 
     // ============================================================
     // Accent
     // ============================================================
 
-    readonly property color accent:
-        colors.accent || "#A970FF"
+    readonly property color accent: colors.accent || "#A970FF"
 
-    readonly property color accentHover:
-        colors.accentHover || "#B98AFF"
+    readonly property color accentHover: colors.accentHover || "#B98AFF"
 
-    readonly property color accentActive:
-        colors.accentActive || "#C7A6FF"
+    readonly property color accentActive: colors.accentActive || "#C7A6FF"
 
-    readonly property color accentMuted:
-        colors.accentMuted || "#55406F"
+    readonly property color accentMuted: colors.accentMuted || "#55406F"
 
-    readonly property color accentForeground:
-        colors.accentForeground || "#181D25"
-
+    readonly property color accentForeground: colors.accentForeground || "#181D25"
 
     // ============================================================
     // Semantic States
     // ============================================================
 
-    readonly property color success:
-        colors.success || "#8FE3A5"
+    readonly property color success: colors.success || "#8FE3A5"
 
-    readonly property color warning:
-        colors.warning || "#FFD479"
+    readonly property color warning: colors.warning || "#FFD479"
 
-    readonly property color error:
-        colors.error || "#FF7F96"
+    readonly property color error: colors.error || "#FF7F96"
 
-    readonly property color info:
-        colors.info || "#8FB8FF"
-
+    readonly property color info: colors.info || "#8FB8FF"
 
     // ============================================================
     // Compatibility Aliases
     // ============================================================
 
-    readonly property color foreground:
-        text
+    readonly property color foreground: text
 
-    readonly property color foregroundMuted:
-        textSecondary
+    readonly property color foregroundMuted: textSecondary
 
-    readonly property color foregroundFaint:
-        textMuted
+    readonly property color foregroundFaint: textMuted
 
-    readonly property color danger:
-        error
+    readonly property color danger: error
 
-    readonly property color accentSoft:
-        accentMuted
+    readonly property color accentSoft: accentMuted
 
-    readonly property color accentDim:
-        accentMuted
+    readonly property color accentDim: accentMuted
 
-    readonly property color hover:
-        surfaceHover
+    readonly property color hover: surfaceHover
 
-    readonly property color pressed:
-        surfaceActive
-
+    readonly property color pressed: surfaceActive
 
     // ============================================================
     // Glass
     // ============================================================
 
-    readonly property real glassOpacity:
-        0.80
+    readonly property real glassOpacity: 0.80
 
-    readonly property color backgroundGlass:
-        Qt.rgba(
-            background.r,
-            background.g,
-            background.b,
-            glassOpacity
-        )
+    readonly property color backgroundGlass: Qt.rgba(background.r, background.g, background.b, glassOpacity)
 
-    readonly property color backgroundSolid:
-        background
-
+    readonly property color backgroundSolid: background
 
     // ============================================================
     // UI
     // ============================================================
 
-    readonly property int borderWidth:
-        ui.borderWidth || 2
+    readonly property int borderWidth: ui.borderWidth || 2
 
-    readonly property int radius:
-        ui.radius || 10
+    readonly property int radius: ui.radius || 10
 
-    readonly property int radiusSmall:
-        ui.radiusSmall || 6
+    readonly property int radiusSmall: ui.radiusSmall || 6
 
-    readonly property int radiusLarge:
-        ui.radiusLarge || 18
+    readonly property int radiusLarge: ui.radiusLarge || 18
 
-    readonly property int iconSize:
-        ui.iconSize || 16
+    readonly property int iconSize: ui.iconSize || 16
 
-    readonly property int fontSize:
-        ui.fontSize || 12
+    readonly property int fontSize: ui.fontSize || 12
 
-    readonly property int fontSizeSmall:
-        ui.fontSizeSmall || 10
+    readonly property int fontSizeSmall: ui.fontSizeSmall || 10
 
-    readonly property int fontSizeLarge:
-        ui.fontSizeLarge || 14
+    readonly property int fontSizeLarge: ui.fontSizeLarge || 14
 
-    readonly property real shadowOpacity:
-        ui.shadowOpacity || 0.20
-
+    readonly property real shadowOpacity: ui.shadowOpacity || 0.20
 
     // ============================================================
     // Existing QuickShell Geometry
     // ============================================================
 
-    readonly property int pillHeight:
-        32
+    readonly property int pillHeight: 32
 
-    readonly property int moduleHeight:
-        30
+    readonly property int moduleHeight: 30
 
-    readonly property int barMarginTop:
-        8
+    readonly property int barMarginTop: 8
 
-    readonly property int radiusMenu:
-        18
+    readonly property int radiusMenu: 18
 
-    readonly property int radiusRow:
-        12
+    readonly property int radiusRow: 12
 
-    readonly property int padding:
-        10
+    readonly property int padding: 10
 
-    readonly property int spacing:
-        6
-
+    readonly property int spacing: 6
 
     // ============================================================
     // Typography
     // ============================================================
 
-    readonly property string fontFamily:
-        fonts.interface || "Inter"
-
+    readonly property string fontFamily: fonts.interface || "Inter"
 
     // ============================================================
     // Popup Geometry
     // ============================================================
 
-    readonly property int popupWidth:
-        340
+    readonly property int popupWidth: 340
 
-    readonly property int popupMaxHeight:
-        460
+    readonly property int popupMaxHeight: 460
 
-    readonly property int popupGap:
-        2
+    readonly property int popupGap: 2
 
-    readonly property int rowHeight:
-        42
-
+    readonly property int rowHeight: 42
 
     // ============================================================
     // Animation
     // ============================================================
 
-    readonly property real springStiffness:
-        3.2
+    readonly property real springStiffness: 3.2
 
-    readonly property real springDamping:
-        0.32
+    readonly property real springDamping: 0.32
 
-    readonly property real springEpsilon:
-        0.25
+    readonly property real springEpsilon: 0.25
 
-    readonly property real springMass:
-        1.1
+    readonly property real springMass: 1.1
 
     // Motion is intentionally short and deterministic.
     // These timings target a crisp high-refresh feel without
     // spring overshoot or long easing tails.
-    readonly property int durFast:
-        90
+    readonly property int durFast: 90
 
-    readonly property int durBase:
-        140
+    readonly property int durBase: 140
 
-    readonly property int durSlow:
-        190
+    readonly property int durSlow: 190
 
-    readonly property int durOpen:
-        170
+    readonly property int durOpen: 170
 
-    readonly property int durClose:
-        110
+    readonly property int durClose: 110
 
-    readonly property real overshoot:
-        1.0
-
+    readonly property real overshoot: 1.0
 
     // ============================================================
     // Collapsing Bar
     // ============================================================
 
-    readonly property int barRevealDuration:
-        150
+    readonly property int barRevealDuration: 150
 
-    readonly property int barHideDuration:
-        100
+    readonly property int barHideDuration: 100
 
-    readonly property int barCollapseDelay:
-        180
+    readonly property int barCollapseDelay: 180
 }

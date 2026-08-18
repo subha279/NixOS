@@ -46,8 +46,7 @@ PanelWindow {
     // card sizes (and springs) to match.
     property Component contentComponent: null
 
-    readonly property bool open:
-        Core.PopupManager.isOpen(root.popupId)
+    readonly property bool open: Core.PopupManager.isOpen(root.popupId)
 
     readonly property bool menuOpen: menuLayer.active
 
@@ -55,15 +54,15 @@ PanelWindow {
     // Quickshell's window base class already defines a `closed`
     // signal, and QML rejects the override with
     // "Duplicate signal name".
-    signal didOpen()
-    signal didClose()
+    signal didOpen
+    signal didClose
 
     function openMenu(x, y, items) {
-        menuLayer.show(x, y, items)
+        menuLayer.show(x, y, items);
     }
 
     function closeMenu() {
-        menuLayer.close()
+        menuLayer.close();
     }
 
     // ------------------------------------------------------------
@@ -92,10 +91,7 @@ PanelWindow {
 
     WlrLayershell.namespace: "aurora-popup"
 
-    WlrLayershell.keyboardFocus:
-        root.open
-            ? WlrKeyboardFocus.OnDemand
-            : WlrKeyboardFocus.None
+    WlrLayershell.keyboardFocus: root.open ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
     // Keeps the window alive until the close animation finishes
     property bool rendering: false
@@ -110,13 +106,13 @@ PanelWindow {
 
     onOpenChanged: {
         if (root.open) {
-            closeTimer.stop()
-            root.rendering = true
-            root.didOpen()
+            closeTimer.stop();
+            root.rendering = true;
+            root.didOpen();
         } else {
-            menuLayer.close()
-            closeTimer.restart()
-            root.didClose()
+            menuLayer.close();
+            closeTimer.restart();
+            root.didClose();
         }
     }
 
@@ -145,17 +141,11 @@ PanelWindow {
     // pillHeight + borderWidth*2, centred on the pill, so the ring
     // extends borderWidth BELOW the pill itself. Without that term
     // the card lands exactly on the ring and the gap vanishes.
-    readonly property real barBottomY:
-        Core.Theme.barMarginTop
-        + 10
-        + Core.Theme.pillHeight
-        + Core.Theme.borderWidth
+    readonly property real barBottomY: Core.Theme.barMarginTop + 10 + Core.Theme.pillHeight + Core.Theme.borderWidth
 
-    readonly property real naturalHeight:
-        contentHost.implicitHeight + Core.Theme.padding * 2
+    readonly property real naturalHeight: contentHost.implicitHeight + Core.Theme.padding * 2
 
-    readonly property real targetHeight:
-        Math.min(root.naturalHeight, root.maxCardHeight)
+    readonly property real targetHeight: Math.min(root.naturalHeight, root.maxCardHeight)
 
     // ------------------------------------------------------------
     // Click outside to dismiss
@@ -166,16 +156,15 @@ PanelWindow {
 
         enabled: root.open
 
-        acceptedButtons:
-            Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
+        acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
 
         onPressed: {
             if (menuLayer.active) {
-                menuLayer.close()
-                return
+                menuLayer.close();
+                return;
             }
 
-            Core.PopupManager.close()
+            Core.PopupManager.close();
         }
     }
 
@@ -190,9 +179,9 @@ PanelWindow {
 
         Keys.onEscapePressed: {
             if (menuLayer.active)
-                menuLayer.close()
+                menuLayer.close();
             else
-                Core.PopupManager.close()
+                Core.PopupManager.close();
         }
     }
 
@@ -207,15 +196,7 @@ PanelWindow {
 
         // Horizontally centred on the bar module that opened us,
         // clamped so it never runs off screen.
-        x: Math.round(
-            Math.max(
-                Core.Theme.popupGap,
-                Math.min(
-                    root.width - root.cardWidth - Core.Theme.popupGap,
-                    Core.PopupManager.anchorCenter - root.cardWidth / 2
-                )
-            )
-        )
+        x: Math.round(Math.max(Core.Theme.popupGap, Math.min(root.width - root.cardWidth - Core.Theme.popupGap, Core.PopupManager.anchorCenter - root.cardWidth / 2)))
 
         // Every module lives in the same pill, so the vertical
         // anchor is always the same number. Deriving it per-click
@@ -231,9 +212,7 @@ PanelWindow {
 
         Behavior on height {
             NumberAnimation {
-                duration: root.open
-                    ? Core.Theme.durOpen
-                    : Core.Theme.durClose
+                duration: root.open ? Core.Theme.durOpen : Core.Theme.durClose
                 easing.type: Easing.OutCubic
             }
         }
@@ -246,20 +225,14 @@ PanelWindow {
 
         Behavior on scale {
             NumberAnimation {
-                duration: root.open
-                    ? Core.Theme.durOpen
-                    : Core.Theme.durClose
-                easing.type: root.open
-                    ? Easing.OutCubic
-                    : Easing.InCubic
+                duration: root.open ? Core.Theme.durOpen : Core.Theme.durClose
+                easing.type: root.open ? Easing.OutCubic : Easing.InCubic
             }
         }
 
         Behavior on opacity {
             NumberAnimation {
-                duration: root.open
-                    ? Core.Theme.durBase
-                    : Core.Theme.durClose
+                duration: root.open ? Core.Theme.durBase : Core.Theme.durClose
 
                 easing.type: Easing.OutCubic
             }
@@ -298,17 +271,16 @@ PanelWindow {
         MouseArea {
             anchors.fill: parent
 
-            acceptedButtons:
-                Qt.LeftButton | Qt.RightButton
+            acceptedButtons: Qt.LeftButton | Qt.RightButton
 
-            onPressed: function(mouse) {
+            onPressed: function (mouse) {
                 if (menuLayer.active) {
-                    menuLayer.close()
-                    mouse.accepted = true
-                    return
+                    menuLayer.close();
+                    mouse.accepted = true;
+                    return;
                 }
 
-                mouse.accepted = false
+                mouse.accepted = false;
             }
         }
 
@@ -325,9 +297,7 @@ PanelWindow {
 
             anchors.margins: Core.Theme.padding
 
-            implicitHeight: contentLoader.item
-                ? contentLoader.item.implicitHeight
-                : 0
+            implicitHeight: contentLoader.item ? contentLoader.item.implicitHeight : 0
 
             height: implicitHeight
 
@@ -346,9 +316,7 @@ PanelWindow {
 
             Behavior on opacity {
                 NumberAnimation {
-                    duration: root.open
-                        ? Core.Theme.durSlow
-                        : Core.Theme.durFast
+                    duration: root.open ? Core.Theme.durSlow : Core.Theme.durFast
 
                     easing.type: Easing.OutCubic
                 }
@@ -389,17 +357,17 @@ PanelWindow {
         property real targetY: 0
 
         function show(x, y, list) {
-            menuLayer.items = list
-            menuLayer.targetX = x
-            menuLayer.targetY = y
-            menuLayer.active = true
+            menuLayer.items = list;
+            menuLayer.targetX = x;
+            menuLayer.targetY = y;
+            menuLayer.active = true;
 
-            Core.PopupManager.contextMenuOpen = true
+            Core.PopupManager.contextMenuOpen = true;
         }
 
         function close() {
-            menuLayer.active = false
-            Core.PopupManager.contextMenuOpen = false
+            menuLayer.active = false;
+            Core.PopupManager.contextMenuOpen = false;
         }
 
         visible: menuLayer.active || menuBox.opacity > 0.01
@@ -411,25 +379,9 @@ PanelWindow {
 
             height: menuColumn.implicitHeight + 10
 
-            x: Math.round(
-                Math.max(
-                    6,
-                    Math.min(
-                        menuLayer.width - width - 6,
-                        menuLayer.targetX
-                    )
-                )
-            )
+            x: Math.round(Math.max(6, Math.min(menuLayer.width - width - 6, menuLayer.targetX)))
 
-            y: Math.round(
-                Math.max(
-                    6,
-                    Math.min(
-                        menuLayer.height - height - 6,
-                        menuLayer.targetY
-                    )
-                )
-            )
+            y: Math.round(Math.max(6, Math.min(menuLayer.height - height - 6, menuLayer.targetY)))
 
             radius: 14
 
@@ -451,9 +403,7 @@ PanelWindow {
             Behavior on scale {
                 NumberAnimation {
                     duration: menuLayer.active ? 180 : 120
-                    easing.type: menuLayer.active
-                        ? Easing.OutCubic
-                        : Easing.InCubic
+                    easing.type: menuLayer.active ? Easing.OutCubic : Easing.InCubic
                 }
             }
 
@@ -502,10 +452,7 @@ PanelWindow {
 
                         width: menuColumn.width
 
-                        sourceComponent:
-                            entryLoader.modelData.separator === true
-                                ? separatorComp
-                                : entryComp
+                        sourceComponent: entryLoader.modelData.separator === true ? separatorComp : entryComp
 
                         Component {
                             id: separatorComp
@@ -532,9 +479,7 @@ PanelWindow {
 
                                 radius: 9
 
-                                color: entryMouse.containsMouse
-                                    ? Core.Theme.surfaceHover
-                                    : "transparent"
+                                color: entryMouse.containsMouse ? Core.Theme.surfaceHover : "transparent"
 
                                 Behavior on color {
                                     ColorAnimation {
@@ -545,8 +490,7 @@ PanelWindow {
                                 Row {
                                     anchors.left: parent.left
                                     anchors.right: parent.right
-                                    anchors.verticalCenter:
-                                        parent.verticalCenter
+                                    anchors.verticalCenter: parent.verticalCenter
 
                                     anchors.leftMargin: 10
                                     anchors.rightMargin: 10
@@ -554,42 +498,29 @@ PanelWindow {
                                     spacing: 9
 
                                     Text {
-                                        anchors.verticalCenter:
-                                            parent.verticalCenter
+                                        anchors.verticalCenter: parent.verticalCenter
 
                                         width: 16
 
-                                        text: entryLoader.modelData.icon
-                                            ? entryLoader.modelData.icon
-                                            : ""
+                                        text: entryLoader.modelData.icon ? entryLoader.modelData.icon : ""
 
-                                        font.family:
-                                            Core.Theme.fontFamily
+                                        font.family: Core.Theme.fontFamily
 
                                         font.pixelSize: 13
 
-                                        color: entryLoader.modelData.danger
-                                                === true
-                                            ? Core.Theme.danger
-                                            : Core.Theme.foregroundMuted
+                                        color: entryLoader.modelData.danger === true ? Core.Theme.danger : Core.Theme.foregroundMuted
                                     }
 
                                     Text {
-                                        anchors.verticalCenter:
-                                            parent.verticalCenter
+                                        anchors.verticalCenter: parent.verticalCenter
 
                                         text: entryLoader.modelData.label
 
-                                        font.family:
-                                            Core.Theme.fontFamily
+                                        font.family: Core.Theme.fontFamily
 
-                                        font.pixelSize:
-                                            Core.Theme.fontSize
+                                        font.pixelSize: Core.Theme.fontSize
 
-                                        color: entryLoader.modelData.danger
-                                                === true
-                                            ? Core.Theme.danger
-                                            : Core.Theme.foreground
+                                        color: entryLoader.modelData.danger === true ? Core.Theme.danger : Core.Theme.foreground
                                     }
                                 }
 
@@ -600,17 +531,15 @@ PanelWindow {
 
                                     hoverEnabled: true
 
-                                    cursorShape:
-                                        Qt.PointingHandCursor
+                                    cursorShape: Qt.PointingHandCursor
 
                                     onClicked: {
-                                        const act =
-                                            entryLoader.modelData.action
+                                        const act = entryLoader.modelData.action;
 
-                                        menuLayer.close()
+                                        menuLayer.close();
 
                                         if (typeof act === "function")
-                                            act()
+                                            act();
                                     }
                                 }
                             }

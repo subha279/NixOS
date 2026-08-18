@@ -65,32 +65,30 @@ QtObject {
     // Battery — discharging ramp, 0% .. 100%
     // ------------------------------------------------------------
 
-    readonly property var batteryRamp: [
-        "\udb80\udc8e",  // F008E  empty
-        "\udb80\udc7a",  // F007A  10
-        "\udb80\udc7b",  // F007B  20
-        "\udb80\udc7c",  // F007C  30
-        "\udb80\udc7d",  // F007D  40
-        "\udb80\udc7e",  // F007E  50
-        "\udb80\udc7f",  // F007F  60
-        "\udb80\udc80",  // F0080  70
-        "\udb80\udc81",  // F0081  80
-        "\udb80\udc82",  // F0082  90
-        "\udb80\udc79"   // F0079  full
+    readonly property var batteryRamp: ["\udb80\udc8e"  // F008E  empty
+        , "\udb80\udc7a"  // F007A  10
+        , "\udb80\udc7b"  // F007B  20
+        , "\udb80\udc7c"  // F007C  30
+        , "\udb80\udc7d"  // F007D  40
+        , "\udb80\udc7e"  // F007E  50
+        , "\udb80\udc7f"  // F007F  60
+        , "\udb80\udc80"  // F0080  70
+        , "\udb80\udc81"  // F0081  80
+        , "\udb80\udc82"  // F0082  90
+        , "\udb80\udc79"   // F0079  full
     ]
 
-    readonly property var batteryChargeRamp: [
-        "\udb82\udc9c",  // F089C
-        "\udb82\udc9c",  // F089C
-        "\udb80\udc86",  // F0086
-        "\udb80\udc87",  // F0087
-        "\udb80\udc88",  // F0088
-        "\udb82\udc9d",  // F089D
-        "\udb80\udc89",  // F0089
-        "\udb82\udc9e",  // F089E
-        "\udb80\udc8a",  // F008A
-        "\udb80\udc8b",  // F008B
-        "\udb80\udc85"   // F0085
+    readonly property var batteryChargeRamp: ["\udb82\udc9c"  // F089C
+        , "\udb82\udc9c"  // F089C
+        , "\udb80\udc86"  // F0086
+        , "\udb80\udc87"  // F0087
+        , "\udb80\udc88"  // F0088
+        , "\udb82\udc9d"  // F089D
+        , "\udb80\udc89"  // F0089
+        , "\udb82\udc9e"  // F089E
+        , "\udb80\udc8a"  // F008A
+        , "\udb80\udc8b"  // F008B
+        , "\udb80\udc85"   // F0085
     ]
 
     readonly property string batteryAlert: "\udb80\udc83"   // F0083
@@ -106,27 +104,16 @@ QtObject {
 
     // Brightness ramp, dim -> bright (mdi-brightness-4..7).
     // Verified: F00DE, F00DF, F00E0, F00E1.
-    readonly property var brightnessRamp: [
-        "\udb80\udcde",
-        "\udb80\udcdf",
-        "\udb80\udce0",
-        "\udb80\udce1"
-    ]
+    readonly property var brightnessRamp: ["\udb80\udcde", "\udb80\udcdf", "\udb80\udce0", "\udb80\udce1"]
 
     // fraction is 0..1.
     function forBrightness(fraction) {
-        const f =
-            Math.max(0, Math.min(1, fraction))
+        const f = Math.max(0, Math.min(1, fraction));
 
-        const i =
-            Math.min(
-                brightnessRamp.length - 1,
-                Math.floor(f * brightnessRamp.length)
-            )
+        const i = Math.min(brightnessRamp.length - 1, Math.floor(f * brightnessRamp.length));
 
-        return brightnessRamp[i]
+        return brightnessRamp[i];
     }
-
 
     // ------------------------------------------------------------
     // Notifications
@@ -156,78 +143,60 @@ QtObject {
     // a lowercased name, most specific first. Unknown apps get the
     // bell, which is always a truthful answer for a notification.
     function forApp(appName) {
-        const n = String(appName === undefined ? "" : appName).toLowerCase()
+        const n = String(appName === undefined ? "" : appName).toLowerCase();
 
         if (n === "")
-            return bell
+            return bell;
 
-        if (n.indexOf("thunderbird") >= 0 || n.indexOf("mail") >= 0
-                || n.indexOf("gmail") >= 0 || n.indexOf("evolution") >= 0)
-            return email
+        if (n.indexOf("thunderbird") >= 0 || n.indexOf("mail") >= 0 || n.indexOf("gmail") >= 0 || n.indexOf("evolution") >= 0)
+            return email;
 
-        if (n.indexOf("discord") >= 0 || n.indexOf("telegram") >= 0
-                || n.indexOf("signal") >= 0 || n.indexOf("slack") >= 0
-                || n.indexOf("element") >= 0 || n.indexOf("whatsapp") >= 0
-                || n.indexOf("chat") >= 0 || n.indexOf("message") >= 0)
-            return message
+        if (n.indexOf("discord") >= 0 || n.indexOf("telegram") >= 0 || n.indexOf("signal") >= 0 || n.indexOf("slack") >= 0 || n.indexOf("element") >= 0 || n.indexOf("whatsapp") >= 0 || n.indexOf("chat") >= 0 || n.indexOf("message") >= 0)
+            return message;
 
-        if (n.indexOf("spotify") >= 0 || n.indexOf("music") >= 0
-                || n.indexOf("mpd") >= 0 || n.indexOf("vlc") >= 0
-                || n.indexOf("mpv") >= 0 || n.indexOf("audacious") >= 0)
-            return musicNote
+        if (n.indexOf("spotify") >= 0 || n.indexOf("music") >= 0 || n.indexOf("mpd") >= 0 || n.indexOf("vlc") >= 0 || n.indexOf("mpv") >= 0 || n.indexOf("audacious") >= 0)
+            return musicNote;
 
-        if (n.indexOf("firefox") >= 0 || n.indexOf("chrom") >= 0
-                || n.indexOf("brave") >= 0 || n.indexOf("librewolf") >= 0
-                || n.indexOf("qutebrowser") >= 0)
-            return web
+        if (n.indexOf("firefox") >= 0 || n.indexOf("chrom") >= 0 || n.indexOf("brave") >= 0 || n.indexOf("librewolf") >= 0 || n.indexOf("qutebrowser") >= 0)
+            return web;
 
-        if (n.indexOf("transmission") >= 0 || n.indexOf("qbittorrent") >= 0
-                || n.indexOf("download") >= 0 || n.indexOf("wget") >= 0)
-            return download
+        if (n.indexOf("transmission") >= 0 || n.indexOf("qbittorrent") >= 0 || n.indexOf("download") >= 0 || n.indexOf("wget") >= 0)
+            return download;
 
-        if (n.indexOf("nautilus") >= 0 || n.indexOf("thunar") >= 0
-                || n.indexOf("dolphin") >= 0 || n.indexOf("nemo") >= 0
-                || n.indexOf("file") >= 0)
-            return folder
+        if (n.indexOf("nautilus") >= 0 || n.indexOf("thunar") >= 0 || n.indexOf("dolphin") >= 0 || n.indexOf("nemo") >= 0 || n.indexOf("file") >= 0)
+            return folder;
 
-        if (n.indexOf("screenshot") >= 0 || n.indexOf("grim") >= 0
-                || n.indexOf("flameshot") >= 0 || n.indexOf("satty") >= 0)
-            return camera
+        if (n.indexOf("screenshot") >= 0 || n.indexOf("grim") >= 0 || n.indexOf("flameshot") >= 0 || n.indexOf("satty") >= 0)
+            return camera;
 
-        if (n.indexOf("gimp") >= 0 || n.indexOf("image") >= 0
-                || n.indexOf("viewer") >= 0 || n.indexOf("imv") >= 0)
-            return image
+        if (n.indexOf("gimp") >= 0 || n.indexOf("image") >= 0 || n.indexOf("viewer") >= 0 || n.indexOf("imv") >= 0)
+            return image;
 
-        if (n.indexOf("kitty") >= 0 || n.indexOf("alacritty") >= 0
-                || n.indexOf("foot") >= 0 || n.indexOf("term") >= 0
-                || n.indexOf("shell") >= 0 || n.indexOf("zsh") >= 0)
-            return terminal
+        if (n.indexOf("kitty") >= 0 || n.indexOf("alacritty") >= 0 || n.indexOf("foot") >= 0 || n.indexOf("term") >= 0 || n.indexOf("shell") >= 0 || n.indexOf("zsh") >= 0)
+            return terminal;
 
-        if (n.indexOf("volume") >= 0 || n.indexOf("audio") >= 0
-                || n.indexOf("pipewire") >= 0 || n.indexOf("pulse") >= 0)
-            return volumeHigh
+        if (n.indexOf("volume") >= 0 || n.indexOf("audio") >= 0 || n.indexOf("pipewire") >= 0 || n.indexOf("pulse") >= 0)
+            return volumeHigh;
 
         if (n.indexOf("battery") >= 0 || n.indexOf("upower") >= 0)
-            return batteryAlert
+            return batteryAlert;
 
         if (n.indexOf("power") >= 0 || n.indexOf("logout") >= 0)
-            return power
+            return power;
 
-        if (n.indexOf("network") >= 0 || n.indexOf("wifi") >= 0
-                || n.indexOf("nm-") >= 0)
-            return wifi3
+        if (n.indexOf("network") >= 0 || n.indexOf("wifi") >= 0 || n.indexOf("nm-") >= 0)
+            return wifi3;
 
         if (n.indexOf("blue") >= 0)
-            return bluetooth
+            return bluetooth;
 
         if (n.indexOf("calendar") >= 0 || n.indexOf("remind") >= 0)
-            return calendar
+            return calendar;
 
-        if (n.indexOf("timer") >= 0 || n.indexOf("clock") >= 0
-                || n.indexOf("alarm") >= 0 || n.indexOf("pomodoro") >= 0)
-            return timer
+        if (n.indexOf("timer") >= 0 || n.indexOf("clock") >= 0 || n.indexOf("alarm") >= 0 || n.indexOf("pomodoro") >= 0)
+            return timer;
 
-        return bell
+        return bell;
     }
 
     // ------------------------------------------------------------

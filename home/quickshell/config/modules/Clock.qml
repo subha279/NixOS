@@ -22,8 +22,7 @@ Item {
 
     property bool showSeconds: false
 
-    readonly property bool menuOpen:
-        Core.PopupManager.isOpen("calendar")
+    readonly property bool menuOpen: Core.PopupManager.isOpen("calendar")
 
     Behavior on implicitWidth {
         NumberAnimation {
@@ -35,9 +34,7 @@ Item {
     SystemClock {
         id: systemClock
 
-        precision: root.showSeconds
-            ? SystemClock.Seconds
-            : SystemClock.Minutes
+        precision: root.showSeconds ? SystemClock.Seconds : SystemClock.Minutes
     }
 
     Rectangle {
@@ -45,11 +42,7 @@ Item {
 
         radius: height / 2
 
-        color: root.menuOpen
-            ? Core.Theme.surfaceActive
-            : (mouse.containsMouse
-                ? Core.Theme.hover
-                : "transparent")
+        color: root.menuOpen ? Core.Theme.surfaceActive : (mouse.containsMouse ? Core.Theme.hover : "transparent")
 
         Behavior on color {
             ColorAnimation {
@@ -61,14 +54,9 @@ Item {
     Text {
         anchors.centerIn: parent
 
-        text: Qt.formatDateTime(
-            systemClock.date,
-            root.showSeconds ? "HH:mm:ss" : "HH:mm"
-        )
+        text: Qt.formatDateTime(systemClock.date, root.showSeconds ? "HH:mm:ss" : "HH:mm")
 
-        color: root.menuOpen
-            ? Core.Theme.accent
-            : Core.Theme.foreground
+        color: root.menuOpen ? Core.Theme.accent : Core.Theme.foreground
 
         Behavior on color {
             ColorAnimation {
@@ -92,23 +80,17 @@ Item {
 
         cursorShape: Qt.PointingHandCursor
 
-        acceptedButtons:
-            Qt.LeftButton | Qt.RightButton
+        acceptedButtons: Qt.LeftButton | Qt.RightButton
 
-        onClicked: function(event) {
-
+        onClicked: function (event) {
             if (event.button === Qt.RightButton) {
-                root.showSeconds = !root.showSeconds
-                return
+                root.showSeconds = !root.showSeconds;
+                return;
             }
 
-            const p = root.mapToItem(null, 0, root.height)
+            const p = root.mapToItem(null, 0, root.height);
 
-            Core.PopupManager.toggle(
-                "calendar",
-                p.x + root.width / 2,
-                p.y + Core.Theme.barMarginTop
-            )
+            Core.PopupManager.toggle("calendar", p.x + root.width / 2, p.y + Core.Theme.barMarginTop);
         }
     }
 }

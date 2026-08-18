@@ -237,63 +237,85 @@ end
 
 local function configure_diagnostics()
 	vim.diagnostic.config({
-		virtual_text = {
-			spacing = 2,
-			source = "if_many",
-			prefix = "●",
-
-			format = function(diagnostic)
-				return diagnostic.message
-			end,
-		},
-
-		signs = {
-			text = {
-				[vim.diagnostic.severity.ERROR] = "󰅚",
-				[vim.diagnostic.severity.WARN] = "󰀪",
-				[vim.diagnostic.severity.INFO] = "󰋼",
-				[vim.diagnostic.severity.HINT] = "󰌵",
-			},
-		},
-
+		-- Keep diagnostics native and predictable: no custom panel, header,
+		-- prefix, or forced floating window.
+		virtual_text = true,
+		signs = true,
 		underline = true,
-
 		update_in_insert = false,
-
 		severity_sort = true,
-
-		float = {
-			border = "rounded",
-
-			source = true,
-
-			header = {
-				" Diagnostics ",
-				"DiagnosticFloatTitle",
-			},
-
-			prefix = function(diagnostic)
-				if diagnostic.severity == vim.diagnostic.severity.ERROR then
-					return "󰅚 ", "DiagnosticError"
-				end
-
-				if diagnostic.severity == vim.diagnostic.severity.WARN then
-					return "󰀪 ", "DiagnosticWarn"
-				end
-
-				if diagnostic.severity == vim.diagnostic.severity.INFO then
-					return "󰋼 ", "DiagnosticInfo"
-				end
-
-				return "󰌵 ", "DiagnosticHint"
-			end,
-
-			format = function(diagnostic)
-				return diagnostic.message
-			end,
-		},
 	})
 end
+
+local function configure_diagnostic_lists()
+	local function map(mode, lhs, rhs, desc)
+		vim.keymap.set(mode, lhs, rhs, {
+			silent = true,
+			noremap = true,
+			desc = desc,
+		})
+	end
+
+	local function open_list(command, empty_message)
+		local ok = pcall(vim.cmd, command)
+
+		if not ok then
+			vim.notify(empty_message, vim.log.levels.INFO)
+		end
+	end
+
+	map("n", "<leader>xx", function()
+		vim.diagnostic.setqflist({
+			open = true,
+			title = "Diagnostics",
+		})
+	end, "Diagnostics")
+
+	map("n", "<leader>xX", function()
+		vim.diagnostic.setloclist({
+			open = true,
+			title = "Buffer diagnostics",
+		})
+	end, "Buffer diagnostics")
+
+	map("n", "<leader>xs", function()
+		local ok, builtin = pcall(require, "telescope.builtin")
+
+		if ok then
+			builtin.lsp_document_symbols()
+		else
+			vim.notify("Telescope is unavailable", vim.log.levels.WARN)
+		end
+	end, "Symbols")
+
+	map("n", "<leader>xl", function()
+		open_list("lopen", "The location list is empty")
+	end, "Location list")
+
+	map("n", "<leader>xq", function()
+		open_list("copen", "The quickfix list is empty")
+	end, "Quickfix")
+end
+
+-- ============================================================================
+-- Completion Capabilities
+-- ============================================================================
+
+local function configure_capabilities()
+	local ok, blink = pcall(require, "blink.cmp")
+
+	if not ok or type(blink.get_lsp_capabilities) ~= "function" then
+		return
+	end
+
+	-- Apply Blink's completion capabilities to every native LSP config,
+	-- including local configs under config/lsp/.
+	vim.lsp.config("*", {
+		capabilities = blink.get_lsp_capabilities(),
+	})
+end
+
+configure_capabilities()
 
 -- ============================================================================
 -- Server Configuration
@@ -388,6 +410,23 @@ vim.lsp.config("rust_analyzer", {
 })
 
 -- ============================================================================
+
+vim.lsp.config("qmlls", {
+	cmd = { "qmlls" },
+	filetypes = {
+		"qml",
+		"qmljs",
+	},
+	root_markers = {
+		".qmlls.ini",
+		"CMakeLists.txt",
+		"qmldir",
+		".git",
+	},
+	workspace_required = false,
+})
+
+-- ============================================================================
 -- Enable Servers
 -- ============================================================================
 
@@ -408,6 +447,7 @@ vim.lsp.enable({
 	"tailwindcss",
 	"dockerls",
 	"taplo",
+	"qmlls",
 })
 
 -- ============================================================================
@@ -473,14 +513,12 @@ vim.api.nvim_create_autocmd("LspAttach", {
 		map("n", "[d", function()
 			vim.diagnostic.jump({
 				count = -1,
-				float = true,
 			})
 		end, "Diagnostics: Previous")
 
 		map("n", "]d", function()
 			vim.diagnostic.jump({
 				count = 1,
-				float = true,
 			})
 		end, "Diagnostics: Next")
 
@@ -505,6 +543,8 @@ vim.api.nvim_create_autocmd("LspAttach", {
 -- ============================================================================
 -- Initialize
 -- ============================================================================
+
+configure_diagnostic_lists()
 
 configure_diagnostics()
 

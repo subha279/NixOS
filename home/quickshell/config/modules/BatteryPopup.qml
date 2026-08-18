@@ -54,28 +54,26 @@ Components.PopupSurface {
 
                 actions: [
                     {
-                        icon: popup.svc.profileIcon(
-                            popup.svc.profile),
+                        icon: popup.svc.profileIcon(popup.svc.profile),
                         tooltip: "Power profile",
-                        action: function() {
-                            const max = popup.svc.hasPerformance
-                                ? 2 : 1
+                        action: function () {
+                            const max = popup.svc.hasPerformance ? 2 : 1;
 
-                            let next = popup.svc.profile + 1
+                            let next = popup.svc.profile + 1;
 
                             if (next > max)
-                                next = 0
+                                next = 0;
 
-                            popup.svc.setProfile(next)
+                            popup.svc.setProfile(next);
                         }
                     },
                     {
                         icon: "\udb80\udf93",
                         tooltip: "Power settings",
-                        action: function() {
-                            popup.svc.openPowerSettings()
-                            popup.closeMenu()
-                            Core.PopupManager.close()
+                        action: function () {
+                            popup.svc.openPowerSettings();
+                            popup.closeMenu();
+                            Core.PopupManager.close();
                         }
                     }
                 ]
@@ -146,9 +144,7 @@ Components.PopupSurface {
                     anchors.rightMargin: 14
                     anchors.verticalCenter: bigIcon.verticalCenter
 
-                    text: popup.svc.changeRate > 0
-                        ? popup.svc.changeRate.toFixed(1) + " W"
-                        : ""
+                    text: popup.svc.changeRate > 0 ? popup.svc.changeRate.toFixed(1) + " W" : ""
 
                     font.family: Core.Theme.fontFamily
                     font.pixelSize: Core.Theme.fontSizeSmall
@@ -184,10 +180,7 @@ Components.PopupSurface {
                         anchors.top: parent.top
                         anchors.bottom: parent.bottom
 
-                        width: barTrack.width
-                            * Math.max(0.02,
-                                Math.min(1.0,
-                                    popup.svc.percent / 100))
+                        width: barTrack.width * Math.max(0.02, Math.min(1.0, popup.svc.percent / 100))
 
                         radius: 4
 
@@ -195,9 +188,9 @@ Components.PopupSurface {
 
                         Behavior on width {
                             NumberAnimation {
-                    duration: Core.Theme.durBase
-                    easing.type: Easing.OutCubic
-                }
+                                duration: Core.Theme.durBase
+                                easing.type: Easing.OutCubic
+                            }
                         }
 
                         Behavior on color {
@@ -251,10 +244,7 @@ Components.PopupSurface {
                     anchors.bottom: parent.bottom
                     anchors.bottomMargin: 8
 
-                    text: popup.svc.health >= 0
-                        ? popup.svc.healthIcon + "  Health "
-                            + Math.round(popup.svc.health) + "%"
-                        : popup.svc.stateLabel
+                    text: popup.svc.health >= 0 ? popup.svc.healthIcon + "  Health " + Math.round(popup.svc.health) + "%" : popup.svc.stateLabel
 
                     font.family: Core.Theme.fontFamily
                     font.pixelSize: Core.Theme.fontSizeSmall
@@ -285,28 +275,29 @@ Components.PopupSurface {
 
                     acceptedButtons: Qt.RightButton
 
-                    onClicked: function(event) {
-                        const p = gauge.mapToItem(
-                            null, event.x, event.y)
+                    onClicked: function (event) {
+                        const p = gauge.mapToItem(null, event.x, event.y);
 
                         popup.openMenu(p.x, p.y, [
                             {
                                 label: "Copy status",
                                 icon: "\udb81\udcd6",
-                                action: function() {
-                                    popup.svc.copySummary()
+                                action: function () {
+                                    popup.svc.copySummary();
                                 }
                             },
-                            { separator: true },
+                            {
+                                separator: true
+                            },
                             {
                                 label: "Power settings",
                                 icon: "\udb80\udf93",
-                                action: function() {
-                                    popup.svc.openPowerSettings()
-                                    Core.PopupManager.close()
+                                action: function () {
+                                    popup.svc.openPowerSettings();
+                                    Core.PopupManager.close();
                                 }
                             }
-                        ])
+                        ]);
                     }
                 }
             }
@@ -343,9 +334,7 @@ Components.PopupSurface {
                 visible: popup.svc.profilesAvailable
 
                 Repeater {
-                    model: popup.svc.hasPerformance
-                        ? [0, 1, 2]
-                        : [0, 1]
+                    model: popup.svc.hasPerformance ? [0, 1, 2] : [0, 1]
 
                     delegate: Components.ListRow {
                         id: profileRow
@@ -354,57 +343,45 @@ Components.PopupSurface {
 
                         width: profileColumn.width
 
-                        icon: popup.svc.profileIcon(
-                            profileRow.modelData)
+                        icon: popup.svc.profileIcon(profileRow.modelData)
 
-                        title: profileRow.modelData === 0
-                            ? "Power saver"
-                            : profileRow.modelData === 2
-                                ? "Performance"
-                                : "Balanced"
+                        title: profileRow.modelData === 0 ? "Power saver" : profileRow.modelData === 2 ? "Performance" : "Balanced"
 
-                        subtitle: profileRow.modelData === 0
-                            ? "Longest battery life"
-                            : profileRow.modelData === 2
-                                ? "Maximum speed, more heat"
-                                : "Default — good all round"
+                        subtitle: profileRow.modelData === 0 ? "Longest battery life" : profileRow.modelData === 2 ? "Maximum speed, more heat" : "Default — good all round"
 
-                        active: popup.svc.profile
-                            === profileRow.modelData
+                        active: popup.svc.profile === profileRow.modelData
 
-                        trailing: (popup.svc.profile
-                            === profileRow.modelData)
-                            ? "\udb80\udd34"
-                            : ""
+                        trailing: (popup.svc.profile === profileRow.modelData) ? "\udb80\udd34" : ""
 
                         trailingColor: Core.Theme.success
 
                         onActivated: {
-                            popup.svc.setProfile(
-                                profileRow.modelData)
+                            popup.svc.setProfile(profileRow.modelData);
                         }
 
-                        onContextRequested: function(mx, my) {
-                            const value = profileRow.modelData
+                        onContextRequested: function (mx, my) {
+                            const value = profileRow.modelData;
 
                             popup.openMenu(mx, my, [
                                 {
                                     label: "Apply profile",
                                     icon: "\udb80\udc93",
-                                    action: function() {
-                                        popup.svc.setProfile(value)
+                                    action: function () {
+                                        popup.svc.setProfile(value);
                                     }
                                 },
-                                { separator: true },
+                                {
+                                    separator: true
+                                },
                                 {
                                     label: "Power settings",
                                     icon: "\udb80\udf93",
-                                    action: function() {
-                                        popup.svc.openPowerSettings()
-                                        Core.PopupManager.close()
+                                    action: function () {
+                                        popup.svc.openPowerSettings();
+                                        Core.PopupManager.close();
                                     }
                                 }
-                            ])
+                            ]);
                         }
                     }
                 }
@@ -432,8 +409,7 @@ Components.PopupSurface {
 
                     verticalAlignment: Text.AlignVCenter
 
-                    text: "\udb80\udd7c  Performance limited: "
-                        + popup.svc.degradationReason
+                    text: "\udb80\udd7c  Performance limited: " + popup.svc.degradationReason
 
                     elide: Text.ElideRight
 
@@ -475,9 +451,7 @@ Components.PopupSurface {
                     anchors.rightMargin: 6
                     anchors.verticalCenter: parent.verticalCenter
 
-                    text: popup.svc.peripheralModel.count
-                        + (popup.svc.peripheralModel.count === 1
-                            ? " device" : " devices")
+                    text: popup.svc.peripheralModel.count + (popup.svc.peripheralModel.count === 1 ? " device" : " devices")
 
                     font.family: Core.Theme.fontFamily
                     font.pixelSize: Core.Theme.fontSizeSmall
@@ -490,8 +464,7 @@ Components.PopupSurface {
 
                     cursorShape: Qt.PointingHandCursor
 
-                    onClicked: popup.showPeripherals =
-                        !popup.showPeripherals
+                    onClicked: popup.showPeripherals = !popup.showPeripherals
                 }
             }
 
@@ -503,19 +476,15 @@ Components.PopupSurface {
 
                 readonly property int maxListHeight: 180
 
-                height: (popup.showPeripherals
-                    && popup.svc.peripheralModel.count > 0)
-                    ? Math.min(peripheralList.contentHeight,
-                        listBox.maxListHeight)
-                    : 0
+                height: (popup.showPeripherals && popup.svc.peripheralModel.count > 0) ? Math.min(peripheralList.contentHeight, listBox.maxListHeight) : 0
 
                 clip: true
 
                 Behavior on height {
                     NumberAnimation {
-                    duration: Core.Theme.durBase
-                    easing.type: Easing.OutCubic
-                }
+                        duration: Core.Theme.durBase
+                        easing.type: Easing.OutCubic
+                    }
                 }
 
                 opacity: listBox.height > 2 ? 1.0 : 0.0
@@ -553,48 +522,37 @@ Components.PopupSurface {
 
                         title: devRow.label
 
-                        subtitle: devRow.charging
-                            ? "Charging"
-                            : devRow.percent <= 20
-                                ? "Low battery"
-                                : "On battery"
+                        subtitle: devRow.charging ? "Charging" : devRow.percent <= 20 ? "Low battery" : "On battery"
 
                         trailing: devRow.percent + "%"
 
-                        trailingColor: devRow.percent <= 20
-                            ? Core.Theme.danger
-                            : devRow.percent <= 40
-                                ? Core.Theme.warning
-                                : Core.Theme.foregroundMuted
+                        trailingColor: devRow.percent <= 20 ? Core.Theme.danger : devRow.percent <= 40 ? Core.Theme.warning : Core.Theme.foregroundMuted
 
-                        iconColor: devRow.percent <= 20
-                            ? Core.Theme.danger
-                            : Core.Theme.foreground
+                        iconColor: devRow.percent <= 20 ? Core.Theme.danger : Core.Theme.foreground
 
-                        onContextRequested: function(mx, my) {
-                            const name = devRow.label
-                            const pct = devRow.percent
+                        onContextRequested: function (mx, my) {
+                            const name = devRow.label;
+                            const pct = devRow.percent;
 
                             popup.openMenu(mx, my, [
                                 {
                                     label: "Copy \"" + name + "\"",
                                     icon: "\udb81\udcd6",
-                                    action: function() {
-                                        popup.copyText(
-                                            name + " — "
-                                            + pct + "%")
+                                    action: function () {
+                                        popup.copyText(name + " — " + pct + "%");
                                     }
                                 },
-                                { separator: true },
+                                {
+                                    separator: true
+                                },
                                 {
                                     label: "Refresh devices",
                                     icon: "\udb81\udd1e",
-                                    action: function() {
-                                        popup.svc
-                                            .rebuildPeripherals()
+                                    action: function () {
+                                        popup.svc.rebuildPeripherals();
                                     }
                                 }
-                            ])
+                            ]);
                         }
                     }
 
@@ -693,7 +651,7 @@ Components.PopupSurface {
 
     function copyText(text) {
         try {
-            Quickshell.clipboardText = text
+            Quickshell.clipboardText = text;
         } catch (e) {
             // Silently ignore — clipboard is a nice-to-have.
         }

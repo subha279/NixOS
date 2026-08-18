@@ -34,8 +34,7 @@ Item {
 
     readonly property bool dragging: sliderMouse.pressed
 
-    readonly property real shown:
-        Math.max(0, Math.min(1, root.value))
+    readonly property real shown: Math.max(0, Math.min(1, root.value))
 
     opacity: root.enabled ? 1.0 : 0.45
 
@@ -76,9 +75,7 @@ Item {
 
             radius: parent.radius
 
-            color: root.muted
-                ? Core.Theme.foregroundFaint
-                : root.fillColor
+            color: root.muted ? Core.Theme.foregroundFaint : root.fillColor
 
             Behavior on color {
                 ColorAnimation {
@@ -109,17 +106,9 @@ Item {
 
             anchors.verticalCenter: parent.verticalCenter
 
-            x: Math.max(
-                0,
-                Math.min(
-                    track.width - width,
-                    fill.width - width / 2
-                )
-            )
+            x: Math.max(0, Math.min(track.width - width, fill.width - width / 2))
 
-            color: root.muted
-                ? Core.Theme.foregroundMuted
-                : Core.Theme.foreground
+            color: root.muted ? Core.Theme.foregroundMuted : Core.Theme.foreground
 
             border.width: 2
             border.color: Core.Theme.accentForeground
@@ -158,43 +147,36 @@ Item {
         preventStealing: true
 
         function apply(mx) {
-
             if (track.width <= 0)
-                return 0
+                return 0;
 
-            const ratio =
-                Math.max(0, Math.min(1, mx / track.width))
+            const ratio = Math.max(0, Math.min(1, mx / track.width));
 
-            root.moved(ratio)
+            root.moved(ratio);
 
-            return ratio
+            return ratio;
         }
 
-        onPressed: function(event) {
-            sliderMouse.apply(event.x)
+        onPressed: function (event) {
+            sliderMouse.apply(event.x);
         }
 
-        onPositionChanged: function(event) {
-
+        onPositionChanged: function (event) {
             if (!sliderMouse.pressed)
-                return
-
-            sliderMouse.apply(event.x)
+                return;
+            sliderMouse.apply(event.x);
         }
 
-        onReleased: function(event) {
-            root.released(sliderMouse.apply(event.x))
+        onReleased: function (event) {
+            root.released(sliderMouse.apply(event.x));
         }
 
-        onWheel: function(event) {
+        onWheel: function (event) {
+            const step = 0.05;
 
-            const step = 0.05
+            const next = event.angleDelta.y > 0 ? root.value + step : root.value - step;
 
-            const next = event.angleDelta.y > 0
-                ? root.value + step
-                : root.value - step
-
-            root.moved(Math.max(0, Math.min(1, next)))
+            root.moved(Math.max(0, Math.min(1, next)));
         }
     }
 }

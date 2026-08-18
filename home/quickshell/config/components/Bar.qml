@@ -39,8 +39,7 @@ PanelWindow {
 
     color: "transparent"
 
-    exclusiveZone:
-        Core.Theme.pillHeight + margins.top + 4
+    exclusiveZone: Core.Theme.pillHeight + margins.top + 4
 
     WlrLayershell.namespace: "aurora-bar"
 
@@ -53,21 +52,18 @@ PanelWindow {
     // Reveal state
     // ============================================================
 
-    readonly property bool wantExpanded:
-        pillHover.hovered ||
-        Core.PopupManager.current !== ""
+    readonly property bool wantExpanded: pillHover.hovered || Core.PopupManager.current !== ""
 
     property bool expanded: false
 
     onWantExpandedChanged: {
-
         if (root.wantExpanded) {
-            collapseTimer.stop()
-            root.expanded = true
-            return
+            collapseTimer.stop();
+            root.expanded = true;
+            return;
         }
 
-        collapseTimer.restart()
+        collapseTimer.restart();
     }
 
     Timer {
@@ -75,26 +71,21 @@ PanelWindow {
 
         interval: Core.Theme.barCollapseDelay
 
-        onTriggered:
-            root.expanded = root.wantExpanded
+        onTriggered: root.expanded = root.wantExpanded
     }
 
     // 0 = collapsed
     // 1 = fully expanded
-    property real reveal:
-        root.expanded ? 1.0 : 0.0
+    property real reveal: root.expanded ? 1.0 : 0.0
 
     Behavior on reveal {
         NumberAnimation {
-            duration: root.expanded
-                ? Core.Theme.barRevealDuration
-                : Core.Theme.barHideDuration
+            duration: root.expanded ? Core.Theme.barRevealDuration : Core.Theme.barHideDuration
             easing.type: Easing.OutCubic
         }
     }
 
-    readonly property bool modulesVisible:
-        root.reveal > 0.012
+    readonly property bool modulesVisible: root.reveal > 0.012
 
     // ============================================================
     // OSD takeover
@@ -109,8 +100,7 @@ PanelWindow {
     // modules out from under the pointer — you can already see the
     // volume module in that state.
 
-    readonly property bool osd:
-        Core.OsdController.active && !root.expanded
+    readonly property bool osd: Core.OsdController.active && !root.expanded
 
     // ------------------------------------------------------------
     // One animated value drives the entire OSD morph
@@ -120,8 +110,7 @@ PanelWindow {
     // the rise all read this single value, so they physically
     // cannot drift apart the way three separate Behaviors did.
 
-    property real osdMix:
-        root.osd ? 1.0 : 0.0
+    property real osdMix: root.osd ? 1.0 : 0.0
 
     Behavior on osdMix {
         NumberAnimation {
@@ -137,10 +126,7 @@ PanelWindow {
     // read as an unsmooth bar. Interpolating instead means the pill
     // tracks the row exactly, frame for frame, and still morphs
     // when the OSD takes over.
-    readonly property real barContentWidth:
-        content.implicitWidth
-        + (osdView.implicitWidth - content.implicitWidth)
-        * root.osdMix
+    readonly property real barContentWidth: content.implicitWidth + (osdView.implicitWidth - content.implicitWidth) * root.osdMix
 
     // ============================================================
     // OUTER BORDER RING
@@ -163,17 +149,11 @@ PanelWindow {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter
 
-        height:
-            Core.Theme.pillHeight +
-            (Core.Theme.borderWidth * 2)
+        height: Core.Theme.pillHeight + (Core.Theme.borderWidth * 2)
 
-        width:
-            root.barContentWidth +
-            24 +
-            (Core.Theme.borderWidth * 2)
+        width: root.barContentWidth + 24 + (Core.Theme.borderWidth * 2)
 
-        radius:
-            height / 2
+        radius: height / 2
 
         antialiasing: true
 
@@ -209,13 +189,11 @@ PanelWindow {
 
             z: -2
 
-            radius:
-                pillBorder.radius + 3
+            radius: pillBorder.radius + 3
 
             color: "#000000"
 
-            opacity:
-                Core.Theme.shadowOpacity
+            opacity: Core.Theme.shadowOpacity
         }
 
         // ========================================================
@@ -227,17 +205,13 @@ PanelWindow {
 
             anchors.centerIn: parent
 
-            height:
-                Core.Theme.pillHeight
+            height: Core.Theme.pillHeight
 
-            width:
-                root.barContentWidth + 24
+            width: root.barContentWidth + 24
 
-            radius:
-                height / 2
+            radius: height / 2
 
-            color:
-                Core.Theme.background
+            color: Core.Theme.background
 
             antialiasing: true
 
@@ -299,17 +273,13 @@ PanelWindow {
                 Modules.NotificationCenter {
                     id: notificationCenter
 
-                    Layout.preferredWidth:
-                        30 * root.reveal
+                    Layout.preferredWidth: 30 * root.reveal
 
-                    Layout.preferredHeight:
-                        Core.Theme.moduleHeight
+                    Layout.preferredHeight: Core.Theme.moduleHeight
 
-                    visible:
-                        root.modulesVisible
+                    visible: root.modulesVisible
 
-                    opacity:
-                        root.reveal
+                    opacity: root.reveal
                 }
 
                 Separator {
@@ -321,17 +291,13 @@ PanelWindow {
                 // ==================================================
 
                 Modules.Volume {
-                    Layout.preferredWidth:
-                        58 * root.reveal
+                    Layout.preferredWidth: 58 * root.reveal
 
-                    Layout.preferredHeight:
-                        Core.Theme.moduleHeight
+                    Layout.preferredHeight: Core.Theme.moduleHeight
 
-                    visible:
-                        root.modulesVisible
+                    visible: root.modulesVisible
 
-                    opacity:
-                        root.reveal
+                    opacity: root.reveal
                 }
 
                 Separator {
@@ -343,17 +309,13 @@ PanelWindow {
                 // ==================================================
 
                 Modules.Brightness {
-                    Layout.preferredWidth:
-                        58 * root.reveal
+                    Layout.preferredWidth: 58 * root.reveal
 
-                    Layout.preferredHeight:
-                        Core.Theme.moduleHeight
+                    Layout.preferredHeight: Core.Theme.moduleHeight
 
-                    visible:
-                        root.modulesVisible
+                    visible: root.modulesVisible
 
-                    opacity:
-                        root.reveal
+                    opacity: root.reveal
                 }
 
                 Separator {
@@ -367,11 +329,9 @@ PanelWindow {
                 Modules.Clock {
                     id: clockModule
 
-                    Layout.preferredWidth:
-                        clockModule.implicitWidth
+                    Layout.preferredWidth: clockModule.implicitWidth
 
-                    Layout.preferredHeight:
-                        Core.Theme.moduleHeight
+                    Layout.preferredHeight: Core.Theme.moduleHeight
                 }
 
                 Separator {
@@ -383,17 +343,13 @@ PanelWindow {
                 // ==================================================
 
                 Modules.Network {
-                    Layout.preferredWidth:
-                        30 * root.reveal
+                    Layout.preferredWidth: 30 * root.reveal
 
-                    Layout.preferredHeight:
-                        Core.Theme.moduleHeight
+                    Layout.preferredHeight: Core.Theme.moduleHeight
 
-                    visible:
-                        root.modulesVisible
+                    visible: root.modulesVisible
 
-                    opacity:
-                        root.reveal
+                    opacity: root.reveal
                 }
 
                 // --------------------------------------------------
@@ -409,17 +365,13 @@ PanelWindow {
                 // ==================================================
 
                 Modules.Bluetooth {
-                    Layout.preferredWidth:
-                        30 * root.reveal
+                    Layout.preferredWidth: 30 * root.reveal
 
-                    Layout.preferredHeight:
-                        Core.Theme.moduleHeight
+                    Layout.preferredHeight: Core.Theme.moduleHeight
 
-                    visible:
-                        root.modulesVisible
+                    visible: root.modulesVisible
 
-                    opacity:
-                        root.reveal
+                    opacity: root.reveal
                 }
 
                 Separator {
@@ -431,18 +383,13 @@ PanelWindow {
                 // ==================================================
 
                 Modules.Battery {
-                    Layout.preferredWidth:
-                        58 * root.reveal
+                    Layout.preferredWidth: 58 * root.reveal
 
-                    Layout.preferredHeight:
-                        Core.Theme.moduleHeight
+                    Layout.preferredHeight: Core.Theme.moduleHeight
 
-                    visible:
-                        root.modulesVisible &&
-                        Services.BatteryService.available
+                    visible: root.modulesVisible && Services.BatteryService.available
 
-                    opacity:
-                        root.reveal
+                    opacity: root.reveal
                 }
 
                 // --------------------------------------------------
@@ -452,8 +399,7 @@ PanelWindow {
                 Separator {
                     reveal: root.reveal
 
-                    available:
-                        Services.BatteryService.available
+                    available: Services.BatteryService.available
                 }
 
                 // ==================================================
@@ -463,17 +409,13 @@ PanelWindow {
                 Modules.Tray {
                     id: tray
 
-                    Layout.preferredWidth:
-                        tray.implicitWidth * root.reveal
+                    Layout.preferredWidth: tray.implicitWidth * root.reveal
 
-                    Layout.preferredHeight:
-                        Core.Theme.moduleHeight
+                    Layout.preferredHeight: Core.Theme.moduleHeight
 
-                    visible:
-                        root.modulesVisible
+                    visible: root.modulesVisible
 
-                    opacity:
-                        root.reveal
+                    opacity: root.reveal
                 }
             }
         }
@@ -493,15 +435,11 @@ PanelWindow {
 
         Layout.preferredHeight: 16
 
-        visible:
-            available &&
-            reveal > 0.012
+        visible: available && reveal > 0.012
 
-        opacity:
-            reveal
+        opacity: reveal
 
-        color:
-            Core.Theme.separator
+        color: Core.Theme.separator
 
         radius: 1
     }

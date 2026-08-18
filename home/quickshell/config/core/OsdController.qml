@@ -26,8 +26,7 @@ QtObject {
 
     property bool muted: false
 
-    readonly property bool active:
-        root.kind !== ""
+    readonly property bool active: root.kind !== ""
 
     // How long the readout stays up after the last change.
     readonly property int holdDuration: 1600
@@ -50,8 +49,7 @@ QtObject {
         running: true
         repeat: false
 
-        onTriggered:
-            root.armed = true
+        onTriggered: root.armed = true
     }
 
     // ------------------------------------------------------------
@@ -63,8 +61,7 @@ QtObject {
 
         repeat: false
 
-        onTriggered:
-            root.kind = ""
+        onTriggered: root.kind = ""
     }
 
     // ------------------------------------------------------------
@@ -76,20 +73,18 @@ QtObject {
     // keeps the readout alive instead of retriggering it.
     function show(kind, value, muted) {
         if (!root.armed)
-            return
+            return;
+        root.kind = kind;
 
-        root.kind = kind
+        root.value = Math.max(0, Math.min(1, value));
 
-        root.value =
-            Math.max(0, Math.min(1, value))
+        root.muted = muted === true;
 
-        root.muted = muted === true
-
-        root.hideTimer.restart()
+        root.hideTimer.restart();
     }
 
     function hide() {
-        root.hideTimer.stop()
-        root.kind = ""
+        root.hideTimer.stop();
+        root.kind = "";
     }
 }

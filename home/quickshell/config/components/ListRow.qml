@@ -26,19 +26,14 @@ Rectangle {
     property bool dimmed: false
 
     // Right-click gives window-space coordinates for the menu
-    signal activated()
+    signal activated
     signal contextRequested(real mx, real my)
 
-    implicitHeight:
-        root.subtitle !== "" ? Core.Theme.rowHeight : 34
+    implicitHeight: root.subtitle !== "" ? Core.Theme.rowHeight : 34
 
     radius: Core.Theme.radiusRow
 
-    color: root.active
-        ? Core.Theme.surfaceActive
-        : mouse.containsMouse
-            ? Core.Theme.surfaceHover
-            : "transparent"
+    color: root.active ? Core.Theme.surfaceActive : mouse.containsMouse ? Core.Theme.surfaceHover : "transparent"
 
     Behavior on color {
         ColorAnimation {
@@ -97,9 +92,7 @@ Rectangle {
         font.family: Core.Theme.fontFamily
         font.pixelSize: Core.Theme.iconSize
 
-        color: root.active
-            ? Core.Theme.accent
-            : root.iconColor
+        color: root.active ? Core.Theme.accent : root.iconColor
 
         Behavior on color {
             ColorAnimation {
@@ -172,9 +165,7 @@ Rectangle {
             font.family: Core.Theme.fontFamily
             font.pixelSize: Core.Theme.fontSize
 
-            font.weight: root.active
-                ? Font.DemiBold
-                : Font.Medium
+            font.weight: root.active ? Font.DemiBold : Font.Medium
 
             color: Core.Theme.foreground
         }
@@ -191,9 +182,7 @@ Rectangle {
             font.family: Core.Theme.fontFamily
             font.pixelSize: Core.Theme.fontSizeSmall
 
-            color: root.active
-                ? Core.Theme.accent
-                : Core.Theme.foregroundMuted
+            color: root.active ? Core.Theme.accent : Core.Theme.foregroundMuted
         }
     }
 
@@ -229,19 +218,17 @@ Rectangle {
 
         cursorShape: Qt.PointingHandCursor
 
-        acceptedButtons:
-            Qt.LeftButton | Qt.RightButton
+        acceptedButtons: Qt.LeftButton | Qt.RightButton
 
-        onClicked: function(event) {
+        onClicked: function (event) {
             if (event.button === Qt.RightButton) {
-                const p = mouse.mapToItem(
-                    null, event.x, event.y)
+                const p = mouse.mapToItem(null, event.x, event.y);
 
-                root.contextRequested(p.x, p.y)
-                return
+                root.contextRequested(p.x, p.y);
+                return;
             }
 
-            root.activated()
+            root.activated();
         }
     }
 

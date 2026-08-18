@@ -15,25 +15,18 @@ Item {
     implicitWidth: 30
     implicitHeight: Core.Theme.moduleHeight
 
-    readonly property bool menuOpen:
-        Core.PopupManager.isOpen("bluetooth")
+    readonly property bool menuOpen: Core.PopupManager.isOpen("bluetooth")
 
-    readonly property bool powered:
-        Services.BluetoothService.powered
+    readonly property bool powered: Services.BluetoothService.powered
 
-    readonly property int connectedCount:
-        Services.BluetoothService.connectedCount
+    readonly property int connectedCount: Services.BluetoothService.connectedCount
 
     Rectangle {
         anchors.fill: parent
 
         radius: height / 2
 
-        color: root.menuOpen
-            ? Core.Theme.surfaceActive
-            : mouse.containsMouse
-                ? Core.Theme.hover
-                : "transparent"
+        color: root.menuOpen ? Core.Theme.surfaceActive : mouse.containsMouse ? Core.Theme.hover : "transparent"
 
         Behavior on color {
             ColorAnimation {
@@ -47,20 +40,12 @@ Item {
 
         anchors.centerIn: parent
 
-        text: !root.powered
-            ? "\udb80\udcb2"
-            : root.connectedCount > 0
-                ? "\udb80\udcb1"
-                : "\udb80\udcaf"
+        text: !root.powered ? "\udb80\udcb2" : root.connectedCount > 0 ? "\udb80\udcb1" : "\udb80\udcaf"
 
         font.family: Core.Theme.fontFamily
         font.pixelSize: Core.Theme.iconSize
 
-        color: !root.powered
-            ? Core.Theme.foregroundMuted
-            : root.connectedCount > 0
-                ? Core.Theme.accent
-                : Core.Theme.foreground
+        color: !root.powered ? Core.Theme.foregroundMuted : root.connectedCount > 0 ? Core.Theme.accent : Core.Theme.foreground
 
         Behavior on color {
             ColorAnimation {
@@ -145,34 +130,28 @@ Item {
 
         cursorShape: Qt.PointingHandCursor
 
-        acceptedButtons:
-            Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
+        acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
 
-        onClicked: function(event) {
+        onClicked: function (event) {
             if (event.button === Qt.MiddleButton) {
-                Services.BluetoothService.togglePowered()
-                return
+                Services.BluetoothService.togglePowered();
+                return;
             }
 
             if (event.button === Qt.RightButton) {
-                Services.BluetoothService.openManager()
-                return
+                Services.BluetoothService.openManager();
+                return;
             }
 
-            const p = root.mapToItem(null, 0, root.height)
+            const p = root.mapToItem(null, 0, root.height);
 
-            Core.PopupManager.toggle(
-                "bluetooth",
-                p.x + root.width / 2,
-                p.y + Core.Theme.barMarginTop
-            )
+            Core.PopupManager.toggle("bluetooth", p.x + root.width / 2, p.y + Core.Theme.barMarginTop);
         }
 
-        onWheel: function(event) {
+        onWheel: function (event) {
             if (event.angleDelta.y === 0)
-                return
-
-            Services.BluetoothService.togglePowered()
+                return;
+            Services.BluetoothService.togglePowered();
         }
     }
 
@@ -184,8 +163,7 @@ Item {
 
     // Stop scanning when the menu closes — saves battery
     onMenuOpenChanged: {
-        if (!root.menuOpen
-            && Services.BluetoothService.discovering)
-            Services.BluetoothService.setDiscovering(false)
+        if (!root.menuOpen && Services.BluetoothService.discovering)
+            Services.BluetoothService.setDiscovering(false);
     }
 }

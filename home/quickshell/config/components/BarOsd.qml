@@ -18,14 +18,11 @@ import "../core" as Core
 Item {
     id: root
 
-    readonly property string kind:
-        Core.OsdController.kind
+    readonly property string kind: Core.OsdController.kind
 
-    readonly property real value:
-        Core.OsdController.value
+    readonly property real value: Core.OsdController.value
 
-    readonly property bool muted:
-        Core.OsdController.muted
+    readonly property bool muted: Core.OsdController.muted
 
     implicitWidth: row.implicitWidth
     implicitHeight: Core.Theme.moduleHeight
@@ -34,33 +31,25 @@ Item {
     // Colour + glyph per kind
     // ------------------------------------------------------------
 
-    readonly property color tint:
-        root.muted
-            ? Core.Theme.danger
-            : (root.kind === "brightness"
-                ? Core.Theme.warning
-                : Core.Theme.accent)
+    readonly property color tint: root.muted ? Core.Theme.danger : (root.kind === "brightness" ? Core.Theme.warning : Core.Theme.accent)
 
     readonly property string glyph: {
-
         if (root.kind === "brightness")
-            return Core.Icons.forBrightness(root.value)
+            return Core.Icons.forBrightness(root.value);
 
         if (root.kind === "mic")
-            return root.muted
-                ? Core.Icons.micOff
-                : Core.Icons.mic
+            return root.muted ? Core.Icons.micOff : Core.Icons.mic;
 
         if (root.muted)
-            return Core.Icons.volumeOff
+            return Core.Icons.volumeOff;
 
         if (root.value >= 0.66)
-            return Core.Icons.volumeHigh
+            return Core.Icons.volumeHigh;
 
         if (root.value >= 0.33)
-            return Core.Icons.volumeMedium
+            return Core.Icons.volumeMedium;
 
-        return Core.Icons.volumeLow
+        return Core.Icons.volumeLow;
     }
 
     Row {
@@ -118,8 +107,7 @@ Item {
 
                 radius: parent.radius
 
-                width:
-                    Math.round(track.width * root.value)
+                width: Math.round(track.width * root.value)
 
                 color: root.tint
 
@@ -154,9 +142,7 @@ Item {
 
             horizontalAlignment: Text.AlignRight
 
-            text: root.muted && root.kind !== "brightness"
-                ? "off"
-                : Math.round(root.value * 100) + "%"
+            text: root.muted && root.kind !== "brightness" ? "off" : Math.round(root.value * 100) + "%"
 
             font.family: Core.Theme.fontFamily
             font.pixelSize: Core.Theme.fontSize

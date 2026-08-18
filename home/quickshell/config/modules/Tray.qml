@@ -17,19 +17,11 @@ Item {
     // ============================================================
 
     function isHidden(item) {
-        const id = String(item.id || "").toLowerCase()
-        const title = String(item.title || "").toLowerCase()
-        const tooltip = String(item.tooltip || "").toLowerCase()
+        const id = String(item.id || "").toLowerCase();
+        const title = String(item.title || "").toLowerCase();
+        const tooltip = String(item.tooltip || "").toLowerCase();
 
-        return (
-            id.includes("nm-applet") ||
-            id.includes("networkmanager") ||
-            id.includes("blueman") ||
-            title.includes("networkmanager") ||
-            title.includes("blueman") ||
-            tooltip.includes("networkmanager") ||
-            tooltip.includes("blueman")
-        )
+        return (id.includes("nm-applet") || id.includes("networkmanager") || id.includes("blueman") || title.includes("networkmanager") || title.includes("blueman") || tooltip.includes("networkmanager") || tooltip.includes("blueman"));
     }
 
     RowLayout {
@@ -51,21 +43,16 @@ Item {
                 // visual tray while keeping their processes alive.
                 visible: !root.isHidden(modelData)
 
-                implicitWidth:
-                    visible ? 26 : 0
+                implicitWidth: visible ? 26 : 0
 
-                implicitHeight:
-                    Core.Theme.moduleHeight
+                implicitHeight: Core.Theme.moduleHeight
 
                 Rectangle {
                     anchors.fill: parent
 
                     radius: 14
 
-                    color:
-                        mouse.containsMouse
-                            ? Core.Theme.hover
-                            : "transparent"
+                    color: mouse.containsMouse ? Core.Theme.hover : "transparent"
 
                     Behavior on color {
                         ColorAnimation {
@@ -82,8 +69,7 @@ Item {
 
                     source: modelData.icon
 
-                    fillMode:
-                        Image.PreserveAspectFit
+                    fillMode: Image.PreserveAspectFit
 
                     smooth: true
                     mipmap: true
@@ -96,46 +82,37 @@ Item {
 
                     hoverEnabled: true
 
-                    cursorShape:
-                        Qt.PointingHandCursor
+                    cursorShape: Qt.PointingHandCursor
 
-                    acceptedButtons:
-                        Qt.LeftButton |
-                        Qt.RightButton |
-                        Qt.MiddleButton
+                    acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
 
-                    onClicked: function(event) {
+                    onClicked: function (event) {
 
                         // Left click
                         if (event.button === Qt.LeftButton) {
-
-                            if (
-                                modelData.onlyMenu ||
-                                modelData.hasMenu
-                            ) {
-                                menuAnchor.open()
+                            if (modelData.onlyMenu || modelData.hasMenu) {
+                                menuAnchor.open();
                             } else {
-                                modelData.activate()
+                                modelData.activate();
                             }
 
-                            return
+                            return;
                         }
 
                         // Right click
                         if (event.button === Qt.RightButton) {
-
                             if (modelData.hasMenu) {
-                                menuAnchor.open()
+                                menuAnchor.open();
                             } else {
-                                modelData.activate()
+                                modelData.activate();
                             }
 
-                            return
+                            return;
                         }
 
                         // Middle click
                         if (event.button === Qt.MiddleButton) {
-                            modelData.secondaryActivate()
+                            modelData.secondaryActivate();
                         }
                     }
                 }

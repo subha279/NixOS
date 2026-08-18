@@ -27,91 +27,80 @@ Components.PopupSurface {
     cardWidth: 360
     maxCardHeight: 480
 
-    readonly property var list:
-        Services.NotificationServer.notifications
+    readonly property var list: Services.NotificationServer.notifications
 
-    readonly property int count:
-        (popup.list && popup.list.values)
-            ? popup.list.values.length
-            : 0
+    readonly property int count: (popup.list && popup.list.values) ? popup.list.values.length : 0
 
     readonly property bool dnd: Core.PopupManager.dnd
 
     function setDnd(value) {
-        Core.PopupManager.dnd = value
+        Core.PopupManager.dnd = value;
     }
 
     function dismiss(n) {
         if (!n)
-            return
-
+            return;
         if (typeof n.dismiss === "function")
-            n.dismiss()
+            n.dismiss();
         else if (typeof n.expire === "function")
-            n.expire()
+            n.expire();
     }
 
     function clearAll() {
         if (!popup.list || !popup.list.values)
-            return
-
-        const snapshot = popup.list.values.slice()
+            return;
+        const snapshot = popup.list.values.slice();
 
         for (let i = 0; i < snapshot.length; i++)
-            popup.dismiss(snapshot[i])
+            popup.dismiss(snapshot[i]);
     }
 
     function invoke(n, action) {
         if (!n || !action)
-            return
-
+            return;
         try {
             if (typeof action.invoke === "function")
-                action.invoke()
+                action.invoke();
         } catch (e) {
             // Some senders drop off the bus before we get here.
         }
 
-        popup.dismiss(n)
+        popup.dismiss(n);
     }
 
     function copyText(text) {
         if (!text || text === "")
-            return
-
+            return;
         try {
-            Quickshell.clipboardText = text
+            Quickshell.clipboardText = text;
         } catch (e) {
-            copyProc.command = [
-                "sh", "-c",
-                "printf %s " + JSON.stringify(text) + " | wl-copy"
-            ]
-            copyProc.running = true
+            copyProc.command = ["sh", "-c", "printf %s " + JSON.stringify(text) + " | wl-copy"];
+            copyProc.running = true;
         }
     }
 
     function appLabel(n) {
         if (!n)
-            return ""
+            return "";
 
         if (n.appName && n.appName !== "")
-            return n.appName
+            return n.appName;
 
         if (n.desktopEntry && n.desktopEntry !== "")
-            return n.desktopEntry
+            return n.desktopEntry;
 
-        return "Notification"
+        return "Notification";
     }
 
     function isCritical(n) {
         if (!n)
-            return false
+            return false;
 
         // Urgency is an enum; 2 == Critical in the freedesktop spec.
         try {
-            return Number(n.urgency) === 2
+            return Number(n.urgency) === 2;
         } catch (e) {
-            return false
+            return false;
         }
     }
 
@@ -127,412 +116,391 @@ Components.PopupSurface {
 
     contentComponent: Component {
 
-    Column {
-        id: body
+        Column {
+            id: body
 
-        spacing: Core.Theme.spacing
+            spacing: Core.Theme.spacing
 
-        // --------------------------------------------------------
-        // Header
-        // --------------------------------------------------------
+            // --------------------------------------------------------
+            // Header
+            // --------------------------------------------------------
 
-        Components.PopupHeader {
-            width: body.width
+            Components.PopupHeader {
+                width: body.width
 
-            title: "Notifications"
+                title: "Notifications"
 
-            subtitle: popup.dnd
-                ? "Do not disturb"
-                : popup.count === 0
-                    ? "All caught up"
-                    : popup.count === 1
-                        ? "1 notification"
-                        : popup.count + " notifications"
+                subtitle: popup.dnd ? "Do not disturb" : popup.count === 0 ? "All caught up" : popup.count === 1 ? "1 notification" : popup.count + " notifications"
 
-            showToggle: true
+                showToggle: true
 
-            // The toggle drives do-not-disturb; on means "allowed".
-            toggled: !popup.dnd
+                // The toggle drives do-not-disturb; on means "allowed".
+                toggled: !popup.dnd
 
-            onToggleRequested: popup.setDnd(!popup.dnd)
+                onToggleRequested: popup.setDnd(!popup.dnd)
 
-            actions: [
-                {
-                    icon: "\udb80\uddb4",
-                    tooltip: "Clear all",
-                    action: function() {
-                        popup.clearAll()
+                actions: [
+                    {
+                        icon: "\udb80\uddb4",
+                        tooltip: "Clear all",
+                        action: function () {
+                            popup.clearAll();
+                        }
                     }
-                }
-            ]
-        }
-
-        // --------------------------------------------------------
-        // Do-not-disturb banner
-        // --------------------------------------------------------
-
-        Rectangle {
-            width: body.width
-
-            height: popup.dnd ? 32 : 0
-
-            visible: height > 1
-
-            clip: true
-
-            radius: Core.Theme.radiusRow
-
-            color: "#22e6c68f"
-
-            Behavior on height {
-                NumberAnimation {
-                    duration: Core.Theme.durBase
-                    easing.type: Easing.OutCubic
-                }
+                ]
             }
 
-            Text {
-                anchors.left: parent.left
-                anchors.leftMargin: 10
-                anchors.verticalCenter: parent.verticalCenter
+            // --------------------------------------------------------
+            // Do-not-disturb banner
+            // --------------------------------------------------------
 
-                text: "\udb80\udc9a  New alerts are being silenced"
+            Rectangle {
+                width: body.width
 
-                font.family: Core.Theme.fontFamily
-                font.pixelSize: Core.Theme.fontSizeSmall
+                height: popup.dnd ? 32 : 0
 
-                color: Core.Theme.warning
-            }
-        }
-
-        // --------------------------------------------------------
-        // The list
-        // --------------------------------------------------------
-
-        Item {
-            id: listBox
-
-            readonly property int maxListHeight: 330
-
-            width: body.width
-
-            height: Math.min(
-                list.contentHeight, listBox.maxListHeight)
-
-            clip: true
-
-            Behavior on height {
-                NumberAnimation {
-                    duration: Core.Theme.durBase
-                    easing.type: Easing.OutCubic
-                }
-            }
-
-            ListView {
-                id: list
-
-                anchors.fill: parent
-
-                spacing: 4
+                visible: height > 1
 
                 clip: true
 
-                boundsBehavior: Flickable.StopAtBounds
+                radius: Core.Theme.radiusRow
 
-                model: popup.list
+                color: "#22e6c68f"
 
-                add: Transition {
+                Behavior on height {
                     NumberAnimation {
-                        property: "opacity"
-                        from: 0
-                        to: 1
-                        duration: 160
-                        easing.type: Easing.OutCubic
-                    }
-
-                    NumberAnimation {
-                        property: "scale"
-                        from: 0.86
-                        to: 1
-                        duration: 180
+                        duration: Core.Theme.durBase
                         easing.type: Easing.OutCubic
                     }
                 }
 
-                remove: Transition {
-                    NumberAnimation {
-                        property: "opacity"
-                        to: 0
-                        duration: 160
-                        easing.type: Easing.InCubic
-                    }
+                Text {
+                    anchors.left: parent.left
+                    anchors.leftMargin: 10
+                    anchors.verticalCenter: parent.verticalCenter
 
-                    NumberAnimation {
-                        property: "scale"
-                        to: 0.8
-                        duration: 160
-                        easing.type: Easing.InCubic
-                    }
+                    text: "\udb80\udc9a  New alerts are being silenced"
+
+                    font.family: Core.Theme.fontFamily
+                    font.pixelSize: Core.Theme.fontSizeSmall
+
+                    color: Core.Theme.warning
                 }
+            }
 
-                displaced: Transition {
+            // --------------------------------------------------------
+            // The list
+            // --------------------------------------------------------
+
+            Item {
+                id: listBox
+
+                readonly property int maxListHeight: 330
+
+                width: body.width
+
+                height: Math.min(list.contentHeight, listBox.maxListHeight)
+
+                clip: true
+
+                Behavior on height {
                     NumberAnimation {
-                        properties: "x,y"
-                        duration: 170
+                        duration: Core.Theme.durBase
                         easing.type: Easing.OutCubic
                     }
                 }
 
-                addDisplaced: Transition {
-                    NumberAnimation {
-                        properties: "x,y"
-                        duration: 170
-                        easing.type: Easing.OutCubic
-                    }
-                }
+                ListView {
+                    id: list
 
-                removeDisplaced: Transition {
-                    NumberAnimation {
-                        properties: "x,y"
-                        duration: 160
-                        easing.type: Easing.OutCubic
-                    }
-                }
+                    anchors.fill: parent
 
-                delegate: Rectangle {
-                    id: noteRow
+                    spacing: 4
 
-                    required property var modelData
+                    clip: true
 
-                    width: list.width
+                    boundsBehavior: Flickable.StopAtBounds
 
-                    implicitHeight: noteLayout.implicitHeight + 20
-                    height: implicitHeight
+                    model: popup.list
 
-                    radius: Core.Theme.radiusRow
-
-                    color: noteMouse.containsMouse
-                        ? Core.Theme.surfaceHover
-                        : Core.Theme.surface
-
-                    Behavior on color {
-                        ColorAnimation {
-                            duration: 120
-                        }
-                    }
-
-                    scale: noteMouse.pressed ? 0.97 : 1.0
-
-                    Behavior on scale {
+                    add: Transition {
                         NumberAnimation {
-                            duration: 110
+                            property: "opacity"
+                            from: 0
+                            to: 1
+                            duration: 160
+                            easing.type: Easing.OutCubic
+                        }
+
+                        NumberAnimation {
+                            property: "scale"
+                            from: 0.86
+                            to: 1
+                            duration: 180
                             easing.type: Easing.OutCubic
                         }
                     }
 
-                    // Urgency stripe
-                    Rectangle {
-                        anchors.left: parent.left
-                        anchors.top: parent.top
-                        anchors.bottom: parent.bottom
-                        anchors.margins: 6
+                    remove: Transition {
+                        NumberAnimation {
+                            property: "opacity"
+                            to: 0
+                            duration: 160
+                            easing.type: Easing.InCubic
+                        }
 
-                        width: 3
-
-                        radius: 2
-
-                        color: popup.isCritical(noteRow.modelData)
-                            ? Core.Theme.danger
-                            : Core.Theme.accent
-
-                        opacity: popup.isCritical(noteRow.modelData)
-                            ? 1.0
-                            : 0.55
+                        NumberAnimation {
+                            property: "scale"
+                            to: 0.8
+                            duration: 160
+                            easing.type: Easing.InCubic
+                        }
                     }
 
-                    Column {
-                        id: noteLayout
+                    displaced: Transition {
+                        NumberAnimation {
+                            properties: "x,y"
+                            duration: 170
+                            easing.type: Easing.OutCubic
+                        }
+                    }
 
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.top: parent.top
+                    addDisplaced: Transition {
+                        NumberAnimation {
+                            properties: "x,y"
+                            duration: 170
+                            easing.type: Easing.OutCubic
+                        }
+                    }
 
-                        anchors.leftMargin: 18
-                        anchors.rightMargin: 34
-                        anchors.topMargin: 10
+                    removeDisplaced: Transition {
+                        NumberAnimation {
+                            properties: "x,y"
+                            duration: 160
+                            easing.type: Easing.OutCubic
+                        }
+                    }
 
-                        spacing: 3
+                    delegate: Rectangle {
+                        id: noteRow
 
-                        Text {
-                            width: parent.width
+                        required property var modelData
 
-                            text: popup.appLabel(noteRow.modelData)
-                                .toUpperCase()
+                        width: list.width
 
-                            elide: Text.ElideRight
+                        implicitHeight: noteLayout.implicitHeight + 20
+                        height: implicitHeight
 
-                            font.family: Core.Theme.fontFamily
-                            font.pixelSize: Core.Theme.fontSizeSmall
-                            font.letterSpacing: 0.8
+                        radius: Core.Theme.radiusRow
 
-                            color: Core.Theme.foregroundFaint
+                        color: noteMouse.containsMouse ? Core.Theme.surfaceHover : Core.Theme.surface
+
+                        Behavior on color {
+                            ColorAnimation {
+                                duration: 120
+                            }
                         }
 
-                        Text {
-                            width: parent.width
+                        scale: noteMouse.pressed ? 0.97 : 1.0
 
-                            text: noteRow.modelData.summary
-                                ? noteRow.modelData.summary
-                                : ""
-
-                            visible: text !== ""
-
-                            elide: Text.ElideRight
-
-                            font.family: Core.Theme.fontFamily
-                            font.pixelSize: Core.Theme.fontSize
-                            font.weight: Font.DemiBold
-
-                            color: Core.Theme.foreground
+                        Behavior on scale {
+                            NumberAnimation {
+                                duration: 110
+                                easing.type: Easing.OutCubic
+                            }
                         }
 
-                        Text {
-                            width: parent.width
+                        // Urgency stripe
+                        Rectangle {
+                            anchors.left: parent.left
+                            anchors.top: parent.top
+                            anchors.bottom: parent.bottom
+                            anchors.margins: 6
 
-                            text: noteRow.modelData.body
-                                ? noteRow.modelData.body
-                                : ""
+                            width: 3
 
-                            visible: text !== ""
+                            radius: 2
 
-                            wrapMode: Text.Wrap
-                            maximumLineCount: 3
-                            elide: Text.ElideRight
+                            color: popup.isCritical(noteRow.modelData) ? Core.Theme.danger : Core.Theme.accent
 
-                            textFormat: Text.PlainText
-
-                            font.family: Core.Theme.fontFamily
-                            font.pixelSize: Core.Theme.fontSizeSmall
-
-                            color: Core.Theme.foregroundMuted
+                            opacity: popup.isCritical(noteRow.modelData) ? 1.0 : 0.55
                         }
 
-                        // Inline action buttons
-                        Row {
-                            spacing: 6
+                        Column {
+                            id: noteLayout
 
-                            topPadding: 4
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.top: parent.top
 
-                            visible: actionRepeater.count > 0
+                            anchors.leftMargin: 18
+                            anchors.rightMargin: 34
+                            anchors.topMargin: 10
 
-                            Repeater {
-                                id: actionRepeater
+                            spacing: 3
 
-                                model: noteRow.modelData.actions
-                                    ? noteRow.modelData.actions
-                                    : []
+                            Text {
+                                width: parent.width
 
-                                delegate: Rectangle {
-                                    id: actionChip
+                                text: popup.appLabel(noteRow.modelData).toUpperCase()
 
-                                    required property var modelData
+                                elide: Text.ElideRight
 
-                                    height: 22
+                                font.family: Core.Theme.fontFamily
+                                font.pixelSize: Core.Theme.fontSizeSmall
+                                font.letterSpacing: 0.8
 
-                                    width: chipText.implicitWidth + 18
+                                color: Core.Theme.foregroundFaint
+                            }
 
-                                    radius: 11
+                            Text {
+                                width: parent.width
 
-                                    color: chipMouse.containsMouse
-                                        ? Core.Theme.surfaceActive
-                                        : Core.Theme.hover
+                                text: noteRow.modelData.summary ? noteRow.modelData.summary : ""
 
-                                    Behavior on color {
-                                        ColorAnimation {
-                                            duration: 120
+                                visible: text !== ""
+
+                                elide: Text.ElideRight
+
+                                font.family: Core.Theme.fontFamily
+                                font.pixelSize: Core.Theme.fontSize
+                                font.weight: Font.DemiBold
+
+                                color: Core.Theme.foreground
+                            }
+
+                            Text {
+                                width: parent.width
+
+                                text: noteRow.modelData.body ? noteRow.modelData.body : ""
+
+                                visible: text !== ""
+
+                                wrapMode: Text.Wrap
+                                maximumLineCount: 3
+                                elide: Text.ElideRight
+
+                                textFormat: Text.PlainText
+
+                                font.family: Core.Theme.fontFamily
+                                font.pixelSize: Core.Theme.fontSizeSmall
+
+                                color: Core.Theme.foregroundMuted
+                            }
+
+                            // Inline action buttons
+                            Row {
+                                spacing: 6
+
+                                topPadding: 4
+
+                                visible: actionRepeater.count > 0
+
+                                Repeater {
+                                    id: actionRepeater
+
+                                    model: noteRow.modelData.actions ? noteRow.modelData.actions : []
+
+                                    delegate: Rectangle {
+                                        id: actionChip
+
+                                        required property var modelData
+
+                                        height: 22
+
+                                        width: chipText.implicitWidth + 18
+
+                                        radius: 11
+
+                                        color: chipMouse.containsMouse ? Core.Theme.surfaceActive : Core.Theme.hover
+
+                                        Behavior on color {
+                                            ColorAnimation {
+                                                duration: 120
+                                            }
                                         }
-                                    }
 
-                                    Text {
-                                        id: chipText
+                                        Text {
+                                            id: chipText
 
-                                        anchors.centerIn: parent
+                                            anchors.centerIn: parent
 
-                                        text: actionChip.modelData.text
-                                            ? actionChip.modelData.text
-                                            : "Open"
+                                            text: actionChip.modelData.text ? actionChip.modelData.text : "Open"
 
-                                        font.family:
-                                            Core.Theme.fontFamily
+                                            font.family: Core.Theme.fontFamily
 
-                                        font.pixelSize:
-                                            Core.Theme.fontSizeSmall
+                                            font.pixelSize: Core.Theme.fontSizeSmall
 
-                                        color: Core.Theme.foreground
-                                    }
+                                            color: Core.Theme.foreground
+                                        }
 
-                                    MouseArea {
-                                        id: chipMouse
+                                        MouseArea {
+                                            id: chipMouse
 
-                                        anchors.fill: parent
+                                            anchors.fill: parent
 
-                                        hoverEnabled: true
+                                            hoverEnabled: true
 
-                                        cursorShape:
-                                            Qt.PointingHandCursor
+                                            cursorShape: Qt.PointingHandCursor
 
-                                        onClicked: popup.invoke(
-                                            noteRow.modelData,
-                                            actionChip.modelData)
+                                            onClicked: popup.invoke(noteRow.modelData, actionChip.modelData)
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
 
-                    // Per-notification close button
-                    Rectangle {
-                        id: closeBtn
+                        // Per-notification close button
+                        Rectangle {
+                            id: closeBtn
 
-                        anchors.right: parent.right
-                        anchors.top: parent.top
+                            anchors.right: parent.right
+                            anchors.top: parent.top
 
-                        anchors.rightMargin: 6
-                        anchors.topMargin: 6
+                            anchors.rightMargin: 6
+                            anchors.topMargin: 6
 
-                        width: 22
-                        height: 22
+                            width: 22
+                            height: 22
 
-                        radius: 11
+                            radius: 11
 
-                        color: closeMouse.containsMouse
-                            ? Core.Theme.surfaceHover
-                            : "transparent"
+                            color: closeMouse.containsMouse ? Core.Theme.surfaceHover : "transparent"
 
-                        opacity: noteMouse.containsMouse
-                            || closeMouse.containsMouse
-                                ? 1.0
-                                : 0.0
+                            opacity: noteMouse.containsMouse || closeMouse.containsMouse ? 1.0 : 0.0
 
-                        Behavior on opacity {
-                            NumberAnimation {
-                                duration: 140
+                            Behavior on opacity {
+                                NumberAnimation {
+                                    duration: 140
+                                }
+                            }
+
+                            Text {
+                                anchors.centerIn: parent
+
+                                text: "\udb80\udc94"
+
+                                font.family: Core.Theme.fontFamily
+                                font.pixelSize: 12
+
+                                color: Core.Theme.foregroundMuted
+                            }
+
+                            MouseArea {
+                                id: closeMouse
+
+                                anchors.fill: parent
+
+                                hoverEnabled: true
+
+                                cursorShape: Qt.PointingHandCursor
+
+                                onClicked: popup.dismiss(noteRow.modelData)
                             }
                         }
 
-                        Text {
-                            anchors.centerIn: parent
-
-                            text: "\udb80\udc94"
-
-                            font.family: Core.Theme.fontFamily
-                            font.pixelSize: 12
-
-                            color: Core.Theme.foregroundMuted
-                        }
-
                         MouseArea {
-                            id: closeMouse
+                            id: noteMouse
 
                             anchors.fill: parent
 
@@ -540,148 +508,124 @@ Components.PopupSurface {
 
                             cursorShape: Qt.PointingHandCursor
 
-                            onClicked: popup.dismiss(
-                                noteRow.modelData)
-                        }
-                    }
+                            acceptedButtons: Qt.LeftButton | Qt.RightButton
 
-                    MouseArea {
-                        id: noteMouse
+                            z: -1
 
-                        anchors.fill: parent
-
-                        hoverEnabled: true
-
-                        cursorShape: Qt.PointingHandCursor
-
-                        acceptedButtons:
-                            Qt.LeftButton | Qt.RightButton
-
-                        z: -1
-
-                        onClicked: function(event) {
-                            if (event.button === Qt.LeftButton) {
-                                popup.dismiss(noteRow.modelData)
-                                return
-                            }
-
-                            // Capture values now — the delegate is
-                            // recycled and modelData can change
-                            // before the menu action runs.
-                            const note = noteRow.modelData
-
-                            const summary = note.summary
-                                ? String(note.summary)
-                                : ""
-
-                            const bodyText = note.body
-                                ? String(note.body)
-                                : ""
-
-                            const app = popup.appLabel(note)
-
-                            const point = noteRow.mapToItem(
-                                null, event.x, event.y)
-
-                            popup.openMenu(point.x, point.y, [
-                                {
-                                    icon: "\udb80\udc94",
-                                    label: "Dismiss",
-                                    action: function() {
-                                        popup.dismiss(note)
-                                    }
-                                },
-                                {
-                                    icon: "\udb81\udcd6",
-                                    label: "Copy text",
-                                    action: function() {
-                                        popup.copyText(
-                                            summary
-                                            + (bodyText !== ""
-                                                ? "\n" + bodyText
-                                                : ""))
-                                    }
-                                },
-                                {
-                                    icon: "\udb80\udd7c",
-                                    label: "Copy app name",
-                                    action: function() {
-                                        popup.copyText(app)
-                                    }
-                                },
-                                { separator: true },
-                                {
-                                    icon: "\udb80\udc9a",
-                                    label: popup.dnd
-                                        ? "Turn off do not disturb"
-                                        : "Turn on do not disturb",
-                                    action: function() {
-                                        popup.setDnd(!popup.dnd)
-                                    }
-                                },
-                                {
-                                    icon: "\udb80\uddb4",
-                                    label: "Clear all",
-                                    danger: true,
-                                    action: function() {
-                                        popup.clearAll()
-                                    }
+                            onClicked: function (event) {
+                                if (event.button === Qt.LeftButton) {
+                                    popup.dismiss(noteRow.modelData);
+                                    return;
                                 }
-                            ])
+
+                                // Capture values now — the delegate is
+                                // recycled and modelData can change
+                                // before the menu action runs.
+                                const note = noteRow.modelData;
+
+                                const summary = note.summary ? String(note.summary) : "";
+
+                                const bodyText = note.body ? String(note.body) : "";
+
+                                const app = popup.appLabel(note);
+
+                                const point = noteRow.mapToItem(null, event.x, event.y);
+
+                                popup.openMenu(point.x, point.y, [
+                                    {
+                                        icon: "\udb80\udc94",
+                                        label: "Dismiss",
+                                        action: function () {
+                                            popup.dismiss(note);
+                                        }
+                                    },
+                                    {
+                                        icon: "\udb81\udcd6",
+                                        label: "Copy text",
+                                        action: function () {
+                                            popup.copyText(summary + (bodyText !== "" ? "\n" + bodyText : ""));
+                                        }
+                                    },
+                                    {
+                                        icon: "\udb80\udd7c",
+                                        label: "Copy app name",
+                                        action: function () {
+                                            popup.copyText(app);
+                                        }
+                                    },
+                                    {
+                                        separator: true
+                                    },
+                                    {
+                                        icon: "\udb80\udc9a",
+                                        label: popup.dnd ? "Turn off do not disturb" : "Turn on do not disturb",
+                                        action: function () {
+                                            popup.setDnd(!popup.dnd);
+                                        }
+                                    },
+                                    {
+                                        icon: "\udb80\uddb4",
+                                        label: "Clear all",
+                                        danger: true,
+                                        action: function () {
+                                            popup.clearAll();
+                                        }
+                                    }
+                                ]);
+                            }
                         }
                     }
                 }
             }
-        }
 
-        // --------------------------------------------------------
-        // Empty state
-        // --------------------------------------------------------
+            // --------------------------------------------------------
+            // Empty state
+            // --------------------------------------------------------
 
-        Item {
-            width: body.width
+            Item {
+                width: body.width
 
-            height: popup.count === 0 ? 96 : 0
+                height: popup.count === 0 ? 96 : 0
 
-            visible: height > 1
+                visible: height > 1
 
-            clip: true
+                clip: true
 
-            Behavior on height {
-                NumberAnimation {
-                    duration: Core.Theme.durBase
-                    easing.type: Easing.OutCubic
+                Behavior on height {
+                    NumberAnimation {
+                        duration: Core.Theme.durBase
+                        easing.type: Easing.OutCubic
+                    }
+                }
+
+                Column {
+                    anchors.centerIn: parent
+
+                    spacing: 6
+
+                    Text {
+                        anchors.horizontalCenter: parent.horizontalCenter
+
+                        text: "\udb80\udc9c"
+
+                        font.family: Core.Theme.fontFamily
+                        font.pixelSize: 20
+
+                        color: Core.Theme.foregroundFaint
+                    }
+
+                    Text {
+                        anchors.horizontalCenter: parent.horizontalCenter
+
+                        text: "Nothing to catch up on"
+
+                        font.family: Core.Theme.fontFamily
+                        font.pixelSize: Core.Theme.fontSizeSmall
+
+                        color: Core.Theme.foregroundMuted
+                    }
                 }
             }
-
-            Column {
-                anchors.centerIn: parent
-
-                spacing: 6
-
-                Text {
-                    anchors.horizontalCenter: parent.horizontalCenter
-
-                    text: "\udb80\udc9c"
-
-                    font.family: Core.Theme.fontFamily
-                    font.pixelSize: 20
-
-                    color: Core.Theme.foregroundFaint
-                }
-
-                Text {
-                    anchors.horizontalCenter: parent.horizontalCenter
-
-                    text: "Nothing to catch up on"
-
-                    font.family: Core.Theme.fontFamily
-                    font.pixelSize: Core.Theme.fontSizeSmall
-
-                    color: Core.Theme.foregroundMuted
-                }
-            }
         }
-    }
     }
 }

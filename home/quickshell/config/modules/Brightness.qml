@@ -22,18 +22,14 @@ Item {
     implicitWidth: 58
     implicitHeight: Core.Theme.moduleHeight
 
-    readonly property int level:
-        Services.BrightnessService.level
+    readonly property int level: Services.BrightnessService.level
 
     Rectangle {
         anchors.fill: parent
 
         radius: height / 2
 
-        color:
-            mouse.containsMouse
-                ? Core.Theme.hover
-                : "transparent"
+        color: mouse.containsMouse ? Core.Theme.hover : "transparent"
 
         Behavior on color {
             ColorAnimation {
@@ -50,35 +46,25 @@ Item {
         Text {
             // Ramps with the level instead of showing the same sun
             // at 5% and at 100%.
-            text: Core.Icons.forBrightness(
-                Services.BrightnessService.fraction
-            )
+            text: Core.Icons.forBrightness(Services.BrightnessService.fraction)
 
-            font.family:
-                Core.Theme.fontFamily
+            font.family: Core.Theme.fontFamily
 
-            font.pixelSize:
-                Core.Theme.iconSize
+            font.pixelSize: Core.Theme.iconSize
 
-            color:
-                Core.Theme.accent
+            color: Core.Theme.accent
         }
 
         Text {
-            text:
-                root.level + "%"
+            text: root.level + "%"
 
-            font.family:
-                Core.Theme.fontFamily
+            font.family: Core.Theme.fontFamily
 
-            font.pixelSize:
-                Core.Theme.fontSize
+            font.pixelSize: Core.Theme.fontSize
 
-            font.weight:
-                Font.Medium
+            font.weight: Font.Medium
 
-            color:
-                Core.Theme.foreground
+            color: Core.Theme.foreground
 
             renderType: Text.QtRendering
         }
@@ -91,23 +77,16 @@ Item {
 
         hoverEnabled: true
 
-        cursorShape:
-            Qt.PointingHandCursor
+        cursorShape: Qt.PointingHandCursor
 
-        acceptedButtons:
-            Qt.LeftButton
+        acceptedButtons: Qt.LeftButton
 
-        onWheel: function(event) {
-
+        onWheel: function (event) {
             if (event.angleDelta.y === 0)
-                return
-
-            Services.BrightnessService.step(
-                event.angleDelta.y > 0
-            )
+                return;
+            Services.BrightnessService.step(event.angleDelta.y > 0);
         }
 
-        onClicked:
-            Services.BrightnessService.step(true)
+        onClicked: Services.BrightnessService.step(true)
     }
 }

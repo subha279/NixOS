@@ -23,14 +23,11 @@ Item {
     implicitWidth: 30
     implicitHeight: Core.Theme.moduleHeight
 
-    readonly property bool menuOpen:
-        Core.PopupManager.isOpen("network")
+    readonly property bool menuOpen: Core.PopupManager.isOpen("network")
 
-    readonly property string link:
-        Services.NetworkService.primaryLink
+    readonly property string link: Services.NetworkService.primaryLink
 
-    readonly property bool showEthernet:
-        root.link === "ethernet"
+    readonly property bool showEthernet: root.link === "ethernet"
 
     // ------------------------------------------------------------
     // Signal tier, with a deadband
@@ -44,23 +41,22 @@ Item {
 
     property int tier: 3
 
-    readonly property int rawSignal:
-        Services.NetworkService.activeSignal
+    readonly property int rawSignal: Services.NetworkService.activeSignal
 
     onRawSignalChanged: {
-        const s = root.rawSignal
-        const bounds = [25, 50, 75]
-        const dead = 6
+        const s = root.rawSignal;
+        const bounds = [25, 50, 75];
+        const dead = 6;
 
-        let t = root.tier
+        let t = root.tier;
 
         while (t < 3 && s >= bounds[t] + dead)
-            t++
+            t++;
 
         while (t > 0 && s < bounds[t - 1] - dead)
-            t--
+            t--;
 
-        root.tier = t
+        root.tier = t;
     }
 
     // ------------------------------------------------------------
@@ -72,11 +68,7 @@ Item {
 
         radius: height / 2
 
-        color: root.menuOpen
-            ? Core.Theme.surfaceActive
-            : mouse.containsMouse
-                ? Core.Theme.hover
-                : "transparent"
+        color: root.menuOpen ? Core.Theme.surfaceActive : mouse.containsMouse ? Core.Theme.hover : "transparent"
 
         Behavior on color {
             ColorAnimation {
@@ -126,26 +118,28 @@ Item {
         anchors.centerIn: parent
 
         text: {
-            const svc = Services.NetworkService
+            const svc = Services.NetworkService;
 
             if (!svc.wifiEnabled)
-                return Core.Icons.wifiOff
+                return Core.Icons.wifiOff;
 
             if (!svc.wifiConnected)
-                return Core.Icons.wifiNone
+                return Core.Icons.wifiNone;
 
-            if (root.tier >= 3) return Core.Icons.wifi3
-            if (root.tier === 2) return Core.Icons.wifi2
-            if (root.tier === 1) return Core.Icons.wifi1
+            if (root.tier >= 3)
+                return Core.Icons.wifi3;
+            if (root.tier === 2)
+                return Core.Icons.wifi2;
+            if (root.tier === 1)
+                return Core.Icons.wifi1;
 
-            return Core.Icons.wifi0        }
+            return Core.Icons.wifi0;
+        }
 
         font.family: Core.Theme.fontFamily
         font.pixelSize: Core.Theme.iconSize
 
-        color: Services.NetworkService.wifiConnected
-            ? Core.Theme.foreground
-            : Core.Theme.foregroundMuted
+        color: Services.NetworkService.wifiConnected ? Core.Theme.foreground : Core.Theme.foregroundMuted
 
         Behavior on color {
             ColorAnimation {
@@ -190,10 +184,7 @@ Item {
 
         color: Core.Theme.accent
 
-        opacity: Services.NetworkService.busy
-            || Services.NetworkService.scanning
-                ? 1.0
-                : 0.0
+        opacity: Services.NetworkService.busy || Services.NetworkService.scanning ? 1.0 : 0.0
 
         Behavior on opacity {
             NumberAnimation {
@@ -202,8 +193,7 @@ Item {
         }
 
         SequentialAnimation on scale {
-            running: Services.NetworkService.busy
-                || Services.NetworkService.scanning
+            running: Services.NetworkService.busy || Services.NetworkService.scanning
 
             loops: Animation.Infinite
 
@@ -234,41 +224,35 @@ Item {
 
         cursorShape: Qt.PointingHandCursor
 
-        acceptedButtons:
-            Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
+        acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
 
-        onClicked: function(event) {
+        onClicked: function (event) {
             if (event.button === Qt.MiddleButton) {
-                Services.NetworkService.toggleWifi()
-                return
+                Services.NetworkService.toggleWifi();
+                return;
             }
 
             if (event.button === Qt.RightButton) {
-                Services.NetworkService.openEditor()
-                return
+                Services.NetworkService.openEditor();
+                return;
             }
 
             // Screen-space anchor for the dropdown.
             // The bar window spans the full width, so mapToItem(null)
             // already gives us screen X; we only add the bar's top
             // margin to get screen Y.
-            const p = root.mapToItem(null, 0, root.height)
+            const p = root.mapToItem(null, 0, root.height);
 
-            Core.PopupManager.toggle(
-                "network",
-                p.x + root.width / 2,
-                p.y + Core.Theme.barMarginTop
-            )
+            Core.PopupManager.toggle("network", p.x + root.width / 2, p.y + Core.Theme.barMarginTop);
 
             if (Core.PopupManager.isOpen("network"))
-                Services.NetworkService.rescan()
+                Services.NetworkService.rescan();
         }
 
-        onWheel: function(event) {
+        onWheel: function (event) {
             if (event.angleDelta.y === 0)
-                return
-
-            Services.NetworkService.toggleWifi()
+                return;
+            Services.NetworkService.toggleWifi();
         }
     }
 

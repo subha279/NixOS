@@ -22,19 +22,14 @@ Item {
 
     readonly property var svc: Services.AudioService
 
-    readonly property bool menuOpen:
-        Core.PopupManager.isOpen("audio")
+    readonly property bool menuOpen: Core.PopupManager.isOpen("audio")
 
     Rectangle {
         anchors.fill: parent
 
         radius: height / 2
 
-        color: root.menuOpen
-            ? Core.Theme.surfaceActive
-            : (mouse.containsMouse
-                ? Core.Theme.hover
-                : "transparent")
+        color: root.menuOpen ? Core.Theme.surfaceActive : (mouse.containsMouse ? Core.Theme.hover : "transparent")
 
         Behavior on color {
             ColorAnimation {
@@ -58,11 +53,7 @@ Item {
             font.family: Core.Theme.fontFamily
             font.pixelSize: Core.Theme.iconSize
 
-            color: root.svc.muted
-                ? Core.Theme.foregroundMuted
-                : (root.menuOpen
-                    ? Core.Theme.accent
-                    : Core.Theme.foreground)
+            color: root.svc.muted ? Core.Theme.foregroundMuted : (root.menuOpen ? Core.Theme.accent : Core.Theme.foreground)
 
             Behavior on color {
                 ColorAnimation {
@@ -103,9 +94,7 @@ Item {
             font.pixelSize: Core.Theme.fontSize
             font.weight: Font.Medium
 
-            color: root.svc.muted
-                ? Core.Theme.foregroundMuted
-                : Core.Theme.foreground
+            color: root.svc.muted ? Core.Theme.foregroundMuted : Core.Theme.foreground
 
             renderType: Text.QtRendering
         }
@@ -149,42 +138,30 @@ Item {
 
         cursorShape: Qt.PointingHandCursor
 
-        acceptedButtons:
-            Qt.LeftButton |
-            Qt.RightButton |
-            Qt.MiddleButton
+        acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
 
-        onClicked: function(event) {
-
+        onClicked: function (event) {
             if (event.button === Qt.RightButton) {
-                root.svc.toggleOutputMute()
-                return
+                root.svc.toggleOutputMute();
+                return;
             }
 
             if (event.button === Qt.MiddleButton) {
-                root.svc.toggleMicMute()
-                return
+                root.svc.toggleMicMute();
+                return;
             }
 
             // Bar coordinates -> screen coordinates. Only x is
             // used; the popup derives its own y from the theme.
-            const p = root.mapToItem(null, 0, root.height)
+            const p = root.mapToItem(null, 0, root.height);
 
-            Core.PopupManager.toggle(
-                "audio",
-                p.x + root.width / 2,
-                p.y + Core.Theme.barMarginTop
-            )
+            Core.PopupManager.toggle("audio", p.x + root.width / 2, p.y + Core.Theme.barMarginTop);
         }
 
-        onWheel: function(event) {
+        onWheel: function (event) {
+            const step = 0.05;
 
-            const step = 0.05
-
-            root.svc.stepVolume(
-                root.svc.sink,
-                event.angleDelta.y > 0 ? step : -step
-            )
+            root.svc.stepVolume(root.svc.sink, event.angleDelta.y > 0 ? step : -step);
         }
     }
 }

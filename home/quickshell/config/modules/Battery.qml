@@ -23,8 +23,7 @@ Item {
     implicitWidth: 58
     implicitHeight: Core.Theme.moduleHeight
 
-    readonly property bool menuOpen:
-        Core.PopupManager.isOpen("battery")
+    readonly property bool menuOpen: Core.PopupManager.isOpen("battery")
 
     readonly property var svc: Services.BatteryService
 
@@ -36,11 +35,7 @@ Item {
 
         radius: height / 2
 
-        color: root.menuOpen
-            ? Core.Theme.surfaceActive
-            : mouse.containsMouse
-                ? Core.Theme.hover
-                : "transparent"
+        color: root.menuOpen ? Core.Theme.surfaceActive : mouse.containsMouse ? Core.Theme.hover : "transparent"
 
         Behavior on color {
             ColorAnimation {
@@ -146,11 +141,7 @@ Item {
             font.pixelSize: Core.Theme.fontSize
             font.weight: Font.Medium
 
-            color: root.svc.critical
-                ? Core.Theme.danger
-                : root.svc.low
-                    ? Core.Theme.warning
-                    : Core.Theme.foreground
+            color: root.svc.critical ? Core.Theme.danger : root.svc.low ? Core.Theme.warning : Core.Theme.foreground
 
             Behavior on color {
                 ColorAnimation {
@@ -173,53 +164,46 @@ Item {
 
         cursorShape: Qt.PointingHandCursor
 
-        acceptedButtons:
-            Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
+        acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
 
-        onClicked: function(event) {
+        onClicked: function (event) {
             if (event.button === Qt.MiddleButton) {
-                root.cycleProfile()
-                return
+                root.cycleProfile();
+                return;
             }
 
             if (event.button === Qt.RightButton) {
-                root.svc.openPowerSettings()
-                return
+                root.svc.openPowerSettings();
+                return;
             }
 
-            const p = root.mapToItem(null, 0, root.height)
+            const p = root.mapToItem(null, 0, root.height);
 
-            Core.PopupManager.toggle(
-                "battery",
-                p.x + root.width / 2,
-                p.y + Core.Theme.barMarginTop
-            )
+            Core.PopupManager.toggle("battery", p.x + root.width / 2, p.y + Core.Theme.barMarginTop);
         }
 
-        onWheel: function(event) {
+        onWheel: function (event) {
             if (event.angleDelta.y === 0)
-                return
-
-            root.cycleProfile(event.angleDelta.y > 0 ? 1 : -1)
+                return;
+            root.cycleProfile(event.angleDelta.y > 0 ? 1 : -1);
         }
     }
 
     function cycleProfile(direction) {
         if (!root.svc.profilesAvailable)
-            return
+            return;
+        const step = direction === undefined ? 1 : direction;
 
-        const step = direction === undefined ? 1 : direction
+        const max = root.svc.hasPerformance ? 2 : 1;
 
-        const max = root.svc.hasPerformance ? 2 : 1
-
-        let next = root.svc.profile + step
+        let next = root.svc.profile + step;
 
         if (next > max)
-            next = 0
+            next = 0;
 
         if (next < 0)
-            next = max
+            next = max;
 
-        root.svc.setProfile(next)
+        root.svc.setProfile(next);
     }
 }

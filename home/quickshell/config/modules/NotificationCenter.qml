@@ -19,16 +19,11 @@ Item {
     implicitWidth: 30
     implicitHeight: Core.Theme.moduleHeight
 
-    readonly property bool menuOpen:
-        Core.PopupManager.isOpen("notifications")
+    readonly property bool menuOpen: Core.PopupManager.isOpen("notifications")
 
-    readonly property var list:
-        Services.NotificationServer.notifications
+    readonly property var list: Services.NotificationServer.notifications
 
-    readonly property int count:
-        (root.list && root.list.values)
-            ? root.list.values.length
-            : 0
+    readonly property int count: (root.list && root.list.values) ? root.list.values.length : 0
 
     // Do-not-disturb is shared with the panel through PopupManager.
     readonly property bool dnd: Core.PopupManager.dnd
@@ -38,11 +33,7 @@ Item {
 
         radius: height / 2
 
-        color: root.menuOpen
-            ? Core.Theme.surfaceActive
-            : mouse.containsMouse
-                ? Core.Theme.hover
-                : "transparent"
+        color: root.menuOpen ? Core.Theme.surfaceActive : mouse.containsMouse ? Core.Theme.hover : "transparent"
 
         Behavior on color {
             ColorAnimation {
@@ -57,20 +48,12 @@ Item {
         anchors.centerIn: parent
 
         // bell / bell-badge / bell-off
-        text: root.dnd
-            ? "\udb80\udc9a"
-            : root.count > 0
-                ? "\udb81\udf9e"
-                : "\udb80\udc9c"
+        text: root.dnd ? "\udb80\udc9a" : root.count > 0 ? "\udb81\udf9e" : "\udb80\udc9c"
 
         font.family: Core.Theme.fontFamily
         font.pixelSize: Core.Theme.iconSize
 
-        color: root.dnd
-            ? Core.Theme.foregroundFaint
-            : root.count > 0
-                ? Core.Theme.accent
-                : Core.Theme.foreground
+        color: root.dnd ? Core.Theme.foregroundFaint : root.count > 0 ? Core.Theme.accent : Core.Theme.foreground
 
         Behavior on color {
             ColorAnimation {
@@ -154,49 +137,44 @@ Item {
 
         cursorShape: Qt.PointingHandCursor
 
-        acceptedButtons:
-            Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
+        acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
 
-        onClicked: function(event) {
+        onClicked: function (event) {
             if (event.button === Qt.MiddleButton) {
-                Core.PopupManager.dnd = !Core.PopupManager.dnd
-                return
+                Core.PopupManager.dnd = !Core.PopupManager.dnd;
+                return;
             }
 
             if (event.button === Qt.RightButton) {
-                root.clearAll()
-                return
+                root.clearAll();
+                return;
             }
 
-            const p = root.mapToItem(null, 0, root.height)
+            const p = root.mapToItem(null, 0, root.height);
 
-            Core.PopupManager.toggle(
-                "notifications",
-                p.x + root.width / 2,
-                p.y + Core.Theme.barMarginTop
-            )
+            Core.PopupManager.toggle("notifications", p.x + root.width / 2, p.y + Core.Theme.barMarginTop);
         }
     }
 
     function dismiss(n) {
         if (!n)
-            return
+            return;
 
         // Prefer dismiss(); fall back to expire() on older builds.
         if (typeof n.dismiss === "function")
-            n.dismiss()
+            n.dismiss();
         else if (typeof n.expire === "function")
-            n.expire()
+            n.expire();
     }
 
     function clearAll() {
         if (!root.list || !root.list.values)
-            return
+            return;
 
         // Copy first — dismissing mutates the live model.
-        const snapshot = root.list.values.slice()
+        const snapshot = root.list.values.slice();
 
         for (let i = 0; i < snapshot.length; i++)
-            root.dismiss(snapshot[i])
+            root.dismiss(snapshot[i]);
     }
 }

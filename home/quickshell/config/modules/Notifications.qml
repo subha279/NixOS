@@ -28,8 +28,7 @@ PanelWindow {
     margins.top: 48
     margins.right: 14
 
-    readonly property var toasts:
-        Services.NotificationServer.toasts
+    readonly property var toasts: Services.NotificationServer.toasts
 
     readonly property int toastWidth: 356
     readonly property int toastSpacing: 8
@@ -41,23 +40,23 @@ PanelWindow {
     // which can collapse the PanelWindow to almost zero height.
     readonly property int contentHeight: {
         if (!root.toasts || root.toasts.length === 0)
-            return 1
+            return 1;
 
-        var total = 0
+        var total = 0;
 
         for (var i = 0; i < root.toasts.length; i++) {
-            var n = root.toasts[i]
+            var n = root.toasts[i];
 
             // Conservative height used by the delegates.
             // The actual card may be slightly taller depending
             // on the notification body.
-            total += 96
+            total += 96;
 
             if (i < root.toasts.length - 1)
-                total += root.toastSpacing
+                total += root.toastSpacing;
         }
 
-        return Math.min(total, root.maxHeight)
+        return Math.min(total, root.maxHeight);
     }
 
     implicitWidth: root.toastWidth + 14
@@ -70,10 +69,7 @@ PanelWindow {
 
     exclusionMode: ExclusionMode.Ignore
 
-    visible:
-        root.toasts.length > 0
-        && !Core.PopupManager.dnd
-        && !Core.PopupManager.isOpen("notifications")
+    visible: root.toasts.length > 0 && !Core.PopupManager.dnd && !Core.PopupManager.isOpen("notifications")
 
     // Only the actual toast stack receives input.
     mask: Region {
@@ -87,10 +83,7 @@ PanelWindow {
         anchors.right: parent.right
 
         width: root.toastWidth
-        height: Math.min(
-            root.contentHeight,
-            root.maxHeight
-        )
+        height: Math.min(root.contentHeight, root.maxHeight)
 
         Repeater {
             id: repeater
@@ -102,21 +95,11 @@ PanelWindow {
 
                 required property var modelData
 
-                readonly property bool critical:
-                    Services.NotificationServer.isCritical(
-                        wrapper.modelData
-                    )
+                readonly property bool critical: Services.NotificationServer.isCritical(wrapper.modelData)
 
-                readonly property int lifetime:
-                    Services.NotificationServer.lifetimeFor(
-                        wrapper.modelData
-                    )
+                readonly property int lifetime: Services.NotificationServer.lifetimeFor(wrapper.modelData)
 
-                readonly property real cardHeight:
-                    Math.max(
-                        72,
-                        card.implicitHeight
-                    )
+                readonly property real cardHeight: Math.max(72, card.implicitHeight)
 
                 property real remaining: wrapper.lifetime
 
@@ -138,27 +121,23 @@ PanelWindow {
                 // This prevents Layout animations from fighting
                 // with the compositor.
                 y: {
-                    var result = 0
+                    var result = 0;
 
                     for (var i = 0; i < index; i++) {
-                        result += 96 + root.toastSpacing
+                        result += 96 + root.toastSpacing;
                     }
 
-                    return result
+                    return result;
                 }
 
-                height: Math.max(
-                    0,
-                    wrapper.cardHeight * wrapper.collapse
-                )
+                height: Math.max(0, wrapper.cardHeight * wrapper.collapse)
 
-                opacity:
-                    1.0 - (wrapper.slide * 0.35)
+                opacity: 1.0 - (wrapper.slide * 0.35)
 
                 clip: true
 
                 Component.onCompleted: {
-                    enterAnim.start()
+                    enterAnim.start();
                 }
 
                 // ------------------------------------------------
@@ -167,46 +146,39 @@ PanelWindow {
 
                 function hide() {
                     if (wrapper.dismissing)
-                        return
-
-                    wrapper.dismissing = true
-                    exitAnim.start()
+                        return;
+                    wrapper.dismissing = true;
+                    exitAnim.start();
                 }
 
                 function dismissFully() {
                     if (wrapper.dismissing)
-                        return
+                        return;
+                    wrapper.dismissing = true;
 
-                    wrapper.dismissing = true
-
-                    Services.NotificationServer.dismiss(
-                        wrapper.modelData
-                    )
+                    Services.NotificationServer.dismiss(wrapper.modelData);
                 }
 
                 function activate() {
-                    const n = wrapper.modelData
+                    const n = wrapper.modelData;
 
                     try {
-                        const acts = n.actions
+                        const acts = n.actions;
 
                         if (acts && acts.length > 0) {
                             for (var i = 0; i < acts.length; i++) {
-                                var actionId = ""
+                                var actionId = "";
 
                                 try {
                                     if (acts[i].identifier !== undefined)
-                                        actionId =
-                                            String(
-                                                acts[i].identifier
-                                            )
+                                        actionId = String(acts[i].identifier);
                                 } catch (e) {
-                                    actionId = ""
+                                    actionId = "";
                                 }
 
                                 if (actionId === "default") {
-                                    acts[i].invoke()
-                                    break
+                                    acts[i].invoke();
+                                    break;
                                 }
                             }
                         }
@@ -214,7 +186,7 @@ PanelWindow {
                         // No usable action.
                     }
 
-                    wrapper.dismissFully()
+                    wrapper.dismissFully();
                 }
 
                 // ------------------------------------------------
@@ -279,10 +251,7 @@ PanelWindow {
                     }
 
                     ScriptAction {
-                        script:
-                            Services.NotificationServer.hideToast(
-                                wrapper.modelData
-                            )
+                        script: Services.NotificationServer.hideToast(wrapper.modelData)
                     }
                 }
 
@@ -296,16 +265,13 @@ PanelWindow {
                     interval: 50
                     repeat: true
 
-                    running:
-                        wrapper.lifetime > 0
-                        && !cardHover.hovered
-                        && !wrapper.dismissing
+                    running: wrapper.lifetime > 0 && !cardHover.hovered && !wrapper.dismissing
 
                     onTriggered: {
-                        wrapper.remaining -= interval
+                        wrapper.remaining -= interval;
 
                         if (wrapper.remaining <= 0)
-                            wrapper.hide()
+                            wrapper.hide();
                     }
                 }
 
@@ -320,11 +286,7 @@ PanelWindow {
                     anchors.right: parent.right
                     anchors.top: parent.top
 
-                    implicitHeight:
-                        Math.max(
-                            72,
-                            contentRow.implicitHeight + 24
-                        )
+                    implicitHeight: Math.max(72, contentRow.implicitHeight + 24)
 
                     height: implicitHeight
 
@@ -332,14 +294,11 @@ PanelWindow {
 
                     clip: true
 
-                    color:
-                        Core.Theme.backgroundSolid
+                    color: Core.Theme.backgroundSolid
 
-                    border.width:
-                        Core.Theme.borderWidth
+                    border.width: Core.Theme.borderWidth
 
-                    border.color:
-                        Core.Theme.borderActive
+                    border.color: Core.Theme.borderActive
 
                     transform: Translate {
                         x: wrapper.slide * 44
@@ -354,8 +313,7 @@ PanelWindow {
 
                         onHoveredChanged: {
                             if (cardHover.hovered)
-                                wrapper.remaining =
-                                    wrapper.lifetime
+                                wrapper.remaining = wrapper.lifetime;
                         }
                     }
 
@@ -366,27 +324,22 @@ PanelWindow {
                     MouseArea {
                         anchors.fill: parent
 
-                        acceptedButtons:
-                            Qt.LeftButton
-                            | Qt.RightButton
-                            | Qt.MiddleButton
+                        acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
 
-                        cursorShape:
-                            Qt.PointingHandCursor
+                        cursorShape: Qt.PointingHandCursor
 
-                        onClicked: function(mouse) {
-
+                        onClicked: function (mouse) {
                             if (mouse.button === Qt.RightButton) {
-                                wrapper.dismissFully()
-                                return
+                                wrapper.dismissFully();
+                                return;
                             }
 
                             if (mouse.button === Qt.MiddleButton) {
-                                Services.NotificationServer.clearToasts()
-                                return
+                                Services.NotificationServer.clearToasts();
+                                return;
                             }
 
-                            wrapper.activate()
+                            wrapper.activate();
                         }
                     }
 
@@ -401,15 +354,9 @@ PanelWindow {
 
                         width: 3
 
-                        color:
-                            wrapper.critical
-                                ? Core.Theme.danger
-                                : Core.Theme.accent
+                        color: wrapper.critical ? Core.Theme.danger : Core.Theme.accent
 
-                        opacity:
-                            wrapper.critical
-                                ? 1.0
-                                : 0.55
+                        opacity: wrapper.critical ? 1.0 : 0.55
                     }
 
                     // ------------------------------------------------
@@ -433,121 +380,95 @@ PanelWindow {
                         // Application icon
                         // --------------------------------------------
                         Rectangle {
-    Layout.alignment: Qt.AlignTop
+                            Layout.alignment: Qt.AlignTop
 
-    Layout.preferredWidth: 38
-    Layout.preferredHeight: 38
+                            Layout.preferredWidth: 38
+                            Layout.preferredHeight: 38
 
-    radius: 11
+                            radius: 11
 
-    color: wrapper.critical
-        ? "#1fe58fa0"
-        : Core.Theme.surface
+                            color: wrapper.critical ? "#1fe58fa0" : Core.Theme.surface
 
-    // ------------------------------------------------------------
-    // Resolve the notification icon.
-    //
-    // Different applications use different notification fields:
-    //
-    //   image
-    //   imagePath
-    //   appIcon
-    //
-    // We try them in that order.
-    // ------------------------------------------------------------
+                            // ------------------------------------------------------------
+                            // Resolve the notification icon.
+                            //
+                            // Different applications use different notification fields:
+                            //
+                            //   image
+                            //   imagePath
+                            //   appIcon
+                            //
+                            // We try them in that order.
+                            // ------------------------------------------------------------
 
-    readonly property string resolvedIcon: {
-        const n = wrapper.modelData
+                            readonly property string resolvedIcon: {
+                                const n = wrapper.modelData;
 
-        // 1. Explicit notification image
-        try {
-            if (
-                n.image !== undefined
-                && n.image !== null
-                && String(n.image) !== ""
-            ) {
-                return String(n.image)
-            }
-        } catch (e) {}
+                                // 1. Explicit notification image
+                                try {
+                                    if (n.image !== undefined && n.image !== null && String(n.image) !== "") {
+                                        return String(n.image);
+                                    }
+                                } catch (e) {}
 
-        // 2. Explicit image path
-        try {
-            if (
-                n.imagePath !== undefined
-                && n.imagePath !== null
-                && String(n.imagePath) !== ""
-            ) {
-                return String(n.imagePath)
-            }
-        } catch (e) {}
+                                // 2. Explicit image path
+                                try {
+                                    if (n.imagePath !== undefined && n.imagePath !== null && String(n.imagePath) !== "") {
+                                        return String(n.imagePath);
+                                    }
+                                } catch (e) {}
 
-        // 3. Desktop/application icon
-        try {
-            if (
-                n.appIcon !== undefined
-                && n.appIcon !== null
-                && String(n.appIcon) !== ""
-            ) {
-                return Quickshell.iconPath(
-                    String(n.appIcon),
-                    true
-                )
-            }
-        } catch (e) {}
+                                // 3. Desktop/application icon
+                                try {
+                                    if (n.appIcon !== undefined && n.appIcon !== null && String(n.appIcon) !== "") {
+                                        return Quickshell.iconPath(String(n.appIcon), true);
+                                    }
+                                } catch (e) {}
 
-        return ""
-    }
+                                return "";
+                            }
 
-    Image {
-        id: notificationIcon
+                            Image {
+                                id: notificationIcon
 
-        anchors.centerIn: parent
+                                anchors.centerIn: parent
 
-        width: 26
-        height: 26
+                                width: 26
+                                height: 26
 
-        source: parent.resolvedIcon
+                                source: parent.resolvedIcon
 
-        visible:
-            status === Image.Ready
-            && source !== ""
+                                visible: status === Image.Ready && source !== ""
 
-        asynchronous: true
-        cache: true
-        smooth: true
+                                asynchronous: true
+                                cache: true
+                                smooth: true
 
-        fillMode:
-            Image.PreserveAspectFit
+                                fillMode: Image.PreserveAspectFit
 
-        mipmap: true
-    }
+                                mipmap: true
+                            }
 
-    // ------------------------------------------------------------
-    // Nerd Font fallback
-    // ------------------------------------------------------------
+                            // ------------------------------------------------------------
+                            // Nerd Font fallback
+                            // ------------------------------------------------------------
 
-    Text {
-        anchors.centerIn: parent
+                            Text {
+                                anchors.centerIn: parent
 
-        visible:
-            !notificationIcon.visible
+                                visible: !notificationIcon.visible
 
-        text: "\udb80\udc7f"
+                                text: "\udb80\udc7f"
 
-        font.family:
-            Core.Theme.fontFamily
+                                font.family: Core.Theme.fontFamily
 
-        font.pixelSize: 19
+                                font.pixelSize: 19
 
-        color:
-            wrapper.critical
-                ? Core.Theme.danger
-                : Core.Theme.accent
+                                color: wrapper.critical ? Core.Theme.danger : Core.Theme.accent
 
-        renderType:
-            Text.NativeRendering
-    }
-}
+                                renderType: Text.NativeRendering
+                            }
+                        }
 
                         // --------------------------------------------
                         // Text
@@ -562,72 +483,54 @@ PanelWindow {
                                 Layout.fillWidth: true
 
                                 text: {
-                                    const n =
-                                        wrapper.modelData
+                                    const n = wrapper.modelData;
 
                                     try {
-                                        if (
-                                            n.appName
-                                            && n.appName !== ""
-                                        )
-                                            return n.appName
+                                        if (n.appName && n.appName !== "")
+                                            return n.appName;
                                     } catch (e) {}
 
                                     try {
-                                        if (
-                                            n.desktopEntry
-                                            && n.desktopEntry !== ""
-                                        )
-                                            return n.desktopEntry
+                                        if (n.desktopEntry && n.desktopEntry !== "")
+                                            return n.desktopEntry;
                                     } catch (e) {}
 
-                                    return "Notification"
+                                    return "Notification";
                                 }
 
-                                font.family:
-                                    Core.Theme.fontFamily
+                                font.family: Core.Theme.fontFamily
 
-                                font.pixelSize:
-                                    Core.Theme.fontSizeSmall
+                                font.pixelSize: Core.Theme.fontSizeSmall
 
-                                font.weight:
-                                    Font.DemiBold
+                                font.weight: Font.DemiBold
 
-                                color:
-                                    Core.Theme.text
+                                color: Core.Theme.text
 
-                                elide:
-                                    Text.ElideRight
+                                elide: Text.ElideRight
                             }
 
                             Text {
                                 Layout.fillWidth: true
 
                                 text: {
-                                    const n =
-                                        wrapper.modelData
+                                    const n = wrapper.modelData;
 
                                     try {
-                                        return n.summary || ""
+                                        return n.summary || "";
                                     } catch (e) {
-                                        return ""
+                                        return "";
                                     }
                                 }
 
-                                font.family:
-                                    Core.Theme.fontFamily
+                                font.family: Core.Theme.fontFamily
 
-                                font.pixelSize:
-                                    Core.Theme.fontSizeBase
+                                font.pixelSize: Core.Theme.fontSizeBase
 
-                                font.weight:
-                                    Font.Medium
+                                font.weight: Font.Medium
 
-                                color:
-                                    Core.Theme.text
+                                color: Core.Theme.text
 
-                                elide:
-                                    Text.ElideRight
+                                elide: Text.ElideRight
 
                                 maximumLineCount: 2
                             }
@@ -635,36 +538,29 @@ PanelWindow {
                             Text {
                                 Layout.fillWidth: true
 
-                                visible:
-                                    text !== ""
+                                visible: text !== ""
 
                                 text: {
-                                    const n =
-                                        wrapper.modelData
+                                    const n = wrapper.modelData;
 
                                     try {
-                                        return n.body || ""
+                                        return n.body || "";
                                     } catch (e) {
-                                        return ""
+                                        return "";
                                     }
                                 }
 
-                                font.family:
-                                    Core.Theme.fontFamily
+                                font.family: Core.Theme.fontFamily
 
-                                font.pixelSize:
-                                    Core.Theme.fontSizeSmall
+                                font.pixelSize: Core.Theme.fontSizeSmall
 
-                                color:
-                                    Core.Theme.textMuted
+                                color: Core.Theme.textMuted
 
-                                wrapMode:
-                                    Text.Wrap
+                                wrapMode: Text.Wrap
 
                                 maximumLineCount: 3
 
-                                elide:
-                                    Text.ElideRight
+                                elide: Text.ElideRight
                             }
                         }
 
@@ -673,31 +569,25 @@ PanelWindow {
                         // --------------------------------------------
 
                         Rectangle {
-                            Layout.alignment:
-                                Qt.AlignTop
+                            Layout.alignment: Qt.AlignTop
 
                             width: 28
                             height: 28
 
                             radius: 9
 
-                            color:
-                                closeMouse.containsMouse
-                                    ? Core.Theme.surfaceHover
-                                    : "transparent"
+                            color: closeMouse.containsMouse ? Core.Theme.surfaceHover : "transparent"
 
                             Text {
                                 anchors.centerIn: parent
 
                                 text: "\udb80\udc6f"
 
-                                font.family:
-                                    Core.Theme.fontFamily
+                                font.family: Core.Theme.fontFamily
 
                                 font.pixelSize: 15
 
-                                color:
-                                    Core.Theme.textMuted
+                                color: Core.Theme.textMuted
                             }
 
                             MouseArea {
@@ -708,7 +598,7 @@ PanelWindow {
                                 hoverEnabled: true
 
                                 onClicked: {
-                                    wrapper.hide()
+                                    wrapper.hide();
                                 }
                             }
                         }
