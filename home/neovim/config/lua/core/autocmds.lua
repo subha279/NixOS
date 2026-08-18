@@ -6,6 +6,24 @@ local group = vim.api.nvim_create_augroup("UserAutocmds", {
 	clear = true,
 })
 
+vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter" }, {
+	group = group,
+
+	callback = function(event)
+		local buf = event.buf
+
+		-- Only normal editable buffers.
+		if vim.bo[buf].buftype ~= "" then
+			return
+		end
+
+		-- Normal editing view.
+		vim.wo.number = true
+		vim.wo.relativenumber = true
+		vim.wo.signcolumn = "yes"
+	end,
+})
+
 -- ============================================================================
 -- Highlight yanked text
 -- ============================================================================

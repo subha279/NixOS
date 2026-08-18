@@ -231,3 +231,16 @@ map("n", "<leader>:", "q:", {
 map("n", "<leader>/", "q/", {
 	desc = "Search history",
 })
+
+-- Others
+map(
+	"n",
+	"<leader>rb",
+	[[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]],
+	{ desc = "Rename Same Many Words Together In the Cursor" }
+)
+map("v", "K", ":m '<-2<CR>gv=gv", { desc = "Move Selected Line Up" })
+map("v", "J", ":m '>+1<CR>gv=gv", { desc = "Move Selected Line Down" })
+map("n", "<C-d>", "<C-d>zz")
+map("n", "<C-u>", "<C-u>zz")
+map("n", "<leader>m", "<cmd>NvimTreeFocus<CR>", { desc = "Focus file explorer" })
