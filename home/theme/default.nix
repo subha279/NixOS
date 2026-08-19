@@ -547,22 +547,6 @@ let
 
       read_only_style = "bold red"
 
-
-      [directory.substitutions]
-
-      Documents = "󰈙 "
-
-      Downloads = " "
-
-      Music = " "
-
-      Pictures = " "
-
-      Developer = "󰲋 "
-
-      Others = " "
-
-
       # ========================================================
       # GIT REMOTE
       # ========================================================
