@@ -14,6 +14,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    apple-fonts = {
+      url = "github:Lyndeno/apple-fonts.nix";
+    };
+
   };
 
   outputs =
@@ -22,6 +26,7 @@
       nixpkgs,
       home-manager,
       stylix,
+      apple-fonts,
       ...
     }:
     {
@@ -30,6 +35,12 @@
           system = "x86_64-linux";
 
           modules = [
+            {
+              nixpkgs.overlays = [
+                apple-fonts.overlays.default
+              ];
+            }
+
             stylix.nixosModules.stylix
             ./hosts/laptop
 

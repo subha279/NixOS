@@ -8,6 +8,7 @@
       nerd-fonts.jetbrains-mono
       nerd-fonts.caskaydia-cove
       nerd-fonts.fira-code
+      sf-mono-nerd
       inter
       noto-fonts
       noto-fonts-cjk-sans
