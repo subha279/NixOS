@@ -64,8 +64,8 @@
       #   • CLI interfaces
       #
       terminal = {
-        name = "JetBrains Mono Nerd Font";
-        package = "nerd-fonts.jetbrains-mono";
+        name = "FiraCode Nerd Font";
+        package = "nerd-fonts.fira-code";
       };
 
       # Emoji fallback.
