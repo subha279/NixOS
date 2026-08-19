@@ -9,6 +9,7 @@
       nerd-fonts.caskaydia-cove
       nerd-fonts.fira-code
       sf-mono-nerd
+      nerd-fonts.comic-shanns-mono
       inter
       noto-fonts
       noto-fonts-cjk-sans

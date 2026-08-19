@@ -379,7 +379,6 @@ let
       # ========================================================
 
       format = """
-      $os\
       $directory\
       ''${custom.giturl}\
       $git_branch\
@@ -596,7 +595,7 @@ let
 
       when = "git rev-parse --is-inside-work-tree 2>/dev/null"
 
-      format = "[$output](bold purple) "
+      format = "[$output](bold purple)  "
 
       require_repo = true
 
@@ -882,17 +881,17 @@ let
 
       [character]
 
-      success_symbol = "[❯](bold purple)"
+      success_symbol = "[➜](bold purple)"
 
-      error_symbol = "[❯](bold red)"
+      error_symbol = "[➜](bold red)"
 
-      vimcmd_symbol = "[❮](bold cyan)"
+      vimcmd_symbol = "[➜](bold cyan)"
 
-      vimcmd_replace_one_symbol = "[❮](bold pink)"
+      vimcmd_replace_one_symbol = "[➜](bold pink)"
 
-      vimcmd_replace_symbol = "[❮](bold pink)"
+      vimcmd_replace_symbol = "[➜](bold pink)"
 
-      vimcmd_visual_symbol = "[❮](bold purple)"
+      vimcmd_visual_symbol = "[➜](bold purple)"
     '';
 
   # ============================================================

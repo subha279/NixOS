@@ -64,8 +64,8 @@
       #   • CLI interfaces
       #
       terminal = {
-        name = "SFMono Nerd Font";
-        package = "sf-mono-nerd";
+        name = "ComicShannsMono Nerd Font";
+        package = "nerd-fonts.comic-shanns-mono";
       };
 
       # Emoji fallback.
@@ -90,8 +90,8 @@
     # ------------------------------------------------------------------------
 
     cursor = {
-      name = "Bibata-Modern-Classic";
-      package = "bibata-cursors";
+      name = "capitaine-cursors";
+      package = "capitaine-cursors";
       size = 24;
     };
 
@@ -117,9 +117,9 @@
       iconSize = 16;
 
       # Global font sizes.
-      fontSize = 12;
+      fontSize = 14;
       fontSizeSmall = 10;
-      fontSizeLarge = 14;
+      fontSizeLarge = 15;
 
       # Shadow strength.
       shadowOpacity = 0.20;
