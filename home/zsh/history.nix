@@ -17,7 +17,7 @@
     # ==================================================
 
     ignoreDups = true;
-
+    ignoreAllDups = true;
     expireDuplicatesFirst = true;
 
     # ==================================================
