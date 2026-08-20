@@ -92,7 +92,7 @@
     cursor = {
       name = "capitaine-cursors";
       package = "capitaine-cursors";
-      size = 24;
+      size = 30;
     };
 
     # ------------------------------------------------------------------------
