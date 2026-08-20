@@ -117,7 +117,7 @@
       iconSize = 16;
 
       # Global font sizes.
-      fontSize = 14;
+      fontSize = 13;
       fontSizeSmall = 10;
       fontSizeLarge = 15;
 
