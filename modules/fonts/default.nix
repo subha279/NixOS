@@ -11,6 +11,7 @@
       nerd-fonts.fira-code
       sf-mono-nerd
       nerd-fonts.comic-shanns-mono
+      maple-mono.truetype
       inter
       noto-fonts
       noto-fonts-cjk-sans

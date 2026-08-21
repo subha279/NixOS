@@ -70,8 +70,8 @@
       #   • CLI interfaces
       #
       terminal = {
-        name = "JetBrains Mono Nerd Font";
-        package = "nerd-fonts.jetbrains-mono";
+        name = "Maple Mono";
+        package = "maple-mono.truetype";
       };
 
       # Emoji fallback.
