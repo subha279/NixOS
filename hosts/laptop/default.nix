@@ -24,6 +24,8 @@
     ../../modules/stylix
     ../../modules/development
     ../../modules/creator
+    ../../modules/gaming
+    ../../modules/virtualisation
   ];
 
   networking.hostName = "subha";
