@@ -10,12 +10,12 @@ hl.config({
 
 		force_default_wallpaper = 0,
 
-		vrr = 0,
+		vrr = 2,
 
 		focus_on_activate = true,
 
-		animate_manual_resizes = true,
-		animate_mouse_windowdragging = true,
+		animate_manual_resizes = false,
+		animate_mouse_windowdragging = false,
 
 		middle_click_paste = false,
 	},
