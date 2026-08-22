@@ -31,7 +31,7 @@ Item {
     // Colour + glyph per kind
     // ------------------------------------------------------------
 
-    readonly property color tint: root.muted ? Core.Theme.danger : (root.kind === "brightness" ? Core.Theme.warning : Core.Theme.accent)
+    readonly property color tint: root.muted ? Core.Theme.danger : Core.Theme.accent
 
     readonly property string glyph: {
         if (root.kind === "brightness")
