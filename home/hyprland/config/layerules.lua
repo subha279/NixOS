@@ -21,10 +21,6 @@
 --------------------------------------------------
 -- Wallpaper
 --------------------------------------------------
---
--- Bottom layer. Never blurred: it is the thing
--- everything else is blurring against.
---------------------------------------------------
 
 hl.layer_rule({
 	name = "wallpaper",
@@ -61,25 +57,6 @@ hl.layer_rule({
 --------------------------------------------------
 -- Aurora Popups
 --------------------------------------------------
---
--- This rule did not exist.
---
--- Every panel that drops out of the bar shares the
--- aurora-popup namespace, from PopupSurface.qml:
---
---   network
---   bluetooth
---   battery
---   audio
---   calendar
---   notification centre
---
--- With nothing matching them they were the only
--- Aurora surfaces rendering unblurred, which is why
--- they looked flat next to the bar they hang off.
---
--- Sits above the bar and below notifications.
---------------------------------------------------
 
 hl.layer_rule({
 	name = "aurora-popup",
@@ -99,11 +76,6 @@ hl.layer_rule({
 
 --------------------------------------------------
 -- Aurora Notifications
---------------------------------------------------
---
--- Above the popups so a toast is never hidden behind
--- an open panel, below the launcher so it cannot
--- cover the search field.
 --------------------------------------------------
 
 hl.layer_rule({
@@ -125,14 +97,6 @@ hl.layer_rule({
 --------------------------------------------------
 -- Aurora Launcher
 --------------------------------------------------
---
--- Used by:
---   * Application launcher
---   * Wallpaper picker
---   * Colorscheme picker
---
--- All three share the aurora-launcher namespace.
---------------------------------------------------
 
 hl.layer_rule({
 	name = "aurora-launcher",
@@ -153,12 +117,6 @@ hl.layer_rule({
 
 --------------------------------------------------
 -- Screen Capture and Colour Picking
---------------------------------------------------
---
--- grim, slurp and swappy are installed. Their
--- overlays must show the screen exactly as it is, so
--- blur is explicitly off and xray keeps windows
--- visible through the selection.
 --------------------------------------------------
 
 hl.layer_rule({

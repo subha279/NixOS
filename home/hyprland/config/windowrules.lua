@@ -21,17 +21,8 @@
 -- modules/virtualisation.
 --------------------------------------------------
 
-
 --------------------------------------------------
 -- 1. Global
---------------------------------------------------
-
---------------------------------------------------
--- Suppress Maximize Requests
---------------------------------------------------
---
--- Declared first so a later, more specific rule can
--- still override anything else it sets.
 --------------------------------------------------
 
 hl.window_rule({
@@ -46,10 +37,6 @@ hl.window_rule({
 
 --------------------------------------------------
 -- Global Modal Dialogs
---------------------------------------------------
---
--- Modal dialogs should float above the application
--- that opened them instead of becoming tiled windows.
 --------------------------------------------------
 
 hl.window_rule({
@@ -92,24 +79,6 @@ hl.window_rule({
 	no_focus = true,
 })
 
-
---------------------------------------------------
--- 2. Generic Dialogs
---------------------------------------------------
---
--- This section used to be nine rules that differed
--- only in the title they matched. Three sizes were
--- repeated verbatim:
---
---   900 600   open-file / save-as / file-upload
---   500 300   replace-files / file-operation-progress
---   450 200   rename-dialog / create-folder-dialog
---
--- Collapsed into one rule per size using alternation.
--- Same behaviour, and adding a new dialog is now a
--- word rather than a block.
---------------------------------------------------
-
 --------------------------------------------------
 -- File Choosers
 --------------------------------------------------
@@ -138,12 +107,6 @@ hl.window_rule({
 --------------------------------------------------
 -- File Conflicts
 --------------------------------------------------
---
--- Deliberately NO size. These dialogs grow with
--- the filename and the number of buttons, so a
--- forced 500x300 clipped Replace / Rename / Skip
--- straight off the bottom edge.
---------------------------------------------------
 
 hl.window_rule({
 	name = "file-conflict-dialogs",
@@ -162,14 +125,6 @@ hl.window_rule({
 
 --------------------------------------------------
 -- File Operation Progress
---------------------------------------------------
---
--- A progress window is not modal. Centring it put
--- it directly on top of the conflict dialog that
--- the same operation had just raised, which made
--- the buttons unreachable.
---
--- Parked bottom-right, never focused, never dims.
 --------------------------------------------------
 
 hl.window_rule({
@@ -259,12 +214,6 @@ hl.window_rule({
 --------------------------------------------------
 -- Polkit Authentication Agent
 --------------------------------------------------
---
--- plasma-polkit-agent is started by
--- desktop-services.target. Its prompt appears for
--- every privileged action, so it should be centred,
--- dimmed and unmissable.
---------------------------------------------------
 
 hl.window_rule({
 	name = "polkit-agent",
@@ -310,10 +259,6 @@ hl.window_rule({
 
 --------------------------------------------------
 -- Bluetooth Manager
---------------------------------------------------
---
--- Was 500x300, which is too small for the device
--- list; the pairing UI needed scrolling to use.
 --------------------------------------------------
 
 hl.window_rule({
@@ -411,11 +356,6 @@ hl.window_rule({
 --------------------------------------------------
 -- Appearance Tools
 --------------------------------------------------
---
--- nwg-look, qt6ct and Kvantum are all installed by
--- modules/desktop/applications.nix and had no rules,
--- so they opened tiled into the middle of a workspace.
---------------------------------------------------
 
 hl.window_rule({
 	name = "appearance-tools",
@@ -443,13 +383,6 @@ hl.window_rule({
 
 --------------------------------------------------
 -- Firefox
---------------------------------------------------
---
--- Keep Firefox completely opaque.
---
--- Browser pages contain their own backgrounds,
--- images and colors, so desktop transparency
--- would make web content visually inconsistent.
 --------------------------------------------------
 
 hl.window_rule({
@@ -488,10 +421,6 @@ hl.window_rule({
 
 --------------------------------------------------
 -- Firefox Screen Sharing Indicator
---------------------------------------------------
---
--- Small always-present strip. It must never take
--- focus away from the window being shared.
 --------------------------------------------------
 
 hl.window_rule({
@@ -556,13 +485,6 @@ hl.window_rule({
 --------------------------------------------------
 -- Image Viewer
 --------------------------------------------------
---
--- Gwenview is the default handler for png, jpeg,
--- webp, gif, tiff, bmp and avif in modules/xdg, so
--- it opens constantly. Forced opaque for the same
--- reason as Firefox: it renders other people's
--- images and transparency corrupts them.
---------------------------------------------------
 
 hl.window_rule({
 	name = "gwenview",
@@ -619,11 +541,6 @@ hl.window_rule({
 
 --------------------------------------------------
 -- Editors and Notes
---------------------------------------------------
---
--- Electron and GPU-composited editors blend badly
--- with compositor transparency, so both are pinned
--- fully opaque.
 --------------------------------------------------
 
 hl.window_rule({
@@ -684,24 +601,8 @@ hl.window_rule({
 	opacity = "1.0 override 1.0 override",
 })
 
-
---------------------------------------------------
--- 5. Media and Content Creation
---------------------------------------------------
---
--- Everything in this section renders colour-critical
--- output. Transparency and blur are wrong here, not
--- just distracting, so opacity is forced to 1.0.
---------------------------------------------------
-
 --------------------------------------------------
 -- OBS Studio
---------------------------------------------------
---
--- OBS remains tiled.
---
--- The previous rule had an empty body and did
--- nothing at all.
 --------------------------------------------------
 
 hl.window_rule({
