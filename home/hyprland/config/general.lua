@@ -37,7 +37,10 @@ hl.config({
 		-- Gaps
 		--------------------------------------------------
 
-		gaps_in = 2,
+		-- Keep gaps_in >= rounding/2, otherwise the rounded corners of
+		-- adjacent tiles pinch together and the two 2px borders sitting
+		-- in a 2px gap visually collide.
+		gaps_in = 5,
 
 		gaps_out = 10,
 

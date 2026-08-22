@@ -24,8 +24,9 @@ hl.window_rule({
 	size = "500 300",
 	rounding = 10,
 	opacity = "0.90 0.90",
-	border_size = 1,
-	border_color = "rgb(87b158) rgb(2D353B)",
+	-- Removed a hardcoded Everforest green border (rgb(87b158)/rgb(2D353B)).
+	-- It survived a theme change and no longer matches any active palette,
+	-- so this dialog now inherits the themed gradient from theme.lua.
 	animation = "popin",
 	dim_around = true,
 })
@@ -37,7 +38,7 @@ hl.window_rule({
 	center = true,
 	rounding = 10,
 	opacity = "0.95 0.95",
-	border_color = "rgb(87b158)",
+	-- Removed a second hardcoded Everforest green border for the same reason.
 })
 hl.window_rule({ match = { class = "^xdg-desktop-portal-gtk$" }, float = true, center = true, size = "700 400" })
 
@@ -77,7 +78,11 @@ hl.window_rule({
 		class = "^firefox$",
 	},
 
-	opacity = "0.90 override 0.90 override 1.0 override",
+	-- Was 0.90. With xray = true and blur ignore_opacity = true, the
+	-- wallpaper showed through page content, which hurts reading and makes
+	-- any colour on a web page unreliable. Chrome-only transparency is not
+	-- possible here, so content windows stay opaque.
+	opacity = "1.0 override 1.0 override 1.0 override",
 
 	xray = true,
 })

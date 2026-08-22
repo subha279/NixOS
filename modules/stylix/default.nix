@@ -8,65 +8,87 @@ let
 
   themeData = import ../../lib/themes.nix;
 
-  activeTheme =
-    themeData.themes.${themeData.global.activeTheme};
+  activeTheme = themeData.themes.${themeData.global.activeTheme};
 
   colors = activeTheme.colors;
 
   global = themeData.global;
 
   # ==========================================================================
+  # Helpers
+  # ==========================================================================
+
+  # themes.nix stores colors as "#RRGGBB"; base16 wants them bare.
+  hex = lib.removePrefix "#";
+
+  # Resolve DOTTED package paths such as "maple-mono.truetype".
+  #
+  # builtins.getAttr cannot do this: it looks for a single attribute
+  # literally named "maple-mono.truetype" and fails to evaluate.
+  pkgFromPath = path: lib.getAttrFromPath (lib.splitString "." path) pkgs;
+
+  # ==========================================================================
+  # Polarity Detection
+  # ==========================================================================
+  #
+  # Derived from the active theme's background so the light themes
+  # (catppuccin-latte, solarized-light, gruvbox-light) automatically get
+  # light GTK / Qt variants instead of dark ones.
+  #
+  # The fromTOML trick is the standard way to parse hex in pure Nix.
+  #
+  # ==========================================================================
+
+  hexToInt = s: (builtins.fromTOML "v = 0x${s}").v;
+
+  bgHex = hex colors.background;
+
+  # Perceived brightness, ITU-R BT.601.
+  bgBrightness =
+    (
+      hexToInt (builtins.substring 0 2 bgHex) * 299
+      + hexToInt (builtins.substring 2 2 bgHex) * 587
+      + hexToInt (builtins.substring 4 2 bgHex) * 114
+    )
+    / 1000;
+
+  isLight = bgBrightness > 127;
+
+  # ==========================================================================
   # Central Fonts
   # ==========================================================================
 
-  interfaceFont =
-    builtins.getAttr
-      global.fonts.interface.package
-      pkgs;
+  interfaceFont = pkgFromPath global.fonts.interface.package;
 
-  terminalFont =
-    builtins.getAttr
-      global.fonts.terminal.package
-      pkgs;
+  terminalFont = pkgFromPath global.fonts.terminal.package;
 
-  emojiFont =
-    builtins.getAttr
-      global.fonts.emoji.package
-      pkgs;
+  emojiFont = pkgFromPath global.fonts.emoji.package;
 
   # ==========================================================================
   # Central Cursor
   # ==========================================================================
 
-  cursorPackage =
-    builtins.getAttr
-      global.cursor.package
-      pkgs;
+  cursorPackage = pkgFromPath global.cursor.package;
 
   # ==========================================================================
   # Central Icons
   # ==========================================================================
 
-  iconPackage =
-    builtins.getAttr
-      global.icons.package
-      pkgs;
+  iconPackage = pkgFromPath global.icons.package;
 
-  # ==========================================================================
-  # Helpers
-  # ==========================================================================
+  # Colloid-Dark -> Colloid-Light for light polarity.
+  # Falls through unchanged if the name has no "-Dark" suffix.
+  iconNameLight = lib.replaceStrings [ "-Dark" ] [ "-Light" ] global.icons.name;
 
-  hex =
-    color:
-    lib.removePrefix "#" color;
+  iconNameDark = global.icons.name;
 
 in
 {
   stylix = {
 
-    # ==========================================================================
+    # ========================================================================
     # Core
-    # ==========================================================================
+    # ========================================================================
 
     enable = true;
 
@@ -74,11 +96,12 @@ in
     # Stylix remains responsible for system desktop integration.
     autoEnable = false;
 
-    polarity = "dark";
+    # Derived, not hardcoded. See Polarity Detection above.
+    polarity = if isLight then "light" else "dark";
 
-    # ==========================================================================
+    # ========================================================================
     # STATIC AURORA COLOR SOURCE
-    # ==========================================================================
+    # ========================================================================
     #
     # IMPORTANT:
     #
@@ -87,39 +110,52 @@ in
     #
     # Colors come exclusively from lib/themes.nix.
     #
-    # ==========================================================================
+    # base16 slot meanings that matter here:
+    #
+    #   base03  comments, invisibles, line highlighting
+    #   base04  dark foreground, status bars
+    #   base05  default foreground
+    #   base09  integers, constants (orange slot)
+    #   base0A  classes, search highlight (yellow slot)
+    #   base0F  deprecated, embedded tags
+    #
+    # ========================================================================
 
     base16Scheme = {
 
       scheme = activeTheme.name;
+      author = "Aurora (lib/themes.nix)";
 
-      # Base
+      # Base ramp
 
       base00 = hex colors.background;
       base01 = hex colors.surface;
       base02 = hex colors.surfaceHover;
-      base03 = hex colors.border;
+      base03 = hex colors.textMuted; # was border -> comments were invisible
 
-      base04 = hex colors.textMuted;
+      base04 = hex colors.textSecondary; # was textMuted -> ramp was shifted
       base05 = hex colors.text;
-      base06 = hex colors.text;
-      base07 = hex colors.text;
+      # base06/base07 are the bright end of the foreground ramp. Pointing all
+      # three at `text` flattened it, so anything asking for a brighter
+      # foreground got the normal one.
+      base06 = hex colors.terminalWhite;
+      base07 = hex colors.terminalBrightWhite;
 
       # Semantic
 
       base08 = hex colors.error;
       base09 = hex colors.warning;
-      base0A = hex colors.warning;
+      base0A = hex colors.terminalYellow; # was a duplicate of warning
       base0B = hex colors.success;
       base0C = hex colors.terminalCyan;
       base0D = hex colors.info;
       base0E = hex colors.accent;
-      base0F = hex colors.accentMuted;
+      base0F = hex colors.terminalMagenta; # was accentMuted -> near-background
     };
 
-    # ==========================================================================
+    # ========================================================================
     # FONTS
-    # ==========================================================================
+    # ========================================================================
 
     fonts = {
 
@@ -151,9 +187,9 @@ in
       };
     };
 
-    # ==========================================================================
+    # ========================================================================
     # CURSOR
-    # ==========================================================================
+    # ========================================================================
 
     cursor = {
       package = cursorPackage;
@@ -161,28 +197,44 @@ in
       size = global.cursor.size;
     };
 
-    # ==========================================================================
+    # ========================================================================
     # ICON THEME
-    # ==========================================================================
+    # ========================================================================
 
     icons = {
       enable = true;
 
       package = iconPackage;
 
-      dark = global.icons.name;
-      light = global.icons.name;
+      dark = iconNameDark;
+      light = iconNameLight;
     };
 
-    # ==========================================================================
+    # ========================================================================
     # DESKTOP TARGETS
-    # ==========================================================================
+    # ========================================================================
     #
     # autoEnable = false means targets must be explicitly enabled.
     #
     # We intentionally keep GTK, Qt and Fontconfig under Stylix.
     #
-    # ==========================================================================
+    # Neovim is deliberately NOT a Stylix target: enabling it would
+    # generate a base16 colorscheme and override the real plugin
+    # colorschemes. Transparency is handled in the Neovim config with a
+    # ColorScheme autocmd instead. If you ever want Stylix to own nvim:
+    #
+    #   targets.neovim = {
+    #     enable = true;
+    #     transparentBackground = {
+    #       main = true;
+    #       signColumn = true;
+    #     };
+    #   };
+    #
+    # Both lines are required -- transparentBackground alone is a no-op
+    # while the target is disabled.
+    #
+    # ========================================================================
 
     targets.gtk.enable = true;
 

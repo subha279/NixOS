@@ -47,10 +47,10 @@ hl.bind(mainMod .. " + P", hl.dsp.exec_cmd(vars.wallpaperScript))
 --------------------------------------------------
 -- Focus Movement
 --------------------------------------------------
-hl.bind(ALT .. " + H", hl.dsp.focus({ direction = "left" }))
-hl.bind(ALT .. " + J", hl.dsp.focus({ direction = "down" }))
-hl.bind(ALT .. " + K", hl.dsp.focus({ direction = "up" }))
-hl.bind(ALT .. " + L", hl.dsp.focus({ direction = "right" }))
+hl.bind(altMod .. " + H", hl.dsp.focus({ direction = "left" }))
+hl.bind(altMod .. " + J", hl.dsp.focus({ direction = "down" }))
+hl.bind(altMod .. " + K", hl.dsp.focus({ direction = "up" }))
+hl.bind(altMod .. " + L", hl.dsp.focus({ direction = "right" }))
 
 --------------------------------------------------
 -- Workspaces

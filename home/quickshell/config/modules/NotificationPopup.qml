@@ -165,7 +165,7 @@ Components.PopupSurface {
 
                 radius: Core.Theme.radiusRow
 
-                color: "#22e6c68f"
+                color: Qt.alpha(Core.Theme.warning, 0.13)
 
                 Behavior on height {
                     NumberAnimation {

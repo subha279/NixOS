@@ -209,7 +209,7 @@ Components.PopupSurface {
 
                         radius: 4
 
-                        color: "#ffffff"
+                        color: Core.Theme.text
 
                         opacity: popup.svc.charging ? 0.18 : 0.0
 
@@ -400,7 +400,7 @@ Components.PopupSurface {
 
                 radius: Core.Theme.radiusRow
 
-                color: "#22e6c68f"
+                color: Qt.alpha(Core.Theme.warning, 0.13)
 
                 Text {
                     anchors.fill: parent

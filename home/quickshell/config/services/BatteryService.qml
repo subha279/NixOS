@@ -198,20 +198,22 @@ Singleton {
         return root.charging || root.full ? root.chargeIcons[idx] : root.dischargeIcons[idx];
     }
 
+    // These are semantic states that already exist in the theme. Hardcoding
+    // them meant the battery pill kept its old palette on every theme switch.
     readonly property color color: {
         if (!root.available)
-            return "#9b98ad";
+            return Theme.textMuted;
 
         if (root.critical)
-            return "#e58fa0";
+            return Theme.error;
 
         if (root.low)
-            return "#e6c68f";
+            return Theme.warning;
 
         if (root.charging || root.full)
-            return "#8fd3a8";
+            return Theme.success;
 
-        return "#e6e4ef";
+        return Theme.text;
     }
 
     function profileIcon(value) {

@@ -387,7 +387,7 @@ PanelWindow {
 
                             radius: 11
 
-                            color: wrapper.critical ? "#1fe58fa0" : Core.Theme.surface
+                            color: wrapper.critical ? Qt.alpha(Core.Theme.error, 0.12) : Core.Theme.surface
 
                             // ------------------------------------------------------------
                             // Resolve the notification icon.

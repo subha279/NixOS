@@ -206,7 +206,9 @@ let
       cursor ${colors.accent}
       cursor_text_color ${colors.accentForeground}
 
-      selection_foreground ${colors.accentForeground}
+      # accentForeground is a near-background tone; on accentMuted it gave
+      # 1.4-2.8:1 in every theme, i.e. selected text was invisible.
+      selection_foreground ${colors.text}
       selection_background ${colors.accentMuted}
 
       url_color ${colors.info}

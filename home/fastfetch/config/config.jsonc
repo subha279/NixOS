@@ -11,11 +11,14 @@
     },
     "display": {
         "separator": "  ",
+        // Use ANSI names, not hex. fastfetch then inherits whatever palette
+        // kitty is running, which is generated from lib/themes.nix -- so this
+        // now follows all 21 themes instead of being pinned to one purple.
         "color": {
-            "keys": "#d0bcff",
-            "output": "#e6e0e9",
-            "title": "#d0bcff",
-            "separator": "#4e3d76"
+            "keys": "magenta",
+            "output": "white",
+            "title": "magenta",
+            "separator": "blue"
         }
     },
     "modules": [

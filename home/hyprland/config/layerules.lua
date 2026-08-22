@@ -23,15 +23,9 @@ hl.layer_rule({
 	order = 10,
 })
 
-hl.layer_rule({
-	name = "fuzzel",
-	match = {
-		namespace = "^launcher$",
-	},
-
-	blur = true,
-	ignore_alpha = 0.20,
-})
+-- Removed a duplicate rule that also matched namespace ^launcher$. It set
+-- the same blur/ignore_alpha as launcher-glass above but omitted order and
+-- blur_popups, so the later rule could clobber the layer ordering.
 -- ==========================================================
 -- Aurora Bar
 -- ==========================================================

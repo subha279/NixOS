@@ -165,7 +165,7 @@ QtObject {
     // Glass
     // ============================================================
 
-    readonly property real glassOpacity: 0.80
+    readonly property real glassOpacity: ui.glassOpacity || 0.80
 
     readonly property color backgroundGlass: Qt.rgba(background.r, background.g, background.b, glassOpacity)
 
@@ -185,11 +185,11 @@ QtObject {
 
     readonly property int iconSize: ui.iconSize || 16
 
-    readonly property int fontSize: ui.fontSize || 12
+    readonly property int fontSize: ui.fontSize || 13
 
     readonly property int fontSizeSmall: ui.fontSizeSmall || 10
 
-    readonly property int fontSizeLarge: ui.fontSizeLarge || 14
+    readonly property int fontSizeLarge: ui.fontSizeLarge || 15
 
     readonly property real shadowOpacity: ui.shadowOpacity || 0.20
 
@@ -203,9 +203,13 @@ QtObject {
 
     readonly property int barMarginTop: 8
 
-    readonly property int radiusMenu: 18
+    // Was a hardcoded 18, identical to radiusLarge. Derive it so a theme
+    // change cannot leave menus at a stale radius.
+    readonly property int radiusMenu: radiusLarge
 
-    readonly property int radiusRow: 12
+    // Was a hardcoded 12, an undeclared fourth radius step between
+    // radius (10) and radiusLarge (18). Derived keeps the same pixel value.
+    readonly property int radiusRow: radius + 2
 
     readonly property int padding: 10
 

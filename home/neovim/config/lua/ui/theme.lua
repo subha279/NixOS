@@ -225,8 +225,11 @@ function M.apply()
 		bold = true,
 	})
 
+	-- accentForeground is a near-background tone, so on accentMuted it sat at
+	-- 1.4-2.8:1 depending on theme. Visual/VisualNOS above already use
+	-- c.text on the same background.
 	set("MatchParen", {
-		fg = c.accentForeground,
+		fg = c.text,
 		bg = c.accentMuted,
 		bold = true,
 	})
