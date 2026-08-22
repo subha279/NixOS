@@ -24,7 +24,7 @@ Components.LauncherSurface {
     promptIcon: Core.Icons.search
     placeholder: "Search applications"
 
-    cardWidth: 620
+    cardWidth: 460
     cardHeight: 460
 
     columns: 1

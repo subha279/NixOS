@@ -34,8 +34,8 @@ Components.LauncherSurface {
     promptIcon: Core.Icons.brightness
     placeholder: "Search colorschemes"
 
-    cardWidth: 560
-    cardHeight: 500
+    cardWidth: 460
+    cardHeight: 460
 
     columns: 1
 

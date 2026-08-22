@@ -114,9 +114,7 @@ PanelWindow {
 
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.namespace: "aurora-launcher"
-    WlrLayershell.keyboardFocus: root.open
-        ? WlrKeyboardFocus.Exclusive
-        : WlrKeyboardFocus.None
+    WlrLayershell.keyboardFocus: root.open ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
 
     exclusionMode: ExclusionMode.Ignore
 
@@ -187,8 +185,8 @@ PanelWindow {
 
         color: Core.Theme.backgroundGlass
 
-        border.width: 1
-        border.color: Core.Theme.border
+        border.width: 2
+        border.color: Core.Theme.borderActive
 
         opacity: root.reveal
 
@@ -293,17 +291,13 @@ PanelWindow {
 
                         const ctrl = (event.modifiers & Qt.ControlModifier) !== 0;
 
-                        if (event.key === Qt.Key_Down
-                            || (ctrl && event.key === Qt.Key_N)
-                            || (ctrl && event.key === Qt.Key_J)) {
+                        if (event.key === Qt.Key_Down || (ctrl && event.key === Qt.Key_N) || (ctrl && event.key === Qt.Key_J)) {
                             root.move(root.columns);
                             event.accepted = true;
                             return;
                         }
 
-                        if (event.key === Qt.Key_Up
-                            || (ctrl && event.key === Qt.Key_P)
-                            || (ctrl && event.key === Qt.Key_K)) {
+                        if (event.key === Qt.Key_Up || (ctrl && event.key === Qt.Key_P) || (ctrl && event.key === Qt.Key_K)) {
                             root.move(-root.columns);
                             event.accepted = true;
                             return;
@@ -325,15 +319,13 @@ PanelWindow {
                         // only at the ends of the text, so editing the
                         // query still works normally.
                         if (root.columns > 1) {
-                            if (event.key === Qt.Key_Right
-                                && input.cursorPosition >= input.text.length) {
+                            if (event.key === Qt.Key_Right && input.cursorPosition >= input.text.length) {
                                 root.move(1);
                                 event.accepted = true;
                                 return;
                             }
 
-                            if (event.key === Qt.Key_Left
-                                && input.cursorPosition <= 0) {
+                            if (event.key === Qt.Key_Left && input.cursorPosition <= 0) {
                                 root.move(-1);
                                 event.accepted = true;
                                 return;
