@@ -52,7 +52,7 @@ PanelWindow {
     // Reveal state
     // ============================================================
 
-    readonly property bool wantExpanded: pillHover.hovered || Core.PopupManager.current !== ""
+    readonly property bool wantExpanded: pillHover.hovered
 
     property bool expanded: false
 

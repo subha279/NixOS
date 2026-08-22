@@ -84,7 +84,7 @@ Components.LauncherSurface {
             currentIndex: launcher.selectedIndex
 
             clip: true
-
+            boundsBehavior: Flickable.StopAtBounds
             // Contiguous rows: no gap between selection bars.
             spacing: 0
 

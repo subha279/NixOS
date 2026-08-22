@@ -33,9 +33,7 @@ Components.LauncherSurface {
 
     itemCount: launcher.results.length
 
-    counterText: launcher.query.length === 0
-        ? launcher.results.length + " apps"
-        : launcher.results.length + " of " + Services.AppsService.count
+    counterText: launcher.query.length === 0 ? launcher.results.length + " apps" : launcher.results.length + " of " + Services.AppsService.count
 
     onAccepted: {
         const entry = launcher.results[launcher.selectedIndex];
@@ -72,7 +70,7 @@ Components.LauncherSurface {
             currentIndex: launcher.selectedIndex
 
             clip: true
-
+            boundsBehavior: Flickable.StopAtBounds
             // Contiguous rows: no gap between selection bars.
             spacing: 0
 
@@ -107,9 +105,7 @@ Components.LauncherSurface {
                 // rounded pill plus indicator stripe.
                 radius: 0
 
-                color: row.selected
-                    ? Core.Theme.accent
-                    : (hover.hovered ? Core.Theme.surfaceHover : "transparent")
+                color: row.selected ? Core.Theme.accent : (hover.hovered ? Core.Theme.surfaceHover : "transparent")
 
                 Behavior on color {
                     ColorAnimation {
@@ -136,10 +132,7 @@ Components.LauncherSurface {
                         sourceSize.width: 44
                         sourceSize.height: 44
 
-                        source: Quickshell.iconPath(
-                            row.modelData.icon,
-                            "application-x-executable"
-                        )
+                        source: Quickshell.iconPath(row.modelData.icon, "application-x-executable")
                     }
 
                     Column {
@@ -148,19 +141,13 @@ Components.LauncherSurface {
 
                         Text {
                             text: row.modelData.name
-                            color: row.selected
-                                ? Core.Theme.accentForeground
-                                : Core.Theme.foreground
+                            color: row.selected ? Core.Theme.accentForeground : Core.Theme.foreground
                             font.family: Core.Theme.fontMono
                             font.pixelSize: Core.Theme.fontSize
                         }
 
                         Text {
-                            readonly property string subtitle:
-                                row.modelData.genericName
-                                && row.modelData.genericName.length > 0
-                                    ? row.modelData.genericName
-                                    : (row.modelData.comment || "")
+                            readonly property string subtitle: row.modelData.genericName && row.modelData.genericName.length > 0 ? row.modelData.genericName : (row.modelData.comment || "")
 
                             visible: subtitle.length > 0
 
@@ -168,9 +155,7 @@ Components.LauncherSurface {
                             // On an accent-filled row, faint grey would
                             // be unreadable, so dim the accent
                             // foreground instead.
-                            color: row.selected
-                                ? Qt.alpha(Core.Theme.accentForeground, 0.75)
-                                : Core.Theme.foregroundFaint
+                            color: row.selected ? Qt.alpha(Core.Theme.accentForeground, 0.75) : Core.Theme.foregroundFaint
                             font.family: Core.Theme.fontMono
                             font.pixelSize: Core.Theme.fontSizeSmall
 

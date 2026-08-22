@@ -36,6 +36,20 @@ PanelWindow {
 
     property int itemCount: 0
 
+    readonly property int headerHeight: 46
+    readonly property int separatorHeight: 1
+    readonly property int rowHeight: 40
+
+    readonly property int listMaxRows: 10
+    readonly property int gridMaxRows: 4
+
+    readonly property int cardMinHeight: 110
+    readonly property int cardMaxHeight: 620
+
+    readonly property int visibleRows: root.columns > 1 ? Math.min(root.gridMaxRows, Math.max(1, Math.ceil(root.itemCount / root.columns))) : Math.min(root.listMaxRows, Math.max(1, root.itemCount))
+
+    readonly property int targetCardHeight: root.columns > 1 ? root.headerHeight + root.separatorHeight + root.visibleRows * Math.round((root.cardWidth / root.columns) * 0.70) : root.headerHeight + root.separatorHeight + root.visibleRows * root.rowHeight
+
     // Grid launchers set this so Left/Right and Up/Down move by a
     // row rather than by one item.
     property int columns: 1
@@ -170,11 +184,19 @@ PanelWindow {
         id: card
 
         width: root.cardWidth
-        height: root.cardHeight
+
+        height: Math.max(root.cardMinHeight, Math.min(root.cardMaxHeight, root.targetCardHeight))
 
         x: Math.round((parent.width - width) / 2)
-        y: Math.round(parent.height * 0.14 + (1.0 - root.reveal) * 14)
 
+        y: Math.round((parent.height - height) / 2 + 60 + (1.0 - root.reveal) * 14)
+
+        Behavior on height {
+            NumberAnimation {
+                duration: 160
+                easing.type: Easing.OutCubic
+            }
+        }
         // Omarchy-style chrome: near-square corners, a single
         // hairline border, no shadow and no bounce on open.
         //

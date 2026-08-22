@@ -75,6 +75,7 @@ Components.LauncherSurface {
             currentIndex: launcher.selectedIndex
 
             clip: true
+            boundsBehavior: Flickable.StopAtBounds
 
             cellWidth: Math.floor(width / launcher.columns)
             cellHeight: Math.round(cellWidth * 0.70)
