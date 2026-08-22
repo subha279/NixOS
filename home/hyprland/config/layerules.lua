@@ -1,63 +1,54 @@
--- ==========================================================
--- Aurora Hyprland Layer Rules
--- ==========================================================
+--------------------------------------------------
+-- Layer Rules
+-- Aurora Quickshell Desktop
+--------------------------------------------------
 
--- ==========================================================
+--------------------------------------------------
 -- Aurora Launcher
--- ==========================================================
+--------------------------------------------------
 --
--- Covers all three Quickshell dmenu surfaces: the application
--- launcher, the wallpaper picker and the colorscheme picker. They
--- share the aurora-launcher namespace, so one rule styles them all.
+-- Used by:
+--   • Application launcher
+--   • Wallpaper picker
+--   • Colorscheme picker
 --
--- ==========================================================
+-- All three share the aurora-launcher namespace.
+--------------------------------------------------
 
 hl.layer_rule({
-	name = "launcher-glass",
+	name = "aurora-launcher",
 
 	match = {
 		namespace = "^aurora-launcher$",
 	},
 
-	-- Blur the card, not the screen.
-	--
-	-- These surfaces are fullscreen so that clicking outside can
-	-- dismiss them. ignore_alpha means Hyprland only blurs pixels
-	-- whose alpha is at or above 0.20, so:
-	--
-	--   launcher card   glassOpacity 0.80  -> frosted
-	--   dim scrim       scrimAlpha   0.12  -> left sharp
-	--
-	-- That is what keeps the blur inside the popup instead of
-	-- smearing the whole desktop. The scrim value lives in
-	-- LauncherSurface.qml and must stay below this threshold.
-	--
-	-- Same trick the bar already uses: a full-width layer where
-	-- only the opaque pill is blurred.
 	blur = true,
+
 	blur_popups = true,
 
+	-- Blur only the opaque launcher surface.
+	--
+	-- Transparent scrim remains sharp so the wallpaper
+	-- does not become unnecessarily blurred.
 	ignore_alpha = 0.20,
 
-	-- Keep launcher above other layers.
+	-- Launcher must sit above the rest of the shell.
 	order = 10,
 })
 
--- Removed a duplicate rule that also matched namespace ^launcher$. It set
--- the same blur/ignore_alpha as launcher-glass above but omitted order and
--- blur_popups, so the later rule could clobber the layer ordering.
--- ==========================================================
+--------------------------------------------------
 -- Aurora Bar
--- ==========================================================
+--------------------------------------------------
 
 hl.layer_rule({
-	name = "aurora-bar-glass",
+	name = "aurora-bar",
 
 	match = {
 		namespace = "^aurora-bar$",
 	},
 
 	blur = true,
+
 	blur_popups = true,
 
 	ignore_alpha = 0.20,
@@ -65,18 +56,19 @@ hl.layer_rule({
 	order = 5,
 })
 
--- ==========================================================
+--------------------------------------------------
 -- Aurora Notifications
--- ==========================================================
+--------------------------------------------------
 
 hl.layer_rule({
-	name = "aurora-notifications-glass",
+	name = "aurora-notifications",
 
 	match = {
 		namespace = "^aurora-notifications$",
 	},
 
 	blur = true,
+
 	blur_popups = true,
 
 	ignore_alpha = 0.20,
