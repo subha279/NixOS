@@ -14,7 +14,6 @@ set -euo pipefail
 #   • generate colors
 #   • invoke legacy dynamic color generator
 #   • modify Kitty
-#   • modify Fuzzel
 #   • modify Starship
 #   • regenerate Hyprland colors
 # ============================================================================

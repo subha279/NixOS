@@ -3,20 +3,40 @@
 -- ==========================================================
 
 -- ==========================================================
--- Fuzzel / Application + Wallpaper Launcher
+-- Aurora Launcher
+-- ==========================================================
+--
+-- Covers all three Quickshell dmenu surfaces: the application
+-- launcher, the wallpaper picker and the colorscheme picker. They
+-- share the aurora-launcher namespace, so one rule styles them all.
+--
 -- ==========================================================
 
 hl.layer_rule({
 	name = "launcher-glass",
 
 	match = {
-		namespace = "^launcher$",
+		namespace = "^aurora-launcher$",
 	},
 
+	-- Blur the card, not the screen.
+	--
+	-- These surfaces are fullscreen so that clicking outside can
+	-- dismiss them. ignore_alpha means Hyprland only blurs pixels
+	-- whose alpha is at or above 0.20, so:
+	--
+	--   launcher card   glassOpacity 0.80  -> frosted
+	--   dim scrim       scrimAlpha   0.12  -> left sharp
+	--
+	-- That is what keeps the blur inside the popup instead of
+	-- smearing the whole desktop. The scrim value lives in
+	-- LauncherSurface.qml and must stay below this threshold.
+	--
+	-- Same trick the bar already uses: a full-width layer where
+	-- only the opaque pill is blurred.
 	blur = true,
 	blur_popups = true,
 
-	-- Blur transparent regions without making the UI muddy.
 	ignore_alpha = 0.20,
 
 	-- Keep launcher above other layers.

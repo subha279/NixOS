@@ -28,9 +28,13 @@ M.guieditor = "zeditor"
 
 M.note = "obsidian"
 
-M.menu = "$HOME/.config/hypr/scripts/launcher.sh"
+-- Quickshell owns the launcher, the wallpaper picker and the
+-- colorscheme picker. These are IPC calls into the already-running
+-- shell rather than new processes, so there is no spawn cost and no
+-- second theming path to keep in sync.
+M.menu = "qs ipc call launcher toggle"
 
-M.colorscheme = "$HOME/.local/bin/aurora-theme"
+M.colorscheme = "qs ipc call theme toggle"
 
 --------------------------------------------------
 -- Screenshot
@@ -54,7 +58,7 @@ M.wallpaperDir = os.getenv("HOME") .. "/Wallpapers"
 -- Scripts
 --------------------------------------------------
 
-M.wallpaperScript = M.scriptDir .. "/wallpaper.sh"
+M.wallpaperScript = "qs ipc call wallpaper toggle"
 
 --------------------------------------------------
 -- Audio

@@ -221,6 +221,11 @@ QtObject {
 
     readonly property string fontFamily: fonts.interface || "Inter"
 
+    // themes.nix already defines a terminal font; only the interface
+    // font was ever exposed here. The launcher surfaces use this for
+    // their Omarchy-style monospace rows.
+    readonly property string fontMono: fonts.terminal || "monospace"
+
     // ============================================================
     // Popup Geometry
     // ============================================================

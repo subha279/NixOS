@@ -46,7 +46,6 @@
 #               ├── Stylix
 #               ├── Hyprland
 #               ├── Kitty
-#               ├── Fuzzel
 #               ├── QuickShell
 #               ├── Neovim
 #               └── Starship
@@ -246,12 +245,7 @@ required_files=(
     "lib/themes.nix"
     "home/theme/default.nix"
 
-    # Fuzzel
-    "home/fuzzel/fuzzel.ini"
-
     # Wallpaper
-    "home/hyprland/scripts/launcher.sh"
-    "home/hyprland/scripts/wallpaper.sh"
     "home/hyprland/scripts/restore-wallpaper.sh"
 
 )
@@ -432,7 +426,6 @@ desktop_commands=(
 
     git
 
-    fuzzel
     kitty
 
     qs
@@ -592,19 +585,53 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# Fuzzel
+# Launcher
+# ---------------------------------------------------------------------------
+#
+# The launcher, wallpaper picker and colorscheme picker are Quickshell
+# surfaces. Fuzzel is no longer a dependency, so assert both that the
+# package is gone and that the surfaces replacing it are present.
+#
 # ---------------------------------------------------------------------------
 
 if grep -qE '^[[:space:]]*fuzzel[[:space:]]*$' \
     "$ROOT/modules/desktop/applications.nix" 2>/dev/null; then
 
-    ok "Fuzzel is declared by the desktop module"
+    fail "Fuzzel package is still declared by the desktop module"
 
 else
 
-    fail "Fuzzel package declaration not found"
+    ok "Fuzzel package is no longer declared"
 
 fi
+
+launcher_surfaces=(
+
+    "home/quickshell/config/components/LauncherSurface.qml"
+
+    "home/quickshell/config/modules/AppLauncher.qml"
+    "home/quickshell/config/modules/WallpaperPicker.qml"
+    "home/quickshell/config/modules/ThemePicker.qml"
+
+    "home/quickshell/config/services/AppsService.qml"
+    "home/quickshell/config/services/WallpaperService.qml"
+    "home/quickshell/config/services/ThemeService.qml"
+
+)
+
+for surface in "${launcher_surfaces[@]}"; do
+
+    if [[ -f "$ROOT/$surface" ]]; then
+
+        ok "Launcher surface present: $surface"
+
+    else
+
+        fail "Launcher surface missing: $surface"
+
+    fi
+
+done
 
 # ---------------------------------------------------------------------------
 # Kitty
@@ -872,7 +899,7 @@ fi
 
 section "Wallpaper / theme separation"
 
-WALLPAPER_SCRIPT="$ROOT/home/hyprland/scripts/wallpaper.sh"
+WALLPAPER_SERVICE="$ROOT/home/quickshell/config/services/WallpaperService.qml"
 RESTORE_SCRIPT="$ROOT/home/hyprland/scripts/restore-wallpaper.sh"
 
 # ---------------------------------------------------------------------------
@@ -881,7 +908,7 @@ RESTORE_SCRIPT="$ROOT/home/hyprland/scripts/restore-wallpaper.sh"
 
 if grep -qiE \
     'wallust|wallust run|\.cache/wallust|stylix-colors' \
-    "$WALLPAPER_SCRIPT" 2>/dev/null; then
+    "$WALLPAPER_SERVICE" 2>/dev/null; then
 
     fail "Wallpaper picker still contains legacy theme generation"
 
@@ -912,7 +939,7 @@ fi
 # ---------------------------------------------------------------------------
 
 if grep -q '\.cache/aurora/current-wallpaper' \
-    "$WALLPAPER_SCRIPT" 2>/dev/null; then
+    "$WALLPAPER_SERVICE" 2>/dev/null; then
 
     ok "Wallpaper state uses Aurora cache"
 
@@ -1007,7 +1034,6 @@ generated_files=(
     "$HOME/.config/aurora/active-theme"
     "$HOME/.config/aurora/active-theme.lua"
     "$HOME/.config/aurora/active-kitty.conf"
-    "$HOME/.config/aurora/active-fuzzel.conf"
     "$HOME/.config/aurora/active-starship.toml"
 
     "$HOME/.config/quickshell/shell.qml"
@@ -1037,7 +1063,6 @@ section "Generated theme sanity"
 
 ACTIVE_THEME_LUA="$HOME/.config/aurora/active-theme.lua"
 ACTIVE_KITTY="$HOME/.config/aurora/active-kitty.conf"
-ACTIVE_FUZZEL="$HOME/.config/aurora/active-fuzzel.conf"
 ACTIVE_STARSHIP="$HOME/.config/aurora/active-starship.toml"
 
 # ---------------------------------------------------------------------------
@@ -1082,28 +1107,6 @@ if [[ -f "$ACTIVE_KITTY" ]]; then
 else
 
     info "Aurora Kitty theme not generated yet"
-
-fi
-
-# ---------------------------------------------------------------------------
-# Fuzzel theme
-# ---------------------------------------------------------------------------
-
-if [[ -f "$ACTIVE_FUZZEL" ]]; then
-
-    if grep -qE '^\[colors\]' "$ACTIVE_FUZZEL"; then
-
-        ok "Generated Fuzzel theme contains colors"
-
-    else
-
-        fail "Generated Fuzzel theme is incomplete"
-
-    fi
-
-else
-
-    info "Aurora Fuzzel theme not generated yet"
 
 fi
 

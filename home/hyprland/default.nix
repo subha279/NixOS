@@ -57,11 +57,12 @@
   #
   # ==========================================================================
 
-  xdg.configFile."hypr/scripts/wallpaper.sh".source = ./scripts/wallpaper.sh;
+  # Wallpaper selection itself now lives in Quickshell, in
+  # home/quickshell/config/modules/WallpaperPicker.qml. Only the
+  # boot-time restore hook is still a script, because it has to run
+  # before the shell is up.
 
   xdg.configFile."hypr/scripts/restore-wallpaper.sh".source = ./scripts/restore-wallpaper.sh;
-
-  xdg.configFile."hypr/scripts/launcher.sh".source = ./scripts/launcher.sh;
 
   # ==========================================================================
   # Aurora Desktop Services

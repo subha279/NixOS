@@ -65,7 +65,6 @@
       #   • GTK
       #   • Qt
       #   • QuickShell
-      #   • Fuzzel
       #   • desktop UI
       #
       interface = {

@@ -82,8 +82,11 @@
     # ==============================
     # Launcher
     # ==============================
-
-    fuzzel
+    #
+    # No package needed. The launcher, wallpaper picker and
+    # colorscheme picker are Quickshell surfaces, in
+    # home/quickshell/config/modules.
+    #
 
     # ==============================
     # Notifications
