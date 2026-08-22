@@ -2,6 +2,30 @@
 -- Environment Variables
 -- https://wiki.hypr.land/Configuring/Environment-variables/
 --------------------------------------------------
+--
+-- Only compositor-specific variables live here.
+--
+-- Anything the whole session needs is exported once,
+-- from Nix, and is NOT repeated here:
+--
+--   modules/session/environment.nix   session-wide
+--   home/zsh/environment.nix          shell / user
+--
+-- Removed as duplicates of environment.sessionVariables.
+-- Those are NixOS level, so PAM exports them into every
+-- session before Hyprland even starts:
+--
+--   XDG_SESSION_TYPE
+--   MOZ_ENABLE_WAYLAND
+--   SDL_VIDEODRIVER
+--   CLUTTER_BACKEND
+--
+-- EDITOR / BROWSER / TERMINAL are deliberately kept below
+-- even though home/zsh/environment.nix also sets them.
+-- home.sessionVariables is written to hm-session-vars.sh and
+-- is only sourced by login shells, so an app launched from a
+-- Hyprland keybind would never see it.
+--------------------------------------------------
 
 --------------------------------------------------
 -- Cursor
@@ -14,7 +38,6 @@ hl.env("HYPRCURSOR_SIZE", "24")
 -- Wayland
 --------------------------------------------------
 
-hl.env("XDG_SESSION_TYPE", "wayland")
 hl.env("XDG_CURRENT_DESKTOP", "Hyprland")
 hl.env("XDG_SESSION_DESKTOP", "Hyprland")
 
@@ -31,23 +54,6 @@ hl.env("QT_WAYLAND_DISABLE_WINDOWDECORATION", "1")
 
 hl.env("GDK_BACKEND", "wayland,x11")
 
---------------------------------------------------
--- Mozilla (Firefox)
---------------------------------------------------
-
-hl.env("MOZ_ENABLE_WAYLAND", "1")
-
---------------------------------------------------
--- SDL Applications
---------------------------------------------------
-
-hl.env("SDL_VIDEODRIVER", "wayland")
-
---------------------------------------------------
--- Clutter
---------------------------------------------------
-
-hl.env("CLUTTER_BACKEND", "wayland")
 
 --------------------------------------------------
 -- Java Applications
@@ -72,6 +78,17 @@ hl.env("__GLX_VENDOR_LIBRARY_NAME", "nvidia")
 
 --------------------------------------------------
 -- Misc
+--------------------------------------------------
+
+
+--------------------------------------------------
+-- Default Applications
+--------------------------------------------------
+--
+-- Also set in home/zsh/environment.nix for shells.
+-- Repeated here so graphical children of Hyprland
+-- inherit them regardless of how the session began.
+--
 --------------------------------------------------
 
 hl.env("EDITOR", "nvim")

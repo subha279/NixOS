@@ -68,15 +68,45 @@
   # Aurora Desktop Services
   # ==========================================================================
 
+  # This repo configures Hyprland by writing config files directly rather
+  # than through the home-manager Hyprland module, so nothing was defining
+  # hyprland-session.target. Everything below hangs off graphical-session.target,
+  # so it has to exist and it has to be bound.
+  systemd.user.targets.hyprland-session = {
+    Unit = {
+      Description = "Hyprland compositor session";
+
+      Documentation = [ "man:systemd.special(7)" ];
+
+      BindsTo = [ "graphical-session.target" ];
+
+      Wants = [ "graphical-session-pre.target" ];
+
+      After = [ "graphical-session-pre.target" ];
+
+      Before = [ "graphical-session.target" ];
+    };
+  };
+
   systemd.user.targets.desktop-services = {
     Unit = {
       Description = "Aurora desktop services";
+
+      PartOf = [ "graphical-session.target" ];
+
+      After = [ "graphical-session.target" ];
 
       Wants = [
         "quickshell.service"
         "awww-daemon.service"
         "plasma-polkit-agent.service"
       ];
+    };
+
+    # Previously missing, so the target was only reachable through the
+    # explicit `systemctl --user start` in startup.lua and raced the shell.
+    Install = {
+      WantedBy = [ "graphical-session.target" ];
     };
   };
 
@@ -89,16 +119,30 @@
       Description = "Awww Wayland wallpaper daemon";
 
       PartOf = [
-        "desktop-services.target"
+        "graphical-session.target"
       ];
+
+      After = [
+        "graphical-session.target"
+      ];
+
+      ConditionEnvironment = "WAYLAND_DISPLAY";
     };
 
     Service = {
+      Type = "exec";
+
       ExecStart = "${pkgs.awww}/bin/awww-daemon";
 
       Restart = "on-failure";
 
       RestartSec = 2;
+
+      Slice = "session.slice";
+    };
+
+    Install = {
+      WantedBy = [ "desktop-services.target" ];
     };
   };
 }

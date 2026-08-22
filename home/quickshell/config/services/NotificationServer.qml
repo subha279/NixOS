@@ -2,7 +2,15 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
-import Quickshell.Services.Notifications
+
+// The alias is load-bearing.
+//
+// services/qmldir registers THIS file as a composite type named
+// `NotificationServer`. A bare `NotificationServer { }` below therefore
+// resolved back to this singleton instead of the Quickshell type, so the
+// real D-Bus object was never constructed, org.freedesktop.Notifications
+// was never claimed, and every notification on the system was dropped.
+import Quickshell.Services.Notifications as Notifs
 
 import "../core" as Core
 
@@ -132,7 +140,7 @@ Singleton {
         }
     }
 
-    NotificationServer {
+    Notifs.NotificationServer {
         id: server
 
         bodySupported: true

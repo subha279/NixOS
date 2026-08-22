@@ -1,13 +1,16 @@
 { ... }:
 
+let
+  vars = import ../../lib/variables.nix;
+in
 {
   programs.git = {
     enable = true;
 
     settings = {
       user = {
-        name = "subha279";
-        email = "111702137+subha279@users.noreply.github.com";
+        name = vars.gitUser;
+        email = vars.email;
       };
 
       init.defaultBranch = "main";

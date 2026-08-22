@@ -34,30 +34,13 @@ PanelWindow {
     readonly property int toastSpacing: 8
     readonly property int maxHeight: 640
 
-    // Calculate the actual content height ourselves.
+    // Measured, not estimated.
     //
-    // This avoids relying on ColumnLayout/Reapeater implicitHeight,
-    // which can collapse the PanelWindow to almost zero height.
-    readonly property int contentHeight: {
-        if (!root.toasts || root.toasts.length === 0)
-            return 1;
-
-        var total = 0;
-
-        for (var i = 0; i < root.toasts.length; i++) {
-            var n = root.toasts[i];
-
-            // Conservative height used by the delegates.
-            // The actual card may be slightly taller depending
-            // on the notification body.
-            total += 96;
-
-            if (i < root.toasts.length - 1)
-                total += root.toastSpacing;
-        }
-
-        return Math.min(total, root.maxHeight);
-    }
+    // The previous version summed a hardcoded 96px per card, so any toast
+    // with a two-line body overlapped the one beneath it and the last card
+    // was clipped off the bottom of the layer surface. The Column below
+    // measures each card instead.
+    readonly property int contentHeight: Math.max(1, Math.min(column.implicitHeight, root.maxHeight))
 
     implicitWidth: root.toastWidth + 14
     implicitHeight: root.contentHeight
@@ -67,23 +50,28 @@ PanelWindow {
     WlrLayershell.namespace: "aurora-notifications"
     WlrLayershell.layer: WlrLayer.Overlay
 
+    // A toast must never steal keyboard focus from whatever you are
+    // typing in.
+    WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
+
     exclusionMode: ExclusionMode.Ignore
 
     visible: root.toasts.length > 0 && !Core.PopupManager.dnd && !Core.PopupManager.isOpen("notifications")
 
     // Only the actual toast stack receives input.
     mask: Region {
-        item: stack
+        item: column
     }
 
-    Item {
-        id: stack
+    Column {
+        id: column
 
         anchors.top: parent.top
         anchors.right: parent.right
 
         width: root.toastWidth
-        height: Math.min(root.contentHeight, root.maxHeight)
+
+        spacing: root.toastSpacing
 
         Repeater {
             id: repeater
@@ -117,19 +105,10 @@ PanelWindow {
 
                 width: root.toastWidth
 
-                // Every delegate is positioned explicitly.
-                // This prevents Layout animations from fighting
-                // with the compositor.
-                y: {
-                    var result = 0;
-
-                    for (var i = 0; i < index; i++) {
-                        result += 96 + root.toastSpacing;
-                    }
-
-                    return result;
-                }
-
+                // Positioned by the parent Column, which measures every
+                // card rather than assuming a fixed height. The old manual
+                // y-binding also read `index`, which Qt 6 stops injecting
+                // as soon as a delegate declares a required property.
                 height: Math.max(0, wrapper.cardHeight * wrapper.collapse)
 
                 opacity: 1.0 - (wrapper.slide * 0.35)

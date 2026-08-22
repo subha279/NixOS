@@ -1136,31 +1136,119 @@ if [[ -f "$LAYER_RULES" ]]; then
 
     ok "Layer rules file exists"
 
-    if grep -q 'namespace = "\^launcher\$"' \
-        "$LAYER_RULES" 2>/dev/null; then
+    # Every Wayland namespace declared by a Quickshell surface needs a
+    # matching layer rule.
+    #
+    # The launcher assertion used to grep for "^launcher$", a namespace
+    # LauncherSurface.qml has never declared, so it could never pass.
+    # aurora-popup was not checked at all, and had no rule.
 
-        ok "Launcher blur rule declared"
+    for ns in aurora-bar aurora-popup aurora-notifications aurora-launcher; do
+
+        if grep -q "namespace = \"\\^${ns}\\\$\"" \
+            "$LAYER_RULES" 2>/dev/null; then
+
+            ok "Layer rule declared: $ns"
+
+        else
+
+            fail "Layer rule missing: $ns"
+
+        fi
+
+    done
+
+else
+
+    fail "Hyprland layer rules file not found"
+
+fi
+
+# ============================================================================
+# 18b. Notification delivery
+# ============================================================================
+#
+# Regression guards for the failure that took notifications down entirely.
+#
+# ============================================================================
+
+section "Notification delivery"
+
+NOTIF_SERVER="$ROOT/home/quickshell/config/services/NotificationServer.qml"
+QUICKSHELL_NIX="$ROOT/home/quickshell/default.nix"
+NOTIF_MODULE="$ROOT/modules/notifications/default.nix"
+
+if [[ -f "$NOTIF_SERVER" ]]; then
+
+    # services/qmldir registers NotificationServer.qml as a composite type
+    # called NotificationServer. A bare `NotificationServer {}` inside it
+    # therefore resolves to the singleton itself instead of the Quickshell
+    # type, the D-Bus object is never built, and every notification on the
+    # system is dropped in silence. The import must stay aliased.
+
+    if grep -q "import Quickshell.Services.Notifications as "         "$NOTIF_SERVER" 2>/dev/null; then
+
+        ok "Notification server import is aliased"
 
     else
 
-        fail "Launcher blur rule missing"
+        fail "Notification server import is not aliased (daemon will not bind)"
 
     fi
 
-    if grep -q 'namespace = "\^aurora-notifications\$"' \
-        "$LAYER_RULES" 2>/dev/null; then
+    if grep -qE "^[[:space:]]+NotificationServer \{"         "$NOTIF_SERVER" 2>/dev/null; then
 
-        ok "Aurora notification blur rule declared"
+        fail "Unqualified NotificationServer instantiation (shadows itself)"
 
     else
 
-        fail "Aurora notification blur rule missing"
+        ok "Notification server instantiated through its namespace"
 
     fi
 
 else
 
-    fail "Hyprland layer rules file not found"
+    fail "NotificationServer.qml not found"
+
+fi
+
+if grep -q "org.freedesktop.Notifications.service"     "$QUICKSHELL_NIX" 2>/dev/null; then
+
+    ok "D-Bus activation declared for org.freedesktop.Notifications"
+
+else
+
+    fail "No D-Bus activation: apps that notify before the shell starts lose it"
+
+fi
+
+if grep -q "WantedBy" "$QUICKSHELL_NIX" 2>/dev/null; then
+
+    ok "quickshell.service is bound to the graphical session"
+
+else
+
+    fail "quickshell.service has no Install section and will never autostart"
+
+fi
+
+if grep -q "libnotify" "$QUICKSHELL_NIX" 2>/dev/null; then
+
+    ok "notify-send available in the user profile"
+
+else
+
+    fail "libnotify missing: notify-send unavailable to scripts and keybinds"
+
+fi
+
+if grep -q "impl.portal.Notification" "$NOTIF_MODULE" 2>/dev/null; then
+
+    ok "Portal notification backend declared"
+
+else
+
+    fail "Portal notification backend missing: sandboxed apps cannot notify"
 
 fi
 

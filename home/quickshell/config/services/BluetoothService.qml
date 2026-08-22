@@ -30,6 +30,82 @@ Singleton {
 
     property string lastError: ""
 
+    // ------------------------------------------------------------
+    // Desktop notifications
+    // ------------------------------------------------------------
+    //
+    // blueman-applet emits these only while its tray icon is
+    // alive. The bar replaced the tray, so nothing was left to
+    // announce pairing and connection changes.
+    //
+    // ------------------------------------------------------------
+
+    property var lastConnected: []
+    property bool btPrimed: false
+
+    property bool lastPowered: false
+    property bool poweredPrimed: false
+
+    property Process notifyProc: Process {}
+
+    function notify(summary, body, icon, urgency) {
+        root.notifyProc.running = false;
+        root.notifyProc.command = ["notify-send", "-a", "Bluetooth", "-i", icon, "-u", urgency, summary, body];
+        root.notifyProc.running = true;
+    }
+
+    function connectedAddresses() {
+        const out = [];
+
+        for (const d of root.allDevices)
+            if (d && d.connected && d.address)
+                out.push(String(d.address));
+
+        return out;
+    }
+
+    function syncDeviceNotifications() {
+        const now = root.connectedAddresses();
+        const prev = root.lastConnected;
+
+        root.lastConnected = now;
+
+        // Devices arrive asynchronously after the adapter appears,
+        // so the first pass is bookkeeping only.
+        if (!root.btPrimed) {
+            root.btPrimed = true;
+            return;
+        }
+
+        for (const addr of now)
+            if (prev.indexOf(addr) === -1)
+                root.notify(root.displayName(root.deviceByAddress(addr)), "Connected", "bluetooth-active", "low");
+
+        for (const addr of prev)
+            if (now.indexOf(addr) === -1) {
+                const gone = root.deviceByAddress(addr);
+                root.notify(gone ? root.displayName(gone) : addr, "Disconnected", "bluetooth-disabled", "normal");
+            }
+    }
+
+    onPoweredChanged: {
+        if (!root.poweredPrimed) {
+            root.poweredPrimed = true;
+            root.lastPowered = root.powered;
+            return;
+        }
+
+        if (root.powered === root.lastPowered)
+            return;
+
+        root.lastPowered = root.powered;
+
+        if (root.powered)
+            root.notify("Bluetooth on", "Adapter powered on", "bluetooth-active", "low");
+        else
+            root.notify("Bluetooth off", "Adapter powered off", "bluetooth-disabled", "low");
+    }
+
     // Address of a device with an operation in flight
     property string pendingAddress: ""
 
@@ -233,7 +309,12 @@ Singleton {
         }
     }
 
-    onAllDevicesChanged: root.rebuildModel()
+    // Rebuild first so deviceByAddress() can resolve names for
+    // anything that just appeared, then diff for notifications.
+    onAllDevicesChanged: {
+        root.rebuildModel();
+        root.syncDeviceNotifications();
+    }
 
     property Timer syncTimer: Timer {
         interval: root.fastPoll ? 800 : 3000

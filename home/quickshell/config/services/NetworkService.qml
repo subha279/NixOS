@@ -71,6 +71,93 @@ Singleton {
     signal connectSucceeded(string ssid)
 
     // ------------------------------------------------------------
+    // Desktop notifications
+    // ------------------------------------------------------------
+    //
+    // nm-applet only speaks up when it owns a tray icon, and it
+    // says nothing at all about ethernet. This service already
+    // tracks every link transition, so it announces them itself
+    // through the same D-Bus daemon every other app uses.
+    //
+    // ------------------------------------------------------------
+
+    property string lastLink: ""
+    property bool linkPrimed: false
+
+    property Process notifyProc: Process {}
+
+    function notify(summary, body, icon, urgency) {
+        root.notifyProc.running = false;
+        root.notifyProc.command = ["notify-send", "-a", "Network", "-i", icon, "-u", urgency, summary, body];
+        root.notifyProc.running = true;
+    }
+
+    function linkFingerprint() {
+        if (root.ethConnected)
+            return "eth:" + (root.ethConnection !== "" ? root.ethConnection : "Ethernet");
+
+        if (root.wifiConnected)
+            return "wifi:" + root.activeSsid;
+
+        if (!root.wifiEnabled)
+            return "off";
+
+        return "none";
+    }
+
+    function syncLinkNotification() {
+        const now = root.linkFingerprint();
+
+        if (now === root.lastLink)
+            return;
+
+        const prev = root.lastLink;
+
+        root.lastLink = now;
+
+        // The first evaluation lands while nmcli is still being
+        // polled for the first time. Announcing it would fire a
+        // notification on every single login.
+        if (!root.linkPrimed) {
+            root.linkPrimed = true;
+            return;
+        }
+
+        if (now.indexOf("eth:") === 0) {
+            root.notify("Ethernet connected", now.substring(4), "network-wired", "low");
+            return;
+        }
+
+        if (now.indexOf("wifi:") === 0) {
+            root.notify("Wi-Fi connected", now.substring(5), "network-wireless", "low");
+            return;
+        }
+
+        if (now === "off") {
+            root.notify("Wi-Fi off", "Radio disabled", "network-wireless-offline", "low");
+            return;
+        }
+
+        if (prev.indexOf("wifi:") === 0) {
+            root.notify("Wi-Fi disconnected", prev.substring(5), "network-wireless-offline", "normal");
+            return;
+        }
+
+        if (prev.indexOf("eth:") === 0) {
+            root.notify("Ethernet disconnected", prev.substring(4), "network-wired-disconnected", "normal");
+            return;
+        }
+
+        root.notify("Disconnected", "No network connection", "network-offline", "normal");
+    }
+
+    onWifiStateChanged: root.syncLinkNotification()
+    onEthStateChanged: root.syncLinkNotification()
+    onActiveSsidChanged: root.syncLinkNotification()
+    onEthConnectionChanged: root.syncLinkNotification()
+    onWifiEnabledChanged: root.syncLinkNotification()
+
+    // ------------------------------------------------------------
     // Live ListModel (stable rows => real add/remove animations)
     // ------------------------------------------------------------
 

@@ -1,5 +1,8 @@
 { ... }:
 
+let
+  vars = import ../../lib/variables.nix;
+in
 {
   imports = [
     ./hardware-configuration.nix
@@ -15,6 +18,7 @@
     ../../modules/polkit
     ../../modules/graphics
     ../../modules/xdg
+    ../../modules/notifications
     ../../modules/hyprland
     ../../modules/desktop
     ../../modules/session
@@ -28,5 +32,5 @@
     ../../modules/virtualisation
   ];
 
-  networking.hostName = "subha";
+  networking.hostName = vars.hostname;
 }

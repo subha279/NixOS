@@ -887,11 +887,23 @@ in
   # ============================================================
   #
   # Aurora controls application colors.
-  # Stylix handles desktop integration:
+  # Stylix handles desktop integration (GTK / Qt / Fontconfig).
   #
-  #   GTK
-  #   Qt
-  #   Fontconfig
+  # These look like duplicates of the targets in
+  # modules/stylix/default.nix. They are NOT.
+  #
+  # Stylix exposes a separate `targets` option at each level:
+  #
+  #   modules/stylix   NixOS level  -> system-wide theming
+  #   here             home-manager -> ~/.config/gtk-3.0,
+  #                                    gtk-4.0, qt5ct/qt6ct,
+  #                                    dconf, fontconfig
+  #
+  # modules/stylix sets autoEnable = false, which propagates
+  # down, so every home-manager target defaults to OFF. These
+  # three lines are the only thing theming your GTK and Qt
+  # applications. Deleting them leaves Thunar and friends on
+  # stock Adwaita.
   #
   # ============================================================
 

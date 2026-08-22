@@ -1,7 +1,10 @@
 { pkgs, ... }:
 
+let
+  vars = import ../../lib/variables.nix;
+in
 {
-  users.users.subha = {
+  users.users.${vars.username} = {
     isNormalUser = true;
 
     shell = pkgs.zsh;

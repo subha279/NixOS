@@ -1,9 +1,12 @@
 { ... }:
 
+let
+  vars = import ../../lib/variables.nix;
+in
 {
-  time.timeZone = "Asia/Kolkata";
+  time.timeZone = vars.timezone;
 
-  i18n.defaultLocale = "en_US.UTF-8";
+  i18n.defaultLocale = vars.locale;
 
   console.keyMap = "us";
 

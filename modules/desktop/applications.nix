@@ -13,13 +13,11 @@
     # File Manager
     # ==============================
 
-    thunar
-    thunar-volman
-
-    # Thunar / File integration
+    # thunar, thunar-volman and tumbler are provided by
+    # programs.thunar / services.tumbler in ./services.nix, and gvfs by
+    # services.gvfs. Listing them here too shipped a second, unintegrated
+    # copy with no plugins and no thumbnailer registration.
     shared-mime-info
-    gvfs
-    tumbler
     ffmpegthumbnailer
 
     # ==============================
