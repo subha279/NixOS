@@ -638,14 +638,6 @@ hl.window_rule({
 --------------------------------------------------
 -- DaVinci Resolve
 --------------------------------------------------
---
--- Resolve remains tiled.
---
--- The previous rule had an empty body. Resolve is
--- also an Xwayland client that draws its own splash
--- and tool windows with no class, so it needs the
--- opacity override to stay colour accurate.
---------------------------------------------------
 
 hl.window_rule({
 	name = "davinci-resolve",
