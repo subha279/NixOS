@@ -94,7 +94,7 @@ Components.PopupSurface {
 
                 color: Core.Theme.surface
 
-                border.width: 1
+                border.width: Core.Theme.borderWidth
                 border.color: Core.Theme.border
 
                 // ------------------------------------------------

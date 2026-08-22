@@ -185,7 +185,7 @@ PanelWindow {
 
         color: Core.Theme.backgroundGlass
 
-        border.width: 2
+        border.width: 0
         border.color: Core.Theme.borderActive
 
         opacity: root.reveal

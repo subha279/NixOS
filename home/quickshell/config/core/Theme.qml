@@ -175,7 +175,7 @@ QtObject {
     // UI
     // ============================================================
 
-    readonly property int borderWidth: ui.borderWidth || 2
+    readonly property int borderWidth: ui.borderWidth || 0
 
     readonly property int radius: ui.radius || 10
 

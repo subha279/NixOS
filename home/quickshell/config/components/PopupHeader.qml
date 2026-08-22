@@ -166,7 +166,7 @@ Item {
 
                 color: root.toggled ? Core.Theme.accent : Core.Theme.surface
 
-                border.width: 1
+                border.width: Core.Theme.borderWidth;
                 border.color: root.toggled ? Core.Theme.accent : Core.Theme.border
 
                 Behavior on color {

@@ -110,7 +110,7 @@ Item {
 
             color: root.muted ? Core.Theme.foregroundMuted : Core.Theme.foreground
 
-            border.width: 2
+            border.width: Core.Theme.borderWidth
             border.color: Core.Theme.accentForeground
 
             Behavior on width {

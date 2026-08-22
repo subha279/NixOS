@@ -242,7 +242,7 @@ PanelWindow {
 
         color: Core.Theme.backgroundSolid
 
-        border.width: 2
+        border.width: Core.Theme.borderWidth
         border.color: Core.Theme.borderActive
 
         antialiasing: true
@@ -387,7 +387,7 @@ PanelWindow {
 
             color: Core.Theme.backgroundSolid
 
-            border.width: 1
+            border.width: Core.Theme.borderWidth
             border.color: Core.Theme.border
 
             antialiasing: true

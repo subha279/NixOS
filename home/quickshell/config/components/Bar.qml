@@ -169,12 +169,12 @@ PanelWindow {
             // The border remains entirely controlled by Aurora.
             GradientStop {
                 position: 0.0
-                color: Core.Theme.borderActive
+                color: Core.Theme.borderWidth > 0 ? Core.Theme.borderActive : "transparent"
             }
 
             GradientStop {
                 position: 1.0
-                color: Core.Theme.borderActiveEnd
+                color: Core.Theme.borderWidth > 0 ? Core.Theme.borderActiveEnd : "transparent"
             }
         }
 

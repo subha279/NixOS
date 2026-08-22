@@ -43,9 +43,7 @@ Components.LauncherSurface {
 
     itemCount: launcher.results.length
 
-    counterText: launcher.query.length === 0
-        ? launcher.results.length + " themes"
-        : launcher.results.length + " of " + Services.ThemeService.count
+    counterText: launcher.query.length === 0 ? launcher.results.length + " themes" : launcher.results.length + " of " + Services.ThemeService.count
 
     onAccepted: {
         const theme = launcher.results[launcher.selectedIndex];
@@ -117,8 +115,7 @@ Components.LauncherSurface {
                 radius: 0
 
                 readonly property bool selected: row.index === launcher.selectedIndex
-                readonly property bool isActive:
-                    row.modelData.id === Services.ThemeService.activeId
+                readonly property bool isActive: row.modelData.id === Services.ThemeService.activeId
 
                 // A partially generated themes.json must not break
                 // layout, so every read has a fallback.
@@ -129,9 +126,7 @@ Components.LauncherSurface {
                     return (value && String(value).length > 0) ? value : fallback;
                 }
 
-                color: row.selected
-                    ? Core.Theme.accent
-                    : (hover.hovered ? Core.Theme.surfaceHover : "transparent")
+                color: row.selected ? Core.Theme.accent : (hover.hovered ? Core.Theme.surfaceHover : "transparent")
 
                 Behavior on color {
                     ColorAnimation {
@@ -163,7 +158,7 @@ Components.LauncherSurface {
 
                         color: row.shade("background", Core.Theme.background)
 
-                        border.width: 1
+                        border.width: Core.Theme.borderWidth
                         border.color: row.shade("border", Core.Theme.border)
 
                         // Fake bar
@@ -226,9 +221,7 @@ Components.LauncherSurface {
 
                         Text {
                             text: row.modelData.name
-                            color: row.selected
-                                ? Core.Theme.accentForeground
-                                : Core.Theme.foreground
+                            color: row.selected ? Core.Theme.accentForeground : Core.Theme.foreground
                             font.family: Core.Theme.fontMono
                             font.pixelSize: Core.Theme.fontSize
                         }
@@ -242,14 +235,7 @@ Components.LauncherSurface {
                             // so selected rows switch to the accent
                             // foreground and keep the marker bolder
                             // than a plain id.
-                            color: row.selected
-                                ? Qt.alpha(
-                                    Core.Theme.accentForeground,
-                                    row.isActive ? 1.0 : 0.75
-                                  )
-                                : (row.isActive
-                                    ? Core.Theme.accent
-                                    : Core.Theme.foregroundFaint)
+                            color: row.selected ? Qt.alpha(Core.Theme.accentForeground, row.isActive ? 1.0 : 0.75) : (row.isActive ? Core.Theme.accent : Core.Theme.foregroundFaint)
                             font.family: Core.Theme.fontMono
                             font.pixelSize: Core.Theme.fontSizeSmall
                         }
@@ -268,14 +254,7 @@ Components.LauncherSurface {
                     spacing: 4
 
                     Repeater {
-                        model: [
-                            "terminalRed",
-                            "terminalYellow",
-                            "terminalGreen",
-                            "terminalCyan",
-                            "terminalBlue",
-                            "terminalMagenta"
-                        ]
+                        model: ["terminalRed", "terminalYellow", "terminalGreen", "terminalCyan", "terminalBlue", "terminalMagenta"]
 
                         delegate: Rectangle {
                             required property var modelData

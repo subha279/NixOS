@@ -81,8 +81,8 @@
       #   • CLI interfaces
       #
       terminal = {
-        name = "Maple Mono";
-        package = "maple-mono.truetype";
+        name = "JetBrains Mono Nerd Font";
+        package = "nerd-fonts.jetbrains-mono";
       };
 
       # Emoji fallback.
@@ -119,7 +119,7 @@
     ui = {
 
       # Window border.
-      borderWidth = 2;
+      borderWidth = 0;
 
       # Global corner radius.
       radius = 10;

@@ -55,7 +55,7 @@ Item {
 
         color: "transparent"
 
-        border.width: 1
+        border.width: 0
         border.color: Core.Theme.danger
 
         opacity: root.svc.critical ? 1.0 : 0.0

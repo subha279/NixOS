@@ -337,7 +337,7 @@ Components.PopupSurface {
 
                         color: Core.Theme.surface
 
-                        border.width: 1
+                        border.width: Core.Theme.borderWidth
 
                         border.color: passwordInput.activeFocus ? Core.Theme.accent : Core.Theme.border
 

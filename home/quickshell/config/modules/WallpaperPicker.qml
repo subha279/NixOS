@@ -36,11 +36,7 @@ Components.LauncherSurface {
 
     itemCount: launcher.results.length
 
-    counterText: Services.WallpaperService.scanning
-        ? "scanning"
-        : (launcher.query.length === 0
-            ? launcher.results.length + " wallpapers"
-            : launcher.results.length + " of " + Services.WallpaperService.count)
+    counterText: Services.WallpaperService.scanning ? "scanning" : (launcher.query.length === 0 ? launcher.results.length + " wallpapers" : launcher.results.length + " of " + Services.WallpaperService.count)
 
     // Wallpapers are dropped into ~/Wallpapers by hand, so rescan on
     // every open rather than trusting a cached list.
@@ -83,19 +79,13 @@ Components.LauncherSurface {
             cellWidth: Math.floor(width / launcher.columns)
             cellHeight: Math.round(cellWidth * 0.70)
 
-            onCurrentIndexChanged: grid.positionViewAtIndex(
-                grid.currentIndex,
-                GridView.Contain
-            )
+            onCurrentIndexChanged: grid.positionViewAtIndex(grid.currentIndex, GridView.Contain)
 
             Text {
                 anchors.centerIn: parent
-                visible: launcher.results.length === 0
-                    && !Services.WallpaperService.scanning
+                visible: launcher.results.length === 0 && !Services.WallpaperService.scanning
 
-                text: Services.WallpaperService.error.length > 0
-                    ? Services.WallpaperService.error
-                    : "No wallpapers in ~/Wallpapers"
+                text: Services.WallpaperService.error.length > 0 ? Services.WallpaperService.error : "No wallpapers in ~/Wallpapers"
 
                 color: Core.Theme.foregroundFaint
                 font.family: Core.Theme.fontMono
@@ -112,8 +102,7 @@ Components.LauncherSurface {
                 height: grid.cellHeight
 
                 readonly property bool selected: cell.index === launcher.selectedIndex
-                readonly property bool applied:
-                    Services.WallpaperService.current === cell.modelData.path
+                readonly property bool applied: Services.WallpaperService.current === cell.modelData.path
 
                 Rectangle {
                     anchors.fill: parent
@@ -129,10 +118,8 @@ Components.LauncherSurface {
 
                     // Selection is now shown by border weight rather
                     // than by scaling the tile: no bounce, no reflow.
-                    border.width: cell.selected ? 2 : 1
-                    border.color: cell.selected
-                        ? Core.Theme.accent
-                        : (cell.applied ? Core.Theme.accentMuted : Core.Theme.border)
+                    border.width: cell.selected ? Core.Theme.borderWidth * 2 : Core.Theme.borderWidth
+                    border.color: cell.selected ? Core.Theme.accent : (cell.applied ? Core.Theme.accentMuted : Core.Theme.border)
 
                     Behavior on border.color {
                         ColorAnimation {

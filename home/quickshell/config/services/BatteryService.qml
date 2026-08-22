@@ -5,6 +5,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import Quickshell.Services.UPower
+import "../core" as Core
 
 // ================================================================
 // BatteryService
@@ -200,20 +201,21 @@ Singleton {
 
     // These are semantic states that already exist in the theme. Hardcoding
     // them meant the battery pill kept its old palette on every theme switch.
+
     readonly property color color: {
         if (!root.available)
-            return Theme.textMuted;
+            return Core.Theme.foregroundMuted;
 
         if (root.critical)
-            return Theme.error;
+            return Core.Theme.danger;
 
         if (root.low)
-            return Theme.warning;
+            return Core.Theme.warning;
 
         if (root.charging || root.full)
-            return Theme.success;
+            return Core.Theme.success;
 
-        return Theme.text;
+        return Core.Theme.foreground;
     }
 
     function profileIcon(value) {
