@@ -13,10 +13,6 @@
     # File Manager
     # ==============================
 
-    # thunar, thunar-volman and tumbler are provided by
-    # programs.thunar / services.tumbler in ./services.nix, and gvfs by
-    # services.gvfs. Listing them here too shipped a second, unintegrated
-    # copy with no plugins and no thumbnailer registration.
     shared-mime-info
     ffmpegthumbnailer
 
@@ -76,15 +72,6 @@
     # ==============================
 
     awww
-
-    # ==============================
-    # Launcher
-    # ==============================
-    #
-    # No package needed. The launcher, wallpaper picker and
-    # colorscheme picker are Quickshell surfaces, in
-    # home/quickshell/config/modules.
-    #
 
     # ==============================
     # Notifications
