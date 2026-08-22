@@ -17,7 +17,7 @@ import "../core" as Core
 Item {
     id: root
 
-    implicitWidth: showSeconds ? 66 : 48
+    implicitWidth: showSeconds ? 72 : 48
     implicitHeight: Core.Theme.moduleHeight
 
     property bool showSeconds: false
@@ -51,24 +51,92 @@ Item {
         }
     }
 
-    Text {
+    Row {
         anchors.centerIn: parent
 
-        text: Qt.formatDateTime(systemClock.date, root.showSeconds ? "HH:mm:ss" : "HH:mm")
+        spacing: 0
 
-        color: root.menuOpen ? Core.Theme.accent : Core.Theme.foreground
+        Text {
+            text: Qt.formatDateTime(systemClock.date, "HH")
 
-        Behavior on color {
-            ColorAnimation {
-                duration: 120
+            color: root.menuOpen ? Core.Theme.accent : Core.Theme.clockHour
+
+            font.family: Core.Theme.fontFamily
+            font.pixelSize: Core.Theme.fontSize
+            font.weight: Font.Medium
+
+            renderType: Text.QtRendering
+
+            Behavior on color {
+                ColorAnimation {
+                    duration: 120
+                }
             }
         }
 
-        font.family: Core.Theme.fontFamily
-        font.pixelSize: Core.Theme.fontSize
-        font.weight: Font.Medium
+        Text {
+            text: ":"
 
-        renderType: Text.QtRendering
+            color: root.menuOpen ? Core.Theme.accent : Core.Theme.clockSeparator
+
+            font.family: Core.Theme.fontFamily
+            font.pixelSize: Core.Theme.fontSize
+            font.weight: Font.Medium
+
+            renderType: Text.QtRendering
+
+            Behavior on color {
+                ColorAnimation {
+                    duration: 120
+                }
+            }
+        }
+
+        Text {
+            text: Qt.formatDateTime(systemClock.date, "mm")
+
+            color: root.menuOpen ? Core.Theme.accent : Core.Theme.clockMinute
+
+            font.family: Core.Theme.fontFamily
+            font.pixelSize: Core.Theme.fontSize
+            font.weight: Font.Medium
+
+            renderType: Text.QtRendering
+
+            Behavior on color {
+                ColorAnimation {
+                    duration: 120
+                }
+            }
+        }
+
+        Text {
+            visible: root.showSeconds
+
+            text: ":"
+
+            color: Core.Theme.clockSeparator
+
+            font.family: Core.Theme.fontFamily
+            font.pixelSize: Core.Theme.fontSize
+            font.weight: Font.Medium
+
+            renderType: Text.QtRendering
+        }
+
+        Text {
+            visible: root.showSeconds
+
+            text: Qt.formatDateTime(systemClock.date, "ss")
+
+            color: Core.Theme.clockSecond
+
+            font.family: Core.Theme.fontFamily
+            font.pixelSize: Core.Theme.fontSize
+            font.weight: Font.Medium
+
+            renderType: Text.QtRendering
+        }
     }
 
     MouseArea {

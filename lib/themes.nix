@@ -144,10 +144,17 @@
       glassOpacity = 0.80;
 
       # Shadow strength.
-      shadowOpacity = 0.20;
+      shadowOpacity = 0.0;
 
       # Default application/window opacity.
       windowOpacity = 0.96;
+
+      clock = {
+        hour = "foreground";
+        separator = "foregroundMuted";
+        minute = "accent";
+        second = "foregroundFaint";
+      };
 
     };
 

@@ -162,6 +162,49 @@ QtObject {
     readonly property color pressed: surfaceActive
 
     // ============================================================
+    // Semantic Color Resolver
+    // ============================================================
+
+    function resolveColor(name, fallback) {
+        switch (name) {
+        case "foreground":
+            return foreground;
+        case "foregroundMuted":
+            return foregroundMuted;
+        case "foregroundFaint":
+            return foregroundFaint;
+        case "accent":
+            return accent;
+        case "accentHover":
+            return accentHover;
+        case "accentActive":
+            return accentActive;
+        case "success":
+            return success;
+        case "warning":
+            return warning;
+        case "danger":
+            return danger;
+        case "info":
+            return info;
+        default:
+            return fallback;
+        }
+    }
+
+    // ============================================================
+    // Clock
+    // ============================================================
+
+    readonly property color clockHour: resolveColor(ui.clock?.hour, foreground)
+
+    readonly property color clockSeparator: resolveColor(ui.clock?.separator, foregroundMuted)
+
+    readonly property color clockMinute: resolveColor(ui.clock?.minute, accent)
+
+    readonly property color clockSecond: resolveColor(ui.clock?.second, foregroundFaint)
+
+    // ============================================================
     // Glass
     // ============================================================
 
@@ -191,7 +234,7 @@ QtObject {
 
     readonly property int fontSizeLarge: ui.fontSizeLarge || 15
 
-    readonly property real shadowOpacity: ui.shadowOpacity || 0.20
+    readonly property real shadowOpacity: ui.shadowOpacity !== undefined ? ui.shadowOpacity : 0.20
 
     // ============================================================
     // Existing QuickShell Geometry
