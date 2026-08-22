@@ -9,7 +9,7 @@
 
 local vars = require("config.variables")
 local mainMod = vars.mainMod
-local ALT = "ALT"
+local altMod = vars.altMod
 
 --------------------------------------------------
 -- Applications
