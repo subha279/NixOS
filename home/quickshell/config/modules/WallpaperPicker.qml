@@ -240,11 +240,12 @@ Components.LauncherSurface {
                 MouseArea {
                     anchors.fill: parent
                     z: 3
+                    hoverEnabled: true
 
-                    // Wheel and click only. Hover no longer moves the
-                    // selection: with the wheel driving the highlight, a
-                    // pointer resting over the grid was just fighting it for
-                    // control.
+                    onEntered: {
+                        launcher.selectedIndex = cell.index;
+                    }
+
                     onClicked: {
                         launcher.selectedIndex = cell.index;
                         launcher.accepted();

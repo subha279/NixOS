@@ -70,13 +70,7 @@ Components.LauncherSurface {
             clip: true
             boundsBehavior: Flickable.StopAtBounds
 
-            // Rows are inset cards now, in the style of the battery popup, so
-            // they need air between them instead of butting together.
             spacing: 4
-
-            // One theme per wheel notch. highlightRangeMode below already keeps
-            // the current row inside the view, so the view follows the
-            // selection instead of flicking on its own.
             interactive: false
 
             highlightRangeMode: ListView.ApplyRange
@@ -349,6 +343,12 @@ Components.LauncherSurface {
                 // the list was just fighting it for control.
                 MouseArea {
                     anchors.fill: parent
+                    hoverEnabled: true
+
+                    onEntered: {
+                        launcher.selectedIndex = row.index;
+                    }
+
                     onClicked: {
                         launcher.selectedIndex = row.index;
                         launcher.accepted();

@@ -113,26 +113,13 @@ PanelWindow {
             previewTimer.restart();
     }
 
-    // One wheel notch, one item.
-    //
-    // A mouse sends 120 units per notch; a touchpad sends a stream of much
-    // smaller deltas, so they accumulate until they add up to a notch.
-    // The accumulator resets on a direction change, otherwise leftover
-    // travel from scrolling one way eats the first step back the other way.
     property real wheelTravel: 0
-
-    // While the wheel is stepping the selection, the view scrolls underneath
-    // a stationary pointer -- and Qt then reports a hover on whatever item
-    // slid under it, which would fight the wheel for control of the selection.
-    // So hover is ignored for a moment after each notch.
-    // It resumes the instant the pointer crosses into a different item
-    // under its own steam.
     readonly property bool wheelActive: wheelLock.running
 
     Timer {
         id: wheelLock
 
-        interval: 120
+        interval: 60
         repeat: false
     }
 

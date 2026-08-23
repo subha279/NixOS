@@ -203,11 +203,14 @@ Components.LauncherSurface {
                     }
                 }
 
-                // Wheel and click only. Hover no longer moves the selection:
-                // with the wheel driving the highlight, a pointer resting over
-                // the list was just fighting it for control.
                 MouseArea {
                     anchors.fill: parent
+                    hoverEnabled: true
+
+                    onEntered: {
+                        launcher.selectedIndex = row.index;
+                    }
+
                     onClicked: {
                         launcher.selectedIndex = row.index;
                         launcher.accepted();
