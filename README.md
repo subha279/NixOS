@@ -1,21 +1,17 @@
 # Aurora
 
-Subha's NixOS configuration. Flake-based, Hyprland on Wayland, with a Quickshell
+NixOS configuration. Flake-based, Hyprland on Wayland, with a Quickshell
 desktop shell and Stylix-driven theming across every application.
 
 |             |                                      |
 | ----------- | ------------------------------------ |
 | Host        | `laptop` — `x86_64-linux`            |
-| Hostname    | `subha`                              |
-| User        | `subha`                              |
 | Channel     | `nixos-26.05`                        |
 | Compositor  | Hyprland, configured in **Lua**      |
 | Shell / bar | Quickshell                           |
 | Theming     | Stylix — 21 themes, active: `aurora` |
 | Terminal    | Kitty · Zsh                          |
 | Editor      | Neovim (17 LSPs)                     |
-
-Keybindings live in a separate file: **[KEYBINDS.md](KEYBINDS.md)**
 
 ---
 
@@ -51,10 +47,6 @@ NixOS/
 ├── lib/                   Shared values: identity + theme definitions
 └── scripts/               check.sh, cleanup.sh
 ```
-
-The split is deliberate: **`modules/` is the machine, `home/` is the user.**
-Anything that needs root or affects all users goes in `modules/`. Anything that
-is configuration for Subha's session goes in `home/`.
 
 ---
 
@@ -114,7 +106,7 @@ Unusually, the compositor is configured in **Lua** rather than `hyprland.conf`.
 | File                         | Contents                                                               |
 | ---------------------------- | ---------------------------------------------------------------------- |
 | `variables.lua`              | Modifiers, default applications, command strings — **edit this first** |
-| `keybinds.lua`               | All key bindings (see [KEYBINDS.md](KEYBINDS.md))                      |
+| `keybinds.lua`               | All key bindings below                      |
 | `monitor.lua`                | Display layout                                                         |
 | `windowrules.lua`            | 38 window rules                                                        |
 | `layerules.lua`              | 6 layer-surface rules                                                  |
@@ -421,16 +413,6 @@ applications.
 ## Identity
 
 All personal values are centralised in `lib/variables.nix`:
-
-```nix
-username  = "subha";
-hostname  = "subha";
-gitUser   = "subha279";
-fullName  = "Subha";
-email     = "111702137+subha279@users.noreply.github.com";
-timezone  = "Asia/Kolkata";
-locale    = "en_US.UTF-8";
-```
 
 Change them here rather than in individual modules.
 
