@@ -123,20 +123,59 @@ PanelWindow {
             }
         }
 
-        // Shadow
+        // Floating shadow
+        //
+        // Three stacked layers with falling opacity approximate a soft blur
+        // without pulling in GraphicalEffects. This is what lifts the pill off
+        // the wallpaper. Lower z is wider and fainter, so darkness builds up
+        // towards the pill edge.
 
         Rectangle {
             anchors.fill: parent
 
-            anchors.margins: -3
+            anchors.margins: -Core.Theme.shellShadowSpread
 
-            z: -2
+            z: -4
 
-            radius: pillBorder.radius + 3
+            radius: pillBorder.radius + Core.Theme.shellShadowSpread
 
             color: "#000000"
 
-            opacity: Core.Theme.shadowOpacity
+            opacity: Core.Theme.shellShadowOpacity * 0.16
+
+            antialiasing: true
+        }
+
+        Rectangle {
+            anchors.fill: parent
+
+            anchors.margins: -4
+
+            z: -3
+
+            radius: pillBorder.radius + 4
+
+            color: "#000000"
+
+            opacity: Core.Theme.shellShadowOpacity * 0.30
+
+            antialiasing: true
+        }
+
+        Rectangle {
+            anchors.fill: parent
+
+            anchors.margins: -2
+
+            z: -2
+
+            radius: pillBorder.radius + 2
+
+            color: "#000000"
+
+            opacity: Core.Theme.shellShadowOpacity * 0.55
+
+            antialiasing: true
         }
 
         // ACTUAL BAR SURFACE

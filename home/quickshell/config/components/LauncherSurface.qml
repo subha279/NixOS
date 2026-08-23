@@ -136,6 +136,58 @@ PanelWindow {
         }
     }
 
+    // Floating shadow
+    //
+    // Declared after the scrim and before the card so it paints between them
+    // without needing an explicit z.
+
+    Item {
+        anchors.fill: card
+
+        opacity: card.opacity
+
+        visible: root.reveal > 0.001
+
+        Rectangle {
+            anchors.fill: parent
+            anchors.margins: -12
+
+            radius: card.radius + 12
+
+            color: "#000000"
+
+            opacity: Core.Theme.shellShadowOpacity * 0.15
+
+            antialiasing: true
+        }
+
+        Rectangle {
+            anchors.fill: parent
+            anchors.margins: -7
+
+            radius: card.radius + 7
+
+            color: "#000000"
+
+            opacity: Core.Theme.shellShadowOpacity * 0.28
+
+            antialiasing: true
+        }
+
+        Rectangle {
+            anchors.fill: parent
+            anchors.margins: -3
+
+            radius: card.radius + 3
+
+            color: "#000000"
+
+            opacity: Core.Theme.shellShadowOpacity * 0.50
+
+            antialiasing: true
+        }
+    }
+
     // Card
 
     Rectangle {
@@ -155,7 +207,7 @@ PanelWindow {
                 easing.type: Easing.OutCubic
             }
         }
-        // Omarchy-style chrome: near-square corners, a single hairline border, no shadow and no bounce on open.
+        // Omarchy-style chrome: near-square corners, a single hairline border and no bounce on open. The drop shadow is the sibling declared above, which keeps it outside this card's own bounds.
         radius: Core.Theme.radiusSmall
 
         color: Core.Theme.backgroundGlass

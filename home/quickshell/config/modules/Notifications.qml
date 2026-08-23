@@ -15,16 +15,24 @@ PanelWindow {
     anchors.top: true
     anchors.right: true
 
-    margins.top: 48
-    margins.right: 14
+    // Reduced by exactly toastGutter, because the gutter added below carries
+    // the shadow. The visible card therefore stays in the same place as before.
+    margins.top: 40
+    margins.right: 6
 
     readonly property var toasts: Services.NotificationServer.toasts
 
     readonly property int toastWidth: 356
-    readonly property int toastSpacing: 8
+
+    // Transparent room around each card for its drop shadow. Both the wrapper
+    // and the card clip, so the shadow cannot be drawn past their edges.
+    readonly property int toastGutter: 8
+
+    // Adjacent gutters already supply the visual gap between cards.
+    readonly property int toastSpacing: 0
     readonly property int maxHeight: 640
 
-    implicitWidth: root.toastWidth + 14
+    implicitWidth: root.toastWidth + root.toastGutter * 2 + 14
 
     // Fixed on purpose. Binding this to the column made the layer-shell surface
     // resize on every animation frame, which is what caused the tearing and
@@ -54,7 +62,7 @@ PanelWindow {
         anchors.top: parent.top
         anchors.right: parent.right
 
-        width: root.toastWidth
+        width: root.toastWidth + root.toastGutter * 2
 
         spacing: root.toastSpacing
 
@@ -107,10 +115,10 @@ PanelWindow {
                 // animation also wrote to it broke the binding mid-flight.
                 property real fade: 0.0
 
-                width: root.toastWidth
+                width: root.toastWidth + root.toastGutter * 2
 
                 // Positioned by the parent Column, which measures every card rather than assuming a fixed height.
-                height: Math.max(0, wrapper.cardHeight * wrapper.collapse)
+                height: Math.max(0, (wrapper.cardHeight + root.toastGutter * 2) * wrapper.collapse)
 
                 opacity: wrapper.fade
 
@@ -261,6 +269,61 @@ PanelWindow {
                     }
                 }
 
+                // Floating shadow
+                //
+                // A sibling of the card, because the card clips its own
+                // children. It slides with the card so the shadow never
+                // detaches during the exit animation.
+
+                Item {
+                    anchors.fill: card
+
+                    z: -1
+
+                    transform: Translate {
+                        x: wrapper.slide * 44
+                    }
+
+                    Rectangle {
+                        anchors.fill: parent
+                        anchors.margins: -root.toastGutter
+
+                        radius: card.radius + root.toastGutter
+
+                        color: "#000000"
+
+                        opacity: Core.Theme.shellShadowOpacity * 0.16
+
+                        antialiasing: true
+                    }
+
+                    Rectangle {
+                        anchors.fill: parent
+                        anchors.margins: -4
+
+                        radius: card.radius + 4
+
+                        color: "#000000"
+
+                        opacity: Core.Theme.shellShadowOpacity * 0.30
+
+                        antialiasing: true
+                    }
+
+                    Rectangle {
+                        anchors.fill: parent
+                        anchors.margins: -2
+
+                        radius: card.radius + 2
+
+                        color: "#000000"
+
+                        opacity: Core.Theme.shellShadowOpacity * 0.55
+
+                        antialiasing: true
+                    }
+                }
+
                 // Card
 
                 Rectangle {
@@ -269,6 +332,10 @@ PanelWindow {
                     anchors.left: parent.left
                     anchors.right: parent.right
                     anchors.top: parent.top
+
+                    anchors.leftMargin: root.toastGutter
+                    anchors.rightMargin: root.toastGutter
+                    anchors.topMargin: root.toastGutter
 
                     implicitHeight: Math.max(72, contentRow.implicitHeight + 24)
 

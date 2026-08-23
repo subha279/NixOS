@@ -158,6 +158,66 @@ PanelWindow {
         }
     }
 
+    // Floating shadow
+    //
+    // A sibling of the card rather than a child: the card turns on layer
+    // caching while it scales, and a layer clips to the item's own bounds,
+    // which would cut off any shadow drawn past the edge. Widest layer first
+    // so darkness builds up towards the card.
+
+    Item {
+        anchors.fill: card
+
+        z: -1
+
+        opacity: card.opacity
+
+        scale: card.scale
+
+        transformOrigin: card.transformOrigin
+
+        visible: card.height > 0
+
+        Rectangle {
+            anchors.fill: parent
+            anchors.margins: -10
+
+            radius: card.radius + 10
+
+            color: "#000000"
+
+            opacity: Core.Theme.shellShadowOpacity * 0.15
+
+            antialiasing: true
+        }
+
+        Rectangle {
+            anchors.fill: parent
+            anchors.margins: -6
+
+            radius: card.radius + 6
+
+            color: "#000000"
+
+            opacity: Core.Theme.shellShadowOpacity * 0.30
+
+            antialiasing: true
+        }
+
+        Rectangle {
+            anchors.fill: parent
+            anchors.margins: -3
+
+            radius: card.radius + 3
+
+            color: "#000000"
+
+            opacity: Core.Theme.shellShadowOpacity * 0.55
+
+            antialiasing: true
+        }
+    }
+
     // The card
 
     Rectangle {
@@ -215,19 +275,6 @@ PanelWindow {
         // Cache the card while it is being scaled/faded.
         layer.enabled: root.open || root.rendering
         layer.smooth: true
-
-        // Soft drop shadow
-        Rectangle {
-            anchors.fill: parent
-            anchors.margins: -4
-
-            z: -1
-
-            radius: card.radius + 4
-            color: "#000000"
-
-            opacity: Core.Theme.shadowOpacity
-        }
 
         // Swallow clicks so the outside-click handler doesn't fire
         MouseArea {

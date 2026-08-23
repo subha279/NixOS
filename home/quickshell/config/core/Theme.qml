@@ -204,13 +204,22 @@ QtObject {
 
     readonly property real shadowOpacity: ui.shadowOpacity !== undefined ? ui.shadowOpacity : 0.20
 
+    // Shell surfaces draw their own stacked shadow to read as floating.
+    // Deliberately separate from ui.shadowOpacity, which decoration.lua also
+    // reads for Hyprland window shadows, so the shell can float without
+    // touching window decorations.
+    readonly property real shellShadowOpacity: 0.30
+
+    // How far the stacked shadow bleeds past a floating surface.
+    readonly property int shellShadowSpread: 7
+
     // Existing QuickShell Geometry
 
     readonly property int pillHeight: 32
 
     readonly property int moduleHeight: 30
 
-    readonly property int barMarginTop: 8
+    readonly property int barMarginTop: 10
 
     // Was a hardcoded 18, identical to radiusLarge.
     readonly property int radiusMenu: radiusLarge
@@ -237,7 +246,8 @@ QtObject {
 
     readonly property int popupMaxHeight: 460
 
-    readonly property int popupGap: 2
+    // Visible detachment from the bar pill. At 2 the cards looked welded to it.
+    readonly property int popupGap: 10
 
     readonly property int rowHeight: 42
 
