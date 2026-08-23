@@ -361,6 +361,8 @@ PanelWindow {
                 Modules.Tray {
                     id: tray
 
+                    barWindow: root
+
                     Layout.preferredWidth: tray.implicitWidth * root.reveal
 
                     Layout.preferredHeight: Core.Theme.moduleHeight
@@ -372,17 +374,6 @@ PanelWindow {
             }
         }
     }
-
-    // Separator
-    //
-    // A flat 1px bar reads as a hard seam stamped across the pill. These fade
-    // out at both ends instead, so each divider dissolves into the surface
-    // rather than sitting on top of it, and the row reads as one continuous
-    // object.
-    //
-    // The fade goes to a transparent copy of the separator colour rather than
-    // to "transparent" -- that keyword is transparent BLACK, and interpolating
-    // towards it visibly dirties the midpoint on light themes.
 
     component Separator: Item {
         id: sep

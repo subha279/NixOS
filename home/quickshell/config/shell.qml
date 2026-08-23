@@ -1,4 +1,4 @@
-// @ pragma UseQApplication
+//@ pragma UseQApplication
 
 import Quickshell
 import Quickshell.Wayland

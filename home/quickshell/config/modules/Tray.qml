@@ -9,6 +9,8 @@ import "../core" as Core
 Item {
     id: root
 
+    property var barWindow: null
+
     implicitWidth: trayRow.implicitWidth
     implicitHeight: Core.Theme.moduleHeight
 
@@ -85,11 +87,11 @@ Item {
                     acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
 
                     onClicked: function (event) {
-
-                        // Left click
                         if (event.button === Qt.LeftButton) {
                             if (modelData.onlyMenu || modelData.hasMenu) {
-                                menuAnchor.open();
+                                const p = trayItem.mapToItem(root.barWindow.contentItem, 0, trayItem.height);
+
+                                modelData.display(root.barWindow, Math.round(p.x), Math.round(p.y));
                             } else {
                                 modelData.activate();
                             }
@@ -97,33 +99,20 @@ Item {
                             return;
                         }
 
-                        // Right click
                         if (event.button === Qt.RightButton) {
                             if (modelData.hasMenu) {
-                                menuAnchor.open();
-                            } else {
-                                modelData.activate();
+                                const p = trayItem.mapToItem(root.barWindow.contentItem, 0, trayItem.height);
+
+                                modelData.display(root.barWindow, Math.round(p.x), Math.round(p.y));
                             }
 
                             return;
                         }
 
-                        // Middle click
                         if (event.button === Qt.MiddleButton) {
                             modelData.secondaryActivate();
                         }
                     }
-                }
-
-                QsMenuAnchor {
-                    id: menuAnchor
-
-                    menu: modelData.menu
-
-                    anchor.item: trayItem
-
-                    anchor.rect.x: 0
-                    anchor.rect.y: trayItem.height
                 }
             }
         }
