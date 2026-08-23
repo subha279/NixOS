@@ -54,7 +54,7 @@ Components.PopupSurface {
 
                 actions: [
                     {
-                        icon: popup.svc.discovering ? "\udb81\udd1e" : "\udb80\udd6c",
+                        icon: popup.svc.discovering ? Core.Icons.refresh : "\udb80\udd6c",
                         spinning: popup.svc.discovering,
                         action: function () {
                             if (!popup.svc.powered)
@@ -64,7 +64,7 @@ Components.PopupSurface {
                         }
                     },
                     {
-                        icon: "\udb80\udf93",
+                        icon: Core.Icons.gear,
                         action: function () {
                             popup.svc.openManager();
                             Core.PopupManager.close();
@@ -280,7 +280,7 @@ Components.PopupSurface {
 
                             if (devRow.paired) {
                                 items.push({
-                                    icon: devRow.trusted ? "\udb80\udc94" : "\udb80\udc93",
+                                    icon: devRow.trusted ? Core.Icons.close : "\udb80\udc93",
                                     label: devRow.trusted ? "Untrust device" : "Trust device",
                                     action: function () {
                                         popup.svc.setTrusted(devRow.address, !devRow.trusted);
@@ -289,7 +289,7 @@ Components.PopupSurface {
                             }
 
                             items.push({
-                                icon: devRow.blocked ? "\udb80\udd34" : "\udb80\udd5c",
+                                icon: devRow.blocked ? "\udb80\udd34" : Core.Icons.closeCircle,
                                 label: devRow.blocked ? "Unblock" : "Block",
                                 action: function () {
                                     popup.svc.setBlocked(devRow.address, !devRow.blocked);

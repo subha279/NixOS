@@ -91,14 +91,14 @@ Components.PopupSurface {
 
                 actions: [
                     {
-                        icon: "\udb81\udd1e",
+                        icon: Core.Icons.refresh,
                         spinning: popup.svc.scanning,
                         action: function () {
                             popup.svc.rescan();
                         }
                     },
                     {
-                        icon: "\udb80\udf93",
+                        icon: Core.Icons.gear,
                         action: function () {
                             popup.svc.openEditor();
                             Core.PopupManager.close();
@@ -190,7 +190,7 @@ Components.PopupSurface {
                                     }
                                 },
                                 {
-                                    icon: "\udb81\udd1e",
+                                    icon: Core.Icons.refresh,
                                     label: "Reconnect",
                                     action: function () {
                                         popup.svc.disconnectEthernet();
@@ -201,7 +201,7 @@ Components.PopupSurface {
                                     separator: true
                                 },
                                 {
-                                    icon: "\udb80\udf93",
+                                    icon: Core.Icons.gear,
                                     label: "Wired settings",
                                     action: function () {
                                         popup.svc.openEditor();
@@ -603,7 +603,7 @@ Components.PopupSurface {
 
                             if (netRow.saved) {
                                 items.push({
-                                    icon: "\udb81\udd1e",
+                                    icon: Core.Icons.refresh,
                                     label: "Reconnect",
                                     action: function () {
                                         popup.svc.disconnectWifi();
@@ -620,7 +620,7 @@ Components.PopupSurface {
                                 });
 
                                 items.push({
-                                    icon: "\udb80\udc94",
+                                    icon: Core.Icons.close,
                                     label: "Disable autoconnect",
                                     action: function () {
                                         popup.svc.setAutoconnect(netRow.ssid, false);

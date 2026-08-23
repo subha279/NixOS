@@ -163,7 +163,7 @@ Components.PopupSurface {
                     anchors.leftMargin: 10
                     anchors.verticalCenter: parent.verticalCenter
 
-                    text: "\udb80\udc9a  New alerts are being silenced"
+                    text: Core.Icons.bellOff + "  New alerts are being silenced"
 
                     font.family: Core.Theme.fontFamily
                     font.pixelSize: Core.Theme.fontSizeSmall
@@ -460,7 +460,7 @@ Components.PopupSurface {
                             Text {
                                 anchors.centerIn: parent
 
-                                text: "\udb80\udc94"
+                                text: Core.Icons.close
 
                                 font.family: Core.Theme.fontFamily
                                 font.pixelSize: 12
@@ -513,7 +513,7 @@ Components.PopupSurface {
 
                                 popup.openMenu(point.x, point.y, [
                                     {
-                                        icon: "\udb80\udc94",
+                                        icon: Core.Icons.close,
                                         label: "Dismiss",
                                         action: function () {
                                             popup.dismiss(note);
@@ -537,7 +537,7 @@ Components.PopupSurface {
                                         separator: true
                                     },
                                     {
-                                        icon: "\udb80\udc9a",
+                                        icon: Core.Icons.bellOff,
                                         label: popup.dnd ? "Turn off do not disturb" : "Turn on do not disturb",
                                         action: function () {
                                             popup.setDnd(!popup.dnd);

@@ -59,7 +59,7 @@ Components.PopupSurface {
             },
             {
                 label: "Open pavucontrol",
-                icon: "\udb80\udf93",
+                icon: Core.Icons.gear,
                 action: function () {
                     svc.openMixer();
                 }
@@ -85,7 +85,7 @@ Components.PopupSurface {
 
                 actions: [
                     {
-                        icon: "\udb80\udf93",
+                        icon: Core.Icons.gear,
                         tooltip: "Open pavucontrol",
                         action: function () {
                             popup.svc.openMixer();

@@ -53,7 +53,7 @@ Components.PopupSurface {
                         }
                     },
                     {
-                        icon: "\udb80\udf93",
+                        icon: Core.Icons.gear,
                         tooltip: "Power settings",
                         action: function () {
                             popup.svc.openPowerSettings();
@@ -266,7 +266,7 @@ Components.PopupSurface {
                             },
                             {
                                 label: "Power settings",
-                                icon: "\udb80\udf93",
+                                icon: Core.Icons.gear,
                                 action: function () {
                                     popup.svc.openPowerSettings();
                                     Core.PopupManager.close();
@@ -348,7 +348,7 @@ Components.PopupSurface {
                                 },
                                 {
                                     label: "Power settings",
-                                    icon: "\udb80\udf93",
+                                    icon: Core.Icons.gear,
                                     action: function () {
                                         popup.svc.openPowerSettings();
                                         Core.PopupManager.close();
@@ -516,7 +516,7 @@ Components.PopupSurface {
                                 },
                                 {
                                     label: "Refresh devices",
-                                    icon: "\udb81\udd1e",
+                                    icon: Core.Icons.refresh,
                                     action: function () {
                                         popup.svc.rebuildPeripherals();
                                     }

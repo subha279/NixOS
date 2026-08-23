@@ -108,9 +108,22 @@ QtObject {
 
     // Notifications
 
-    readonly property string bell: "\udb80\udc9c"       // F009C
-    readonly property string bellOff: "\udb80\udc9a"    // F009A
-    readonly property string bellBadge: "\udb81\udf9e"  // F079E
+    // F079E is nf-md-bus_school, NOT a bell with a badge -- that single wrong
+    // codepoint is why a school bus appeared in the bar the moment a
+    // notification arrived. F009A was also mislabelled as "off": it is the
+    // plain filled bell, so do-not-disturb was drawing a ringing bell.
+    //
+    // MDI bell block, verified: F009A bell, F009B bell-off,
+    // F009C bell-outline, F009E bell-ring, F009F bell-ring-outline.
+
+    readonly property string bell: "\udb80\udc9c"            // F009C  bell-outline
+    readonly property string bellFilled: "\udb80\udc9a"      // F009A  bell
+    readonly property string bellOff: "\udb80\udc9b"         // F009B  bell-off
+    readonly property string bellRing: "\udb80\udc9e"        // F009E  bell-ring
+    readonly property string bellRingOutline: "\udb80\udc9f" // F009F  bell-ring-outline
+
+    // Alias kept so existing call sites keep resolving.
+    readonly property string bellBadge: bellRing
 
     // App-class glyphs.
     readonly property string alert: "\udb80\udc26"        // F0026
@@ -187,9 +200,16 @@ QtObject {
     // Generic UI
 
     readonly property string check: "\udb80\udc93"        // F0093
-    readonly property string close: "\udb80\udc94"        // F0094
+
+    // F0094 is not close. MDI codepoints run alphabetically, and F009x lands in
+    // the b-names right next to the bells -- close is F0156. Same class of
+    // mistake as the bus, so every "x" button was drawing an unrelated glyph.
+    readonly property string close: "\udb80\udd56"        // F0156  close
+
     readonly property string checkCircle: "\udb80\udd34"  // F0134
-    readonly property string closeCircle: "\udb80\udd5c"  // F015C
+
+    // F015C is close-octagon. close-circle is F0159.
+    readonly property string closeCircle: "\udb80\udd59"  // F0159  close-circle
 
     readonly property string chevronDown: "\udb80\udd40"  // F0140
     readonly property string chevronLeft: "\udb80\udd41"  // F0141
@@ -199,10 +219,17 @@ QtObject {
     readonly property string calendar: "\udb80\udced"     // F00ED
     readonly property string search: "\udb80\udd6c"       // F016C
     readonly property string info: "\udb80\udd7c"         // F017C
-    readonly property string gear: "\udb80\udf93"         // F0393
+    // F0393 is not the cog: mdi-cog is F0493. One nibble out, which is why the
+    // settings buttons in every popup were drawing something unrelated.
+    readonly property string gear: "\udb81\udc93"         // F0493  cog
+
+    readonly property string refresh: "\udb81\udc50"      // F0450  refresh
     readonly property string lock: "\udb80\udfba"         // F03BA
     readonly property string send: "\udb81\udc0c"         // F040C
     readonly property string clipboard: "\udb81\udcd6"    // F04D6
+    // F051E used to double as the refresh/rescan glyph in the popup headers.
+    // Those buttons use `refresh` above now; this remains for anything that
+    // genuinely wants a bare spinner.
     readonly property string spinner: "\udb81\udd1e"      // F051E
     readonly property string trash: "\udb80\uddb4"        // F01B4
     readonly property string link: "\udb80\udd74"         // F0174

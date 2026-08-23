@@ -41,8 +41,9 @@ Item {
 
         anchors.centerIn: parent
 
-        // bell / bell-badge / bell-off
-        text: root.dnd ? "\udb80\udc9a" : root.count > 0 ? "\udb81\udf9e" : "\udb80\udc9c"
+        // Resolved through Core.Icons rather than inlined surrogate pairs --
+        // hand-written pairs here are exactly how a bus ended up in the bar.
+        text: root.dnd ? Core.Icons.bellOff : root.count > 0 ? Core.Icons.bellRing : Core.Icons.bell
 
         font.family: Core.Theme.fontFamily
         font.pixelSize: Core.Theme.iconSize

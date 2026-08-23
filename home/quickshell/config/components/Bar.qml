@@ -291,6 +291,11 @@ PanelWindow {
                     Layout.preferredWidth: clockModule.implicitWidth
 
                     Layout.preferredHeight: Core.Theme.moduleHeight
+
+                    // The clock hides its now-playing line whenever the bar is
+                    // wide, so it needs the same reveal value the collapsible
+                    // modules already use.
+                    reveal: root.reveal
                 }
 
                 Separator {
@@ -369,23 +374,64 @@ PanelWindow {
     }
 
     // Separator
+    //
+    // A flat 1px bar reads as a hard seam stamped across the pill. These fade
+    // out at both ends instead, so each divider dissolves into the surface
+    // rather than sitting on top of it, and the row reads as one continuous
+    // object.
+    //
+    // The fade goes to a transparent copy of the separator colour rather than
+    // to "transparent" -- that keyword is transparent BLACK, and interpolating
+    // towards it visibly dirties the midpoint on light themes.
 
-    component Separator: Rectangle {
+    component Separator: Item {
+        id: sep
 
         property real reveal: 1.0
 
         property bool available: true
 
+        readonly property color tint: Core.Theme.separator
+
         Layout.preferredWidth: 1
 
-        Layout.preferredHeight: 16
+        Layout.preferredHeight: 18
 
-        visible: available && reveal > 0.012
+        visible: sep.available && sep.reveal > 0.012
 
-        opacity: reveal
+        // Slightly under full strength so it never competes with the glyphs.
+        opacity: sep.reveal * 0.9
 
-        color: Core.Theme.separator
+        Rectangle {
+            anchors.centerIn: parent
 
-        radius: 1
+            width: 1
+
+            height: parent.height
+
+            antialiasing: true
+
+            gradient: Gradient {
+                GradientStop {
+                    position: 0.0
+                    color: Qt.rgba(sep.tint.r, sep.tint.g, sep.tint.b, 0.0)
+                }
+
+                GradientStop {
+                    position: 0.32
+                    color: sep.tint
+                }
+
+                GradientStop {
+                    position: 0.68
+                    color: sep.tint
+                }
+
+                GradientStop {
+                    position: 1.0
+                    color: Qt.rgba(sep.tint.r, sep.tint.g, sep.tint.b, 0.0)
+                }
+            }
+        }
     }
 }
