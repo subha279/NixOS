@@ -69,8 +69,10 @@ Components.LauncherSurface {
 
             clip: true
             boundsBehavior: Flickable.StopAtBounds
-            // Contiguous rows: no gap between selection bars.
-            spacing: 0
+
+            // Rows are inset cards now, in the style of the battery popup, so
+            // they need air between them instead of butting together.
+            spacing: 4
 
             // One theme per wheel notch. highlightRangeMode below already keeps
             // the current row inside the view, so the view follows the
@@ -103,20 +105,27 @@ Components.LauncherSurface {
                 required property var modelData
                 required property int index
 
-                width: list.width
+                // Inset from the list, which is the whole reason the zoom is
+                // safe: a full-bleed row has nowhere to grow into, so scaling it
+                // up ran it off both edges and the clip shaved it flat. 12px of
+                // gutter against the 6.5px the row gains at 1.03.
+                //
+                // The inset has to come from a transform, not from x. A vertical
+                // ListView positions its delegates itself and assigns x = 0 on
+                // every layout pass, which overwrites an x binding here and
+                // leaves the row narrow but still hugging the left edge, with
+                // its scaled edge and its accent bar clipped away. A Translate
+                // is applied on top of the view's positioning, so it survives.
+                width: list.width - 24
+
+                transform: Translate {
+                    x: 12
+                }
+
                 height: 56
 
-                // Was a full-bleed square bar. The selected row is now a
-                // rounded slab that lifts out of the list; unselected rows stay
-                // square, so the list still reads as a list.
-                radius: row.selected ? Core.Theme.radiusSmall : 0
-
-                Behavior on radius {
-                    NumberAnimation {
-                        duration: Core.Theme.durFast
-                        easing.type: Easing.OutQuint
-                    }
-                }
+                // Always rounded now, like the rows in the battery popup.
+                radius: Core.Theme.radiusRow
 
                 readonly property bool selected: row.index === launcher.selectedIndex
                 readonly property bool isActive: row.modelData.id === Services.ThemeService.activeId
@@ -125,10 +134,10 @@ Components.LauncherSurface {
                 // neighbours.
                 z: row.selected ? 2 : 0
 
-                // Zoom on selection. A row is full width and grows against the
-                // list's clip edge, so it stays modest -- the miniature below
-                // carries the zoom instead.
-                scale: row.selected ? 1.04 : 1.0
+                // Zoom on selection, kept small on purpose: the row is nearly
+                // card-wide, so a few percent is already a lot of travel. The
+                // miniature below carries the rest of it.
+                scale: row.selected ? 1.03 : 1.0
 
                 Behavior on scale {
                     NumberAnimation {
@@ -145,12 +154,38 @@ Components.LauncherSurface {
                     return (value && String(value).length > 0) ? value : fallback;
                 }
 
-                color: row.selected ? Core.Theme.accent : (hover.hovered ? Core.Theme.surfaceHover : "transparent")
+                // Battery-popup selection: a quiet raised surface rather than a
+                // solid accent fill. The accent moves to the bar on the left
+                // and into the text, so the row no longer has to invert
+                // everything sitting on it.
+                color: row.selected ? Core.Theme.surfaceActive : "transparent"
 
                 Behavior on color {
                     ColorAnimation {
                         duration: Core.Theme.durFast
                         easing.type: Easing.OutQuint
+                    }
+                }
+
+                // Selection marker, borrowed from ListRow: a short accent bar
+                // on the left edge that grows out of nothing.
+                Rectangle {
+                    anchors.left: parent.left
+                    anchors.leftMargin: 3
+                    anchors.verticalCenter: parent.verticalCenter
+
+                    width: 3
+                    height: row.selected ? parent.height * 0.5 : 0
+
+                    radius: 2
+
+                    color: Core.Theme.accent
+
+                    Behavior on height {
+                        NumberAnimation {
+                            duration: 150
+                            easing.type: Easing.OutQuint
+                        }
                     }
                 }
 
@@ -178,7 +213,7 @@ Components.LauncherSurface {
                         // pushes forward while the row itself only lifts. It is
                         // also the one part of the row that is a picture, which
                         // is what makes scaling it read as focus.
-                        scale: row.selected ? 1.28 : 1.0
+                        scale: row.selected ? 1.18 : 1.0
 
                         Behavior on scale {
                             NumberAnimation {
@@ -250,7 +285,13 @@ Components.LauncherSurface {
 
                         Text {
                             text: row.modelData.name
-                            color: row.selected ? Core.Theme.accentForeground : Core.Theme.foreground
+
+                            // Not inverted any more: the row keeps its own
+                            // surface, so the label keeps its own colour and
+                            // just gains weight when selected.
+                            color: Core.Theme.foreground
+                            font.weight: row.selected ? Font.DemiBold : Font.Medium
+
                             font.family: Core.Theme.fontMono
                             font.pixelSize: Core.Theme.fontSize
                         }
@@ -258,8 +299,10 @@ Components.LauncherSurface {
                         Text {
                             text: row.isActive ? "active" : row.modelData.id
 
-                            // The "active" marker used to be drawn in the accent colour.
-                            color: row.selected ? Qt.alpha(Core.Theme.accentForeground, row.isActive ? 1.0 : 0.75) : (row.isActive ? Core.Theme.accent : Core.Theme.foregroundFaint)
+                            // Accent for the theme actually applied, muted for
+                            // one merely selected -- the same split the battery
+                            // popup uses on its rows.
+                            color: row.isActive ? Core.Theme.accent : (row.selected ? Core.Theme.foregroundMuted : Core.Theme.foregroundFaint)
                             font.family: Core.Theme.fontMono
                             font.pixelSize: Core.Theme.fontSizeSmall
                         }
@@ -274,6 +317,23 @@ Components.LauncherSurface {
                     anchors.verticalCenter: parent.verticalCenter
 
                     spacing: 4
+
+                    // Applied-theme tick, the same idiom the battery popup uses
+                    // to mark the live power profile.
+                    Text {
+                        anchors.verticalCenter: parent.verticalCenter
+
+                        rightPadding: 4
+
+                        visible: row.isActive
+
+                        text: Core.Icons.checkCircle
+
+                        font.family: Core.Theme.fontFamily
+                        font.pixelSize: Core.Theme.iconSize
+
+                        color: Core.Theme.accent
+                    }
 
                     Repeater {
                         model: ["terminalRed", "terminalYellow", "terminalGreen", "terminalCyan", "terminalBlue", "terminalMagenta"]
@@ -290,18 +350,9 @@ Components.LauncherSurface {
                     }
                 }
 
-                HoverHandler {
-                    id: hover
-
-                    onHoveredChanged: {
-                        // Ignored for a moment after each wheel notch, so a
-                        // list scrolling under a still pointer cannot steal the
-                        // selection back. See wheelActive in LauncherSurface.
-                        if (hovered && !launcher.wheelActive)
-                            launcher.selectedIndex = row.index;
-                    }
-                }
-
+                // Wheel and click only. Hover no longer moves the selection:
+                // with the wheel driving the highlight, a pointer resting over
+                // the list was just fighting it for control.
                 MouseArea {
                     anchors.fill: parent
                     onClicked: {

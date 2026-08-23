@@ -120,18 +120,18 @@ Components.LauncherSurface {
                     // the outer columns would get shaved flat as they scale.
                     anchors.margins: 8
 
-                    // Was square, to match the flat Omarchy chrome. Rounded now
-                    // that the tiles are meant to read as widgets.
-                    radius: Core.Theme.radiusSmall
+                    // Rounded to match the rows in the battery popup.
+                    radius: Core.Theme.radiusRow
 
                     color: Core.Theme.surface
                     clip: true
 
-                    // Zoom on selection -- the caelestia move. The frame itself
-                    // only goes to 1.10, because it grows against the grid's
-                    // clip edge; most of the zoom now lives in the image below,
-                    // which the tile clips anyway and so costs nothing.
-                    scale: cell.selected ? 1.10 : 1.0
+                    // Zoom on selection, now sized so it actually fits. The
+                    // tile is 237px inside a 253px cell, so it can only gain
+                    // 8px per side before the grid's clip shaves it; 1.06 gains
+                    // 7.1. At 1.10 it wanted 11.9 and got cut off, which is the
+                    // same thing that was going wrong in the theme list.
+                    scale: cell.selected ? 1.06 : 1.0
 
                     Behavior on scale {
                         NumberAnimation {
@@ -179,7 +179,7 @@ Components.LauncherSurface {
                         // past the edges of its own tile, so the crop opens up
                         // as you land on it. Two speeds is what separates this
                         // from a tile that simply got bigger.
-                        scale: cell.selected ? 1.22 : 1.0
+                        scale: cell.selected ? 1.16 : 1.0
 
                         Behavior on scale {
                             NumberAnimation {
@@ -216,14 +216,18 @@ Components.LauncherSurface {
 
                             spacing: 6
 
-                            Rectangle {
+                            // Applied-wallpaper tick, matching the marker the
+                            // battery popup puts on the live power profile.
+                            Text {
                                 anchors.verticalCenter: parent.verticalCenter
 
-                                width: 6
-                                height: 6
-                                radius: 3
-
                                 visible: cell.applied
+
+                                text: Core.Icons.checkCircle
+
+                                font.family: Core.Theme.fontFamily
+                                font.pixelSize: Core.Theme.fontSizeSmall + 2
+
                                 color: Core.Theme.accent
                             }
 
@@ -246,15 +250,10 @@ Components.LauncherSurface {
                     anchors.fill: parent
                     z: 3
 
-                    hoverEnabled: true
-
-                    // Ignored for a moment after each wheel notch, so a view
-                    // scrolling under a still pointer cannot steal the
-                    // selection back. See wheelActive in LauncherSurface.
-                    onEntered: {
-                        if (!launcher.wheelActive)
-                            launcher.selectedIndex = cell.index;
-                    }
+                    // Wheel and click only. Hover no longer moves the
+                    // selection: with the wheel driving the highlight, a
+                    // pointer resting over the grid was just fighting it for
+                    // control.
                     onClicked: {
                         launcher.selectedIndex = cell.index;
                         launcher.accepted();

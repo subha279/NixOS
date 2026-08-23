@@ -60,8 +60,21 @@ Components.LauncherSurface {
 
             clip: true
             boundsBehavior: Flickable.StopAtBounds
-            // Contiguous rows: no gap between selection bars.
-            spacing: 0
+
+            // Rows are inset cards now, in the style of the battery popup, so
+            // they need air between them instead of butting together.
+            spacing: 4
+
+            // One app per wheel notch. The wheel moves the SELECTION rather
+            // than flicking the list, so the highlight is what you steer and
+            // the view follows it.
+            interactive: false
+
+            WheelHandler {
+                onWheel: function (event) {
+                    launcher.wheelSelect(event.angleDelta.y);
+                }
+            }
 
             // Keep the selection off the very edge while scrolling.
             highlightRangeMode: ListView.ApplyRange
@@ -86,18 +99,71 @@ Components.LauncherSurface {
 
                 readonly property bool selected: row.index === launcher.selectedIndex
 
-                width: list.width
+                // Inset from the list so the selected row has somewhere to
+                // grow into: a full-bleed row scaled up runs off both edges and
+                // gets shaved flat by the clip.
+                //
+                // The inset has to come from a transform, not from x. A vertical
+                // ListView positions its delegates itself and assigns x = 0 on
+                // every layout pass, which overwrites an x binding here and
+                // leaves the row narrow but still hugging the left edge. A
+                // Translate is applied on top of the view's positioning, so it
+                // survives.
+                width: list.width - 24
+
+                transform: Translate {
+                    x: 12
+                }
+
                 height: 40
 
-                // Omarchy selection: the entire row inverts to a solid accent bar running edge to edge, replacing the rounded pill plus indicator stripe.
-                radius: 0
+                // Rounded and quietly filled, like the rows in the battery
+                // popup, instead of inverting to a solid accent bar.
+                radius: Core.Theme.radiusRow
 
-                color: row.selected ? Core.Theme.accent : (hover.hovered ? Core.Theme.surfaceHover : "transparent")
+                color: row.selected ? Core.Theme.surfaceActive : "transparent"
+
+                // The selected row grows past its slot, so it paints over its
+                // neighbours.
+                z: row.selected ? 2 : 0
+
+                // Zoom on selection: 12px of gutter against 6.5px of growth at
+                // 1.03, so it never reaches the edge.
+                scale: row.selected ? 1.03 : 1.0
+
+                Behavior on scale {
+                    NumberAnimation {
+                        duration: 240
+                        easing.type: Easing.OutQuint
+                    }
+                }
 
                 Behavior on color {
                     ColorAnimation {
                         duration: Core.Theme.durFast
                         easing.type: Easing.OutQuint
+                    }
+                }
+
+                // Selection marker, borrowed from ListRow: a short accent bar
+                // on the left edge that grows out of nothing.
+                Rectangle {
+                    anchors.left: parent.left
+                    anchors.leftMargin: 3
+                    anchors.verticalCenter: parent.verticalCenter
+
+                    width: 3
+                    height: row.selected ? parent.height * 0.5 : 0
+
+                    radius: 2
+
+                    color: Core.Theme.accent
+
+                    Behavior on height {
+                        NumberAnimation {
+                            duration: 150
+                            easing.type: Easing.OutQuint
+                        }
                     }
                 }
 
@@ -129,7 +195,13 @@ Components.LauncherSurface {
 
                         Text {
                             text: row.modelData.name
-                            color: row.selected ? Core.Theme.accentForeground : Core.Theme.foreground
+
+                            // Not inverted any more: the row keeps its own
+                            // surface, so the label keeps its own colour and
+                            // just gains weight when selected.
+                            color: Core.Theme.foreground
+                            font.weight: row.selected ? Font.DemiBold : Font.Medium
+
                             font.family: Core.Theme.fontMono
                             font.pixelSize: Core.Theme.fontSize
                         }
@@ -140,8 +212,9 @@ Components.LauncherSurface {
                             visible: subtitle.length > 0
 
                             text: subtitle
-                            // On an accent-filled row, faint grey would be unreadable, so dim the accent foreground instead.
-                            color: row.selected ? Qt.alpha(Core.Theme.accentForeground, 0.75) : Core.Theme.foregroundFaint
+                            // The row is no longer accent-filled, so the muted
+                            // greys read fine in both states.
+                            color: row.selected ? Core.Theme.foregroundMuted : Core.Theme.foregroundFaint
                             font.family: Core.Theme.fontMono
                             font.pixelSize: Core.Theme.fontSizeSmall
 
@@ -151,16 +224,9 @@ Components.LauncherSurface {
                     }
                 }
 
-                HoverHandler {
-                    id: hover
-
-                    // Syncing hover into the selection keeps mouse and keyboard from disagreeing about what Enter does.
-                    onHoveredChanged: {
-                        if (hovered)
-                            launcher.selectedIndex = row.index;
-                    }
-                }
-
+                // Wheel and click only. Hover no longer moves the selection:
+                // with the wheel driving the highlight, a pointer resting over
+                // the list was just fighting it for control.
                 MouseArea {
                     anchors.fill: parent
                     onClicked: {
