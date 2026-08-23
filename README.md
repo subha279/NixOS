@@ -1,4 +1,4 @@
-#  NixOS — Laptop Configuration
+# NixOS
 
 > A production-oriented, flake-based **NixOS** configuration for a Wayland desktop built around **Hyprland + Quickshell + Stylix**.
 
