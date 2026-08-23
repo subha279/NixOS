@@ -1,6 +1,4 @@
--- ============================================================================
 -- Autocommands
--- ============================================================================
 
 local group = vim.api.nvim_create_augroup("UserAutocmds", {
 	clear = true,
@@ -24,9 +22,7 @@ vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter" }, {
 	end,
 })
 
--- ============================================================================
 -- Highlight yanked text
--- ============================================================================
 
 vim.api.nvim_create_autocmd("TextYankPost", {
 	group = group,
@@ -37,9 +33,7 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 	end,
 })
 
--- ============================================================================
 -- Remove trailing whitespace
--- ============================================================================
 
 vim.api.nvim_create_autocmd("BufWritePre", {
 	group = group,
@@ -52,9 +46,7 @@ vim.api.nvim_create_autocmd("BufWritePre", {
 	end,
 })
 
--- ============================================================================
 -- Remember cursor position
--- ============================================================================
 
 vim.api.nvim_create_autocmd("BufReadPost", {
 	group = group,
@@ -67,9 +59,7 @@ vim.api.nvim_create_autocmd("BufReadPost", {
 	end,
 })
 
--- ============================================================================
 -- Close temporary windows with q
--- ============================================================================
 
 vim.api.nvim_create_autocmd("FileType", {
 	group = group,

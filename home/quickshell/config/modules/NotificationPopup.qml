@@ -7,17 +7,7 @@ import "../core" as Core
 import "../services" as Services
 import "../components" as Components
 
-// ================================================================
 // NotificationPopup
-// ----------------------------------------------------------------
-// The notification center panel.
-//
-//   * Do-not-disturb toggle in the header
-//   * Clear-all button
-//   * Live list with the same rubbery enter / exit motion as the
-//     network and bluetooth panels
-//   * Right-click a notification for Dismiss / Copy / Clear all
-// ================================================================
 
 Components.PopupSurface {
     id: popup
@@ -110,9 +100,7 @@ Components.PopupSurface {
         running: false
     }
 
-    // ============================================================
     // Content
-    // ============================================================
 
     contentComponent: Component {
 
@@ -121,9 +109,7 @@ Components.PopupSurface {
 
             spacing: Core.Theme.spacing
 
-            // --------------------------------------------------------
             // Header
-            // --------------------------------------------------------
 
             Components.PopupHeader {
                 width: body.width
@@ -150,9 +136,7 @@ Components.PopupSurface {
                 ]
             }
 
-            // --------------------------------------------------------
             // Do-not-disturb banner
-            // --------------------------------------------------------
 
             Rectangle {
                 width: body.width
@@ -188,9 +172,7 @@ Components.PopupSurface {
                 }
             }
 
-            // --------------------------------------------------------
             // The list
-            // --------------------------------------------------------
 
             Item {
                 id: listBox
@@ -518,9 +500,7 @@ Components.PopupSurface {
                                     return;
                                 }
 
-                                // Capture values now — the delegate is
-                                // recycled and modelData can change
-                                // before the menu action runs.
+                                // Capture values now — the delegate is recycled and modelData can change before the menu action runs.
                                 const note = noteRow.modelData;
 
                                 const summary = note.summary ? String(note.summary) : "";
@@ -578,9 +558,7 @@ Components.PopupSurface {
                 }
             }
 
-            // --------------------------------------------------------
             // Empty state
-            // --------------------------------------------------------
 
             Item {
                 width: body.width

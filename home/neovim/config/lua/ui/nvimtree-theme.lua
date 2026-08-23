@@ -1,24 +1,8 @@
--- ============================================================================
 -- Aurora NvimTree Theme
--- ============================================================================
---
--- NvimTree-specific highlights only.
---
--- IMPORTANT:
---
--- NvimTree intentionally uses a TRANSPARENT background.
---
--- Hyprland handles the actual blur/transparency.
---
--- Do NOT give NvimTreeNormal a solid background color.
---
--- ============================================================================
 
 local M = {}
 
--- ============================================================================
 -- Theme Loader
--- ============================================================================
 
 local function get_theme()
 	local path = vim.fn.expand("~/.config/aurora/active-theme.lua")
@@ -40,9 +24,7 @@ local function get_theme()
 	return theme
 end
 
--- ============================================================================
 -- Apply NvimTree Theme
--- ============================================================================
 
 function M.setup()
 	local theme = get_theme()
@@ -53,18 +35,7 @@ function M.setup()
 
 	local c = theme.colors
 
-	-- ========================================================================
 	-- Transparent Background
-	-- ========================================================================
-	--
-	-- IMPORTANT:
-	--
-	-- bg = "NONE" allows the compositor to show the blurred background.
-	--
-	-- This is what gives NvimTree the same glass/blur appearance as the
-	-- rest of the Neovim window.
-	--
-	-- ========================================================================
 
 	vim.api.nvim_set_hl(0, "NvimTreeNormal", {
 		fg = c.text,
@@ -86,9 +57,7 @@ function M.setup()
 		bg = "NONE",
 	})
 
-	-- ========================================================================
 	-- Cursor / Selection
-	-- ========================================================================
 
 	vim.api.nvim_set_hl(0, "NvimTreeCursorLine", {
 		bg = c.surfaceHover,
@@ -98,9 +67,7 @@ function M.setup()
 		fg = c.accent,
 	})
 
-	-- ========================================================================
 	-- Files
-	-- ========================================================================
 
 	vim.api.nvim_set_hl(0, "NvimTreeFileName", {
 		fg = c.text,
@@ -118,9 +85,7 @@ function M.setup()
 		bg = "NONE",
 	})
 
-	-- ========================================================================
 	-- Folder Names
-	-- ========================================================================
 
 	vim.api.nvim_set_hl(0, "NvimTreeFolderName", {
 		fg = c.text,
@@ -133,15 +98,7 @@ function M.setup()
 		bold = true,
 	})
 
-	-- ========================================================================
 	-- Folder Icons
-	-- ========================================================================
-	--
-	-- NEVER link these to Directory.
-	--
-	-- They must have their own Aurora colors.
-	--
-	-- ========================================================================
 
 	vim.api.nvim_set_hl(0, "NvimTreeFolderIcon", {
 		fg = c.accent,
@@ -158,9 +115,7 @@ function M.setup()
 		bg = "NONE",
 	})
 
-	-- ========================================================================
 	-- Root Folder
-	-- ========================================================================
 
 	vim.api.nvim_set_hl(0, "NvimTreeRootFolder", {
 		fg = c.accent,
@@ -168,9 +123,7 @@ function M.setup()
 		bold = true,
 	})
 
-	-- ========================================================================
 	-- Git
-	-- ========================================================================
 
 	vim.api.nvim_set_hl(0, "NvimTreeGitNew", {
 		fg = c.success,
@@ -242,9 +195,7 @@ function M.setup()
 		bg = "NONE",
 	})
 
-	-- ========================================================================
 	-- Diagnostics
-	-- ========================================================================
 
 	vim.api.nvim_set_hl(0, "NvimTreeLspDiagnosticsError", {
 		fg = c.error,
@@ -267,8 +218,6 @@ function M.setup()
 	})
 end
 
--- ============================================================================
 -- Return
--- ============================================================================
 
 return M

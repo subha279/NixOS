@@ -4,15 +4,7 @@ import Quickshell
 
 import "../core" as Core
 
-// ================================================================
 // Clock (bar module)
-// ----------------------------------------------------------------
-// This is the one module that is always visible. Everything else
-// in the pill folds away until you hover it.
-//
-// Left click  : open the calendar dropdown
-// Right click : toggle a seconds readout
-// ================================================================
 
 Item {
     id: root

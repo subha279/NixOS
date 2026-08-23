@@ -5,20 +5,7 @@ import "../components" as Components
 import "../core" as Core
 import "../services" as Services
 
-// ============================================================
 // Wallpaper Picker
-// ============================================================
-//
-// Replaces wallpaper.sh, which shelled out to ImageMagick to build
-// a thumbnail cache so Fuzzel could show icons. Here the images are
-// loaded and scaled asynchronously by QML, so there is no cache to
-// build, invalidate or clean up.
-//
-// Opened from Hyprland with:
-//
-//   qs ipc call wallpaper toggle
-//
-// ============================================================
 
 Components.LauncherSurface {
     id: launcher
@@ -38,8 +25,7 @@ Components.LauncherSurface {
 
     counterText: Services.WallpaperService.scanning ? "scanning" : (launcher.query.length === 0 ? launcher.results.length + " wallpapers" : launcher.results.length + " of " + Services.WallpaperService.count)
 
-    // Wallpapers are dropped into ~/Wallpapers by hand, so rescan on
-    // every open rather than trusting a cached list.
+    // Wallpapers are dropped into ~/Wallpapers by hand, so rescan on every open rather than trusting a cached list.
     onDidOpen: Services.WallpaperService.refresh()
 
     onAccepted: {
@@ -110,15 +96,12 @@ Components.LauncherSurface {
                     anchors.margins: 2
 
                     // Square tiles, to match the flat Omarchy chrome.
-                    // This also removes the need for the corner-faking
-                    // overlay that used to sit on top of the image.
                     radius: 0
 
                     color: Core.Theme.surface
                     clip: true
 
-                    // Selection is now shown by border weight rather
-                    // than by scaling the tile: no bounce, no reflow.
+                    // Selection is now shown by border weight rather than by scaling the tile: no bounce, no reflow.
                     border.width: cell.selected ? Core.Theme.borderWidth * 2 : Core.Theme.borderWidth
                     border.color: cell.selected ? Core.Theme.accent : (cell.applied ? Core.Theme.accentMuted : Core.Theme.border)
 

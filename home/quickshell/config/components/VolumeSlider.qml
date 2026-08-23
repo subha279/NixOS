@@ -2,16 +2,7 @@ import QtQuick
 
 import "../core" as Core
 
-// ================================================================
 // VolumeSlider
-// ----------------------------------------------------------------
-// A compact, draggable level bar.
-//
-// The value is NOT written back to itself on drag. The owner is
-// expected to handle `moved(value)` and push the new value into
-// Pipewire, which then flows back down through `value`. That keeps
-// a single source of truth and avoids feedback loops.
-// ================================================================
 
 Item {
     id: root
@@ -83,9 +74,7 @@ Item {
                 }
             }
 
-            // Only spring the width when the change came from
-            // somewhere else. While dragging we want it to track
-            // the pointer exactly, with no lag.
+            // Only spring the width when the change came from somewhere else.
             Behavior on width {
                 enabled: !root.dragging
 

@@ -3,28 +3,12 @@ import Quickshell
 import Quickshell.Wayland
 import "../core" as Core
 
-// ============================================================
 // Launcher Surface
-// ============================================================
-//
-// Shared dmenu chrome: fullscreen scrim, centred card, prompt,
-// search field and keyboard navigation. The three launchers
-// (apps, wallpaper, colorscheme) supply only a content component
-// and a result count.
-//
-// Deliberately NOT built on PopupSurface. That component anchors
-// under the bar and takes OnDemand keyboard focus, which cannot
-// reliably receive typed text. A launcher needs Exclusive focus
-// and its own centred geometry, so it is a separate surface.
-//
-// ============================================================
 
 PanelWindow {
     id: root
 
-    // --------------------------------------------------------
     // API for subclasses
-    // --------------------------------------------------------
 
     property string launcherId: ""
     property string promptIcon: Core.Icons.search
@@ -50,8 +34,7 @@ PanelWindow {
 
     readonly property int targetCardHeight: root.columns > 1 ? root.headerHeight + root.separatorHeight + root.visibleRows * Math.round((root.cardWidth / root.columns) * 0.70) : root.headerHeight + root.separatorHeight + root.visibleRows * root.rowHeight
 
-    // Grid launchers set this so Left/Right and Up/Down move by a
-    // row rather than by one item.
+    // Grid launchers set this so Left/Right and Up/Down move by a row rather than by one item.
     property int columns: 1
 
     property int selectedIndex: 0
@@ -66,12 +49,7 @@ PanelWindow {
 
     readonly property bool open: Core.PopupManager.isOpen(root.launcherId)
 
-    // --------------------------------------------------------
     // Open / close
-    //
-    // PopupManager is the single source of truth, so opening a
-    // launcher closes any bar popup for free.
-    // --------------------------------------------------------
 
     function show() {
         Core.PopupManager.open(root.launcherId, 0, 0);
@@ -115,9 +93,7 @@ PanelWindow {
         }
     }
 
-    // --------------------------------------------------------
     // Surface
-    // --------------------------------------------------------
 
     anchors.top: true
     anchors.bottom: true
@@ -132,9 +108,7 @@ PanelWindow {
 
     exclusionMode: ExclusionMode.Ignore
 
-    // Driving everything from one animated value keeps the close
-    // animation visible: the window stays mapped until reveal
-    // has actually reached zero.
+    // Driving everything from one animated value keeps the close animation visible: the window stays mapped until reveal has actually reached
     property real reveal: root.open ? 1.0 : 0.0
 
     Behavior on reveal {
@@ -146,25 +120,11 @@ PanelWindow {
 
     visible: root.reveal > 0.001
 
-    // --------------------------------------------------------
     // Scrim opacity
-    //
-    // MUST stay below the aurora-launcher layer rule's
-    // ignore_alpha (0.20).
-    //
-    // Hyprland only blurs pixels at or above that alpha. Keeping
-    // the fullscreen scrim underneath it is what stops the blur
-    // from spreading across the whole desktop, while the card
-    // above (glassOpacity 0.80) still gets frosted.
-    //
-    // Raise this above 0.20 and fullscreen blur comes back.
-    // --------------------------------------------------------
 
     readonly property real scrimAlpha: 0.12
 
-    // --------------------------------------------------------
     // Scrim
-    // --------------------------------------------------------
 
     Rectangle {
         anchors.fill: parent
@@ -176,9 +136,7 @@ PanelWindow {
         }
     }
 
-    // --------------------------------------------------------
     // Card
-    // --------------------------------------------------------
 
     Rectangle {
         id: card
@@ -197,12 +155,7 @@ PanelWindow {
                 easing.type: Easing.OutCubic
             }
         }
-        // Omarchy-style chrome: near-square corners, a single
-        // hairline border, no shadow and no bounce on open.
-        //
-        // Still translucent, so the layer-rule blur frosts it.
-        // Because the scrim behind stays under ignore_alpha, this
-        // card remains the only thing Hyprland blurs.
+        // Omarchy-style chrome: near-square corners, a single hairline border, no shadow and no bounce on open.
         radius: Core.Theme.radiusSmall
 
         color: Core.Theme.backgroundGlass
@@ -217,22 +170,13 @@ PanelWindow {
             anchors.fill: parent
         }
 
-        // No horizontal margin and no spacing between children: the
-        // separator and the row selection bars run edge to edge, the
-        // way a dmenu list does. Horizontal padding moves inside each
-        // row instead.
-        //
-        // The bottom margin matches the card radius so the last row
-        // cannot square off the rounded bottom corners (a Rectangle
-        // does not clip its children to its own radius).
+        // No horizontal margin and no spacing between children: the separator and the row selection bars run edge to edge, the way a dmenu list does.
         Column {
             anchors.fill: parent
             anchors.bottomMargin: Core.Theme.radiusSmall
             spacing: 0
 
-            // ------------------------------------------------
             // Header: prompt, counter, input
-            // ------------------------------------------------
 
             Item {
                 id: header
@@ -337,9 +281,7 @@ PanelWindow {
                             return;
                         }
 
-                        // Horizontal arrows only navigate in grids, and
-                        // only at the ends of the text, so editing the
-                        // query still works normally.
+                        // Horizontal arrows only navigate in grids, and only at the ends of the text, so editing the query still works normally.
                         if (root.columns > 1) {
                             if (event.key === Qt.Key_Right && input.cursorPosition >= input.text.length) {
                                 root.move(1);
@@ -357,9 +299,7 @@ PanelWindow {
                 }
             }
 
-            // ------------------------------------------------
             // Separator
-            // ------------------------------------------------
 
             Rectangle {
                 width: parent.width
@@ -367,9 +307,7 @@ PanelWindow {
                 color: Core.Theme.separator
             }
 
-            // ------------------------------------------------
             // Results
-            // ------------------------------------------------
 
             Loader {
                 width: parent.width

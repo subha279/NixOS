@@ -6,20 +6,7 @@ import "../core" as Core
 import "../services" as Services
 import "../components" as Components
 
-// ================================================================
 // BatteryPopup
-// ----------------------------------------------------------------
-// Dropdown for the battery module.
-//
-//   * Big charge gauge with a springy fill bar
-//   * Power profile picker (power-saver / balanced / performance)
-//   * Connected peripherals with their own batteries
-//   * Right-click menus on every row
-//
-// The card height is driven entirely by the content column, so it
-// expands and contracts with a spring exactly like the Wi-Fi and
-// Bluetooth dropdowns.
-// ================================================================
 
 Components.PopupSurface {
     id: popup
@@ -41,9 +28,7 @@ Components.PopupSurface {
 
             spacing: Core.Theme.spacing
 
-            // ====================================================
             // Header
-            // ====================================================
 
             Components.PopupHeader {
                 width: body.width
@@ -79,9 +64,7 @@ Components.PopupSurface {
                 ]
             }
 
-            // ====================================================
             // Big charge gauge
-            // ====================================================
 
             Rectangle {
                 id: gauge
@@ -97,9 +80,7 @@ Components.PopupSurface {
                 border.width: Core.Theme.borderWidth
                 border.color: Core.Theme.border
 
-                // ------------------------------------------------
                 // Percentage + state
-                // ------------------------------------------------
 
                 Text {
                     id: bigIcon
@@ -152,9 +133,7 @@ Components.PopupSurface {
                     color: Core.Theme.foregroundMuted
                 }
 
-                // ------------------------------------------------
                 // Springy fill bar
-                // ------------------------------------------------
 
                 Rectangle {
                     id: barTrack
@@ -234,9 +213,7 @@ Components.PopupSurface {
                     }
                 }
 
-                // ------------------------------------------------
                 // Footnote: health
-                // ------------------------------------------------
 
                 Text {
                     anchors.left: parent.left
@@ -266,9 +243,7 @@ Components.PopupSurface {
                     color: Core.Theme.accent
                 }
 
-                // ------------------------------------------------
                 // Right-click the gauge
-                // ------------------------------------------------
 
                 MouseArea {
                     anchors.fill: parent
@@ -302,9 +277,7 @@ Components.PopupSurface {
                 }
             }
 
-            // ====================================================
             // Power profiles
-            // ====================================================
 
             Text {
                 width: body.width
@@ -387,9 +360,7 @@ Components.PopupSurface {
                 }
             }
 
-            // ====================================================
             // Degradation warning
-            // ====================================================
 
             Rectangle {
                 width: body.width
@@ -420,9 +391,7 @@ Components.PopupSurface {
                 }
             }
 
-            // ====================================================
             // Peripherals
-            // ====================================================
 
             Item {
                 width: body.width
@@ -556,9 +525,7 @@ Components.PopupSurface {
                         }
                     }
 
-                    // ------------------------------------------
                     // Rubbery list transitions
-                    // ------------------------------------------
 
                     add: Transition {
                         NumberAnimation {
@@ -620,9 +587,7 @@ Components.PopupSurface {
                 }
             }
 
-            // ====================================================
             // Empty state
-            // ====================================================
 
             Text {
                 width: body.width
@@ -644,10 +609,7 @@ Components.PopupSurface {
         }
     }
 
-    // ------------------------------------------------------------
     // Clipboard helper (kept on the popup so delegates can reach
-    // it without importing Quickshell themselves)
-    // ------------------------------------------------------------
 
     function copyText(text) {
         try {

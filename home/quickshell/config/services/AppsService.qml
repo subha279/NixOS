@@ -4,24 +4,10 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-// ============================================================
 // Aurora Apps Service
-// ============================================================
 //
 // Application list and ranking for the launcher.
-//
-// Quickshell's DesktopEntries already parses the XDG desktop
-// files, so there is no scanning of /usr/share/applications here.
-// entry.execute() is used to launch, which handles Exec field
-// codes, Terminal=true and DBus activation. Fuzzel did that too;
-// re-implementing it by hand is how launchers break on the one
-// app that uses %U.
-//
-// State:
-//
-//   ~/.cache/aurora/launcher-usage.json   launch counts
-//
-// ============================================================
+// State: ~/.cache/aurora/launcher-usage.json
 
 QtObject {
     id: root
@@ -31,12 +17,7 @@ QtObject {
 
     property var usage: ({})
 
-    // --------------------------------------------------------
     // Frecency
-    //
-    // Not watched: this service is the only writer, so reacting to
-    // our own writes would just cause churn.
-    // --------------------------------------------------------
 
     property FileView usageFile: FileView {
         path: root.usagePath
@@ -63,9 +44,7 @@ QtObject {
         if (!id || id.length === 0)
             return
 
-        // Copy, then mutate, then assign. Mutating in place would
-        // not register as a property change, so anything bound to
-        // usage would not update.
+        // Copy, then mutate, then assign.
         const next = ({})
         const keys = Object.keys(root.usage)
 
@@ -78,9 +57,7 @@ QtObject {
         root.usageFile.setText(JSON.stringify(next))
     }
 
-    // --------------------------------------------------------
     // Entries
-    // --------------------------------------------------------
 
     readonly property var entries: {
         const source = DesktopEntries.applications.values
@@ -91,8 +68,7 @@ QtObject {
             if (!entry)
                 continue
 
-            // NoDisplay entries are things like MIME handlers and
-            // settings panels that are not meant to be launched.
+            // NoDisplay entries are things like MIME handlers and settings panels that are not meant to be launched.
             if (entry.noDisplay === true)
                 continue
 
@@ -120,9 +96,7 @@ QtObject {
 
     readonly property int count: root.entries.length
 
-    // --------------------------------------------------------
     // Matching
-    // --------------------------------------------------------
 
     function subsequence(haystack, needle) {
         let h = 0
@@ -146,10 +120,7 @@ QtObject {
         return true
     }
 
-    // Tiers, strongest first. A word-boundary prefix beats a bare
-    // substring so "code" ranks "Visual Studio Code" above
-    // "Decoder", and subsequence matching is last so it never
-    // outranks a real prefix.
+    // Tiers, strongest first.
     function score(entry, q) {
         const name = entry.name ? entry.name.toLowerCase() : ""
 
@@ -203,8 +174,7 @@ QtObject {
             if (s < 0)
                 continue
 
-            // Frecency is a tie-breaker, capped so a heavily used
-            // app can never leapfrog a genuine prefix match.
+            // Frecency is a tie-breaker, capped so a heavily used app can never leapfrog a genuine prefix match.
             const hits = root.usage[entry.id] || 0
             s += Math.min(50, hits * 6)
 
@@ -225,9 +195,7 @@ QtObject {
         return out
     }
 
-    // --------------------------------------------------------
     // Actions
-    // --------------------------------------------------------
 
     function launch(entry) {
         if (!entry)

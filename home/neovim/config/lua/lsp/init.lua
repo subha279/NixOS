@@ -1,12 +1,8 @@
--- ============================================================================
 -- Aurora Native LSP
--- ============================================================================
 
 local M = {}
 
--- ============================================================================
 -- Aurora Theme
--- ============================================================================
 
 local function get_theme()
 	local path = vim.fn.expand("~/.config/aurora/active-theme.lua")
@@ -42,16 +38,12 @@ local function set_hl(name, opts)
 	vim.api.nvim_set_hl(0, name, opts)
 end
 
--- ============================================================================
 -- LSP Highlights
--- ============================================================================
 
 local function apply_highlights()
 	local c = colors()
 
-	-- ========================================================================
 	-- Floating UI
-	-- ========================================================================
 
 	set_hl("LspFloatNormal", {
 		fg = c.text,
@@ -69,9 +61,7 @@ local function apply_highlights()
 		bold = true,
 	})
 
-	-- ========================================================================
 	-- Signature Help
-	-- ========================================================================
 
 	set_hl("LspSignatureActiveParameter", {
 		fg = c.accent,
@@ -79,9 +69,7 @@ local function apply_highlights()
 		bold = true,
 	})
 
-	-- ========================================================================
 	-- Inlay Hints
-	-- ========================================================================
 
 	set_hl("LspInlayHint", {
 		fg = c.textMuted,
@@ -89,9 +77,7 @@ local function apply_highlights()
 		italic = true,
 	})
 
-	-- ========================================================================
 	-- Code Lens
-	-- ========================================================================
 
 	set_hl("LspCodeLens", {
 		fg = c.textMuted,
@@ -104,9 +90,7 @@ local function apply_highlights()
 		bg = "NONE",
 	})
 
-	-- ========================================================================
 	-- References
-	-- ========================================================================
 
 	set_hl("LspReferenceText", {
 		bg = c.surfaceHover,
@@ -126,9 +110,7 @@ local function apply_highlights()
 		underline = true,
 	})
 
-	-- ========================================================================
 	-- Semantic Tokens
-	-- ========================================================================
 
 	set_hl("@lsp.type.namespace", {
 		fg = c.info,
@@ -195,9 +177,7 @@ local function apply_highlights()
 	})
 end
 
--- ============================================================================
 -- LSP Hover
--- ============================================================================
 
 local function hover()
 	vim.lsp.buf.hover({
@@ -213,9 +193,7 @@ local function hover()
 	})
 end
 
--- ============================================================================
 -- LSP Signature Help
--- ============================================================================
 
 local function signature_help()
 	vim.lsp.buf.signature_help({
@@ -231,14 +209,11 @@ local function signature_help()
 	})
 end
 
--- ============================================================================
 -- Diagnostics
--- ============================================================================
 
 local function configure_diagnostics()
 	vim.diagnostic.config({
-		-- Keep diagnostics native and predictable: no custom panel, header,
-		-- prefix, or forced floating window.
+		-- Keep diagnostics native and predictable: no custom panel, header, prefix, or forced floating window.
 		virtual_text = true,
 		signs = true,
 		underline = true,
@@ -297,9 +272,7 @@ local function configure_diagnostic_lists()
 	end, "Quickfix")
 end
 
--- ============================================================================
 -- Completion Capabilities
--- ============================================================================
 
 local function configure_capabilities()
 	local ok, blink = pcall(require, "blink.cmp")
@@ -308,8 +281,7 @@ local function configure_capabilities()
 		return
 	end
 
-	-- Apply Blink's completion capabilities to every native LSP config,
-	-- including local configs under config/lsp/.
+	-- Apply Blink's completion capabilities to every native LSP config, including local configs under config/lsp/.
 	vim.lsp.config("*", {
 		capabilities = blink.get_lsp_capabilities(),
 	})
@@ -317,9 +289,7 @@ end
 
 configure_capabilities()
 
--- ============================================================================
 -- Server Configuration
--- ============================================================================
 
 vim.lsp.config("lua_ls", {
 	settings = {
@@ -340,8 +310,6 @@ vim.lsp.config("lua_ls", {
 		},
 	},
 })
-
--- ============================================================================
 
 vim.lsp.config("rust_analyzer", {
 	settings = {
@@ -409,8 +377,6 @@ vim.lsp.config("rust_analyzer", {
 	},
 })
 
--- ============================================================================
-
 vim.lsp.config("qmlls", {
 	cmd = { "qmlls" },
 	filetypes = {
@@ -426,9 +392,7 @@ vim.lsp.config("qmlls", {
 	workspace_required = false,
 })
 
--- ============================================================================
 -- Enable Servers
--- ============================================================================
 
 vim.lsp.enable({
 	"lua_ls",
@@ -450,9 +414,7 @@ vim.lsp.enable({
 	"qmlls",
 })
 
--- ============================================================================
 -- LSP Attach
--- ============================================================================
 
 vim.api.nvim_create_autocmd("LspAttach", {
 	callback = function(event)
@@ -474,9 +436,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
 			})
 		end
 
-		-- ======================================================================
 		-- Navigation
-		-- ======================================================================
 
 		map("n", "gd", vim.lsp.buf.definition, "LSP: Definition")
 
@@ -488,25 +448,19 @@ vim.api.nvim_create_autocmd("LspAttach", {
 
 		map("n", "gt", vim.lsp.buf.type_definition, "LSP: Type definition")
 
-		-- ======================================================================
 		-- Documentation
-		-- ======================================================================
 
 		map("n", "K", hover, "LSP: Hover")
 
 		map("n", "<C-k>", signature_help, "LSP: Signature help")
 
-		-- ======================================================================
 		-- Refactoring
-		-- ======================================================================
 
 		map("n", "<leader>lr", vim.lsp.buf.rename, "LSP: Rename")
 
 		map({ "n", "v" }, "<leader>la", vim.lsp.buf.code_action, "LSP: Code action")
 
-		-- ======================================================================
 		-- Diagnostics
-		-- ======================================================================
 
 		map("n", "<leader>ld", vim.diagnostic.open_float, "LSP: Line diagnostics")
 
@@ -522,9 +476,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
 			})
 		end, "Diagnostics: Next")
 
-		-- ======================================================================
 		-- Inlay Hints
-		-- ======================================================================
 
 		if vim.lsp.inlay_hint and client:supports_method("textDocument/inlayHint") then
 			map("n", "<leader>lh", function()
@@ -540,9 +492,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
 	end,
 })
 
--- ============================================================================
 -- Initialize
--- ============================================================================
 
 configure_diagnostic_lists()
 
@@ -550,9 +500,7 @@ configure_diagnostics()
 
 apply_highlights()
 
--- ============================================================================
 -- Live Aurora Theme Refresh
--- ============================================================================
 
 function M.refresh_theme()
 	apply_highlights()

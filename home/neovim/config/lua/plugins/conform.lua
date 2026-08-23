@@ -1,29 +1,8 @@
--- ============================================================================
 -- Aurora Conform
--- ============================================================================
---
--- Formatting engine.
---
--- Conform owns:
---
---   • Formatting
---   • Formatter selection
---   • Manual formatting
---   • Optional format-on-save
---
--- Diagnostics/colors remain owned by:
---
---   • Native LSP
---   • nvim-lint
---   • Aurora theme
---
--- ============================================================================
 
 local M = {}
 
--- ============================================================================
 -- Setup
--- ============================================================================
 
 function M.setup()
 	local ok, conform = pcall(require, "conform")
@@ -35,9 +14,7 @@ function M.setup()
 	end
 
 	conform.setup({
-		-- ======================================================================
 		-- Formatters
-		-- ======================================================================
 
 		formatters_by_ft = {
 			lua = {
@@ -117,9 +94,7 @@ function M.setup()
 			},
 		},
 
-		-- ======================================================================
 		-- Formatting behavior
-		-- ======================================================================
 
 		format_on_save = false,
 
@@ -130,9 +105,7 @@ function M.setup()
 		log_level = vim.log.levels.WARN,
 	})
 
-	-- ========================================================================
 	-- Manual formatting
-	-- ========================================================================
 
 	vim.keymap.set({ "n", "v" }, "<leader>gf", function()
 		conform.format({
@@ -147,18 +120,7 @@ function M.setup()
 	return true
 end
 
--- ============================================================================
 -- Live Aurora Refresh
--- ============================================================================
---
--- Conform itself does not own theme colors.
--- This function exists so the Aurora refresh architecture can safely call:
---
---     require("plugins.conform").refresh_theme()
---
--- without errors.
---
--- ============================================================================
 
 function M.refresh_theme()
 	vim.schedule(function()
@@ -168,15 +130,7 @@ function M.refresh_theme()
 	return true
 end
 
--- ============================================================================
 -- IMPORTANT
--- ============================================================================
---
--- init.lua loads this module directly:
---
---     require("plugins.conform")
---
--- ============================================================================
 
 M.setup()
 

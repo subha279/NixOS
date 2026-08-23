@@ -4,26 +4,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-// ============================================================
 // Aurora Wallpaper Service
-// ============================================================
-//
-// Lists ~/Wallpapers and applies a selection through awww.
-//
-// The old wallpaper.sh pre-rendered ImageMagick thumbnails into a
-// cache so Fuzzel could show icons. QML loads and scales images
-// itself, asynchronously, so that whole pipeline is gone: no
-// thumbnail cache, no ImageMagick dependency, no cache
-// invalidation bugs when a wallpaper is replaced in place.
-//
-// State:
-//
-//   ~/.cache/aurora/current-wallpaper   the applied wallpaper path
-//
-// This is the same file restore-wallpaper.sh reads at login, so the
-// picker and the boot-time restore stay in agreement.
-//
-// ============================================================
 
 QtObject {
     id: root
@@ -36,9 +17,7 @@ QtObject {
     property string error: ""
     property var wallpapers: []
 
-    // --------------------------------------------------------
     // Applied wallpaper
-    // --------------------------------------------------------
 
     property FileView stateFile: FileView {
         path: root.statePath
@@ -56,13 +35,7 @@ QtObject {
         return raw.trim()
     }
 
-    // --------------------------------------------------------
     // Scanning
-    //
-    // find is given the directory as a real argv entry, not
-    // interpolated into the script body, so directory names with
-    // spaces or quotes cannot break the command.
-    // --------------------------------------------------------
 
     property Process scanProcess: Process {
         command: [
@@ -127,9 +100,7 @@ QtObject {
 
     readonly property int count: root.wallpapers.length
 
-    // --------------------------------------------------------
     // Search
-    // --------------------------------------------------------
 
     function search(query) {
         const all = root.wallpapers
@@ -148,13 +119,7 @@ QtObject {
         return out
     }
 
-    // --------------------------------------------------------
     // Actions
-    //
-    // One detached shell call does the set and the state write, so
-    // the cache file is only updated if awww actually succeeded.
-    // The path travels as argv, never as interpolated script text.
-    // --------------------------------------------------------
 
     function apply(path) {
         if (!path || path.length === 0)

@@ -1,77 +1,32 @@
 { pkgs, ... }:
 
 {
-  # ==========================================================================
   # Aurora Hyprland
-  # ==========================================================================
-  #
-  # Hyprland itself consumes the Aurora theme through:
-  #
-  #   ~/.config/aurora/active-theme.lua
-  #
-  # Stylix remains responsible for system-wide GTK/Qt/font/cursor/icon
-  # integration.
-  #
-  # Wallust is NOT part of the theme pipeline.
-  #
-  # ==========================================================================
 
-  # ==========================================================================
   # Polkit Qt Environment Override
-  # ==========================================================================
 
   xdg.configFile."systemd/user/plasma-polkit-agent.service.d/environment.conf".text = ''
     [Service]
     Environment=QT_STYLE_OVERRIDE=
   '';
 
-  # ==========================================================================
   # Hyprland Lua Configuration
-  # ==========================================================================
 
   xdg.configFile."hypr/hyprland.lua".source = ./hyprland.lua;
 
-  # ==========================================================================
   # Hyprland Configuration Modules
-  # ==========================================================================
 
   xdg.configFile."hypr/config".source = ./config;
 
-  # ==========================================================================
   # Wallpaper Scripts
-  # ==========================================================================
-  #
-  # Wallpaper selection is completely independent from theming.
-  #
-  # Selecting a wallpaper:
-  #
-  #   changes the wallpaper
-  #
-  # It does NOT:
-  #
-  #   generate colors
-  #   change Aurora theme
-  #   modify Kitty colors
-  #   modify Neovim colors
-  #   modify QuickShell colors
-  #
-  # ==========================================================================
 
-  # Wallpaper selection itself now lives in Quickshell, in
-  # home/quickshell/config/modules/WallpaperPicker.qml. Only the
-  # boot-time restore hook is still a script, because it has to run
-  # before the shell is up.
+  # Wallpaper selection itself now lives in Quickshell, in home/quickshell/config/modules/WallpaperPicker.qml.
 
   xdg.configFile."hypr/scripts/restore-wallpaper.sh".source = ./scripts/restore-wallpaper.sh;
 
-  # ==========================================================================
   # Aurora Desktop Services
-  # ==========================================================================
 
-  # This repo configures Hyprland by writing config files directly rather
-  # than through the home-manager Hyprland module, so nothing was defining
-  # hyprland-session.target. Everything below hangs off graphical-session.target,
-  # so it has to exist and it has to be bound.
+  # This repo configures Hyprland by writing config files directly rather than through the home-manager Hyprland module, so nothing was
   systemd.user.targets.hyprland-session = {
     Unit = {
       Description = "Hyprland compositor session";
@@ -103,16 +58,13 @@
       ];
     };
 
-    # Previously missing, so the target was only reachable through the
-    # explicit `systemctl --user start` in startup.lua and raced the shell.
+    # Previously missing, so the target was only reachable through the explicit `systemctl --user start` in startup.lua and raced the shell.
     Install = {
       WantedBy = [ "graphical-session.target" ];
     };
   };
 
-  # ==========================================================================
   # Awww Wallpaper Daemon
-  # ==========================================================================
 
   systemd.user.services.awww-daemon = {
     Unit = {

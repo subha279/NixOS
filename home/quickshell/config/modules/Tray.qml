@@ -12,9 +12,7 @@ Item {
     implicitWidth: trayRow.implicitWidth
     implicitHeight: Core.Theme.moduleHeight
 
-    // ============================================================
     // Hidden system tray applications
-    // ============================================================
 
     function isHidden(item) {
         const id = String(item.id || "").toLowerCase();
@@ -39,8 +37,7 @@ Item {
 
                 required property var modelData
 
-                // Hide NetworkManager and Blueman from the
-                // visual tray while keeping their processes alive.
+                // Hide NetworkManager and Blueman from the visual tray while keeping their processes alive.
                 visible: !root.isHidden(modelData)
 
                 implicitWidth: visible ? 26 : 0

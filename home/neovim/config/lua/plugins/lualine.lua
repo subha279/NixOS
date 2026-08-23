@@ -1,20 +1,8 @@
--- ============================================================================
 -- Aurora Lualine
--- ============================================================================
---
--- Responsive • Information-rich • Glass-friendly • Aurora-native
---
--- The layout keeps its essential context in narrow terminals and progressively
--- reveals project, Git, LSP, file, and clock details as more width is available.
--- Theme colors continue to come exclusively from Aurora's active theme.
---
--- ============================================================================
 
 local M = {}
 
--- ============================================================================
 -- Theme
--- ============================================================================
 
 local function get_theme()
 	local path = vim.fn.expand("~/.config/aurora/active-theme.lua")
@@ -39,9 +27,7 @@ local function transparent(foreground)
 	}
 end
 
--- ============================================================================
 -- Responsive helpers
--- ============================================================================
 
 local function columns()
 	return vim.o.columns
@@ -65,9 +51,7 @@ local function truncate(text, maximum)
 	return vim.fn.strcharpart(text, 0, math.max(maximum - 1, 1)) .. "…"
 end
 
--- ============================================================================
 -- Mode capsule
--- ============================================================================
 
 local mode_labels = {
 	normal = { short = "N", long = "NORMAL" },
@@ -139,9 +123,7 @@ local function mode_color()
 	}
 end
 
--- ============================================================================
 -- Context components
--- ============================================================================
 
 local function project_name()
 	local directory = vim.fn.getcwd()
@@ -270,9 +252,7 @@ local function has_diagnostics()
 	return #vim.diagnostic.get(0) > 0
 end
 
--- ============================================================================
 -- Dynamic Aurora theme
--- ============================================================================
 
 local function build_theme()
 	local c = colors()
@@ -305,9 +285,7 @@ local function build_theme()
 	}
 end
 
--- ============================================================================
 -- Configuration
--- ============================================================================
 
 local function build_config()
 	local c = colors()
@@ -535,9 +513,7 @@ local function build_config()
 	}
 end
 
--- ============================================================================
 -- Setup and live theme refresh
--- ============================================================================
 
 function M.setup()
 	local ok, lualine = pcall(require, "lualine")

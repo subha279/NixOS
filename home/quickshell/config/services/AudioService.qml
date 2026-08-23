@@ -8,32 +8,18 @@ import Quickshell.Services.Pipewire
 
 import "../core" as Core
 
-// ================================================================
 // AudioService
-// ----------------------------------------------------------------
-// Thin, defensive wrapper around Quickshell's Pipewire binding.
-//
-// Everything here is exposed as plain JS arrays rather than
-// ListModels. Pipewire nodes are QObjects and storing QObject
-// references inside a ListModel role is unreliable, whereas an
-// array of objects works directly as a ListView / Repeater model
-// and still animates correctly.
-// ================================================================
 
 Singleton {
     id: root
 
-    // ------------------------------------------------------------
     // Defaults
-    // ------------------------------------------------------------
 
     readonly property var sink: Pipewire.defaultAudioSink
 
     readonly property var source: Pipewire.defaultAudioSource
 
-    // Monitor sources are the "listen to what is playing" loopback
-    // devices. They are almost never what somebody wants to pick as
-    // a microphone, so they are hidden unless explicitly asked for.
+    // Monitor sources are the "listen to what is playing" loopback devices.
     property bool showMonitors: false
 
     // Show per-application playback streams in the popup.
@@ -41,9 +27,7 @@ Singleton {
 
     property string lastError: ""
 
-    // ------------------------------------------------------------
     // Node lists
-    // ------------------------------------------------------------
 
     readonly property var allNodes: (Pipewire.nodes && Pipewire.nodes.values) ? Pipewire.nodes.values : []
 
@@ -117,8 +101,7 @@ Singleton {
         return out;
     }
 
-    // Keep the audio properties of everything we display bound and
-    // live. Without a tracker the volume / muted values are stale.
+    // Keep the audio properties of everything we display bound and live.
     readonly property var tracked: {
         const out = [];
 
@@ -135,9 +118,7 @@ Singleton {
         objects: root.tracked
     }
 
-    // ------------------------------------------------------------
     // Derived state for the bar
-    // ------------------------------------------------------------
 
     readonly property real volume: (root.sink && root.sink.audio) ? root.sink.audio.volume : 0
 
@@ -151,16 +132,7 @@ Singleton {
 
     readonly property int micPercent: Math.round(root.micVolume * 100)
 
-    // ------------------------------------------------------------
     // OSD triggers
-    // ------------------------------------------------------------
-    //
-    // These fire for every volume change no matter who caused it,
-    // which is the whole reason they live in the service.
-    //
-    // OsdController ignores calls until it has armed itself, so the
-    // settle from 0 to the real volume at startup does not flash a
-    // readout across the bar.
 
     onVolumeChanged: Core.OsdController.show("volume", root.volume, root.muted)
 
@@ -168,9 +140,7 @@ Singleton {
 
     onMicMutedChanged: Core.OsdController.show("mic", root.micVolume, root.micMuted)
 
-    // ------------------------------------------------------------
     // Icons
-    // ------------------------------------------------------------
 
     readonly property string iconHigh: "\udb81\udd7e"
     readonly property string iconMedium: "\udb81\udd80"
@@ -204,9 +174,7 @@ Singleton {
 
     readonly property string micIcon: (!root.source || root.micMuted) ? root.iconMicOff : root.iconMic
 
-    // ------------------------------------------------------------
     // Helpers
-    // ------------------------------------------------------------
 
     function label(node) {
         if (!node)
@@ -297,12 +265,9 @@ Singleton {
         return Math.round(root.volumeOf(node) * 100);
     }
 
-    // ------------------------------------------------------------
     // Mutations
-    // ------------------------------------------------------------
 
-    // Hard ceiling. Pipewire happily goes past 100% but blowing out
-    // somebody's speakers from a scroll wheel is impolite.
+    // Hard ceiling.
     readonly property real maxVolume: 1.0
 
     function setVolume(node, value) {
@@ -312,8 +277,7 @@ Singleton {
 
         node.audio.volume = clamped;
 
-        // Nudging the slider off zero should unmute, otherwise the
-        // control appears dead.
+        // Nudging the slider off zero should unmute, otherwise the control appears dead.
         if (clamped > 0.0 && node.audio.muted)
             node.audio.muted = false;
     }
@@ -371,9 +335,7 @@ Singleton {
             root.setDefaultSource(node);
     }
 
-    // ------------------------------------------------------------
     // External tools
-    // ------------------------------------------------------------
 
     property Process launcher: Process {
         id: launcherImpl

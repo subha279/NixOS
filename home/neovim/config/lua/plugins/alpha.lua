@@ -1,22 +1,6 @@
--- ============================================================================
 -- Aurora Alpha Dashboard
--- ============================================================================
---
--- This file is loaded directly from init.lua:
---
---     require("plugins.alpha")
---
--- Therefore this is NOT a lazy.nvim plugin specification.
---
--- alpha-nvim itself is installed declaratively through:
---
---     home/neovim/default.nix
---
--- ============================================================================
 
--- ============================================================================
 -- Load Alpha
--- ============================================================================
 
 local ok_alpha, alpha = pcall(require, "alpha")
 
@@ -30,9 +14,7 @@ if not ok_dashboard then
 	return
 end
 
--- ============================================================================
 -- Startup Timer
--- ============================================================================
 
 local function startup_time()
 	if not vim.g.aurora_startup_time then
@@ -48,9 +30,7 @@ local function startup_time()
 	return string.format("󰅐  Ready in %.2f s", elapsed / 1000)
 end
 
--- ============================================================================
 -- Aurora Theme
--- ============================================================================
 
 local theme_file = vim.fn.expand("~/.config/aurora/active-theme.lua")
 
@@ -72,9 +52,7 @@ local function get_theme()
 	return theme
 end
 
--- ============================================================================
 -- Apply Aurora Colors
--- ============================================================================
 
 local function apply_theme()
 	local theme = get_theme()
@@ -104,9 +82,7 @@ local function apply_theme()
 	})
 end
 
--- ============================================================================
 -- NEOVIM ASCII ART
--- ============================================================================
 
 dashboard.section.header.val = {
 
@@ -127,9 +103,7 @@ dashboard.section.header.val = {
 	[[                                                                       ]],
 }
 
--- ============================================================================
 -- Buttons
--- ============================================================================
 
 dashboard.section.buttons.val = {
 
@@ -138,9 +112,7 @@ dashboard.section.buttons.val = {
 	dashboard.button("q", "    Quit NVIM", "<cmd>qa<CR>"),
 }
 
--- ============================================================================
 -- Footer
--- ============================================================================
 
 dashboard.section.footer.val = {
 
@@ -149,9 +121,7 @@ dashboard.section.footer.val = {
 	startup_time(),
 }
 
--- ============================================================================
 -- Highlights
--- ============================================================================
 
 dashboard.section.header.opts.hl = "AlphaHeader"
 
@@ -159,9 +129,7 @@ dashboard.section.buttons.opts.hl = "AlphaButtons"
 
 dashboard.section.footer.opts.hl = "AlphaFooter"
 
--- ============================================================================
 -- Layout
--- ============================================================================
 
 dashboard.opts.layout = {
 
@@ -187,21 +155,15 @@ dashboard.opts.layout = {
 	dashboard.section.footer,
 }
 
--- ============================================================================
 -- Apply Theme
--- ============================================================================
 
 apply_theme()
 
--- ============================================================================
 -- Initialize Alpha
--- ============================================================================
 
 alpha.setup(dashboard.opts)
 
--- ============================================================================
 -- Alpha Buffer
--- ============================================================================
 
 vim.api.nvim_create_autocmd("FileType", {
 	pattern = "alpha",
@@ -209,16 +171,12 @@ vim.api.nvim_create_autocmd("FileType", {
 	callback = function(args)
 		local win = vim.api.nvim_get_current_win()
 
-		-- ------------------------------------------------------------
 		-- Buffer
-		-- ------------------------------------------------------------
 
 		vim.bo[args.buf].buflisted = false
 		vim.bo[args.buf].modifiable = false
 
-		-- ------------------------------------------------------------
 		-- Window
-		-- ------------------------------------------------------------
 
 		vim.wo[win].number = false
 		vim.wo[win].relativenumber = false
@@ -239,9 +197,7 @@ vim.api.nvim_create_autocmd("FileType", {
 	end,
 })
 
--- ============================================================================
 -- Live Aurora Theme Refresh
--- ============================================================================
 
 local timer = vim.uv.new_timer()
 

@@ -5,20 +5,7 @@ import Quickshell
 
 import "../core" as Core
 
-// ================================================================
 // Launchers (bar module)
-// ----------------------------------------------------------------
-// App menu, wallpaper picker and colorscheme picker, on the bar.
-//
-// These buttons only flip PopupManager.current. The launcher
-// surfaces in shell.qml already bind their visibility to it, so the
-// bar needs no reference to them and there is no second code path
-// to keep in sync with the keybinds or the IPC calls.
-//
-// A side effect worth knowing: Bar.qml keeps the pill expanded
-// while PopupManager.current is set, so the bar stays open for as
-// long as a launcher is up.
-// ================================================================
 
 Item {
     id: root
@@ -49,9 +36,7 @@ Item {
         }
     }
 
-    // ------------------------------------------------------------
     // Button
-    // ------------------------------------------------------------
 
     component LauncherButton: Item {
         id: button
@@ -92,8 +77,7 @@ Item {
 
             font.pixelSize: Core.Theme.iconSize
 
-            // Accent while its surface is open, so the bar shows
-            // which launcher you are in.
+            // Accent while its surface is open, so the bar shows which launcher you are in.
             color: button.active ? Core.Theme.accent : Core.Theme.foreground
 
             Behavior on color {

@@ -1,65 +1,6 @@
-#!/usr/bin/env bash
+# !/usr/bin/env bash
 
-# ============================================================================
 # Aurora NixOS Configuration Validator
-# ============================================================================
-#
-# Repository:
-#
-#   NixOS
-#   ├── hosts/
-#   ├── modules/
-#   ├── home/
-#   ├── lib/
-#   └── scripts/
-#
-# Validates:
-#   • Git repository
-#   • Flake evaluation
-#   • Nix syntax
-#   • Required files
-#   • Neovim configuration
-#   • Lua syntax
-#   • Quickshell
-#   • Hyprland
-#   • Desktop dependencies
-#   • Neovim package declarations
-#   • Plugin declarations
-#   • Configuration ownership
-#   • Aurora static theme architecture
-#   • Wallpaper/theme separation
-#   • Generated Aurora configuration
-#   • Hyprland layer rules
-#   • Git working tree
-#
-# Theme architecture:
-#
-#   lib/themes.nix
-#        │
-#        ├── activeTheme
-#        ├── fonts
-#        ├── icons
-#        ├── cursor
-#        ├── UI values
-#        └── colors
-#               │
-#               ├── Stylix
-#               ├── Hyprland
-#               ├── Kitty
-#               ├── QuickShell
-#               ├── Neovim
-#               └── Starship
-#
-# Wallpaper:
-#
-#   Wallpaper is image-only.
-#   It MUST NOT generate colors.
-#
-# Wallust:
-#
-#   Removed from the Aurora theme pipeline.
-#
-# ============================================================================
 
 set -uo pipefail
 
@@ -68,9 +9,7 @@ cd "$ROOT"
 
 FAILED=0
 
-# ============================================================================
 # UI
-# ============================================================================
 
 RESET='\033[0m'
 BOLD='\033[1m'
@@ -108,9 +47,7 @@ separator() {
     printf "${DIM}────────────────────────────────────────────────────────────${RESET}\n"
 }
 
-# ============================================================================
 # Cleanup
-# ============================================================================
 
 cleanup() {
     rm -f \
@@ -122,9 +59,7 @@ cleanup() {
 
 trap cleanup EXIT
 
-# ============================================================================
 # Header
-# ============================================================================
 
 clear 2>/dev/null || true
 
@@ -141,9 +76,7 @@ printf "${DIM}Repository:${RESET} %s\n" "$ROOT"
 printf "${DIM}Branch:${RESET}     %s\n" \
     "$(git branch --show-current 2>/dev/null || printf 'unknown')"
 
-# ============================================================================
 # 1. Repository
-# ============================================================================
 
 section "Repository"
 
@@ -153,9 +86,7 @@ else
     fail "Not inside a Git repository"
 fi
 
-# ============================================================================
 # 2. Flake
-# ============================================================================
 
 section "Flake"
 
@@ -178,9 +109,7 @@ else
 
 fi
 
-# ============================================================================
 # 3. Nix syntax
-# ============================================================================
 
 section "Nix files"
 
@@ -217,9 +146,7 @@ else
 
 fi
 
-# ============================================================================
 # 4. Required files
-# ============================================================================
 
 section "Required files"
 
@@ -264,9 +191,7 @@ for file in "${required_files[@]}"; do
 
 done
 
-# ============================================================================
 # 5. Neovim files
-# ============================================================================
 
 section "Neovim"
 
@@ -296,9 +221,7 @@ for file in "${nvim_files[@]}"; do
 
 done
 
-# ============================================================================
 # 6. Real Neovim configuration
-# ============================================================================
 
 section "Neovim configuration"
 
@@ -330,9 +253,7 @@ else
 
 fi
 
-# ============================================================================
 # 7. Lua
-# ============================================================================
 
 section "Lua"
 
@@ -363,9 +284,7 @@ else
 
 fi
 
-# ============================================================================
 # 8. Quickshell
-# ============================================================================
 
 section "Quickshell"
 
@@ -387,9 +306,7 @@ else
 
 fi
 
-# ============================================================================
 # 9. Hyprland
-# ============================================================================
 
 section "Hyprland"
 
@@ -416,9 +333,7 @@ else
 
 fi
 
-# ============================================================================
 # 10. Desktop dependencies
-# ============================================================================
 
 section "Desktop dependencies"
 
@@ -458,9 +373,7 @@ for cmd in "${desktop_commands[@]}"; do
 
 done
 
-# ============================================================================
 # 11. Neovim declarations
-# ============================================================================
 
 section "Neovim packages"
 
@@ -478,9 +391,7 @@ if [[ -f "$NVIM_CONFIG" ]]; then
 
     fi
 
-    # ------------------------------------------------------------------------
     # Plugins
-    # ------------------------------------------------------------------------
 
     nvim_plugins=(
 
@@ -520,9 +431,7 @@ if [[ -f "$NVIM_CONFIG" ]]; then
 
     done
 
-    # ------------------------------------------------------------------------
     # Development tools
-    # ------------------------------------------------------------------------
 
     nvim_tools=(
 
@@ -563,15 +472,11 @@ else
 
 fi
 
-# ============================================================================
 # 12. Configuration ownership
-# ============================================================================
 
 section "Configuration ownership"
 
-# ---------------------------------------------------------------------------
 # Neovim
-# ---------------------------------------------------------------------------
 
 if grep -q "programs.neovim" \
     "$ROOT/home/neovim/default.nix" 2>/dev/null; then
@@ -584,15 +489,7 @@ else
 
 fi
 
-# ---------------------------------------------------------------------------
 # Launcher
-# ---------------------------------------------------------------------------
-#
-# The launcher, wallpaper picker and colorscheme picker are Quickshell
-# surfaces. Fuzzel is no longer a dependency, so assert both that the
-# package is gone and that the surfaces replacing it are present.
-#
-# ---------------------------------------------------------------------------
 
 if grep -qE '^[[:space:]]*fuzzel[[:space:]]*$' \
     "$ROOT/modules/desktop/applications.nix" 2>/dev/null; then
@@ -633,9 +530,7 @@ for surface in "${launcher_surfaces[@]}"; do
 
 done
 
-# ---------------------------------------------------------------------------
 # Kitty
-# ---------------------------------------------------------------------------
 
 if grep -q "programs.kitty" \
     "$ROOT/home/kitty/default.nix" 2>/dev/null; then
@@ -648,9 +543,7 @@ else
 
 fi
 
-# ---------------------------------------------------------------------------
 # Quickshell
-# ---------------------------------------------------------------------------
 
 if grep -q "quickshell" \
     "$ROOT/home/quickshell/default.nix" 2>/dev/null; then
@@ -663,18 +556,14 @@ else
 
 fi
 
-# ============================================================================
 # 13. Aurora theme architecture
-# ============================================================================
 
 section "Aurora theme"
 
 THEME_CONFIG="$ROOT/lib/themes.nix"
 THEME_GENERATOR="$ROOT/home/theme/default.nix"
 
-# ---------------------------------------------------------------------------
 # Central theme database
-# ---------------------------------------------------------------------------
 
 if [[ -f "$THEME_CONFIG" ]]; then
 
@@ -686,9 +575,7 @@ else
 
 fi
 
-# ---------------------------------------------------------------------------
 # Declarative active theme
-# ---------------------------------------------------------------------------
 
 if grep -qE '^[[:space:]]*activeTheme[[:space:]]*=' \
     "$THEME_CONFIG" 2>/dev/null; then
@@ -701,9 +588,7 @@ else
 
 fi
 
-# ---------------------------------------------------------------------------
 # Theme generator
-# ---------------------------------------------------------------------------
 
 if [[ -f "$THEME_GENERATOR" ]]; then
 
@@ -715,9 +600,7 @@ else
 
 fi
 
-# ---------------------------------------------------------------------------
 # Validate activeTheme using Nix
-# ---------------------------------------------------------------------------
 
 THEME_EVAL="$(
     nix-instantiate \
@@ -742,9 +625,7 @@ else
 
 fi
 
-# ---------------------------------------------------------------------------
 # Required Aurora theme fields
-# ---------------------------------------------------------------------------
 
 theme_fields=(
 
@@ -789,15 +670,11 @@ for field in "${theme_fields[@]}"; do
 
 done
 
-# ============================================================================
 # 14. Central fonts / UI
-# ============================================================================
 
 section "Global typography"
 
-# ---------------------------------------------------------------------------
 # Interface font
-# ---------------------------------------------------------------------------
 
 if grep -qE '^[[:space:]]*interface[[:space:]]*=' \
     "$THEME_CONFIG" 2>/dev/null; then
@@ -810,9 +687,7 @@ else
 
 fi
 
-# ---------------------------------------------------------------------------
 # Terminal font
-# ---------------------------------------------------------------------------
 
 if grep -qE '^[[:space:]]*terminal[[:space:]]*=' \
     "$THEME_CONFIG" 2>/dev/null; then
@@ -825,9 +700,7 @@ else
 
 fi
 
-# ---------------------------------------------------------------------------
 # Emoji font
-# ---------------------------------------------------------------------------
 
 if grep -qE '^[[:space:]]*emoji[[:space:]]*=' \
     "$THEME_CONFIG" 2>/dev/null; then
@@ -840,9 +713,7 @@ else
 
 fi
 
-# ---------------------------------------------------------------------------
 # UI font size
-# ---------------------------------------------------------------------------
 
 if grep -qE '^[[:space:]]*fontSize[[:space:]]*=' \
     "$THEME_CONFIG" 2>/dev/null; then
@@ -855,9 +726,7 @@ else
 
 fi
 
-# ---------------------------------------------------------------------------
 # Detect hard-coded terminal font in Kitty
-# ---------------------------------------------------------------------------
 
 KITTY_CONFIG="$ROOT/home/kitty/config/kitty.conf"
 
@@ -893,18 +762,14 @@ else
 
 fi
 
-# ============================================================================
 # 15. Wallpaper / theme separation
-# ============================================================================
 
 section "Wallpaper / theme separation"
 
 WALLPAPER_SERVICE="$ROOT/home/quickshell/config/services/WallpaperService.qml"
 RESTORE_SCRIPT="$ROOT/home/hyprland/scripts/restore-wallpaper.sh"
 
-# ---------------------------------------------------------------------------
 # Wallpaper picker
-# ---------------------------------------------------------------------------
 
 if grep -qiE \
     'wallust|wallust run|\.cache/wallust|stylix-colors' \
@@ -918,9 +783,7 @@ else
 
 fi
 
-# ---------------------------------------------------------------------------
 # Wallpaper restore
-# ---------------------------------------------------------------------------
 
 if grep -qiE \
     'wallust|wallust run|\.cache/wallust|stylix-colors' \
@@ -934,9 +797,7 @@ else
 
 fi
 
-# ---------------------------------------------------------------------------
 # Wallpaper state location
-# ---------------------------------------------------------------------------
 
 if grep -q '\.cache/aurora/current-wallpaper' \
     "$WALLPAPER_SERVICE" 2>/dev/null; then
@@ -960,9 +821,7 @@ else
 
 fi
 
-# ---------------------------------------------------------------------------
 # Legacy Wallust directory
-# ---------------------------------------------------------------------------
 
 if [[ ! -d "$ROOT/home/hyprland/wallust" ]]; then
 
@@ -974,9 +833,7 @@ else
 
 fi
 
-# ---------------------------------------------------------------------------
 # Legacy generated cache
-# ---------------------------------------------------------------------------
 
 if [[ -d "$HOME/.cache/wallust" ]]; then
 
@@ -988,13 +845,7 @@ else
 
 fi
 
-# ---------------------------------------------------------------------------
 # Repository-wide legacy references
-# ---------------------------------------------------------------------------
-#
-# README/history files are intentionally excluded from this runtime check.
-# The active configuration itself must contain none of these references.
-#
 
 LEGACY_REFS="$(
     grep -RInE \
@@ -1023,9 +874,7 @@ else
 
 fi
 
-# ============================================================================
 # 16. Generated configuration
-# ============================================================================
 
 section "Generated configuration"
 
@@ -1055,9 +904,7 @@ for file in "${generated_files[@]}"; do
 
 done
 
-# ============================================================================
 # 17. Generated theme sanity
-# ============================================================================
 
 section "Generated theme sanity"
 
@@ -1065,9 +912,7 @@ ACTIVE_THEME_LUA="$HOME/.config/aurora/active-theme.lua"
 ACTIVE_KITTY="$HOME/.config/aurora/active-kitty.conf"
 ACTIVE_STARSHIP="$HOME/.config/aurora/active-starship.toml"
 
-# ---------------------------------------------------------------------------
 # active-theme.lua
-# ---------------------------------------------------------------------------
 
 if [[ -f "$ACTIVE_THEME_LUA" ]]; then
 
@@ -1087,9 +932,7 @@ else
 
 fi
 
-# ---------------------------------------------------------------------------
 # Kitty theme
-# ---------------------------------------------------------------------------
 
 if [[ -f "$ACTIVE_KITTY" ]]; then
 
@@ -1110,9 +953,7 @@ else
 
 fi
 
-# ---------------------------------------------------------------------------
 # Starship theme
-# ---------------------------------------------------------------------------
 
 if [[ -f "$ACTIVE_STARSHIP" ]]; then
 
@@ -1124,9 +965,7 @@ else
 
 fi
 
-# ============================================================================
 # 18. Aurora layer rules
-# ============================================================================
 
 section "Aurora layer rules"
 
@@ -1136,12 +975,7 @@ if [[ -f "$LAYER_RULES" ]]; then
 
     ok "Layer rules file exists"
 
-    # Every Wayland namespace declared by a Quickshell surface needs a
-    # matching layer rule.
-    #
-    # The launcher assertion used to grep for "^launcher$", a namespace
-    # LauncherSurface.qml has never declared, so it could never pass.
-    # aurora-popup was not checked at all, and had no rule.
+    # Every Wayland namespace declared by a Quickshell surface needs a matching layer rule.
 
     for ns in aurora-bar aurora-popup aurora-notifications aurora-launcher; do
 
@@ -1164,13 +998,7 @@ else
 
 fi
 
-# ============================================================================
 # 18b. Notification delivery
-# ============================================================================
-#
-# Regression guards for the failure that took notifications down entirely.
-#
-# ============================================================================
 
 section "Notification delivery"
 
@@ -1180,11 +1008,7 @@ NOTIF_MODULE="$ROOT/modules/notifications/default.nix"
 
 if [[ -f "$NOTIF_SERVER" ]]; then
 
-    # services/qmldir registers NotificationServer.qml as a composite type
-    # called NotificationServer. A bare `NotificationServer {}` inside it
-    # therefore resolves to the singleton itself instead of the Quickshell
-    # type, the D-Bus object is never built, and every notification on the
-    # system is dropped in silence. The import must stay aliased.
+    # services/qmldir registers NotificationServer.qml as a composite type called NotificationServer.
 
     if grep -q "import Quickshell.Services.Notifications as "         "$NOTIF_SERVER" 2>/dev/null; then
 
@@ -1252,15 +1076,11 @@ else
 
 fi
 
-# ============================================================================
 # 19. Aurora theme ownership
-# ============================================================================
 
 section "Theme ownership"
 
-# ---------------------------------------------------------------------------
 # Hyprland
-# ---------------------------------------------------------------------------
 
 HYPR_THEME="$ROOT/home/hyprland/config/theme.lua"
 
@@ -1282,9 +1102,7 @@ else
 
 fi
 
-# ---------------------------------------------------------------------------
 # Neovim
-# ---------------------------------------------------------------------------
 
 if grep -Rql \
     'active-theme.lua' \
@@ -1300,9 +1118,7 @@ else
 
 fi
 
-# ---------------------------------------------------------------------------
 # Quickshell
-# ---------------------------------------------------------------------------
 
 QUICKSHELL_ROOT="$ROOT/home/quickshell"
 
@@ -1321,9 +1137,7 @@ else
 
 fi
 
-# ============================================================================
 # 20. Git status
-# ============================================================================
 
 section "Git status"
 
@@ -1341,9 +1155,7 @@ else
 
 fi
 
-# ============================================================================
 # Final result
-# ============================================================================
 
 printf "\n"
 

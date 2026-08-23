@@ -5,17 +5,7 @@ import Quickshell
 import "../core" as Core
 import "../services" as Services
 
-// ================================================================
 // Battery bar module
-// ----------------------------------------------------------------
-// Icon + percentage. Shares the same PopupManager slot system as
-// Network and Bluetooth, so opening this dropdown closes those.
-//
-//   left click    toggle the battery dropdown
-//   right click   open power settings
-//   middle click  cycle power profile
-//   scroll        cycle power profile
-// ================================================================
 
 Item {
     id: root
@@ -44,9 +34,7 @@ Item {
         }
     }
 
-    // ------------------------------------------------------------
     // Critical-battery breathing glow
-    // ------------------------------------------------------------
 
     Rectangle {
         anchors.fill: parent
@@ -107,8 +95,7 @@ Item {
                 }
             }
 
-            // Pop whenever the glyph changes (level crossed,
-            // charger plugged in, etc.)
+            // Pop whenever the glyph changes (level crossed, charger plugged in, etc.)
             onTextChanged: popAnim.restart()
 
             SequentialAnimation {
@@ -151,9 +138,7 @@ Item {
         }
     }
 
-    // ------------------------------------------------------------
     // Interaction
-    // ------------------------------------------------------------
 
     MouseArea {
         id: mouse

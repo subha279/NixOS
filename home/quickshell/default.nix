@@ -1,38 +1,18 @@
 { pkgs, ... }:
 
 {
-  # ==========================================================================
   # Quickshell
-  # ==========================================================================
-  #
-  # Quickshell owns org.freedesktop.Notifications for this session, so it is
-  # the notification daemon for every application on the machine. That makes
-  # its unit ordering load-bearing rather than cosmetic.
-  #
-  # ==========================================================================
 
   home.packages = with pkgs; [
     quickshell
 
-    # notify-send. Needed by scripts, keybinds and anything that wants to
-    # talk to the daemon from a shell.
+    # notify-send.
     libnotify
   ];
 
   xdg.configFile."quickshell".source = ./config;
 
-  # ==========================================================================
   # D-Bus Activation
-  # ==========================================================================
-  #
-  # Without this file nothing owns org.freedesktop.Notifications until the
-  # shell happens to be running. An application that sends a notification
-  # before then gets ServiceUnknown back and, in almost every toolkit, throws
-  # the notification away without telling you.
-  #
-  # With it, the first notification of the session starts the shell instead.
-  #
-  # ==========================================================================
 
   xdg.dataFile."dbus-1/services/org.freedesktop.Notifications.service".text = ''
     [D-BUS Service]
@@ -41,17 +21,33 @@
     SystemdService=quickshell.service
   '';
 
-  # ==========================================================================
+  # Applet notifications
+  #
+  # nm-applet and blueman-applet run only as the NetworkManager secret agent
+  # and the Bluetooth pairing agent. Tray.qml hides their icons and the bar
+  # draws its own indicators, but they still raised their own popups -- which
+  # is why "Wi-Fi off" and "Connection Established" appeared together.
+
+  dconf.settings = {
+    "org/gnome/nm-applet" = {
+      disable-connected-notifications = true;
+      disable-disconnected-notifications = true;
+      disable-vpn-notifications = true;
+      suppress-wireless-networks-available = true;
+    };
+
+    "org/blueman/general" = {
+      plugin-list = [ "!ConnectionNotifier" ];
+    };
+  };
+
   # Service
-  # ==========================================================================
 
   systemd.user.services.quickshell = {
     Unit = {
       Description = "Quickshell desktop shell and notification daemon";
 
-      # Tie the shell to the graphical session. Previously this unit had no
-      # Install section at all, so it was only ever started by hand and never
-      # stopped or restarted with the session.
+      # Tie the shell to the graphical session.
       PartOf = [ "graphical-session.target" ];
 
       After = [

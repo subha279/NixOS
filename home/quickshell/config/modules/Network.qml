@@ -5,17 +5,7 @@ import Quickshell
 import "../core" as Core
 import "../services" as Services
 
-// ================================================================
 // Network bar module
-// ----------------------------------------------------------------
-// ONE icon slot for the whole network stack.
-//
-//   * Ethernet up  -> Ethernet icon
-//   * Wi-Fi up     -> Wi-Fi strength icon
-//   * Nothing up   -> muted "disconnected" icon
-//
-// The two never show at the same time — they cross-fade in place.
-// ================================================================
 
 Item {
     id: root
@@ -29,15 +19,7 @@ Item {
 
     readonly property bool showEthernet: root.link === "ethernet"
 
-    // ------------------------------------------------------------
     // Signal tier, with a deadband
-    // ------------------------------------------------------------
-    //
-    // Raw nmcli strength moves a few points between polls. Testing
-    // it directly against 25/50/75 makes the glyph flip back and
-    // forth whenever the real value sits near a boundary. The tier
-    // only advances once the signal clears the boundary by `dead`,
-    // and only drops once it falls below by the same margin.
 
     property int tier: 3
 
@@ -59,9 +41,7 @@ Item {
         root.tier = t;
     }
 
-    // ------------------------------------------------------------
     // Hover / open background
-    // ------------------------------------------------------------
 
     Rectangle {
         anchors.fill: parent
@@ -77,9 +57,7 @@ Item {
         }
     }
 
-    // ------------------------------------------------------------
     // Ethernet icon
-    // ------------------------------------------------------------
 
     Text {
         anchors.centerIn: parent
@@ -110,9 +88,7 @@ Item {
         }
     }
 
-    // ------------------------------------------------------------
     // Wi-Fi icon
-    // ------------------------------------------------------------
 
     Text {
         anchors.centerIn: parent
@@ -166,9 +142,7 @@ Item {
         }
     }
 
-    // ------------------------------------------------------------
     // Activity dot (connecting / scanning)
-    // ------------------------------------------------------------
 
     Rectangle {
         anchors.top: parent.top
@@ -211,9 +185,7 @@ Item {
         }
     }
 
-    // ------------------------------------------------------------
     // Interaction
-    // ------------------------------------------------------------
 
     MouseArea {
         id: mouse

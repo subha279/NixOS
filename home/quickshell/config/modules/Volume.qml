@@ -5,14 +5,7 @@ import Quickshell
 import "../core" as Core
 import "../services" as Services
 
-// ================================================================
 // Volume (bar module)
-// ----------------------------------------------------------------
-// Left click   : open the audio dropdown
-// Right click  : mute / unmute the output
-// Middle click : mute / unmute the microphone
-// Scroll       : change the output volume
-// ================================================================
 
 Item {
     id: root
@@ -100,8 +93,7 @@ Item {
         }
     }
 
-    // Small badge in the corner while the microphone is muted, so
-    // you can tell at a glance without opening anything.
+    // Small badge in the corner while the microphone is muted, so you can tell at a glance without opening anything.
     Rectangle {
         id: micBadge
 

@@ -1,24 +1,8 @@
--- ============================================================================
 -- Aurora DevIcons Theme
--- ============================================================================
---
--- Dynamic icon colors for:
---
---   • nvim-web-devicons
---   • NvimTree folders
---   • NvimTree git icons
---
--- Source of truth:
---
---   ~/.config/aurora/active-theme.lua
---
--- ============================================================================
 
 local M = {}
 
--- ============================================================================
 -- Theme Loader
--- ============================================================================
 
 local function get_theme()
 	local path = vim.fn.expand("~/.config/aurora/active-theme.lua")
@@ -36,9 +20,7 @@ local function get_theme()
 	return theme
 end
 
--- ============================================================================
 -- Apply
--- ============================================================================
 
 function M.setup()
 	local theme = get_theme()
@@ -49,9 +31,7 @@ function M.setup()
 
 	local c = theme.colors
 
-	-- ========================================================================
 	-- NvimTree Folder Icons
-	-- ========================================================================
 
 	vim.api.nvim_set_hl(0, "NvimTreeFolderIcon", {
 		fg = c.accent,
@@ -65,9 +45,7 @@ function M.setup()
 		fg = c.info,
 	})
 
-	-- ========================================================================
 	-- NvimTree Git Icons
-	-- ========================================================================
 
 	vim.api.nvim_set_hl(0, "NvimTreeGitNewIcon", {
 		fg = c.success,
@@ -97,16 +75,7 @@ function M.setup()
 		fg = c.textMuted,
 	})
 
-	-- ========================================================================
 	-- nvim-web-devicons
-	-- ========================================================================
-	--
-	-- The plugin stores each icon's color in a DevIcon<Name> highlight group.
-	--
-	-- We intentionally recolor the existing groups rather than replacing
-	-- the glyphs themselves.
-	--
-	-- ========================================================================
 
 	local ok, devicons = pcall(require, "nvim-web-devicons")
 
@@ -120,9 +89,7 @@ function M.setup()
 		return
 	end
 
-	-- ========================================================================
 	-- Semantic Aurora icon palette
-	-- ========================================================================
 
 	local palette = {
 		c.accent,
@@ -136,9 +103,7 @@ function M.setup()
 		c.terminalYellow,
 	}
 
-	-- ========================================================================
 	-- Apply colors to every registered icon
-	-- ========================================================================
 
 	local index = 1
 
@@ -167,9 +132,7 @@ function M.setup()
 		end
 	end
 
-	-- ========================================================================
 	-- Important development files
-	-- ========================================================================
 
 	local important = {
 

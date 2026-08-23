@@ -1,57 +1,15 @@
--- ============================================================================
 -- Aurora Dynamic Neovim Theme
--- ============================================================================
---
--- SINGLE SOURCE OF TRUTH:
---
---   ~/NixOS/lib/themes.nix
---
--- Runtime:
---
---   ~/.config/aurora/active-theme.lua
---   ~/.config/aurora/active-theme
---
--- Responsibilities:
---
---   • Core Neovim UI
---   • Vim syntax
---   • Treesitter
---   • LSP semantic tokens
---   • Diagnostics
---   • GitSigns
---   • Blink completion
---   • Telescope
---   • Which-Key
---   • Trouble
---   • Dashboard
---   • DevIcons refresh
---   • NvimTree refresh
---   • Lualine refresh
---   • Live Aurora theme switching
---
--- IMPORTANT:
---
--- We watch `active-theme`, NOT `active-theme.lua`.
---
--- `active-theme.lua` is a symlink and Aurora replaces that symlink
--- when switching themes.
---
--- ============================================================================
 
 local M = {}
 
--- ============================================================================
 -- Paths
--- ============================================================================
 
 local AURORA_DIR = vim.fn.expand("~/.config/aurora")
 
 local ACTIVE_THEME = AURORA_DIR .. "/active-theme"
 local ACTIVE_THEME_LUA = AURORA_DIR .. "/active-theme.lua"
 
--- ============================================================================
 -- Load Active Aurora Theme
--- ============================================================================
 
 local function load_theme()
 	local ok, theme = pcall(dofile, ACTIVE_THEME_LUA)
@@ -71,17 +29,13 @@ local function load_theme()
 	return theme
 end
 
--- ============================================================================
 -- Highlight Helper
--- ============================================================================
 
 local function set(name, opts)
 	vim.api.nvim_set_hl(0, name, opts)
 end
 
--- ============================================================================
 -- Apply Aurora Theme
--- ============================================================================
 
 function M.apply()
 	local theme = load_theme()
@@ -92,9 +46,7 @@ function M.apply()
 
 	local c = theme.colors
 
-	-- ========================================================================
 	-- Editor
-	-- ========================================================================
 
 	set("Normal", {
 		fg = c.text,
@@ -161,9 +113,7 @@ function M.apply()
 		fg = c.background,
 	})
 
-	-- ========================================================================
 	-- Windows / Borders
-	-- ========================================================================
 
 	set("WinSeparator", {
 		fg = c.border,
@@ -193,9 +143,7 @@ function M.apply()
 		bg = c.background,
 	})
 
-	-- ========================================================================
 	-- Search / Selection
-	-- ========================================================================
 
 	set("Visual", {
 		fg = c.text,
@@ -225,18 +173,14 @@ function M.apply()
 		bold = true,
 	})
 
-	-- accentForeground is a near-background tone, so on accentMuted it sat at
-	-- 1.4-2.8:1 depending on theme. Visual/VisualNOS above already use
-	-- c.text on the same background.
+	-- accentForeground is a near-background tone, so on accentMuted it sat at 1.4-2.8:1 depending on theme.
 	set("MatchParen", {
 		fg = c.text,
 		bg = c.accentMuted,
 		bold = true,
 	})
 
-	-- ========================================================================
 	-- Popup Menu
-	-- ========================================================================
 
 	set("Pmenu", {
 		fg = c.text,
@@ -262,9 +206,7 @@ function M.apply()
 		bg = c.surface,
 	})
 
-	-- ========================================================================
 	-- Tabline
-	-- ========================================================================
 
 	set("TabLine", {
 		fg = c.textSecondary,
@@ -282,9 +224,7 @@ function M.apply()
 		bold = true,
 	})
 
-	-- ========================================================================
 	-- Messages
-	-- ========================================================================
 
 	set("ErrorMsg", {
 		fg = c.error,
@@ -310,18 +250,14 @@ function M.apply()
 		bold = true,
 	})
 
-	-- ========================================================================
 	-- Comments
-	-- ========================================================================
 
 	set("Comment", {
 		fg = c.textMuted,
 		italic = true,
 	})
 
-	-- ========================================================================
 	-- Classic Vim Syntax
-	-- ========================================================================
 
 	set("Constant", {
 		fg = c.terminalMagenta,
@@ -448,9 +384,7 @@ function M.apply()
 		bold = true,
 	})
 
-	-- ========================================================================
 	-- Treesitter
-	-- ========================================================================
 
 	set("@comment", {
 		link = "Comment",
@@ -635,9 +569,7 @@ function M.apply()
 		bold = true,
 	})
 
-	-- ========================================================================
 	-- LSP Semantic Tokens
-	-- ========================================================================
 
 	set("@lsp.type.class", {
 		fg = c.terminalBlue,
@@ -683,9 +615,7 @@ function M.apply()
 		fg = c.terminalBlue,
 	})
 
-	-- ========================================================================
 	-- Diagnostics
-	-- ========================================================================
 
 	set("DiagnosticError", {
 		fg = c.error,
@@ -747,9 +677,7 @@ function M.apply()
 		bg = c.backgroundDark,
 	})
 
-	-- ========================================================================
 	-- Diff
-	-- ========================================================================
 
 	set("DiffAdd", {
 		fg = c.success,
@@ -771,9 +699,7 @@ function M.apply()
 		bg = c.accentMuted,
 	})
 
-	-- ========================================================================
 	-- GitSigns
-	-- ========================================================================
 
 	set("GitSignsAdd", {
 		fg = c.success,
@@ -787,9 +713,7 @@ function M.apply()
 		fg = c.error,
 	})
 
-	-- ========================================================================
 	-- Telescope
-	-- ========================================================================
 
 	set("TelescopeNormal", {
 		fg = c.text,
@@ -833,9 +757,7 @@ function M.apply()
 		bold = true,
 	})
 
-	-- ========================================================================
 	-- Which-Key
-	-- ========================================================================
 
 	set("WhichKey", {
 		fg = c.accent,
@@ -857,9 +779,7 @@ function M.apply()
 		bg = c.surface,
 	})
 
-	-- ========================================================================
 	-- Trouble
-	-- ========================================================================
 
 	set("TroubleNormal", {
 		fg = c.text,
@@ -879,9 +799,7 @@ function M.apply()
 		fg = c.textMuted,
 	})
 
-	-- ========================================================================
 	-- Blink Completion
-	-- ========================================================================
 
 	set("BlinkCmpMenu", {
 		fg = c.text,
@@ -922,9 +840,7 @@ function M.apply()
 		bg = c.surface,
 	})
 
-	-- ========================================================================
 	-- Dashboard
-	-- ========================================================================
 
 	set("DashboardHeader", {
 		fg = c.accent,
@@ -942,9 +858,7 @@ function M.apply()
 		fg = c.info,
 	})
 
-	-- ========================================================================
 	-- Generic / Miscellaneous
-	-- ========================================================================
 
 	set("Title", {
 		fg = c.accent,
@@ -968,33 +882,25 @@ function M.apply()
 	})
 end
 
--- ============================================================================
 -- Plugin Refresh
--- ============================================================================
 
 local function refresh_plugins()
 	-- Core theme first.
 	M.apply()
 
-	-- ========================================================================
 	-- DevIcons
-	-- ========================================================================
 
 	pcall(function()
 		require("ui.devicons-theme").setup()
 	end)
 
-	-- ========================================================================
 	-- NvimTree
-	-- ========================================================================
 
 	pcall(function()
 		require("ui.nvimtree-theme").setup()
 	end)
 
-	-- ========================================================================
 	-- Lualine
-	-- ========================================================================
 
 	pcall(function()
 		local lualine = require("plugins.lualine")
@@ -1004,9 +910,7 @@ local function refresh_plugins()
 		end
 	end)
 
-	-- ========================================================================
 	-- Refresh visible NvimTree
-	-- ========================================================================
 
 	pcall(function()
 		local api = require("nvim-tree.api")
@@ -1016,17 +920,13 @@ local function refresh_plugins()
 		end
 	end)
 
-	-- ========================================================================
 	-- Final redraw
-	-- ========================================================================
 
 	vim.cmd("redraw!")
 	vim.cmd("redrawstatus!")
 end
 
--- ============================================================================
 -- Active Theme Reader
--- ============================================================================
 
 local last_theme = nil
 
@@ -1044,9 +944,7 @@ local function get_active_theme()
 	return value
 end
 
--- ============================================================================
 -- Live Theme Watcher
--- ============================================================================
 
 local function check_for_theme_change()
 	local current = get_active_theme()
@@ -1070,15 +968,12 @@ local function check_for_theme_change()
 	last_theme = current
 
 	-- Aurora changes the regular theme file and the symlink.
-	-- Give the filesystem a moment to settle.
 	vim.defer_fn(function()
 		refresh_plugins()
 	end, 100)
 end
 
--- ============================================================================
 -- Polling Timer
--- ============================================================================
 
 local timer = vim.uv.new_timer()
 
@@ -1086,16 +981,12 @@ if timer then
 	timer:start(500, 500, vim.schedule_wrap(check_for_theme_change))
 end
 
--- ============================================================================
 -- Initial Apply
--- ============================================================================
 
 vim.defer_fn(function()
 	refresh_plugins()
 end, 100)
 
--- ============================================================================
 -- Return
--- ============================================================================
 
 return M

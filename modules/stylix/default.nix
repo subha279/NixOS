@@ -2,9 +2,7 @@
 
 let
 
-  # ==========================================================================
   # Aurora Theme Source
-  # ==========================================================================
 
   themeData = import ../../lib/themes.nix;
 
@@ -14,30 +12,15 @@ let
 
   global = themeData.global;
 
-  # ==========================================================================
   # Helpers
-  # ==========================================================================
 
   # themes.nix stores colors as "#RRGGBB"; base16 wants them bare.
   hex = lib.removePrefix "#";
 
   # Resolve DOTTED package paths such as "maple-mono.truetype".
-  #
-  # builtins.getAttr cannot do this: it looks for a single attribute
-  # literally named "maple-mono.truetype" and fails to evaluate.
   pkgFromPath = path: lib.getAttrFromPath (lib.splitString "." path) pkgs;
 
-  # ==========================================================================
   # Polarity Detection
-  # ==========================================================================
-  #
-  # Derived from the active theme's background so the light themes
-  # (catppuccin-latte, solarized-light, gruvbox-light) automatically get
-  # light GTK / Qt variants instead of dark ones.
-  #
-  # The fromTOML trick is the standard way to parse hex in pure Nix.
-  #
-  # ==========================================================================
 
   hexToInt = s: (builtins.fromTOML "v = 0x${s}").v;
 
@@ -54,9 +37,7 @@ let
 
   isLight = bgBrightness > 127;
 
-  # ==========================================================================
   # Central Fonts
-  # ==========================================================================
 
   interfaceFont = pkgFromPath global.fonts.interface.package;
 
@@ -64,20 +45,15 @@ let
 
   emojiFont = pkgFromPath global.fonts.emoji.package;
 
-  # ==========================================================================
   # Central Cursor
-  # ==========================================================================
 
   cursorPackage = pkgFromPath global.cursor.package;
 
-  # ==========================================================================
   # Central Icons
-  # ==========================================================================
 
   iconPackage = pkgFromPath global.icons.package;
 
   # Colloid-Dark -> Colloid-Light for light polarity.
-  # Falls through unchanged if the name has no "-Dark" suffix.
   iconNameLight = lib.replaceStrings [ "-Dark" ] [ "-Light" ] global.icons.name;
 
   iconNameDark = global.icons.name;
@@ -86,40 +62,17 @@ in
 {
   stylix = {
 
-    # ========================================================================
     # Core
-    # ========================================================================
 
     enable = true;
 
     # Aurora explicitly owns application-specific theming.
-    # Stylix remains responsible for system desktop integration.
     autoEnable = false;
 
     # Derived, not hardcoded. See Polarity Detection above.
     polarity = if isLight then "light" else "dark";
 
-    # ========================================================================
     # STATIC AURORA COLOR SOURCE
-    # ========================================================================
-    #
-    # IMPORTANT:
-    #
-    # No wallpaper image is supplied to Stylix.
-    # No Wallust integration exists.
-    #
-    # Colors come exclusively from lib/themes.nix.
-    #
-    # base16 slot meanings that matter here:
-    #
-    #   base03  comments, invisibles, line highlighting
-    #   base04  dark foreground, status bars
-    #   base05  default foreground
-    #   base09  integers, constants (orange slot)
-    #   base0A  classes, search highlight (yellow slot)
-    #   base0F  deprecated, embedded tags
-    #
-    # ========================================================================
 
     base16Scheme = {
 
@@ -135,9 +88,7 @@ in
 
       base04 = hex colors.textSecondary; # was textMuted -> ramp was shifted
       base05 = hex colors.text;
-      # base06/base07 are the bright end of the foreground ramp. Pointing all
-      # three at `text` flattened it, so anything asking for a brighter
-      # foreground got the normal one.
+      # base06/base07 are the bright end of the foreground ramp.
       base06 = hex colors.terminalWhite;
       base07 = hex colors.terminalBrightWhite;
 
@@ -153,9 +104,7 @@ in
       base0F = hex colors.terminalMagenta; # was accentMuted -> near-background
     };
 
-    # ========================================================================
     # FONTS
-    # ========================================================================
 
     fonts = {
 
@@ -187,9 +136,7 @@ in
       };
     };
 
-    # ========================================================================
     # CURSOR
-    # ========================================================================
 
     cursor = {
       package = cursorPackage;
@@ -197,9 +144,7 @@ in
       size = global.cursor.size;
     };
 
-    # ========================================================================
     # ICON THEME
-    # ========================================================================
 
     icons = {
       enable = true;

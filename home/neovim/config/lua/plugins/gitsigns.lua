@@ -1,32 +1,8 @@
--- ============================================================================
 -- Aurora Gitsigns
--- ============================================================================
---
--- Minimal • Git-aware • Aurora-native
---
--- Theme source:
---
---     ~/.config/aurora/active-theme.lua
---
--- Features:
---
---   • Aurora dynamic colors
---   • Git signs
---   • Hunk navigation
---   • Preview
---   • Blame
---   • Diff
---   • Reset
---   • Stage
---   • Live theme refresh
---
--- ============================================================================
 
 local M = {}
 
--- ============================================================================
 -- Theme
--- ============================================================================
 
 local function get_theme()
 	local path = vim.fn.expand("~/.config/aurora/active-theme.lua")
@@ -58,9 +34,7 @@ local function colors()
 	return {}
 end
 
--- ============================================================================
 -- Highlights
--- ============================================================================
 
 local function apply_highlights()
 	local c = colors()
@@ -131,9 +105,7 @@ local function apply_highlights()
 	})
 end
 
--- ============================================================================
 -- Setup
--- ============================================================================
 
 function M.setup()
 	local ok, gitsigns = pcall(require, "gitsigns")
@@ -221,16 +193,12 @@ function M.setup()
 				})
 			end
 
-			-- ================================================================
 			-- Hunk navigation
-			-- ================================================================
 
 			map("n", "]g", gs.next_hunk, "Git: Next hunk")
 			map("n", "[g", gs.prev_hunk, "Git: Previous hunk")
 
-			-- ================================================================
 			-- Hunk actions
-			-- ================================================================
 
 			map("n", "<leader>gh", gs.preview_hunk, "Git: Preview hunk")
 
@@ -242,9 +210,7 @@ function M.setup()
 
 			map("n", "<leader>gS", gs.stage_hunk, "Git: Stage hunk")
 
-			-- ================================================================
 			-- Visual stage
-			-- ================================================================
 
 			map("v", "<leader>gS", function()
 				local start = vim.fn.line("v")
@@ -260,9 +226,7 @@ function M.setup()
 				})
 			end, "Git: Stage selection")
 
-			-- ================================================================
 			-- Buffer actions
-			-- ================================================================
 
 			map("n", "<leader>gR", gs.reset_buffer, "Git: Reset buffer")
 
@@ -277,9 +241,7 @@ function M.setup()
 	return true
 end
 
--- ============================================================================
 -- Live Aurora Theme Refresh
--- ============================================================================
 
 function M.refresh_theme()
 	apply_highlights()
@@ -299,8 +261,6 @@ function M.refresh_theme()
 	return true
 end
 
--- ============================================================================
 -- Return
--- ============================================================================
 
 return M

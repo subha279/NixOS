@@ -1,33 +1,13 @@
 { lib, ... }:
 
 let
-  # ============================================================
   # CENTRAL THEME DATABASE
-  # ============================================================
-  #
-  # SINGLE SOURCE OF TRUTH:
-  #
-  #   ~/NixOS/lib/themes.nix
-  #
-  # Every generated application theme comes from this file.
-  #
-  # ============================================================
 
   themeData = import ../../lib/themes.nix;
 
   themeNames = builtins.attrNames themeData.themes;
 
-  # ============================================================
   # LUA THEME GENERATOR
-  # ============================================================
-  #
-  # Used by:
-  #
-  #   Hyprland
-  #   Neovim
-  #   Other Lua applications
-  #
-  # ============================================================
 
   themeToLua =
     themeId:
@@ -126,15 +106,7 @@ let
       }
     '';
 
-  # ============================================================
   # QUICKSHELL JSON THEME GENERATOR
-  # ============================================================
-  #
-  # Used by:
-  #
-  #   QuickShell
-  #
-  # ============================================================
 
   themeToJson =
     themeId:
@@ -156,15 +128,7 @@ let
       ui = themeData.global.ui;
     };
 
-  # ============================================================
   # KITTY THEME GENERATOR
-  # ============================================================
-  #
-  # Used by:
-  #
-  #   Kitty
-  #
-  # ============================================================
 
   themeToKitty =
     themeId:
@@ -257,20 +221,7 @@ let
       transparent_background_colors ${colors.background}
     '';
 
-  # ============================================================
   # STARSHIP THEME GENERATOR
-  # ============================================================
-  #
-  # Used by:
-  #
-  #   Starship
-  #
-  # The prompt structure is kept compatible with the existing
-  # Aurora Starship configuration.
-  #
-  # Only the palette is generated from lib/themes.nix.
-  #
-  # ============================================================
 
   themeToStarship =
     themeId:
@@ -808,47 +759,31 @@ let
       vimcmd_visual_symbol = "[➜](bold purple)"
     '';
 
-  # ============================================================
   # GENERATE LUA FILES
-  # ============================================================
 
   luaThemeFiles = lib.genAttrs themeNames (themeId: {
     text = themeToLua themeId;
   });
 
-  # ============================================================
   # GENERATE JSON FILES
-  # ============================================================
 
   jsonThemeFiles = lib.genAttrs themeNames (themeId: {
     text = themeToJson themeId;
   });
 
-  # ============================================================
   # GENERATE KITTY FILES
-  # ============================================================
 
   kittyThemeFiles = lib.genAttrs themeNames (themeId: {
     text = themeToKitty themeId;
   });
 
-  # ============================================================
   # GENERATE STARSHIP FILES
-  # ============================================================
 
   starshipThemeFiles = lib.genAttrs themeNames (themeId: {
     text = themeToStarship themeId;
   });
 
-  # ============================================================
   # THEME LIST
-  # ============================================================
-  #
-  # Format:
-  #
-  #   internal-id<TAB>display-name
-  #
-  # ============================================================
 
   themeList = builtins.concatStringsSep "\n" (
     map (
@@ -860,9 +795,7 @@ let
     ) themeNames
   );
 
-  # ============================================================
   # HOME MANAGER GENERATED FILES
-  # ============================================================
 
   generatedLuaFiles = lib.mapAttrs' (
     themeId: file: lib.nameValuePair "aurora/themes/${themeId}.lua" file
@@ -882,30 +815,7 @@ let
 
 in
 {
-  # ============================================================
   # STYLIX DESKTOP INTEGRATION
-  # ============================================================
-  #
-  # Aurora controls application colors.
-  # Stylix handles desktop integration (GTK / Qt / Fontconfig).
-  #
-  # These look like duplicates of the targets in
-  # modules/stylix/default.nix. They are NOT.
-  #
-  # Stylix exposes a separate `targets` option at each level:
-  #
-  #   modules/stylix   NixOS level  -> system-wide theming
-  #   here             home-manager -> ~/.config/gtk-3.0,
-  #                                    gtk-4.0, qt5ct/qt6ct,
-  #                                    dconf, fontconfig
-  #
-  # modules/stylix sets autoEnable = false, which propagates
-  # down, so every home-manager target defaults to OFF. These
-  # three lines are the only thing theming your GTK and Qt
-  # applications. Deleting them leaves Thunar and friends on
-  # stock Adwaita.
-  #
-  # ============================================================
 
   stylix.targets.gtk.enable = true;
 
@@ -913,20 +823,14 @@ in
 
   stylix.targets.fontconfig.enable = true;
 
-  # ============================================================
   # GENERATED AURORA THEME DATABASE
-  # ============================================================
 
   xdg.configFile = {
-    # --------------------------------------------------------
     # Complete Aurora database
-    # --------------------------------------------------------
 
     "aurora/themes.json".text = builtins.toJSON themeData;
 
-    # --------------------------------------------------------
     # Theme list, read by the Quickshell colorscheme picker
-    # --------------------------------------------------------
 
     "aurora/themes.list".text = themeList + "\n";
 
@@ -937,22 +841,7 @@ in
   // generatedKittyFiles
   // generatedStarshipFiles;
 
-  # ============================================================
   # RUNTIME THEME INITIALIZATION
-  # ============================================================
-  #
-  # Creates:
-  #
-  #   active-theme
-  #   active-theme.lua
-  #   active-kitty.conf
-  #   active-starship.toml
-  #
-  # Runtime state is intentionally NOT managed declaratively.
-  #
-  # This allows aurora-theme to switch themes without a rebuild.
-  #
-  # ============================================================
 
   home.activation.initializeAuroraTheme = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     theme_dir="$HOME/.config/aurora"
@@ -1048,22 +937,7 @@ in
     fi
   '';
 
-  # ============================================================
   # AURORA THEME SWITCHER
-  # ============================================================
-  #
-  # Usage:
-  #
-  #   aurora-theme aurora
-  #   aurora-theme gruvbox
-  #   aurora-theme tokyo-night
-  #
-  # This command is non-interactive. For a picker, open the
-  # Quickshell colorscheme surface:
-  #
-  #   qs ipc call theme toggle
-  #
-  # ============================================================
 
   home.file.".local/bin/aurora-theme" = {
     executable = true;

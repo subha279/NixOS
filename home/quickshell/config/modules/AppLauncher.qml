@@ -5,17 +5,7 @@ import "../components" as Components
 import "../core" as Core
 import "../services" as Services
 
-// ============================================================
 // Application Launcher
-// ============================================================
-//
-// Replaces the Fuzzel application mode.
-//
-// Opened from Hyprland with:
-//
-//   qs ipc call launcher toggle
-//
-// ============================================================
 
 Components.LauncherSurface {
     id: launcher
@@ -40,8 +30,7 @@ Components.LauncherSurface {
         if (!entry)
             return;
 
-        // Dismiss first: otherwise the closing surface and the new
-        // window race for keyboard focus.
+        // Dismiss first: otherwise the closing surface and the new window race for keyboard focus.
         launcher.dismiss();
         Services.AppsService.launch(entry);
     }
@@ -100,9 +89,7 @@ Components.LauncherSurface {
                 width: list.width
                 height: 40
 
-                // Omarchy selection: the entire row inverts to a solid
-                // accent bar running edge to edge, replacing the
-                // rounded pill plus indicator stripe.
+                // Omarchy selection: the entire row inverts to a solid accent bar running edge to edge, replacing the rounded pill plus indicator stripe.
                 radius: 0
 
                 color: row.selected ? Core.Theme.accent : (hover.hovered ? Core.Theme.surfaceHover : "transparent")
@@ -152,9 +139,7 @@ Components.LauncherSurface {
                             visible: subtitle.length > 0
 
                             text: subtitle
-                            // On an accent-filled row, faint grey would
-                            // be unreadable, so dim the accent
-                            // foreground instead.
+                            // On an accent-filled row, faint grey would be unreadable, so dim the accent foreground instead.
                             color: row.selected ? Qt.alpha(Core.Theme.accentForeground, 0.75) : Core.Theme.foregroundFaint
                             font.family: Core.Theme.fontMono
                             font.pixelSize: Core.Theme.fontSizeSmall
@@ -168,8 +153,7 @@ Components.LauncherSurface {
                 HoverHandler {
                     id: hover
 
-                    // Syncing hover into the selection keeps mouse and
-                    // keyboard from disagreeing about what Enter does.
+                    // Syncing hover into the selection keeps mouse and keyboard from disagreeing about what Enter does.
                     onHoveredChanged: {
                         if (hovered)
                             launcher.selectedIndex = row.index;

@@ -1,15 +1,7 @@
 { pkgs, ... }:
 
 {
-  # ==========================================================================
   # XDG
-  # ==========================================================================
-  #
-  # Consolidated. These options used to be split across three files
-  # (modules/xdg, modules/session/xdg.nix, modules/session/mime.nix) which all
-  # wrote into the same `xdg.*` tree.
-  #
-  # ==========================================================================
 
   xdg = {
     portal = {
@@ -29,9 +21,7 @@
 
     menus.enable = true;
 
-    # ------------------------------------------------------------------------
     # Default Applications
-    # ------------------------------------------------------------------------
 
     mime.defaultApplications =
       let

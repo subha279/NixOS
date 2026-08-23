@@ -2,15 +2,7 @@ pragma Singleton
 
 import QtQuick
 
-// ================================================================
 // PopupManager
-// ----------------------------------------------------------------
-// Single source of truth for "which bar popup is open".
-//
-// Because only ONE id can ever be current, opening the Wi-Fi menu
-// automatically closes the Bluetooth menu (and vice versa) with a
-// proper exit animation — no manual bookkeeping in the modules.
-// ================================================================
 
 QtObject {
     id: root
@@ -22,13 +14,10 @@ QtObject {
     property real anchorCenter: 0
     property real anchorBottom: 0
 
-    // A nested context menu is open somewhere (used to keep the
-    // parent popup from closing on outside-click pass-through)
+    // A nested context menu is open somewhere (used to keep the parent popup from closing on outside-click pass-through)
     property bool contextMenuOpen: false
 
-    // Do-not-disturb. Lives here so the bar module and the
-    // notification panel (which are in different windows and can't
-    // see each other's ids) share one flag.
+    // Do-not-disturb.
     property bool dnd: false
 
     function isOpen(id) {

@@ -2,12 +2,7 @@ import QtQuick
 
 import "../core" as Core
 
-// ================================================================
 // PopupHeader
-// ----------------------------------------------------------------
-// Title + subtitle on the left, a row of round action buttons on
-// the right, plus an optional pill-style toggle switch.
-// ================================================================
 
 Item {
     id: root
@@ -142,9 +137,7 @@ Item {
             }
         }
 
-        // --------------------------------------------------------
         // Toggle switch
-        // --------------------------------------------------------
 
         Item {
             visible: root.showToggle

@@ -6,15 +6,7 @@ import Quickshell
 import "../core" as Core
 import "../services" as Services
 
-// ================================================================
 // Brightness (bar module)
-// ----------------------------------------------------------------
-// Pure view. The brightnessctl process, the poll and the level all
-// moved to services/BrightnessService.qml so the OSD can observe
-// brightness without the bar module having to be alive.
-//
-// Behaviour is unchanged: wheel or click steps by 5%.
-// ================================================================
 
 Item {
     id: root
@@ -44,8 +36,7 @@ Item {
         spacing: 5
 
         Text {
-            // Ramps with the level instead of showing the same sun
-            // at 5% and at 100%.
+            // Ramps with the level instead of showing the same sun at 5% and at 100%.
             text: Core.Icons.forBrightness(Services.BrightnessService.fraction)
 
             font.family: Core.Theme.fontFamily

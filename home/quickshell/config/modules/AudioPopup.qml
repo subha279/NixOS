@@ -6,12 +6,7 @@ import "../core" as Core
 import "../services" as Services
 import "../components" as Components
 
-// ================================================================
 // AudioPopup
-// ----------------------------------------------------------------
-// Output volume, microphone volume, device pickers for both, and
-// a per-application mixer.
-// ================================================================
 
 Components.PopupSurface {
     id: popup
@@ -23,8 +18,7 @@ Components.PopupSurface {
 
     readonly property var svc: Services.AudioService
 
-    // Collapsible sections, so the card stays short by default and
-    // springs open when you actually want to switch devices.
+    // Collapsible sections, so the card stays short by default and springs open when you actually want to switch devices.
     property bool showOutputs: false
     property bool showInputs: false
 
@@ -80,9 +74,7 @@ Components.PopupSurface {
 
             spacing: Core.Theme.spacing
 
-            // --------------------------------------------------------
             // Header
-            // --------------------------------------------------------
 
             Components.PopupHeader {
                 width: parent.width
@@ -109,9 +101,7 @@ Components.PopupSurface {
                 color: Core.Theme.separator
             }
 
-            // --------------------------------------------------------
             // Output level
-            // --------------------------------------------------------
 
             Rectangle {
                 id: outputCard
@@ -203,9 +193,7 @@ Components.PopupSurface {
                 }
             }
 
-            // --------------------------------------------------------
             // Output device picker
-            // --------------------------------------------------------
 
             Item {
                 width: parent.width
@@ -330,9 +318,7 @@ Components.PopupSurface {
                 }
             }
 
-            // --------------------------------------------------------
             // Microphone level
-            // --------------------------------------------------------
 
             Rectangle {
                 width: parent.width
@@ -431,9 +417,7 @@ Components.PopupSurface {
                 }
             }
 
-            // --------------------------------------------------------
             // Input device picker
-            // --------------------------------------------------------
 
             Item {
                 width: parent.width
@@ -568,9 +552,7 @@ Components.PopupSurface {
                 }
             }
 
-            // --------------------------------------------------------
             // Per-application mixer
-            // --------------------------------------------------------
 
             Item {
                 width: parent.width
@@ -682,9 +664,7 @@ Components.PopupSurface {
                 }
             }
 
-            // --------------------------------------------------------
             // Empty state
-            // --------------------------------------------------------
 
             Item {
                 width: parent.width

@@ -2,18 +2,7 @@ import QtQuick
 
 import "../core" as Core
 
-// ================================================================
 // BarOsd
-// ----------------------------------------------------------------
-// The readout the bar shows while it is acting as an OSD. It sits
-// in the same slot as the module row and only one of the two is
-// ever visible.
-//
-// Every part has a FIXED width. The pill sizes itself from this
-// item, so a label that grew from "9%" to "100%" would make the
-// whole bar jitter mid-drag. Fixed widths mean the pill takes one
-// shape when the OSD appears and holds it until it leaves.
-// ================================================================
 
 Item {
     id: root
@@ -27,9 +16,7 @@ Item {
     implicitWidth: row.implicitWidth
     implicitHeight: Core.Theme.moduleHeight
 
-    // ------------------------------------------------------------
     // Colour + glyph per kind
-    // ------------------------------------------------------------
 
     readonly property color tint: root.muted ? Core.Theme.danger : Core.Theme.accent
 
@@ -59,9 +46,7 @@ Item {
 
         spacing: 8
 
-        // --------------------------------------------------------
         // Icon
-        // --------------------------------------------------------
 
         Text {
             width: 20
@@ -84,9 +69,7 @@ Item {
             }
         }
 
-        // --------------------------------------------------------
         // Track
-        // --------------------------------------------------------
 
         Rectangle {
             id: track
@@ -113,9 +96,7 @@ Item {
 
                 antialiasing: true
 
-                // The one animated thing in here. Holding a volume
-                // key sends a burst of small changes and this is
-                // what turns them into one continuous slide.
+                // The one animated thing in here.
                 Behavior on width {
                     NumberAnimation {
                         duration: Core.Theme.durBase
@@ -131,9 +112,7 @@ Item {
             }
         }
 
-        // --------------------------------------------------------
         // Readout
-        // --------------------------------------------------------
 
         Text {
             width: 34

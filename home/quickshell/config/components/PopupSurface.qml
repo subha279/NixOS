@@ -33,9 +33,7 @@ import "../core" as Core
 PanelWindow {
     id: root
 
-    // ------------------------------------------------------------
     // Public API
-    // ------------------------------------------------------------
 
     property string popupId: ""
 
@@ -51,9 +49,6 @@ PanelWindow {
     readonly property bool menuOpen: menuLayer.active
 
     // NOTE: these are deliberately NOT called opened()/closed().
-    // Quickshell's window base class already defines a `closed`
-    // signal, and QML rejects the override with
-    // "Duplicate signal name".
     signal didOpen
     signal didClose
 
@@ -65,9 +60,7 @@ PanelWindow {
         menuLayer.close();
     }
 
-    // ------------------------------------------------------------
     // Window setup
-    // ------------------------------------------------------------
 
     anchors {
         top: true
@@ -79,10 +72,7 @@ PanelWindow {
 
     color: "transparent"
 
-    // Ignore mode already implies a zero exclusive zone. Do NOT
-    // also set exclusiveZone here — assigning it flips
-    // exclusionMode back to Normal and the bar's reserved strip
-    // pushes this whole window down.
+    // Ignore mode already implies a zero exclusive zone.
     exclusionMode: ExclusionMode.Ignore
 
     visible: root.open || root.rendering
@@ -125,31 +115,16 @@ PanelWindow {
         onTriggered: root.rendering = false
     }
 
-    // ------------------------------------------------------------
     // Geometry driven by the content
-    // ------------------------------------------------------------
 
     // Screen-space Y of the bottom edge of the bar pill.
-    //
-    // Bar window: margins.top = barMarginTop, implicitHeight =
-    // pillHeight + 20, and the pill is vertically centred, so it
-    // starts 10px into the window.
-    //
-    // Computed from constants that definitely exist so a missing
-    // Theme property can never turn this into NaN.
-    // The pill sits inside an outer border ring of height
-    // pillHeight + borderWidth*2, centred on the pill, so the ring
-    // extends borderWidth BELOW the pill itself. Without that term
-    // the card lands exactly on the ring and the gap vanishes.
     readonly property real barBottomY: Core.Theme.barMarginTop + 10 + Core.Theme.pillHeight + Core.Theme.borderWidth
 
     readonly property real naturalHeight: contentHost.implicitHeight + Core.Theme.padding * 2
 
     readonly property real targetHeight: Math.min(root.naturalHeight, root.maxCardHeight)
 
-    // ------------------------------------------------------------
     // Click outside to dismiss
-    // ------------------------------------------------------------
 
     MouseArea {
         anchors.fill: parent
@@ -168,9 +143,7 @@ PanelWindow {
         }
     }
 
-    // ------------------------------------------------------------
     // Escape to dismiss
-    // ------------------------------------------------------------
 
     Item {
         anchors.fill: parent
@@ -185,28 +158,20 @@ PanelWindow {
         }
     }
 
-    // ============================================================
     // The card
-    // ============================================================
 
     Rectangle {
         id: card
 
         width: root.cardWidth
 
-        // Horizontally centred on the bar module that opened us,
-        // clamped so it never runs off screen.
+        // Horizontally centred on the bar module that opened us, clamped so it never runs off screen.
         x: Math.round(Math.max(Core.Theme.popupGap, Math.min(root.width - root.cardWidth - Core.Theme.popupGap, Core.PopupManager.anchorCenter - root.cardWidth / 2)))
 
-        // Every module lives in the same pill, so the vertical
-        // anchor is always the same number. Deriving it per-click
-        // from mapToItem was the source of all the drift.
+        // Every module lives in the same pill, so the vertical anchor is always the same number.
         y: Math.round(root.barBottomY + Core.Theme.popupGap)
 
-        // --------------------------------------------------------
         // The soft part: a single cubic animation drives the height.
-        // Content changes therefore settle without rubber-band motion.
-        // --------------------------------------------------------
 
         height: root.open ? root.targetHeight : 0
 
@@ -247,10 +212,7 @@ PanelWindow {
 
         antialiasing: true
 
-        // Cache the card while it is being scaled/faded. This keeps
-        // the transform on a stable scene-graph texture instead of
-        // forcing the whole popup subtree to be re-rasterized each
-        // frame.
+        // Cache the card while it is being scaled/faded.
         layer.enabled: root.open || root.rendering
         layer.smooth: true
 
@@ -284,9 +246,7 @@ PanelWindow {
             }
         }
 
-        // --------------------------------------------------------
         // Content host — fades and slides behind the geometry
-        // --------------------------------------------------------
 
         Item {
             id: contentHost
@@ -334,14 +294,7 @@ PanelWindow {
         }
     }
 
-    // ============================================================
     // Shared right-click context menu
-    // ============================================================
-    //
-    // items: [{ label, icon, danger, separator, action }]
-    //
-    // Lives outside the card so it is never clipped by it.
-    // ============================================================
 
     Item {
         id: menuLayer

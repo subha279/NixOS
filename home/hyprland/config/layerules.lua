@@ -1,26 +1,6 @@
---------------------------------------------------
 -- Layer Rules
--- Aurora Quickshell Desktop
---------------------------------------------------
---
--- Every namespace below is declared by a Quickshell
--- surface through WlrLayershell.namespace:
---
---   aurora-bar            modules/Bar.qml
---   aurora-popup          modules/PopupSurface.qml
---   aurora-notifications  modules/Notifications.qml
---   aurora-launcher       modules/LauncherSurface.qml
---
--- order        stacking order within the layer
--- ignore_alpha blur only the opaque part of the
---              surface, so a transparent scrim stays
---              sharp and the wallpaper is not blurred
---              for no reason
---------------------------------------------------
 
---------------------------------------------------
 -- Wallpaper
---------------------------------------------------
 
 hl.layer_rule({
 	name = "wallpaper",
@@ -34,9 +14,7 @@ hl.layer_rule({
 	order = 1,
 })
 
---------------------------------------------------
 -- Aurora Bar
---------------------------------------------------
 
 hl.layer_rule({
 	name = "aurora-bar",
@@ -54,9 +32,7 @@ hl.layer_rule({
 	order = 5,
 })
 
---------------------------------------------------
 -- Aurora Popups
---------------------------------------------------
 
 hl.layer_rule({
 	name = "aurora-popup",
@@ -74,9 +50,7 @@ hl.layer_rule({
 	order = 6,
 })
 
---------------------------------------------------
 -- Aurora Notifications
---------------------------------------------------
 
 hl.layer_rule({
 	name = "aurora-notifications",
@@ -94,9 +68,7 @@ hl.layer_rule({
 	order = 8,
 })
 
---------------------------------------------------
 -- Aurora Launcher
---------------------------------------------------
 
 hl.layer_rule({
 	name = "aurora-launcher",
@@ -115,9 +87,7 @@ hl.layer_rule({
 	order = 10,
 })
 
---------------------------------------------------
 -- Screen Capture and Colour Picking
---------------------------------------------------
 
 hl.layer_rule({
 	name = "screen-capture",

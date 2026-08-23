@@ -1,29 +1,8 @@
--- ============================================================================
 -- Aurora nvim-lint
--- ============================================================================
---
--- Linting engine.
---
--- nvim-lint owns:
---
---   • External linters
---   • Automatic linting
---   • Buffer diagnostics
---
--- Diagnostic colors are intentionally NOT defined here.
---
--- They are controlled by:
---
---     ui/theme.lua
---     lsp/init.lua
---
--- ============================================================================
 
 local M = {}
 
--- ============================================================================
 -- Setup
--- ============================================================================
 
 function M.setup()
 	local ok, lint = pcall(require, "lint")
@@ -34,9 +13,7 @@ function M.setup()
 		return false
 	end
 
-	-- ========================================================================
 	-- Linters
-	-- ========================================================================
 
 	lint.linters_by_ft = {
 		python = {
@@ -68,9 +45,7 @@ function M.setup()
 		},
 	}
 
-	-- ========================================================================
 	-- Automatic linting
-	-- ========================================================================
 
 	local group = vim.api.nvim_create_augroup("AuroraNvimLint", {
 		clear = true,
@@ -97,9 +72,7 @@ function M.setup()
 		end,
 	})
 
-	-- ========================================================================
 	-- Manual lint
-	-- ========================================================================
 
 	vim.keymap.set("n", "<leader>ll", function()
 		lint.try_lint()
@@ -110,16 +83,7 @@ function M.setup()
 	return true
 end
 
--- ============================================================================
 -- Live Aurora Refresh
--- ============================================================================
---
--- nvim-lint uses Neovim diagnostic highlight groups.
--- Those are managed by Aurora's diagnostic/theme system.
---
--- This function therefore only redraws the UI.
---
--- ============================================================================
 
 function M.refresh_theme()
 	vim.schedule(function()
@@ -130,15 +94,7 @@ function M.refresh_theme()
 	return true
 end
 
--- ============================================================================
 -- IMPORTANT
--- ============================================================================
---
--- init.lua loads this module directly:
---
---     require("plugins.lint")
---
--- ============================================================================
 
 M.setup()
 

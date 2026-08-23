@@ -6,17 +6,7 @@ import "../core" as Core
 import "../services" as Services
 import "../components" as Components
 
-// ================================================================
 // NetworkPopup
-// ----------------------------------------------------------------
-// Ethernet + Wi-Fi in one dropdown.
-//
-//   * Ethernet row at the top (only when a wired device exists)
-//   * Wi-Fi toggle, rescan, settings in the header
-//   * Live network list with per-row enter / exit animations
-//   * Inline password field that slides open when needed
-//   * Right-click a network for Forget / Autoconnect / Copy
-// ================================================================
 
 Components.PopupSurface {
     id: popup
@@ -32,10 +22,7 @@ Components.PopupSurface {
     property string passwordFor: ""
     property string passwordError: ""
 
-    // The password field now lives inside contentComponent, so its
-    // id is out of scope here. These two properties are the bridge:
-    // passwordText mirrors the field's text, and bumping focusPulse
-    // asks the field to take keyboard focus.
+    // The password field now lives inside contentComponent, so its id is out of scope here.
     property string passwordText: ""
     property int focusPulse: 0
 
@@ -77,19 +64,9 @@ Components.PopupSurface {
         popup.svc.connectWifi(ssid, "");
     }
 
-    // ============================================================
     // Content
-    // ============================================================
 
-    // ============================================================
     // Content
-    // ------------------------------------------------------------
-    // IMPORTANT: this MUST be assigned to `contentComponent`, not
-    // added as a direct child of the window. PopupSurface loads it
-    // inside the card; a direct child would be parented to the
-    // full-screen overlay instead and render at screen width with
-    // a zero-height card.
-    // ============================================================
 
     contentComponent: Component {
 
@@ -98,9 +75,7 @@ Components.PopupSurface {
 
             spacing: Core.Theme.spacing
 
-            // --------------------------------------------------------
             // Header
-            // --------------------------------------------------------
 
             Components.PopupHeader {
                 width: parent.width
@@ -139,12 +114,7 @@ Components.PopupSurface {
                 color: Core.Theme.separator
             }
 
-            // --------------------------------------------------------
             // Ethernet
-            // --------------------------------------------------------
-            // Collapses to zero height when no wired device exists,
-            // so the card shrinks accordingly.
-            // --------------------------------------------------------
 
             Item {
                 width: parent.width
@@ -251,9 +221,7 @@ Components.PopupSurface {
                 }
             }
 
-            // --------------------------------------------------------
             // Wi-Fi section label
-            // --------------------------------------------------------
 
             Item {
                 width: parent.width
@@ -296,9 +264,7 @@ Components.PopupSurface {
                 }
             }
 
-            // --------------------------------------------------------
             // Inline password field
-            // --------------------------------------------------------
 
             Item {
                 width: parent.width
@@ -490,14 +456,7 @@ Components.PopupSurface {
                 }
             }
 
-            // --------------------------------------------------------
             // Network list
-            // --------------------------------------------------------
-            // The ListView height follows contentHeight, which is what
-            // makes the whole card grow and shrink with the number of
-            // results. The card's spring turns that into the rubbery
-            // motion.
-            // --------------------------------------------------------
 
             Item {
                 width: parent.width
@@ -509,10 +468,6 @@ Components.PopupSurface {
                 clip: true
 
                 // Deliberately NO Behavior on height here. The card
-                // in PopupSurface animates its own height from this
-                // content already; animating both put two easing curves
-                // on the same axis, which is what made growth stutter.
-                // The list snaps, the card does the visible motion.
 
                 ListView {
                     id: list
@@ -527,9 +482,7 @@ Components.PopupSurface {
 
                     model: popup.svc.networkModel
 
-                    // ------------------------------------------------
                     // Per-row motion
-                    // ------------------------------------------------
 
                     add: Transition {
                         NumberAnimation {
@@ -592,8 +545,7 @@ Components.PopupSurface {
                     delegate: Components.ListRow {
                         id: netRow
 
-                        // `signal` is a reserved QML keyword, so the
-                        // model role is called `strength`.
+                        // `signal` is a reserved QML keyword, so the model role is called `strength`.
                         required property string ssid
                         required property int strength
                         required property string security
@@ -615,9 +567,7 @@ Components.PopupSurface {
 
                         busy: popup.svc.pendingSsid === netRow.ssid && popup.svc.busy
 
-                        // ------------------------------------------
                         // Left click
-                        // ------------------------------------------
 
                         onActivated: {
                             if (netRow.inUse) {
@@ -628,9 +578,7 @@ Components.PopupSurface {
                             popup.requestConnect(netRow.ssid, netRow.secured, netRow.saved);
                         }
 
-                        // ------------------------------------------
                         // Right click
-                        // ------------------------------------------
 
                         onContextRequested: function (mx, my) {
                             const items = [];
@@ -722,9 +670,7 @@ Components.PopupSurface {
                 }
             }
 
-            // --------------------------------------------------------
             // Empty / disabled states
-            // --------------------------------------------------------
 
             Item {
                 width: parent.width

@@ -7,17 +7,7 @@ import Quickshell.Wayland
 import "../core" as Core
 import "../services" as Services
 
-// ================================================================
 // Aurora Notifications — transient toast overlay
-//
-// Design goals:
-//   • reliable dynamic sizing
-//   • no animated Layout attached properties
-//   • compositor-friendly transforms
-//   • smooth 180 Hz-style motion
-//   • independent toast lifetime
-//   • critical notifications remain until dismissed
-// ================================================================
 
 PanelWindow {
     id: root
@@ -34,24 +24,19 @@ PanelWindow {
     readonly property int toastSpacing: 8
     readonly property int maxHeight: 640
 
-    // Measured, not estimated.
-    //
-    // The previous version summed a hardcoded 96px per card, so any toast
-    // with a two-line body overlapped the one beneath it and the last card
-    // was clipped off the bottom of the layer surface. The Column below
-    // measures each card instead.
-    readonly property int contentHeight: Math.max(1, Math.min(column.implicitHeight, root.maxHeight))
-
     implicitWidth: root.toastWidth + 14
-    implicitHeight: root.contentHeight
+
+    // Fixed on purpose. Binding this to the column made the layer-shell surface
+    // resize on every animation frame, which is what caused the tearing and
+    // jumping. The mask below already limits input to the actual cards.
+    implicitHeight: root.maxHeight
 
     color: "transparent"
 
     WlrLayershell.namespace: "aurora-notifications"
     WlrLayershell.layer: WlrLayer.Overlay
 
-    // A toast must never steal keyboard focus from whatever you are
-    // typing in.
+    // A toast must never steal keyboard focus from whatever you are typing in.
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
 
     exclusionMode: ExclusionMode.Ignore
@@ -72,6 +57,21 @@ PanelWindow {
         width: root.toastWidth
 
         spacing: root.toastSpacing
+
+        // Cards glide when the stack reflows instead of snapping to a new
+        // position, which is what looked broken when two arrived at once.
+        //
+        // Positioners support add/move/populate only. "displaced" belongs to
+        // ListView/GridView and is rejected here; move covers the reflow.
+        move: Transition {
+            NumberAnimation {
+                property: "y"
+
+                duration: 180
+
+                easing.type: Easing.OutCubic
+            }
+        }
 
         Repeater {
             id: repeater
@@ -103,15 +103,16 @@ PanelWindow {
                 // 0 = collapsed
                 property real collapse: 1.0
 
+                // Animation-driven only. Binding opacity to slide while the exit
+                // animation also wrote to it broke the binding mid-flight.
+                property real fade: 0.0
+
                 width: root.toastWidth
 
-                // Positioned by the parent Column, which measures every
-                // card rather than assuming a fixed height. The old manual
-                // y-binding also read `index`, which Qt 6 stops injecting
-                // as soon as a delegate declares a required property.
+                // Positioned by the parent Column, which measures every card rather than assuming a fixed height.
                 height: Math.max(0, wrapper.cardHeight * wrapper.collapse)
 
-                opacity: 1.0 - (wrapper.slide * 0.35)
+                opacity: wrapper.fade
 
                 clip: true
 
@@ -119,9 +120,7 @@ PanelWindow {
                     enterAnim.start();
                 }
 
-                // ------------------------------------------------
                 // Toast lifecycle
-                // ------------------------------------------------
 
                 function hide() {
                     if (wrapper.dismissing)
@@ -168,27 +167,37 @@ PanelWindow {
                     wrapper.dismissFully();
                 }
 
-                // ------------------------------------------------
                 // Entrance
-                // ------------------------------------------------
 
-                NumberAnimation {
+                ParallelAnimation {
                     id: enterAnim
 
-                    target: wrapper
-                    property: "slide"
+                    NumberAnimation {
+                        target: wrapper
+                        property: "slide"
 
-                    from: 1.0
-                    to: 0.0
+                        from: 1.0
+                        to: 0.0
 
-                    duration: 220
+                        duration: 170
 
-                    easing.type: Easing.OutCubic
+                        easing.type: Easing.OutCubic
+                    }
+
+                    NumberAnimation {
+                        target: wrapper
+                        property: "fade"
+
+                        from: 0.0
+                        to: 1.0
+
+                        duration: 140
+
+                        easing.type: Easing.OutCubic
+                    }
                 }
 
-                // ------------------------------------------------
                 // Exit
-                // ------------------------------------------------
 
                 SequentialAnimation {
                     id: exitAnim
@@ -201,7 +210,7 @@ PanelWindow {
 
                             to: 1.0
 
-                            duration: 190
+                            duration: 150
 
                             easing.type: Easing.InCubic
                         }
@@ -212,18 +221,18 @@ PanelWindow {
 
                             to: 0.0
 
-                            duration: 210
+                            duration: 170
 
                             easing.type: Easing.InCubic
                         }
 
                         NumberAnimation {
                             target: wrapper
-                            property: "opacity"
+                            property: "fade"
 
                             to: 0.0
 
-                            duration: 160
+                            duration: 130
 
                             easing.type: Easing.InCubic
                         }
@@ -234,14 +243,12 @@ PanelWindow {
                     }
                 }
 
-                // ------------------------------------------------
                 // Lifetime
-                // ------------------------------------------------
 
                 Timer {
                     id: tick
 
-                    interval: 50
+                    interval: 100
                     repeat: true
 
                     running: wrapper.lifetime > 0 && !cardHover.hovered && !wrapper.dismissing
@@ -254,9 +261,7 @@ PanelWindow {
                     }
                 }
 
-                // ------------------------------------------------
                 // Card
-                // ------------------------------------------------
 
                 Rectangle {
                     id: card
@@ -277,15 +282,14 @@ PanelWindow {
 
                     border.width: Core.Theme.borderWidth
 
-                    border.color: Core.Theme.borderActive
+                    // Critical is the only state that gets colour, and only as a border.
+                    border.color: wrapper.critical ? Core.Theme.danger : Core.Theme.borderActive
 
                     transform: Translate {
                         x: wrapper.slide * 44
                     }
 
-                    // ------------------------------------------------
                     // Hover
-                    // ------------------------------------------------
 
                     HoverHandler {
                         id: cardHover
@@ -296,9 +300,7 @@ PanelWindow {
                         }
                     }
 
-                    // ------------------------------------------------
                     // Mouse interaction
-                    // ------------------------------------------------
 
                     MouseArea {
                         anchors.fill: parent
@@ -322,25 +324,7 @@ PanelWindow {
                         }
                     }
 
-                    // ------------------------------------------------
-                    // Urgency stripe
-                    // ------------------------------------------------
-
-                    Rectangle {
-                        anchors.left: parent.left
-                        anchors.top: parent.top
-                        anchors.bottom: parent.bottom
-
-                        width: 3
-
-                        color: wrapper.critical ? Core.Theme.danger : Core.Theme.accent
-
-                        opacity: wrapper.critical ? 1.0 : 0.55
-                    }
-
-                    // ------------------------------------------------
                     // Content
-                    // ------------------------------------------------
 
                     RowLayout {
                         id: contentRow
@@ -355,9 +339,7 @@ PanelWindow {
 
                         spacing: 11
 
-                        // --------------------------------------------
                         // Application icon
-                        // --------------------------------------------
                         Rectangle {
                             Layout.alignment: Qt.AlignTop
 
@@ -366,19 +348,9 @@ PanelWindow {
 
                             radius: 11
 
-                            color: wrapper.critical ? Qt.alpha(Core.Theme.error, 0.12) : Core.Theme.surface
+                            color: Core.Theme.surface
 
-                            // ------------------------------------------------------------
                             // Resolve the notification icon.
-                            //
-                            // Different applications use different notification fields:
-                            //
-                            //   image
-                            //   imagePath
-                            //   appIcon
-                            //
-                            // We try them in that order.
-                            // ------------------------------------------------------------
 
                             readonly property string resolvedIcon: {
                                 const n = wrapper.modelData;
@@ -428,9 +400,7 @@ PanelWindow {
                                 mipmap: true
                             }
 
-                            // ------------------------------------------------------------
                             // Nerd Font fallback
-                            // ------------------------------------------------------------
 
                             Text {
                                 anchors.centerIn: parent
@@ -443,15 +413,13 @@ PanelWindow {
 
                                 font.pixelSize: 19
 
-                                color: wrapper.critical ? Core.Theme.danger : Core.Theme.accent
+                                color: Core.Theme.textMuted
 
                                 renderType: Text.NativeRendering
                             }
                         }
 
-                        // --------------------------------------------
                         // Text
-                        // --------------------------------------------
 
                         ColumnLayout {
                             Layout.fillWidth: true
@@ -543,9 +511,7 @@ PanelWindow {
                             }
                         }
 
-                        // --------------------------------------------
                         // Close
-                        // --------------------------------------------
 
                         Rectangle {
                             Layout.alignment: Qt.AlignTop

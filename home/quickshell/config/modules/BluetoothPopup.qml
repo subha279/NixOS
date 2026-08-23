@@ -6,13 +6,7 @@ import "../core" as Core
 import "../services" as Services
 import "../components" as Components
 
-// ================================================================
 // BluetoothPopup
-// ----------------------------------------------------------------
-//   * Power toggle + scan button in the header
-//   * Live device list, connected devices pinned to the top
-//   * Right-click for Pair / Trust / Block / Forget
-// ================================================================
 
 Components.PopupSurface {
     id: popup
@@ -35,15 +29,7 @@ Components.PopupSurface {
             popup.svc.setDiscovering(false);
     }
 
-    // ============================================================
     // Content
-    // ------------------------------------------------------------
-    // IMPORTANT: this MUST be assigned to `contentComponent`, not
-    // added as a direct child of the window. PopupSurface loads it
-    // inside the card; a direct child would be parented to the
-    // full-screen overlay instead and render at screen width with
-    // a zero-height card.
-    // ============================================================
 
     contentComponent: Component {
 
@@ -52,9 +38,7 @@ Components.PopupSurface {
 
             spacing: Core.Theme.spacing
 
-            // --------------------------------------------------------
             // Header
-            // --------------------------------------------------------
 
             Components.PopupHeader {
                 width: parent.width
@@ -96,9 +80,7 @@ Components.PopupSurface {
                 color: Core.Theme.separator
             }
 
-            // --------------------------------------------------------
             // Section label
-            // --------------------------------------------------------
 
             Item {
                 width: parent.width
@@ -141,9 +123,7 @@ Components.PopupSurface {
                 }
             }
 
-            // --------------------------------------------------------
             // Device list
-            // --------------------------------------------------------
 
             Item {
                 width: parent.width
@@ -235,10 +215,7 @@ Components.PopupSurface {
                     delegate: Components.ListRow {
                         id: devRow
 
-                        // These roles are prefixed because `name`,
-                        // `icon` and `state` collide with ListRow's
-                        // own properties, which produces a
-                        // self-referential binding.
+                        // These roles are prefixed because `name`, `icon` and `state` collide with ListRow's own properties, which produces a self-referential
                         required property string address
                         required property string deviceName
                         required property string deviceIcon
@@ -267,9 +244,7 @@ Components.PopupSurface {
 
                         busy: popup.svc.pendingAddress === devRow.address
 
-                        // ------------------------------------------
                         // Left click: connect / disconnect
-                        // ------------------------------------------
 
                         onActivated: {
                             if (!devRow.paired && !devRow.connected) {
@@ -280,9 +255,7 @@ Components.PopupSurface {
                             popup.svc.toggleDevice(devRow.address);
                         }
 
-                        // ------------------------------------------
                         // Right click: full device menu
-                        // ------------------------------------------
 
                         onContextRequested: function (mx, my) {
                             const items = [];
@@ -365,9 +338,7 @@ Components.PopupSurface {
                 }
             }
 
-            // --------------------------------------------------------
             // Empty / off state
-            // --------------------------------------------------------
 
             Item {
                 width: parent.width

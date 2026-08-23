@@ -21,8 +21,7 @@ in
   # Your ISP has no working IPv6 route to the Nix cache.
   networking.enableIPv6 = false;
 
-  # Official Nix cache, pinned to the currently best-performing
-  # Fastly endpoint on this ISP.
+  # Official Nix cache, pinned to the currently best-performing Fastly endpoint on this ISP.
   networking.extraHosts = ''
     151.101.65.91 cache.nixos.org
   '';

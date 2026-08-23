@@ -5,15 +5,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Bluetooth
 
-// ================================================================
 // BluetoothService
-// ----------------------------------------------------------------
-// Wraps Quickshell.Bluetooth and adds:
-//   * a stable ListModel (so rows animate in / out individually)
-//   * sane sorting (connected > paired > discovered)
-//   * icon mapping
-//   * a `bluetoothctl` fallback for anything the binding lacks
-// ================================================================
 
 Singleton {
     id: root
@@ -30,15 +22,7 @@ Singleton {
 
     property string lastError: ""
 
-    // ------------------------------------------------------------
     // Desktop notifications
-    // ------------------------------------------------------------
-    //
-    // blueman-applet emits these only while its tray icon is
-    // alive. The bar replaced the tray, so nothing was left to
-    // announce pairing and connection changes.
-    //
-    // ------------------------------------------------------------
 
     property var lastConnected: []
     property bool btPrimed: false
@@ -46,12 +30,10 @@ Singleton {
     property bool lastPowered: false
     property bool poweredPrimed: false
 
-    property Process notifyProc: Process {}
-
+    // Fire and forget. One shared Process dropped the second notification
+    // whenever two devices changed state in the same instant.
     function notify(summary, body, icon, urgency) {
-        root.notifyProc.running = false;
-        root.notifyProc.command = ["notify-send", "-a", "Bluetooth", "-i", icon, "-u", urgency, summary, body];
-        root.notifyProc.running = true;
+        Quickshell.execDetached(["notify-send", "-a", "Bluetooth", "-i", icon, "-u", urgency, summary, body]);
     }
 
     function connectedAddresses() {
@@ -70,8 +52,7 @@ Singleton {
 
         root.lastConnected = now;
 
-        // Devices arrive asynchronously after the adapter appears,
-        // so the first pass is bookkeeping only.
+        // Devices arrive asynchronously after the adapter appears, so the first pass is bookkeeping only.
         if (!root.btPrimed) {
             root.btPrimed = true;
             return;
@@ -111,9 +92,7 @@ Singleton {
 
     property ListModel deviceModel: ListModel {}
 
-    // ------------------------------------------------------------
     // Raw device list from the binding
-    // ------------------------------------------------------------
 
     readonly property var allDevices: {
         if (!Bluetooth.devices)
@@ -145,9 +124,7 @@ Singleton {
         return "Not connected";
     }
 
-    // ------------------------------------------------------------
     // Helpers
-    // ------------------------------------------------------------
 
     function displayName(dev) {
         if (!dev)
@@ -309,9 +286,27 @@ Singleton {
         }
     }
 
-    // Rebuild first so deviceByAddress() can resolve names for
-    // anything that just appeared, then diff for notifications.
+    // Rebuild first so deviceByAddress() can resolve names for anything that just appeared, then diff for notifications.
     onAllDevicesChanged: {
+        root.rebuildModel();
+        root.syncDeviceNotifications();
+    }
+
+    // Connecting a paired device neither adds nor removes it, so allDevices
+    // never changes and its handler never ran -- that is why connect and
+    // disconnect were silent. Reading every device's connected flag here makes
+    // QML re-evaluate this string on any state change.
+    readonly property string connectedKey: {
+        const parts = [];
+
+        for (const d of root.allDevices)
+            if (d && d.connected && d.address)
+                parts.push(String(d.address));
+
+        return parts.join(",");
+    }
+
+    onConnectedKeyChanged: {
         root.rebuildModel();
         root.syncDeviceNotifications();
     }
@@ -324,9 +319,7 @@ Singleton {
         onTriggered: root.rebuildModel()
     }
 
-    // ------------------------------------------------------------
     // bluetoothctl fallback
-    // ------------------------------------------------------------
 
     property Process ctlProc: Process {
         stdout: StdioCollector {}
@@ -339,9 +332,7 @@ Singleton {
         ctlProc.running = true;
     }
 
-    // ------------------------------------------------------------
     // Public API
-    // ------------------------------------------------------------
 
     function setPowered(on) {
         if (root.adapter) {

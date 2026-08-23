@@ -7,17 +7,13 @@ import Quickshell.Io
 QtObject {
     id: theme
 
-    // ============================================================
     // Aurora Runtime Theme
-    // ============================================================
 
     readonly property string auroraDirectory: Quickshell.env("HOME") + "/.config/aurora"
 
     readonly property string activeThemePath: auroraDirectory + "/active-theme"
 
-    // ============================================================
     // Active Theme
-    // ============================================================
 
     property var activeThemeFile: FileView {
         path: theme.activeThemePath
@@ -31,15 +27,11 @@ QtObject {
         }
     }
 
-    // ============================================================
     // Active Theme ID
-    // ============================================================
 
     readonly property string activeTheme: activeThemeFile.loaded ? activeThemeFile.text().trim() : "aurora"
 
-    // ============================================================
     // Active Theme JSON
-    // ============================================================
 
     property var themeFile: FileView {
         path: theme.auroraDirectory + "/themes/" + theme.activeTheme + ".json"
@@ -52,9 +44,7 @@ QtObject {
         }
     }
 
-    // ============================================================
     // Parsed Theme
-    // ============================================================
 
     readonly property var data: {
         if (!theme.themeFile.loaded)
@@ -75,17 +65,13 @@ QtObject {
 
     readonly property var ui: data.ui || ({})
 
-    // ============================================================
     // Background
-    // ============================================================
 
     readonly property color background: colors.background || "#181D25"
 
     readonly property color backgroundDark: colors.backgroundDark || "#141920"
 
-    // ============================================================
     // Surfaces
-    // ============================================================
 
     readonly property color surface: colors.surface || "#282E37"
 
@@ -93,9 +79,7 @@ QtObject {
 
     readonly property color surfaceActive: colors.surfaceActive || "#363D49"
 
-    // ============================================================
     // Borders
-    // ============================================================
 
     readonly property color border: colors.border || "#3B4350"
 
@@ -105,9 +89,7 @@ QtObject {
 
     readonly property color separator: colors.separator || "#343B47"
 
-    // ============================================================
     // Text
-    // ============================================================
 
     readonly property color text: colors.text || "#F2F3F7"
 
@@ -115,9 +97,7 @@ QtObject {
 
     readonly property color textMuted: colors.textMuted || "#858D9A"
 
-    // ============================================================
     // Accent
-    // ============================================================
 
     readonly property color accent: colors.accent || "#A970FF"
 
@@ -129,9 +109,7 @@ QtObject {
 
     readonly property color accentForeground: colors.accentForeground || "#181D25"
 
-    // ============================================================
     // Semantic States
-    // ============================================================
 
     readonly property color success: colors.success || "#8FE3A5"
 
@@ -141,9 +119,7 @@ QtObject {
 
     readonly property color info: colors.info || "#8FB8FF"
 
-    // ============================================================
     // Compatibility Aliases
-    // ============================================================
 
     readonly property color foreground: text
 
@@ -161,9 +137,7 @@ QtObject {
 
     readonly property color pressed: surfaceActive
 
-    // ============================================================
     // Semantic Color Resolver
-    // ============================================================
 
     function resolveColor(name, fallback) {
         switch (name) {
@@ -192,9 +166,7 @@ QtObject {
         }
     }
 
-    // ============================================================
     // Clock
-    // ============================================================
 
     readonly property color clockHour: resolveColor(ui.clock?.hour, foreground)
 
@@ -204,9 +176,7 @@ QtObject {
 
     readonly property color clockSecond: resolveColor(ui.clock?.second, foregroundFaint)
 
-    // ============================================================
     // Glass
-    // ============================================================
 
     readonly property real glassOpacity: ui.glassOpacity || 0.80
 
@@ -214,9 +184,7 @@ QtObject {
 
     readonly property color backgroundSolid: background
 
-    // ============================================================
     // UI
-    // ============================================================
 
     readonly property int borderWidth: ui.borderWidth || 0
 
@@ -236,9 +204,7 @@ QtObject {
 
     readonly property real shadowOpacity: ui.shadowOpacity !== undefined ? ui.shadowOpacity : 0.20
 
-    // ============================================================
     // Existing QuickShell Geometry
-    // ============================================================
 
     readonly property int pillHeight: 32
 
@@ -246,21 +212,17 @@ QtObject {
 
     readonly property int barMarginTop: 8
 
-    // Was a hardcoded 18, identical to radiusLarge. Derive it so a theme
-    // change cannot leave menus at a stale radius.
+    // Was a hardcoded 18, identical to radiusLarge.
     readonly property int radiusMenu: radiusLarge
 
-    // Was a hardcoded 12, an undeclared fourth radius step between
-    // radius (10) and radiusLarge (18). Derived keeps the same pixel value.
+    // Was a hardcoded 12, an undeclared fourth radius step between radius (10) and radiusLarge (18).
     readonly property int radiusRow: radius + 2
 
     readonly property int padding: 10
 
     readonly property int spacing: 6
 
-    // ============================================================
     // Typography
-    // ============================================================
 
     readonly property string fontFamily: fonts.interface || "Inter"
 
@@ -269,9 +231,7 @@ QtObject {
     // their Omarchy-style monospace rows.
     readonly property string fontMono: fonts.terminal || "monospace"
 
-    // ============================================================
     // Popup Geometry
-    // ============================================================
 
     readonly property int popupWidth: 340
 
@@ -281,9 +241,7 @@ QtObject {
 
     readonly property int rowHeight: 42
 
-    // ============================================================
     // Animation
-    // ============================================================
 
     readonly property real springStiffness: 3.2
 
@@ -294,8 +252,6 @@ QtObject {
     readonly property real springMass: 1.1
 
     // Motion is intentionally short and deterministic.
-    // These timings target a crisp high-refresh feel without
-    // spring overshoot or long easing tails.
     readonly property int durFast: 90
 
     readonly property int durBase: 140
@@ -308,9 +264,7 @@ QtObject {
 
     readonly property real overshoot: 1.0
 
-    // ============================================================
     // Collapsing Bar
-    // ============================================================
 
     readonly property int barRevealDuration: 150
 

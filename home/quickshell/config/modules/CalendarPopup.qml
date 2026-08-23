@@ -5,12 +5,7 @@ import Quickshell
 import "../core" as Core
 import "../components" as Components
 
-// ================================================================
 // CalendarPopup
-// ----------------------------------------------------------------
-// Large clock plus a month grid you can page through. Opened by
-// clicking the clock module in the bar.
-// ================================================================
 
 Components.PopupSurface {
     id: popup
@@ -32,8 +27,7 @@ Components.PopupSurface {
     // Which month the grid is showing. 0 = current month.
     property int monthOffset: 0
 
-    // Reset to today whenever the popup is dismissed, so it always
-    // opens on the current month.
+    // Reset to today whenever the popup is dismissed, so it always opens on the current month.
     onDidClose: popup.monthOffset = 0
 
     readonly property date viewDate: {
@@ -60,8 +54,7 @@ Components.PopupSurface {
 
     readonly property int daysInMonth: new Date(popup.viewYear, popup.viewMonth + 1, 0).getDate()
 
-    // Always render 6 rows so the card does not jitter in height
-    // as you page between months.
+    // Always render 6 rows so the card does not jitter in height as you page between months.
     readonly property int cellCount: 42
 
     function isToday(day) {
@@ -94,9 +87,7 @@ Components.PopupSurface {
 
             spacing: Core.Theme.spacing
 
-            // --------------------------------------------------------
             // Big clock
-            // --------------------------------------------------------
 
             Item {
                 width: parent.width
@@ -156,9 +147,7 @@ Components.PopupSurface {
                 color: Core.Theme.separator
             }
 
-            // --------------------------------------------------------
             // Month navigation
-            // --------------------------------------------------------
 
             Item {
                 id: monthBar
@@ -334,9 +323,7 @@ Components.PopupSurface {
                 }
             }
 
-            // --------------------------------------------------------
             // Weekday labels
-            // --------------------------------------------------------
 
             Row {
                 id: weekdayRow
@@ -370,9 +357,7 @@ Components.PopupSurface {
                 }
             }
 
-            // --------------------------------------------------------
             // Day grid
-            // --------------------------------------------------------
 
             Grid {
                 id: dayGrid
@@ -473,9 +458,7 @@ Components.PopupSurface {
                 }
             }
 
-            // --------------------------------------------------------
             // Footer
-            // --------------------------------------------------------
 
             Item {
                 width: parent.width

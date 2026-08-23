@@ -4,20 +4,12 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-// ================================================================
 // NetworkService
-// ----------------------------------------------------------------
-// A thin, reactive wrapper around `nmcli` that exposes BOTH Wi-Fi
-// and Ethernet as one unified "link" so the bar can show a single
-// icon slot that swaps between the two.
-// ================================================================
 
 Singleton {
     id: root
 
-    // ------------------------------------------------------------
     // Wi-Fi state
-    // ------------------------------------------------------------
 
     property bool wifiEnabled: true
     property string wifiDevice: ""
@@ -27,9 +19,7 @@ Singleton {
 
     readonly property bool wifiConnected: root.wifiState === "connected"
 
-    // ------------------------------------------------------------
     // Ethernet state
-    // ------------------------------------------------------------
 
     property string ethDevice: ""
     property string ethState: "unavailable"
@@ -39,12 +29,7 @@ Singleton {
 
     readonly property bool ethConnected: root.ethState === "connected"
 
-    // ------------------------------------------------------------
     // Unified link
-    // ------------------------------------------------------------
-    // "ethernet" wins when it is up — the bar shows exactly one
-    // icon in one position and swaps between the two.
-    // ------------------------------------------------------------
 
     readonly property string primaryLink: root.ethConnected ? "ethernet" : root.wifiConnected ? "wifi" : "none"
 
@@ -52,9 +37,7 @@ Singleton {
 
     readonly property string linkLabel: root.ethConnected ? (root.ethConnection !== "" ? root.ethConnection : "Ethernet") : root.wifiConnected ? root.activeSsid : root.wifiEnabled ? "Not connected" : "Wi-Fi off"
 
-    // ------------------------------------------------------------
     // Scan results / saved profiles
-    // ------------------------------------------------------------
 
     property var networks: []          // [{ ssid, strength, security, bssid, inUse, saved }]
     property var savedProfiles: []     // [ "HomeWifi", ... ]
@@ -70,26 +53,14 @@ Singleton {
     signal connectFailed(string ssid, string message)
     signal connectSucceeded(string ssid)
 
-    // ------------------------------------------------------------
     // Desktop notifications
-    // ------------------------------------------------------------
-    //
-    // nm-applet only speaks up when it owns a tray icon, and it
-    // says nothing at all about ethernet. This service already
-    // tracks every link transition, so it announces them itself
-    // through the same D-Bus daemon every other app uses.
-    //
-    // ------------------------------------------------------------
 
     property string lastLink: ""
     property bool linkPrimed: false
 
-    property Process notifyProc: Process {}
-
+    // Fire and forget; a shared Process drops rapid back-to-back events.
     function notify(summary, body, icon, urgency) {
-        root.notifyProc.running = false;
-        root.notifyProc.command = ["notify-send", "-a", "Network", "-i", icon, "-u", urgency, summary, body];
-        root.notifyProc.running = true;
+        Quickshell.execDetached(["notify-send", "-a", "Network", "-i", icon, "-u", urgency, summary, body]);
     }
 
     function linkFingerprint() {
@@ -115,9 +86,7 @@ Singleton {
 
         root.lastLink = now;
 
-        // The first evaluation lands while nmcli is still being
-        // polled for the first time. Announcing it would fire a
-        // notification on every single login.
+        // The first evaluation lands while nmcli is still being polled for the first time.
         if (!root.linkPrimed) {
             root.linkPrimed = true;
             return;
@@ -163,9 +132,7 @@ Singleton {
 
     property ListModel networkModel: ListModel {}
 
-    // ============================================================
     // Parsing helpers
-    // ============================================================
 
     // nmcli -t escapes literal ':' as '\:'
     function splitFields(line) {
@@ -204,8 +171,7 @@ Singleton {
         return "\udb82\udd1f";
     }
 
-    // True when any field of the incoming row differs from the row
-    // already in the model.
+    // True when any field of the incoming row differs from the row already in the model.
     function rowsDiffer(current, incoming) {
         for (const k in incoming) {
             if (current[k] !== incoming[k])
@@ -215,18 +181,7 @@ Singleton {
         return false;
     }
 
-    // Keeps delegates alive so ListView add/remove/move transitions
-    // fire. Two rules stop the list from fighting the user:
-    //
-    //   * While a menu is open (fastPoll) rows are NEVER reordered.
-    //     A poll landing mid-click used to move a row out from under
-    //     the cursor, which is the "glitch" — you press one network
-    //     and another one is suddenly there. New rows are appended
-    //     to the end instead, and the order settles on next open.
-    //
-    //   * A row is only rewritten when something actually changed.
-    //     set() on every poll rebound every delegate and restarted
-    //     their animations, which is the flicker.
+    // Keeps delegates alive so ListView add/remove/move transitions fire.
     function syncModel(model, items, key) {
         const freezeOrder = root.fastPoll;
 
@@ -272,9 +227,7 @@ Singleton {
         }
     }
 
-    // ============================================================
     // Readers
-    // ============================================================
 
     property Process deviceProc: Process {
         command: ["nmcli", "-t", "-f", "DEVICE,TYPE,STATE,CONNECTION", "device", "status"]
@@ -384,8 +337,7 @@ Singleton {
                         activeSignal = strength;
                     }
 
-                    // Collapse multiple APs of the same SSID,
-                    // keeping the strongest one.
+                    // Collapse multiple APs of the same SSID, keeping the strongest one.
                     if (seen[ssid] !== undefined) {
                         const prev = list[seen[ssid]];
 
@@ -413,13 +365,7 @@ Singleton {
                     });
                 }
 
-                // Connected first, then by signal strength
-                // Sort on BUCKETED strength, never the raw value.
-                // nmcli reports signal wobble of a few points between
-                // polls, so a raw comparison makes neighbouring APs
-                // trade places on every refresh. The ssid tiebreak
-                // guarantees a total order, so equal buckets cannot
-                // flip either.
+                // Connected first, then by signal strength Sort on BUCKETED strength, never the raw value.
                 list.sort(function (a, b) {
                     if (a.inUse !== b.inUse)
                         return a.inUse ? -1 : 1;
@@ -447,9 +393,7 @@ Singleton {
         }
     }
 
-    // ============================================================
     // Action runner (serialised queue)
-    // ============================================================
 
     property var actionQueue: []
     property string currentTag: ""
@@ -519,9 +463,7 @@ Singleton {
         root.drainQueue();
     }
 
-    // ============================================================
     // Public API — Wi-Fi
-    // ============================================================
 
     function toggleWifi() {
         root.run(["nmcli", "radio", "wifi", root.wifiEnabled ? "off" : "on"]);
@@ -580,9 +522,7 @@ Singleton {
         root.run(cmd, ssid);
     }
 
-    // ============================================================
     // Public API — Ethernet
-    // ============================================================
 
     function connectEthernet(exclusive) {
         if (root.ethDevice === "")
@@ -607,9 +547,7 @@ Singleton {
             root.connectEthernet(true);
     }
 
-    // ============================================================
     // Misc
-    // ============================================================
 
     function openEditor() {
         Quickshell.execDetached(["nm-connection-editor"]);

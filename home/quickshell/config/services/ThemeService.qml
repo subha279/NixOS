@@ -4,25 +4,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-// ============================================================
 // Aurora Theme Service
-// ============================================================
-//
-// Feeds the colorscheme picker from files that
-// home/theme/default.nix already generates. Nothing here invents
-// theme data.
-//
-// Inputs:
-//
-//   ~/.config/aurora/themes.list    <id>\t<display name>
-//   ~/.config/aurora/themes.json    every theme's full palette
-//   ~/.config/aurora/active-theme   the active theme id
-//
-// This service never writes theme state. Switching is delegated to
-// ~/.local/bin/aurora-theme, which owns the symlink relinking and
-// the hyprctl reload. Two writers would mean two sources of truth.
-//
-// ============================================================
 
 QtObject {
     id: root
@@ -31,12 +13,7 @@ QtObject {
     readonly property string auroraDirectory: root.home + "/.config/aurora"
     readonly property string switcherPath: root.home + "/.local/bin/aurora-theme"
 
-    // --------------------------------------------------------
     // Sources
-    //
-    // watchChanges means switching a theme from the terminal is
-    // reflected in the picker without a shell restart.
-    // --------------------------------------------------------
 
     property FileView listFile: FileView {
         path: root.auroraDirectory + "/themes.list"
@@ -62,9 +39,7 @@ QtObject {
         onFileChanged: this.reload()
     }
 
-    // --------------------------------------------------------
     // Derived state
-    // --------------------------------------------------------
 
     readonly property string activeId: {
         const raw = root.activeFile.text()
@@ -87,10 +62,7 @@ QtObject {
         }
     }
 
-    // themes.list is the ordering authority. themes.json supplies
-    // the palette. A theme present in the list but missing from the
-    // catalogue still appears, just without swatches, which beats
-    // silently vanishing from the picker.
+    // themes.list is the ordering authority.
     readonly property var themes: {
         const raw = root.listFile.text()
         if (!raw)
@@ -129,13 +101,7 @@ QtObject {
 
     readonly property int count: root.themes.length
 
-    // --------------------------------------------------------
     // Search
-    //
-    // Tiered scoring so typing "gru" puts Gruvbox first rather than
-    // whatever happens to contain those letters. The active theme
-    // gets a nudge so re-confirming the current theme is cheap.
-    // --------------------------------------------------------
 
     function search(query) {
         const all = root.themes
@@ -184,9 +150,7 @@ QtObject {
         return out
     }
 
-    // --------------------------------------------------------
     // Actions
-    // --------------------------------------------------------
 
     function apply(themeId) {
         if (!themeId || themeId.length === 0)

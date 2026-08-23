@@ -5,13 +5,7 @@ import Quickshell
 import "../core" as Core
 import "../services" as Services
 
-// ================================================================
 // Notification center bar module (leftmost slot)
-// ----------------------------------------------------------------
-//   left click    toggle the notification panel
-//   right click   clear every notification
-//   middle click  toggle do-not-disturb
-// ================================================================
 
 Item {
     id: root
@@ -84,9 +78,7 @@ Item {
         }
     }
 
-    // ------------------------------------------------------------
     // Unread count badge
-    // ------------------------------------------------------------
 
     Rectangle {
         anchors.top: parent.top

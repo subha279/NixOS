@@ -1,17 +1,4 @@
--- ============================================================================
 -- Aurora Color Preview
--- ============================================================================
---
--- Highlights color literals with their actual color without changing Aurora's
--- theme. Hex values work in every normal file; CSS functions and named colors
--- are enabled where they are useful. QML receives its alpha-first hex format.
---
--- Examples:
---
---   #7aa2f7  #0f8  #112233aa  rgb(122 162 247)  hsl(220 86% 72%)
---   QML: #aa7aa2f7  0xaa7aa2f7
---
--- ============================================================================
 
 local M = {}
 
@@ -27,8 +14,7 @@ function M.setup()
 		filetypes = {
 			"*",
 
-			-- Named colors are useful in web styles, but keeping them disabled for
-			-- unrelated filetypes avoids highlighting ordinary words like "red".
+			-- Named colors are useful in web styles, but keeping them disabled for unrelated filetypes avoids highlighting ordinary words like "red".
 			css = {
 				parsers = { names = { enable = true } },
 			},

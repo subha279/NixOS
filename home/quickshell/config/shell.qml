@@ -1,4 +1,4 @@
-//@ pragma UseQApplication
+// @ pragma UseQApplication
 
 import Quickshell
 import Quickshell.Wayland
@@ -17,12 +17,7 @@ Scope {
     NotificationPopup {}
     Notifications {}
 
-    // dmenu-style surfaces, replacing Fuzzel. Each registers its own
-    // IPC target, so Hyprland opens them with:
-    //
-    //     qs ipc call launcher  toggle
-    //     qs ipc call wallpaper toggle
-    //     qs ipc call theme     toggle
+    // dmenu-style surfaces.
     AppLauncher {}
     WallpaperPicker {}
     ThemePicker {}
