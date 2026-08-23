@@ -53,6 +53,7 @@ Item {
         Behavior on color {
             ColorAnimation {
                 duration: 120
+                easing.type: Easing.OutQuint
             }
         }
     }
@@ -76,14 +77,14 @@ Item {
         Behavior on opacity {
             NumberAnimation {
                 duration: 200
-                easing.type: Easing.OutCubic
+                easing.type: Easing.OutQuint
             }
         }
 
         Behavior on scale {
             NumberAnimation {
                 duration: 160
-                easing.type: Easing.OutCubic
+                easing.type: Easing.OutQuint
             }
         }
     }
@@ -120,6 +121,7 @@ Item {
         Behavior on color {
             ColorAnimation {
                 duration: 150
+                easing.type: Easing.OutQuint
             }
         }
 
@@ -130,14 +132,14 @@ Item {
         Behavior on opacity {
             NumberAnimation {
                 duration: 200
-                easing.type: Easing.OutCubic
+                easing.type: Easing.OutQuint
             }
         }
 
         Behavior on scale {
             NumberAnimation {
                 duration: 160
-                easing.type: Easing.OutCubic
+                easing.type: Easing.OutQuint
             }
         }
     }
@@ -163,6 +165,7 @@ Item {
         Behavior on opacity {
             NumberAnimation {
                 duration: 180
+                easing.type: Easing.OutQuint
             }
         }
 

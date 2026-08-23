@@ -97,6 +97,7 @@ Components.LauncherSurface {
                 Behavior on color {
                     ColorAnimation {
                         duration: Core.Theme.durFast
+                        easing.type: Easing.OutQuint
                     }
                 }
 

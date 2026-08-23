@@ -19,6 +19,10 @@ Components.LauncherSurface {
 
     columns: 3
 
+    // The wheel and h/j/k/l move the selection only -- nothing is applied
+    // until Enter, so travelling through the grid is free.
+    vimNavigation: true
+
     readonly property var results: Services.WallpaperService.search(launcher.query)
 
     itemCount: launcher.results.length
@@ -63,6 +67,17 @@ Components.LauncherSurface {
             clip: true
             boundsBehavior: Flickable.StopAtBounds
 
+            // The wheel moves the SELECTION, one wallpaper per notch, instead
+            // of flicking the view: the highlight is what you steer, and the
+            // view follows it rather than drifting independently of it.
+            interactive: false
+
+            WheelHandler {
+                onWheel: function (event) {
+                    launcher.wheelSelect(event.angleDelta.y);
+                }
+            }
+
             cellWidth: Math.floor(width / launcher.columns)
             cellHeight: Math.round(cellWidth * 0.70)
 
@@ -91,23 +106,59 @@ Components.LauncherSurface {
                 readonly property bool selected: cell.index === launcher.selectedIndex
                 readonly property bool applied: Services.WallpaperService.current === cell.modelData.path
 
-                Rectangle {
-                    anchors.fill: parent
-                    anchors.margins: 2
+                // The selected tile grows past its own cell, so it has to paint
+                // over its neighbours.
+                z: cell.selected ? 3 : (cell.applied ? 1 : 0)
 
-                    // Square tiles, to match the flat Omarchy chrome.
-                    radius: 0
+                Rectangle {
+                    id: tile
+
+                    anchors.fill: parent
+
+                    // Headroom for the zoom. The selected tile grows past its
+                    // own cell and the grid clips, so without a wider gutter
+                    // the outer columns would get shaved flat as they scale.
+                    anchors.margins: 8
+
+                    // Was square, to match the flat Omarchy chrome. Rounded now
+                    // that the tiles are meant to read as widgets.
+                    radius: Core.Theme.radiusSmall
 
                     color: Core.Theme.surface
                     clip: true
 
-                    // Selection is now shown by border weight rather than by scaling the tile: no bounce, no reflow.
+                    // Zoom on selection -- the caelestia move. The frame itself
+                    // only goes to 1.10, because it grows against the grid's
+                    // clip edge; most of the zoom now lives in the image below,
+                    // which the tile clips anyway and so costs nothing.
+                    scale: cell.selected ? 1.10 : 1.0
+
+                    Behavior on scale {
+                        NumberAnimation {
+                            duration: 260
+                            easing.type: Easing.OutQuint
+                        }
+                    }
+
+                    // Everything else sits back rather than merely losing its
+                    // border. Half the sense of depth comes from this, not from
+                    // the scale.
+                    opacity: cell.selected ? 1.0 : 0.72
+
+                    Behavior on opacity {
+                        NumberAnimation {
+                            duration: Core.Theme.durBase
+                            easing.type: Easing.OutQuint
+                        }
+                    }
+
                     border.width: cell.selected ? Core.Theme.borderWidth * 2 : Core.Theme.borderWidth
                     border.color: cell.selected ? Core.Theme.accent : (cell.applied ? Core.Theme.accentMuted : Core.Theme.border)
 
                     Behavior on border.color {
                         ColorAnimation {
                             duration: Core.Theme.durFast
+                            easing.type: Easing.OutQuint
                         }
                     }
 
@@ -123,11 +174,26 @@ Components.LauncherSurface {
                         fillMode: Image.PreserveAspectCrop
                         source: "file://" + cell.modelData.path
 
+                        // A second, slower zoom inside the frame, and the one
+                        // doing most of the work now: the picture pushes well
+                        // past the edges of its own tile, so the crop opens up
+                        // as you land on it. Two speeds is what separates this
+                        // from a tile that simply got bigger.
+                        scale: cell.selected ? 1.22 : 1.0
+
+                        Behavior on scale {
+                            NumberAnimation {
+                                duration: 420
+                                easing.type: Easing.OutQuint
+                            }
+                        }
+
                         opacity: status === Image.Ready ? 1.0 : 0.0
 
                         Behavior on opacity {
                             NumberAnimation {
                                 duration: Core.Theme.durBase
+                                easing.type: Easing.OutQuint
                             }
                         }
                     }
@@ -182,7 +248,13 @@ Components.LauncherSurface {
 
                     hoverEnabled: true
 
-                    onEntered: launcher.selectedIndex = cell.index
+                    // Ignored for a moment after each wheel notch, so a view
+                    // scrolling under a still pointer cannot steal the
+                    // selection back. See wheelActive in LauncherSurface.
+                    onEntered: {
+                        if (!launcher.wheelActive)
+                            launcher.selectedIndex = cell.index;
+                    }
                     onClicked: {
                         launcher.selectedIndex = cell.index;
                         launcher.accepted();

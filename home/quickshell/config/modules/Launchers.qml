@@ -64,6 +64,7 @@ Item {
             Behavior on color {
                 ColorAnimation {
                     duration: Core.Theme.durFast
+                    easing.type: Easing.OutQuint
                 }
             }
         }
@@ -83,6 +84,7 @@ Item {
             Behavior on color {
                 ColorAnimation {
                     duration: Core.Theme.durFast
+                    easing.type: Easing.OutQuint
                 }
             }
         }

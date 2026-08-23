@@ -77,7 +77,7 @@ PanelWindow {
 
                 duration: 180
 
-                easing.type: Easing.OutCubic
+                easing.type: Easing.OutQuint
             }
         }
 
@@ -189,7 +189,7 @@ PanelWindow {
 
                         duration: 170
 
-                        easing.type: Easing.OutCubic
+                        easing.type: Easing.OutQuint
                     }
 
                     NumberAnimation {
@@ -201,7 +201,7 @@ PanelWindow {
 
                         duration: 140
 
-                        easing.type: Easing.OutCubic
+                        easing.type: Easing.OutQuint
                     }
                 }
 
@@ -220,7 +220,7 @@ PanelWindow {
 
                             duration: 150
 
-                            easing.type: Easing.InCubic
+                            easing.type: Easing.InQuint
                         }
 
                         NumberAnimation {
@@ -231,7 +231,7 @@ PanelWindow {
 
                             duration: 170
 
-                            easing.type: Easing.InCubic
+                            easing.type: Easing.InQuint
                         }
 
                         NumberAnimation {
@@ -242,7 +242,7 @@ PanelWindow {
 
                             duration: 130
 
-                            easing.type: Easing.InCubic
+                            easing.type: Easing.InQuint
                         }
                     }
 

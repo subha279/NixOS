@@ -29,6 +29,7 @@ Item {
         Behavior on color {
             ColorAnimation {
                 duration: 120
+                easing.type: Easing.OutQuint
             }
         }
     }
@@ -48,6 +49,7 @@ Item {
         Behavior on color {
             ColorAnimation {
                 duration: 150
+                easing.type: Easing.OutQuint
             }
         }
 
@@ -62,7 +64,7 @@ Item {
                 property: "scale"
                 to: 1.22
                 duration: 110
-                easing.type: Easing.OutCubic
+                easing.type: Easing.OutQuint
             }
 
             NumberAnimation {
@@ -70,7 +72,7 @@ Item {
                 property: "scale"
                 to: 1.0
                 duration: 160
-                easing.type: Easing.OutCubic
+                easing.type: Easing.OutQuint
             }
         }
     }
@@ -96,6 +98,7 @@ Item {
         Behavior on opacity {
             NumberAnimation {
                 duration: 180
+                easing.type: Easing.OutQuint
             }
         }
 

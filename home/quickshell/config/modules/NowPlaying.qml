@@ -139,7 +139,7 @@ Item {
     Behavior on opacity {
         NumberAnimation {
             duration: 160
-            easing.type: Easing.OutCubic
+            easing.type: Easing.OutQuint
         }
     }
 
@@ -152,7 +152,7 @@ Item {
         Behavior on y {
             NumberAnimation {
                 duration: 180
-                easing.type: Easing.OutCubic
+                easing.type: Easing.OutQuint
             }
         }
     }
@@ -185,6 +185,7 @@ Item {
             Behavior on color {
                 ColorAnimation {
                     duration: 200
+                    easing.type: Easing.OutQuint
                 }
             }
 
@@ -220,7 +221,7 @@ Item {
                 property: "height"
                 to: 1
                 duration: 260
-                easing.type: Easing.OutCubic
+                easing.type: Easing.OutQuint
             }
         }
     }

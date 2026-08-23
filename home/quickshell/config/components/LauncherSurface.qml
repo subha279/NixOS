@@ -43,9 +43,38 @@ PanelWindow {
 
     property alias query: input.text
 
+    // Live selection
+    //
+    // Pickers that apply as you move (wallpaper, colourscheme) set this. The
+    // applier is debounced rather than fired on every step: spinning the wheel
+    // through forty wallpapers must not spawn forty processes, it should apply
+    // the one you stop on.
+    property bool liveSelect: false
+
+    property int liveSelectDelay: 200
+
+    // h/j/k/l navigation, live only while the query is empty so that typing a
+    // search containing those letters still types.
+    property bool vimNavigation: false
+
     signal accepted
+    signal previewSelection
     signal didOpen
     signal didClose
+
+    Timer {
+        id: previewTimer
+
+        interval: root.liveSelectDelay
+        repeat: false
+
+        // Guarded: the last step before you hit Enter or Escape can land after
+        // the launcher has already closed.
+        onTriggered: {
+            if (root.open)
+                root.previewSelection();
+        }
+    }
 
     readonly property bool open: Core.PopupManager.isOpen(root.launcherId)
 
@@ -75,6 +104,58 @@ PanelWindow {
             next += root.itemCount;
 
         root.selectedIndex = next % root.itemCount;
+
+        // Deliberately here rather than in onSelectedIndexChanged: hovering the
+        // grid with the mouse moves the selection, and so does retyping the
+        // query, and neither of those should apply anything.
+        if (root.liveSelect && root.open)
+            previewTimer.restart();
+    }
+
+    // One wheel notch, one item.
+    //
+    // A mouse sends 120 units per notch; a touchpad sends a stream of much
+    // smaller deltas, so they accumulate until they add up to a notch. The
+    // accumulator resets on a direction change, otherwise leftover travel from
+    // scrolling one way eats the first step back the other way.
+    property real wheelTravel: 0
+
+    // While the wheel is stepping the selection, the view scrolls underneath a
+    // stationary pointer -- and Qt then reports a hover on whatever item slid
+    // under it, which would fight the wheel for control of the selection. So
+    // hover is ignored for a moment after each notch. It resumes the instant
+    // the pointer crosses into a different item under its own steam.
+    readonly property bool wheelActive: wheelLock.running
+
+    Timer {
+        id: wheelLock
+
+        interval: 260
+        repeat: false
+    }
+
+    function wheelSelect(deltaY) {
+        if (deltaY === 0)
+            return;
+
+        wheelLock.restart();
+
+        if ((deltaY > 0) !== (root.wheelTravel > 0))
+            root.wheelTravel = 0;
+
+        root.wheelTravel += deltaY;
+
+        const notch = 120;
+
+        while (root.wheelTravel >= notch) {
+            root.move(-1);
+            root.wheelTravel -= notch;
+        }
+
+        while (root.wheelTravel <= -notch) {
+            root.move(1);
+            root.wheelTravel += notch;
+        }
     }
 
     onItemCountChanged: {
@@ -86,9 +167,15 @@ PanelWindow {
         if (root.open) {
             input.text = "";
             root.selectedIndex = 0;
+            root.wheelTravel = 0;
+
+            // Resetting the selection must not count as a move.
+            previewTimer.stop();
+
             input.forceActiveFocus();
             root.didOpen();
         } else {
+            previewTimer.stop();
             root.didClose();
         }
     }
@@ -114,7 +201,7 @@ PanelWindow {
     Behavior on reveal {
         NumberAnimation {
             duration: root.open ? Core.Theme.durOpen : Core.Theme.durClose
-            easing.type: root.open ? Easing.OutCubic : Easing.InCubic
+            easing.type: root.open ? Easing.OutQuint : Easing.InQuint
         }
     }
 
@@ -204,7 +291,7 @@ PanelWindow {
         Behavior on height {
             NumberAnimation {
                 duration: 160
-                easing.type: Easing.OutCubic
+                easing.type: Easing.OutQuint
             }
         }
         // Omarchy-style chrome: near-square corners, a single hairline border and no bounce on open. The drop shadow is the sibling declared above, which keeps it outside this card's own bounds.
@@ -331,6 +418,42 @@ PanelWindow {
                             root.move(-1);
                             event.accepted = true;
                             return;
+                        }
+
+                        // Vim navigation
+                        //
+                        // Only with an empty query, and only unmodified: the
+                        // moment you start typing, h/j/k/l go back to being
+                        // letters, so searching for "khaki" still works. This
+                        // is why it is gated on the query rather than on a
+                        // mode -- there is nothing to remember and nothing to
+                        // toggle.
+                        if (root.vimNavigation && input.text.length === 0 && event.modifiers === Qt.NoModifier) {
+                            if (event.key === Qt.Key_H) {
+                                root.move(-1);
+                                event.accepted = true;
+                                return;
+                            }
+
+                            if (event.key === Qt.Key_L) {
+                                root.move(1);
+                                event.accepted = true;
+                                return;
+                            }
+
+                            // In a one-column list, columns is 1, so k and j
+                            // are simply previous and next.
+                            if (event.key === Qt.Key_K) {
+                                root.move(-root.columns);
+                                event.accepted = true;
+                                return;
+                            }
+
+                            if (event.key === Qt.Key_J) {
+                                root.move(root.columns);
+                                event.accepted = true;
+                                return;
+                            }
                         }
 
                         // Horizontal arrows only navigate in grids, and only at the ends of the text, so editing the query still works normally.

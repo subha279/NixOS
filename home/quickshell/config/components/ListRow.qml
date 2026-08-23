@@ -32,6 +32,7 @@ Rectangle {
     Behavior on color {
         ColorAnimation {
             duration: 110
+            easing.type: Easing.OutQuint
         }
     }
 
@@ -40,6 +41,7 @@ Rectangle {
     Behavior on opacity {
         NumberAnimation {
             duration: Core.Theme.durFast
+            easing.type: Easing.OutQuint
         }
     }
 
@@ -61,7 +63,7 @@ Rectangle {
         Behavior on height {
             NumberAnimation {
                 duration: 150
-                easing.type: Easing.OutCubic
+                easing.type: Easing.OutQuint
             }
         }
     }
@@ -87,6 +89,7 @@ Rectangle {
         Behavior on color {
             ColorAnimation {
                 duration: 150
+                easing.type: Easing.OutQuint
             }
         }
 
@@ -95,6 +98,7 @@ Rectangle {
         Behavior on opacity {
             NumberAnimation {
                 duration: 120
+                easing.type: Easing.OutQuint
             }
         }
     }
@@ -116,6 +120,7 @@ Rectangle {
         Behavior on opacity {
             NumberAnimation {
                 duration: 120
+                easing.type: Easing.OutQuint
             }
         }
 
@@ -221,7 +226,7 @@ Rectangle {
     Behavior on scale {
         NumberAnimation {
             duration: 110
-            easing.type: Easing.OutCubic
+            easing.type: Easing.OutQuint
         }
     }
 }

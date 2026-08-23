@@ -54,6 +54,7 @@ Item {
                     Behavior on color {
                         ColorAnimation {
                             duration: 120
+                            easing.type: Easing.OutQuint
                         }
                     }
                 }

@@ -238,7 +238,7 @@ PanelWindow {
         Behavior on height {
             NumberAnimation {
                 duration: root.open ? Core.Theme.durOpen : Core.Theme.durClose
-                easing.type: Easing.OutCubic
+                easing.type: Easing.OutQuint
             }
         }
 
@@ -251,7 +251,7 @@ PanelWindow {
         Behavior on scale {
             NumberAnimation {
                 duration: root.open ? Core.Theme.durOpen : Core.Theme.durClose
-                easing.type: root.open ? Easing.OutCubic : Easing.InCubic
+                easing.type: root.open ? Easing.OutQuint : Easing.InQuint
             }
         }
 
@@ -259,7 +259,7 @@ PanelWindow {
             NumberAnimation {
                 duration: root.open ? Core.Theme.durBase : Core.Theme.durClose
 
-                easing.type: Easing.OutCubic
+                easing.type: Easing.OutQuint
             }
         }
 
@@ -316,7 +316,7 @@ PanelWindow {
                 Behavior on y {
                     NumberAnimation {
                         duration: Core.Theme.durSlow
-                        easing.type: Easing.OutCubic
+                        easing.type: Easing.OutQuint
                     }
                 }
             }
@@ -325,7 +325,7 @@ PanelWindow {
                 NumberAnimation {
                     duration: root.open ? Core.Theme.durSlow : Core.Theme.durFast
 
-                    easing.type: Easing.OutCubic
+                    easing.type: Easing.OutQuint
                 }
             }
 
@@ -403,20 +403,21 @@ PanelWindow {
             Behavior on scale {
                 NumberAnimation {
                     duration: menuLayer.active ? 180 : 120
-                    easing.type: menuLayer.active ? Easing.OutCubic : Easing.InCubic
+                    easing.type: menuLayer.active ? Easing.OutQuint : Easing.InQuint
                 }
             }
 
             Behavior on opacity {
                 NumberAnimation {
                     duration: menuLayer.active ? 150 : 110
+                    easing.type: Easing.OutQuint
                 }
             }
 
             Behavior on height {
                 NumberAnimation {
                     duration: 180
-                    easing.type: Easing.OutCubic
+                    easing.type: Easing.OutQuint
                 }
             }
 
@@ -484,6 +485,7 @@ PanelWindow {
                                 Behavior on color {
                                     ColorAnimation {
                                         duration: 90
+                                        easing.type: Easing.OutQuint
                                     }
                                 }
 

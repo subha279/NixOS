@@ -253,7 +253,7 @@ Components.PopupSurface {
                 Behavior on height {
                     NumberAnimation {
                         duration: Core.Theme.durBase
-                        easing.type: Easing.OutCubic
+                        easing.type: Easing.OutQuint
                     }
                 }
 
@@ -272,7 +272,7 @@ Components.PopupSurface {
                             from: 0
                             to: 1
                             duration: 160
-                            easing.type: Easing.OutCubic
+                            easing.type: Easing.OutQuint
                         }
                     }
 
@@ -280,7 +280,7 @@ Components.PopupSurface {
                         NumberAnimation {
                             properties: "y"
                             duration: 170
-                            easing.type: Easing.OutCubic
+                            easing.type: Easing.OutQuint
                         }
                     }
 
@@ -487,7 +487,7 @@ Components.PopupSurface {
                 Behavior on height {
                     NumberAnimation {
                         duration: Core.Theme.durBase
-                        easing.type: Easing.OutCubic
+                        easing.type: Easing.OutQuint
                     }
                 }
 
@@ -506,7 +506,7 @@ Components.PopupSurface {
                             from: 0
                             to: 1
                             duration: 160
-                            easing.type: Easing.OutCubic
+                            easing.type: Easing.OutQuint
                         }
                     }
 
@@ -514,7 +514,7 @@ Components.PopupSurface {
                         NumberAnimation {
                             properties: "y"
                             duration: 170
-                            easing.type: Easing.OutCubic
+                            easing.type: Easing.OutQuint
                         }
                     }
 
@@ -588,7 +588,7 @@ Components.PopupSurface {
                         from: 0
                         to: 1
                         duration: 160
-                        easing.type: Easing.OutCubic
+                        easing.type: Easing.OutQuint
                     }
                 }
 
@@ -596,7 +596,7 @@ Components.PopupSurface {
                     NumberAnimation {
                         properties: "y"
                         duration: 170
-                        easing.type: Easing.OutCubic
+                        easing.type: Easing.OutQuint
                     }
                 }
 

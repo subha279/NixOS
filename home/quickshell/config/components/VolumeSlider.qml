@@ -32,6 +32,7 @@ Item {
     Behavior on opacity {
         NumberAnimation {
             duration: Core.Theme.durFast
+            easing.type: Easing.OutQuint
         }
     }
 
@@ -51,7 +52,7 @@ Item {
         Behavior on height {
             NumberAnimation {
                 duration: 140
-                easing.type: Easing.OutCubic
+                easing.type: Easing.OutQuint
             }
         }
 
@@ -71,6 +72,7 @@ Item {
             Behavior on color {
                 ColorAnimation {
                     duration: Core.Theme.durFast
+                    easing.type: Easing.OutQuint
                 }
             }
 
@@ -80,7 +82,7 @@ Item {
 
                 NumberAnimation {
                     duration: Core.Theme.durBase
-                    easing.type: Easing.OutCubic
+                    easing.type: Easing.OutQuint
                 }
             }
         }
@@ -105,7 +107,7 @@ Item {
             Behavior on width {
                 NumberAnimation {
                     duration: 150
-                    easing.type: Easing.OutCubic
+                    easing.type: Easing.OutQuint
                 }
             }
 
@@ -114,7 +116,7 @@ Item {
 
                 NumberAnimation {
                     duration: Core.Theme.durBase
-                    easing.type: Easing.OutCubic
+                    easing.type: Easing.OutQuint
                 }
             }
         }

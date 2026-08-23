@@ -262,23 +262,23 @@ QtObject {
     readonly property real springMass: 1.1
 
     // Motion is intentionally short and deterministic.
-    readonly property int durFast: 90
+    readonly property int durFast: 110
 
-    readonly property int durBase: 140
+    readonly property int durBase: 180
 
-    readonly property int durSlow: 190
+    readonly property int durSlow: 260
 
-    readonly property int durOpen: 170
+    readonly property int durOpen: 220
 
-    readonly property int durClose: 110
+    readonly property int durClose: 150
 
     readonly property real overshoot: 1.0
 
     // Collapsing Bar
 
-    readonly property int barRevealDuration: 150
+    readonly property int barRevealDuration: 200
 
-    readonly property int barHideDuration: 100
+    readonly property int barHideDuration: 140
 
     readonly property int barCollapseDelay: 180
 }

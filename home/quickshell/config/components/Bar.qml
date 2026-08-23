@@ -67,7 +67,7 @@ PanelWindow {
     Behavior on reveal {
         NumberAnimation {
             duration: root.expanded ? Core.Theme.barRevealDuration : Core.Theme.barHideDuration
-            easing.type: Easing.OutCubic
+            easing.type: Easing.OutQuint
         }
     }
 
@@ -84,7 +84,7 @@ PanelWindow {
     Behavior on osdMix {
         NumberAnimation {
             duration: Core.Theme.barRevealDuration
-            easing.type: Easing.OutCubic
+            easing.type: Easing.OutQuint
         }
     }
 

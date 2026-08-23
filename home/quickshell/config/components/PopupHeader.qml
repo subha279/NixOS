@@ -85,6 +85,7 @@ Item {
                 Behavior on color {
                     ColorAnimation {
                         duration: 100
+                        easing.type: Easing.OutQuint
                     }
                 }
 
@@ -116,7 +117,7 @@ Item {
                 Behavior on scale {
                     NumberAnimation {
                         duration: 110
-                        easing.type: Easing.OutCubic
+                        easing.type: Easing.OutQuint
                     }
                 }
 
@@ -165,6 +166,7 @@ Item {
                 Behavior on color {
                     ColorAnimation {
                         duration: 180
+                        easing.type: Easing.OutQuint
                     }
                 }
 
@@ -183,13 +185,14 @@ Item {
                     Behavior on x {
                         NumberAnimation {
                             duration: 160
-                            easing.type: Easing.OutCubic
+                            easing.type: Easing.OutQuint
                         }
                     }
 
                     Behavior on color {
                         ColorAnimation {
                             duration: 180
+                            easing.type: Easing.OutQuint
                         }
                     }
                 }
