@@ -66,9 +66,8 @@ hl.config({
 			-- Fewer, wider passes: size 8 / 3 passes lands on roughly the same
 			-- visual radius as size 4 / 5 passes for about half the fragment
 			-- work, which matters on the laptop host with vrr = 2.
-			size = 8,
+			size = 6,
 			passes = 3,
-
 			vibrancy = 0.1685,
 			brightness = 0.88,
 			noise = 0.02,
