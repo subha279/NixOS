@@ -8,6 +8,22 @@
 
 ---
 
+## 🎬 Desktop Showcase
+
+<p align="center">
+  <a href="https://www.youtube.com/watch?v=J9286xiVBNk">
+    <img src="https://img.youtube.com/vi/J9286xiVBNk/maxresdefault.jpg"
+         alt="NixOS + Hyprland Desktop Showcase"
+         width="900">
+  </a>
+</p>
+
+<p align="center">
+  <sub>▶ Watch the full showcase on YouTube</sub>
+</p>
+
+---
+
 ## 01 · Overview
 
 | Component | Configuration |
