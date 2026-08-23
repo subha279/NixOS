@@ -61,20 +61,9 @@ Components.LauncherSurface {
             clip: true
             boundsBehavior: Flickable.StopAtBounds
 
-            // Rows are inset cards now, in the style of the battery popup, so
-            // they need air between them instead of butting together.
             spacing: 4
 
-            // One app per wheel notch. The wheel moves the SELECTION rather
-            // than flicking the list, so the highlight is what you steer and
-            // the view follows it.
             interactive: false
-
-            WheelHandler {
-                onWheel: function (event) {
-                    launcher.wheelSelect(event.angleDelta.y);
-                }
-            }
 
             // Keep the selection off the very edge while scrolling.
             highlightRangeMode: ListView.ApplyRange
@@ -99,16 +88,6 @@ Components.LauncherSurface {
 
                 readonly property bool selected: row.index === launcher.selectedIndex
 
-                // Inset from the list so the selected row has somewhere to
-                // grow into: a full-bleed row scaled up runs off both edges and
-                // gets shaved flat by the clip.
-                //
-                // The inset has to come from a transform, not from x. A vertical
-                // ListView positions its delegates itself and assigns x = 0 on
-                // every layout pass, which overwrites an x binding here and
-                // leaves the row narrow but still hugging the left edge. A
-                // Translate is applied on top of the view's positioning, so it
-                // survives.
                 width: list.width - 24
 
                 transform: Translate {

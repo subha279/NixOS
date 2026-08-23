@@ -67,16 +67,7 @@ Components.LauncherSurface {
             clip: true
             boundsBehavior: Flickable.StopAtBounds
 
-            // The wheel moves the SELECTION, one wallpaper per notch, instead
-            // of flicking the view: the highlight is what you steer, and the
-            // view follows it rather than drifting independently of it.
             interactive: false
-
-            WheelHandler {
-                onWheel: function (event) {
-                    launcher.wheelSelect(event.angleDelta.y);
-                }
-            }
 
             cellWidth: Math.floor(width / launcher.columns)
             cellHeight: Math.round(cellWidth * 0.70)

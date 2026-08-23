@@ -79,12 +79,6 @@ Components.LauncherSurface {
             // selection instead of flicking on its own.
             interactive: false
 
-            WheelHandler {
-                onWheel: function (event) {
-                    launcher.wheelSelect(event.angleDelta.y);
-                }
-            }
-
             highlightRangeMode: ListView.ApplyRange
             preferredHighlightBegin: 56
             preferredHighlightEnd: height - 56

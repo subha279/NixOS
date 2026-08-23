@@ -34,7 +34,8 @@ PanelWindow {
 
     readonly property int targetCardHeight: root.columns > 1 ? root.headerHeight + root.separatorHeight + root.visibleRows * Math.round((root.cardWidth / root.columns) * 0.70) : root.headerHeight + root.separatorHeight + root.visibleRows * root.rowHeight
 
-    // Grid launchers set this so Left/Right and Up/Down move by a row rather than by one item.
+    // Grid launchers set this so Left/Right and Up/Down
+    // move by a row rather than by one item.
     property int columns: 1
 
     property int selectedIndex: 0
@@ -45,16 +46,16 @@ PanelWindow {
 
     // Live selection
     //
-    // Pickers that apply as you move (wallpaper, colourscheme) set this. The
-    // applier is debounced rather than fired on every step: spinning the wheel
-    // through forty wallpapers must not spawn forty processes, it should apply
-    // the one you stop on.
+    // Pickers that apply as you move (wallpaper, colourscheme) set this.
+    // The applier is debounced rather than fired on every step: spinning
+    // the wheel through forty wallpapers must not spawn forty processes,
+    // it should apply the one you stop on.
     property bool liveSelect: false
 
     property int liveSelectDelay: 200
 
-    // h/j/k/l navigation, live only while the query is empty so that typing a
-    // search containing those letters still types.
+    // h/j/k/l navigation, live only while the query is empty so that
+    // typing a search containing those letters still types.
     property bool vimNavigation: false
 
     signal accepted
@@ -68,8 +69,8 @@ PanelWindow {
         interval: root.liveSelectDelay
         repeat: false
 
-        // Guarded: the last step before you hit Enter or Escape can land after
-        // the launcher has already closed.
+        // Guarded: the last step before you hit Enter or Escape
+        // can land after the launcher has already closed.
         onTriggered: {
             if (root.open)
                 root.previewSelection();
@@ -96,7 +97,6 @@ PanelWindow {
     function move(delta) {
         if (root.itemCount <= 0)
             return;
-
         let next = root.selectedIndex + delta;
 
         // Wrap, so holding Down cycles instead of sticking.
@@ -105,9 +105,10 @@ PanelWindow {
 
         root.selectedIndex = next % root.itemCount;
 
-        // Deliberately here rather than in onSelectedIndexChanged: hovering the
-        // grid with the mouse moves the selection, and so does retyping the
-        // query, and neither of those should apply anything.
+        // Deliberately here rather than in onSelectedIndexChanged:
+        // hovering the grid with the mouse moves the selection, and so
+        // does retyping the query, and neither of those should apply
+        // anything.
         if (root.liveSelect && root.open)
             previewTimer.restart();
     }
@@ -115,46 +116,39 @@ PanelWindow {
     // One wheel notch, one item.
     //
     // A mouse sends 120 units per notch; a touchpad sends a stream of much
-    // smaller deltas, so they accumulate until they add up to a notch. The
-    // accumulator resets on a direction change, otherwise leftover travel from
-    // scrolling one way eats the first step back the other way.
+    // smaller deltas, so they accumulate until they add up to a notch.
+    // The accumulator resets on a direction change, otherwise leftover
+    // travel from scrolling one way eats the first step back the other way.
     property real wheelTravel: 0
 
-    // While the wheel is stepping the selection, the view scrolls underneath a
-    // stationary pointer -- and Qt then reports a hover on whatever item slid
-    // under it, which would fight the wheel for control of the selection. So
-    // hover is ignored for a moment after each notch. It resumes the instant
-    // the pointer crosses into a different item under its own steam.
+    // While the wheel is stepping the selection, the view scrolls underneath
+    // a stationary pointer -- and Qt then reports a hover on whatever item
+    // slid under it, which would fight the wheel for control of the selection.
+    // So hover is ignored for a moment after each notch.
+    // It resumes the instant the pointer crosses into a different item
+    // under its own steam.
     readonly property bool wheelActive: wheelLock.running
 
     Timer {
         id: wheelLock
 
-        interval: 260
+        interval: 120
         repeat: false
     }
 
     function wheelSelect(deltaY) {
-        if (deltaY === 0)
+        if (deltaY === 0 || root.itemCount <= 0)
             return;
 
+        // Ignore additional wheel events until the current step is finished.
+        if (wheelLock.running)
+            return;
         wheelLock.restart();
 
-        if ((deltaY > 0) !== (root.wheelTravel > 0))
-            root.wheelTravel = 0;
-
-        root.wheelTravel += deltaY;
-
-        const notch = 120;
-
-        while (root.wheelTravel >= notch) {
-            root.move(-1);
-            root.wheelTravel -= notch;
-        }
-
-        while (root.wheelTravel <= -notch) {
-            root.move(1);
-            root.wheelTravel += notch;
+        if (deltaY > 0) {
+            root.move(-root.columns);
+        } else {
+            root.move(root.columns);
         }
     }
 
@@ -195,12 +189,14 @@ PanelWindow {
 
     exclusionMode: ExclusionMode.Ignore
 
-    // Driving everything from one animated value keeps the close animation visible: the window stays mapped until reveal has actually reached
+    // Driving everything from one animated value keeps the close animation
+    // visible: the window stays mapped until reveal has actually reached.
     property real reveal: root.open ? 1.0 : 0.0
 
     Behavior on reveal {
         NumberAnimation {
             duration: root.open ? Core.Theme.durOpen : Core.Theme.durClose
+
             easing.type: root.open ? Easing.OutQuint : Easing.InQuint
         }
     }
@@ -215,10 +211,12 @@ PanelWindow {
 
     Rectangle {
         anchors.fill: parent
+
         color: Qt.alpha(Core.Theme.backgroundDark, root.scrimAlpha * root.reveal)
 
         MouseArea {
             anchors.fill: parent
+            acceptedButtons: Qt.LeftButton
             onClicked: root.dismiss()
         }
     }
@@ -294,7 +292,7 @@ PanelWindow {
                 easing.type: Easing.OutQuint
             }
         }
-        // Omarchy-style chrome: near-square corners, a single hairline border and no bounce on open. The drop shadow is the sibling declared above, which keeps it outside this card's own bounds.
+
         radius: Core.Theme.radiusSmall
 
         color: Core.Theme.backgroundGlass
@@ -304,12 +302,14 @@ PanelWindow {
 
         opacity: root.reveal
 
-        // Swallow clicks so they do not reach the scrim below.
         MouseArea {
             anchors.fill: parent
+            acceptedButtons: Qt.LeftButton
+            onWheel: function (event) {
+                root.wheelSelect(event.angleDelta.y);
+                event.accepted = true;
+            }
         }
-
-        // No horizontal margin and no spacing between children: the separator and the row selection bars run edge to edge, the way a dmenu list does.
         Column {
             anchors.fill: parent
             anchors.bottomMargin: Core.Theme.radiusSmall
@@ -331,7 +331,9 @@ PanelWindow {
                     anchors.verticalCenter: parent.verticalCenter
 
                     text: root.promptIcon
+
                     color: Core.Theme.accent
+
                     font.family: Core.Theme.fontMono
                     font.pixelSize: Core.Theme.fontSizeLarge
                 }
@@ -344,7 +346,9 @@ PanelWindow {
                     anchors.verticalCenter: parent.verticalCenter
 
                     text: root.counterText
+
                     color: Core.Theme.foregroundFaint
+
                     font.family: Core.Theme.fontMono
                     font.pixelSize: Core.Theme.fontSizeSmall
                 }
@@ -360,9 +364,11 @@ PanelWindow {
 
                     focus: true
                     selectByMouse: true
+
                     selectionColor: Core.Theme.accentMuted
 
                     color: Core.Theme.foreground
+
                     font.family: Core.Theme.fontMono
                     font.pixelSize: Core.Theme.fontSizeLarge
 
@@ -376,7 +382,9 @@ PanelWindow {
                         visible: input.text.length === 0
 
                         text: root.placeholder
+
                         color: Core.Theme.foregroundFaint
+
                         font.family: Core.Theme.fontMono
                         font.pixelSize: Core.Theme.fontSizeLarge
                     }
@@ -422,12 +430,10 @@ PanelWindow {
 
                         // Vim navigation
                         //
-                        // Only with an empty query, and only unmodified: the
-                        // moment you start typing, h/j/k/l go back to being
-                        // letters, so searching for "khaki" still works. This
-                        // is why it is gated on the query rather than on a
-                        // mode -- there is nothing to remember and nothing to
-                        // toggle.
+                        // Only with an empty query, and only unmodified:
+                        // the moment you start typing, h/j/k/l go back
+                        // to being letters, so searching for "khaki"
+                        // still works.
                         if (root.vimNavigation && input.text.length === 0 && event.modifiers === Qt.NoModifier) {
                             if (event.key === Qt.Key_H) {
                                 root.move(-1);
@@ -441,8 +447,8 @@ PanelWindow {
                                 return;
                             }
 
-                            // In a one-column list, columns is 1, so k and j
-                            // are simply previous and next.
+                            // In a one-column list, columns is 1,
+                            // so k and j are simply previous and next.
                             if (event.key === Qt.Key_K) {
                                 root.move(-root.columns);
                                 event.accepted = true;
@@ -456,7 +462,9 @@ PanelWindow {
                             }
                         }
 
-                        // Horizontal arrows only navigate in grids, and only at the ends of the text, so editing the query still works normally.
+                        // Horizontal arrows only navigate in grids,
+                        // and only at the ends of the text, so editing
+                        // the query still works normally.
                         if (root.columns > 1) {
                             if (event.key === Qt.Key_Right && input.cursorPosition >= input.text.length) {
                                 root.move(1);
@@ -479,6 +487,7 @@ PanelWindow {
             Rectangle {
                 width: parent.width
                 height: 1
+
                 color: Core.Theme.separator
             }
 
@@ -486,9 +495,11 @@ PanelWindow {
 
             Loader {
                 width: parent.width
+
                 height: parent.height - header.height - 1
 
                 active: root.visible
+
                 sourceComponent: root.contentComponent
             }
         }
