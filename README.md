@@ -680,6 +680,6 @@ The configuration keeps system modules, Home Manager modules, desktop behaviour,
 ---
 
 <p align="center">
-  <strong> NixOS · Hyprland · Quickshell · Stylix</strong><br>
+  <strong>NixOS · Hyprland · Quickshell · Stylix</strong><br>
   <sub>Flake-based laptop configuration</sub>
 </p>
