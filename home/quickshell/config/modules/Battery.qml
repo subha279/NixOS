@@ -77,7 +77,7 @@ Item {
     Row {
         anchors.centerIn: parent
 
-        spacing: 4
+        spacing: 5
 
         Text {
             id: icon
@@ -168,7 +168,7 @@ Item {
 
             const p = root.mapToItem(null, 0, root.height);
 
-            Core.PopupManager.toggle("battery", p.x + root.width / 2, p.y + Core.Theme.barMarginTop);
+            Core.PopupManager.toggle("battery", p.x + root.width / 2, p.y + 6);
         }
 
         onWheel: function (event) {
