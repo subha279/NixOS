@@ -5,7 +5,7 @@
   username = "subha";
 
   # networking.hostName
-  hostname = "subha";
+  hostname = "Subha";
 
   # Git identity.
   gitUser = "subha279";
