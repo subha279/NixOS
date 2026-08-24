@@ -1,6 +1,6 @@
 <div align="center">
 
-# NixOS · Aurora
+# NixOS
 
 ### A declarative, modular and keyboard-driven NixOS desktop
 
@@ -60,7 +60,7 @@ A production-oriented, flake-based **NixOS laptop configuration** built around a
 | 🐧 OS | NixOS 26.05 · `x86_64-linux` |
 | 🖥️ Desktop | Hyprland · Lua |
 | 🐚 Shell | Quickshell · QML |
-| 🎨 Theme | Stylix · 21 themes · active: `aurora` |
+| 🎨 Theme | Stylix · 21 themes |
 | 💻 Terminal | Kitty · Zsh |
 | ✏️ Editor | Neovim · 17 LSPs |
 | 📦 Management | Home Manager · Flakes |
@@ -187,7 +187,6 @@ NixOS/
 │   ├── variables.nix
 │   └── themes.nix
 │
-├── scripts/
 └── setup.sh
 ```
 
@@ -272,10 +271,10 @@ It covers GTK, Qt, Kitty, Neovim and Quickshell, with explicit NixOS and Home Ma
 Available themes include:
 
 ```text
-aurora · gruvbox · tokyo-night · monochrome
+gruvbox · tokyo-night · monochrome
 catppuccin · nord · dracula · one-dark
 everforest · rose-pine · solarized
-kanagawa · github-dark · monokai-pro
+kanagawa · github-dark · monokai-pro and more
 ```
 
 Runtime theme switching:
@@ -324,7 +323,7 @@ cd ~/NixOS
 
 ### Reloading vs applying configuration changes
 
-> **Important:** `hyprctl reload` and restarting Quickshell only reload the **currently installed** configuration.  
+> **Important:** `hyprctl reload` and restarting Quickshell only reload the **currently installed** configuration.
 > If the Lua/QML file is managed by Home Manager, editing the repository does **not** update the live config until Home Manager/NixOS activation runs.
 
 | Change | After editing the repository |
@@ -439,8 +438,6 @@ The goal is simple: **one declarative source of truth for the OS, desktop, shell
 ---
 
 <div align="center">
-
-###  NixOS · Hyprland · Quickshell · Stylix
 
 <sub>Built for a fast, minimal and reproducible Wayland workflow.</sub>
 
