@@ -88,8 +88,8 @@ sudo nixos-rebuild switch --flake .#laptop
 nix flake check
 nix flake update
 
-sudo nixos-rebuild test --flake .#laptop
-sudo nixos-rebuild boot --flake .#laptop
+sudo nixos-rebuild test --flake '.#laptop'
+sudo nixos-rebuild boot --flake '.#laptop'
 ```
 
 > **Tip:** Changes limited to Hyprland Lua or Quickshell QML normally do not require a full NixOS rebuild. See [09 · Reloading Without a Rebuild](#09--reloading-without-a-rebuild).
