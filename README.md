@@ -79,7 +79,7 @@ cd ~/NixOS
 
 ```sh
 cd ~/NixOS
-sudo nixos-rebuild switch --flake .#laptop
+sudo nixos-rebuild switch --flake '.#laptop'
 ```
 
 ### Common operations
