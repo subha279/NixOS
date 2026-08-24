@@ -1,5 +1,9 @@
 { pkgs, ... }:
 
+let
+  vars = import ../../lib/variables.nix;
+in
+
 {
   # Virtualisation
 
@@ -23,7 +27,7 @@
 
   # User Access
 
-  users.users.subha.extraGroups = [
+  users.users.${vars.username}.extraGroups = [
     "libvirtd"
   ];
 }

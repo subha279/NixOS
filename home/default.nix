@@ -1,5 +1,9 @@
 { ... }:
 
+let
+  vars = import ../lib/variables.nix;
+in
+
 {
   imports = [
     ./git
@@ -15,8 +19,8 @@
     ./theme
   ];
 
-  home.username = "subha";
-  home.homeDirectory = "/home/subha";
+  home.username = vars.username;
+  home.homeDirectory = "/home/${vars.username}";
 
   home.stateVersion = "26.05";
 

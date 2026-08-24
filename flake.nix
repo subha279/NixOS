@@ -29,6 +29,9 @@
       apple-fonts,
       ...
     }:
+    let
+      vars = import ./lib/variables.nix;
+    in
     {
       nixosConfigurations = {
         laptop = nixpkgs.lib.nixosSystem {
@@ -50,7 +53,7 @@
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
 
-              home-manager.users.subha = import ./home;
+              home-manager.users.${vars.username} = import ./home;
             }
           ];
         };

@@ -17,4 +17,11 @@
   timezone = "Asia/Kolkata";
 
   locale = "en_US.UTF-8";
+
+  # Hardware / driver preferences. The installer detects these automatically.
+  nvidia = {
+    enable = true;
+    intelBusId = "PCI:0@0:2:0";
+    nvidiaBusId = "PCI:1@0:0:0";
+  };
 }

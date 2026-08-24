@@ -1,4 +1,4 @@
-# NixOS
+# NixOS - With Installer
 
 > A production-oriented, flake-based **NixOS** configuration for a Wayland desktop built around **Hyprland + Quickshell + Stylix**.
 
@@ -62,6 +62,24 @@ NixOS
 ---
 
 ## 02 · Quick Start
+
+### Fresh NixOS install
+
+The repository includes a portable interactive installer. It personalizes the account identity, hostname, Git identity, locale/timezone, detects NVIDIA PRIME hardware when present, generates a fresh hardware configuration, validates the flake, rebuilds the system, and asks for the account password without storing it in the Nix configuration.
+
+```sh
+git clone https://github.com/subha279/NixOS.git ~/NixOS
+cd ~/NixOS
+./installer/install.sh
+```
+
+For a one-command bootstrap after Git is available:
+
+```sh
+./bootstrap.sh
+```
+
+`lib/variables.nix` is the single source of truth for identity and hardware preferences. The installer backs up files it changes under `.installer-backups/`.
 
 ### Rebuild
 

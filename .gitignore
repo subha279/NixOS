@@ -76,3 +76,6 @@ venv/
 node_modules/
 dist/
 build/
+
+# Installer backups
+.installer-backups/
