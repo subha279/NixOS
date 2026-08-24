@@ -73,12 +73,6 @@ cd ~/NixOS
 ./installer/install.sh
 ```
 
-For a one-command bootstrap after Git is available:
-
-```sh
-./bootstrap.sh
-```
-
 `lib/variables.nix` is the single source of truth for identity and hardware preferences. The installer backs up files it changes under `.installer-backups/`.
 
 ### Rebuild
