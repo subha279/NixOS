@@ -1,10 +1,12 @@
 <div align="center">
 
-#  NixOS · Aurora
+# NixOS · Aurora
 
 ### A declarative, modular and keyboard-driven NixOS desktop
 
 **Hyprland** · **Quickshell** · **Stylix** · **Home Manager**
+
+> **GitHub-friendly:** the README uses standard Unicode/emoji icons instead of Nerd Font glyphs, so headings and badges render correctly without a special terminal font.
 
 <p>
   <a href="https://github.com/subha279/NixOS">
@@ -33,7 +35,7 @@
 
 ---
 
-##  Showcase
+## 🎬 Showcase
 
 <p align="center">
   <a href="https://www.youtube.com/watch?v=J9286xiVBNk">
@@ -55,13 +57,13 @@ A production-oriented, flake-based **NixOS laptop configuration** built around a
 
 | Layer | Stack |
 |---|---|
-|  OS | NixOS 26.05 · `x86_64-linux` |
-|  Desktop | Hyprland · Lua |
-|  Shell | Quickshell · QML |
-|  Theme | Stylix · 21 themes · active: `aurora` |
-|  Terminal | Kitty · Zsh |
-|  Editor | Neovim · 17 LSPs |
-|  Management | Home Manager · Flakes |
+| 🐧 OS | NixOS 26.05 · `x86_64-linux` |
+| 🖥️ Desktop | Hyprland · Lua |
+| 🐚 Shell | Quickshell · QML |
+| 🎨 Theme | Stylix · 21 themes · active: `aurora` |
+| 💻 Terminal | Kitty · Zsh |
+| ✏️ Editor | Neovim · 17 LSPs |
+| 📦 Management | Home Manager · Flakes |
 
 ### Design goals
 
@@ -79,7 +81,7 @@ cd ~/NixOS
 ./setup.sh
 ```
 
-The single setup manager handles installation, updates, rebuilds, validation, rollback and maintenance.
+The single setup manager handles installation, updates, rebuilds, validation, rollback and maintenance. The repository no longer depends on a separate installer entry point.
 
 > **Identity stays centralised:** user name, hostname, Git identity, locale and timezone live in `lib/variables.nix`. The installer can replace these values for a new machine.
 
@@ -87,7 +89,7 @@ The single setup manager handles installation, updates, rebuilds, validation, ro
 
 ---
 
-##  Setup Manager
+## 🧰 Setup Manager
 
 One entry point for the whole configuration:
 
@@ -148,7 +150,7 @@ The installer backs up changed configuration before personalising it, generates 
 
 ---
 
-##  Architecture
+## 📁 Architecture
 
 ```text
 NixOS/
@@ -199,7 +201,7 @@ Hyprland, Quickshell, Neovim, Zsh, Kitty, Git/SSH, Fastfetch, Obsidian, XDG and 
 
 ---
 
-##  Desktop Workflow
+## 🖥️ Desktop Workflow
 
 ### Hyprland
 
@@ -261,7 +263,7 @@ qs ipc call wallpaper toggle
 
 ---
 
-##  Theming
+## 🎨 Theming
 
 **Stylix is the single theming layer** for the desktop.
 
@@ -273,7 +275,7 @@ Available themes include:
 aurora · gruvbox · tokyo-night · monochrome
 catppuccin · nord · dracula · one-dark
 everforest · rose-pine · solarized
-kanagawa · github-dark · monokai-pro (and more)
+kanagawa · github-dark · monokai-pro
 ```
 
 Runtime theme switching:
@@ -296,7 +298,7 @@ lib/variables.nix
 
 ---
 
-##  Everyday Commands
+## 💻 Everyday Commands
 
 ```bash
 cd ~/NixOS
@@ -320,14 +322,32 @@ cd ~/NixOS
 ./setup.sh generations
 ```
 
-### Reload without rebuilding
+### Reloading vs applying configuration changes
 
-| Changed | Command |
+> **Important:** `hyprctl reload` and restarting Quickshell only reload the **currently installed** configuration.  
+> If the Lua/QML file is managed by Home Manager, editing the repository does **not** update the live config until Home Manager/NixOS activation runs.
+
+| Change | After editing the repository |
 |---|---|
-| Hyprland Lua | `hyprctl reload` |
-| Quickshell QML | `systemctl --user restart quickshell` |
-| Debug Quickshell | `qs` |
-| NixOS/Home Manager modules | `./setup.sh rebuild` |
+| Hyprland Lua | `./setup.sh rebuild` → `hyprctl reload` |
+| Quickshell QML | `./setup.sh rebuild` → `systemctl --user restart quickshell` |
+| Debug current Quickshell config | `qs` |
+| NixOS/Home Manager `.nix` | `./setup.sh rebuild` |
+| Runtime-only Hyprland change | `hyprctl reload` |
+| Runtime-only Quickshell restart | `systemctl --user restart quickshell` |
+
+For a fast development loop:
+
+```bash
+# Apply the Nix/Home Manager changes
+./setup.sh rebuild
+
+# Then reload the running desktop component if needed
+hyprctl reload
+systemctl --user restart quickshell
+```
+
+> **Why?** Home Manager usually links managed files from the active Nix store generation. The running system therefore sees the generation that was activated, not arbitrary edits sitting in `~/NixOS`.
 
 ---
 
@@ -385,7 +405,7 @@ List generations:
 
 ---
 
-##  Philosophy
+## 🧭 Philosophy
 
 ```text
              ┌──────────────┐
