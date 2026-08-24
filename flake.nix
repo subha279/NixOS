@@ -1,5 +1,5 @@
 {
-  description = "Subha's NixOS Configuration";
+  description = "subha279 NixOS Configuration";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
@@ -18,6 +18,10 @@
       url = "github:Lyndeno/apple-fonts.nix";
     };
 
+    claude-desktop = {
+      url = "github:aaddrick/claude-desktop-debian";
+    };
+
   };
 
   outputs =
@@ -27,6 +31,7 @@
       home-manager,
       stylix,
       apple-fonts,
+      claude-desktop,
       ...
     }:
     let
@@ -41,6 +46,7 @@
             {
               nixpkgs.overlays = [
                 apple-fonts.overlays.default
+                claude-desktop.overlays.default
               ];
             }
 

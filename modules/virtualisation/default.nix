@@ -20,6 +20,10 @@ in
     };
   };
 
+  environment.systemPackages = [
+    pkgs.virtiofsd
+  ];
+
   # Virt-Manager
 
   programs.virt-manager.enable = true;
