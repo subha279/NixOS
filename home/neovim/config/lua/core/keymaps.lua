@@ -216,3 +216,9 @@ map("n", "n", "nzzzv")
 map("n", "N", "Nzzzv")
 
 map("n", "<leader>m", "<cmd>NvimTreeFocus<CR>", { desc = "Focus file explorer" })
+
+-- Auto pairs
+map("i", "(", "()<Esc>i")
+map("i", "{", "{}<Esc>i")
+map("i", "[", "[]<Esc>i")
+map("i", '"', '""<Esc>i')

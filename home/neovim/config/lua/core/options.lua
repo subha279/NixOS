@@ -39,10 +39,9 @@ opt.shiftround = true
 
 opt.wrap = false
 opt.linebreak = true
-
 opt.breakindent = true
-
 opt.autoindent = true
+opt.inccommand = 'split'
 
 -- Search
 
