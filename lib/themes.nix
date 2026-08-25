@@ -72,20 +72,15 @@
       # LIQUID GLASS
       glassOpacity = 0.51;
       glassLuminosity = 0.20;
-      glassGradientOpacity = 0.055;
-      glassGrainOpacity = 0.010;
+      glassGradientOpacity = 0.0;
+      glassGrainOpacity = 0.0;
 
-      # THE GLOSS
-      glassSpecularOpacity = 0.14;
-
-      glassLensOpacity = 0.10;
-
-      glassDepthOpacity = 0.07;
-
-      # wallpaper structure shows through.
+      # FLAT GLASS — match Kitty
+      glassSpecularOpacity = 0.0;
+      glassLensOpacity = 0.0;
+      glassDepthOpacity = 0.0;
+      glassRimOpacity = 0.0;
       glassClarity = 0.14;
-
-      glassRimOpacity = 0.10;
 
       # Shadow strength.
       shadowOpacity = 0.24;

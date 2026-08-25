@@ -316,7 +316,7 @@ QtObject {
     // Deliberately separate from ui.shadowOpacity, which decoration.lua also
     // reads for Hyprland window shadows, so the shell can float without
     // touching window decorations.
-    readonly property real shellShadowOpacity: 0.30
+    readonly property real shellShadowOpacity: 0.0
 
     // How far the stacked shadow bleeds past a floating surface.
     readonly property int shellShadowSpread: 7
