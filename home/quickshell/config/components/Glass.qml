@@ -2,41 +2,10 @@ import QtQuick
 
 import "../core" as Core
 
-// Liquid-glass surface: the fill for every shell window (bar pill, launchers,
-// popups, context menu, toasts).
-//
-// The blur is NOT ours -- a QML item cannot sample behind a Wayland layer
-// surface, so it comes from Hyprland's layer rules (hyprland/config/layerules.lua).
-// All this does is stay translucent enough to let that blur through, tint it, and
-// shape how the edge catches light. An opaque fill here does not cover the blur,
-// it just makes the compositor compute one nobody can see.
-//
-// Seven layers, back to front: tinted ramp, accent wash, grain, specular,
-// lens shade, depth, rim. Colours all come from Core.Theme, so every theme
-// retints for free. Layers 3-7 each carry a `visible: knob > 0.001` guard, so
-// zeroing a knob drops the node instead of drawing a no-op.
-//
-// Use as a CHILD of the surface, with the surface set to `color: "transparent"`.
-// Elevation is the opposite -- it must be a SIBLING, it draws outside the bounds.
-
 Item {
     id: glass
-
-    // Must match the surface's radius or the gradient corners will not line up.
     property real radius: 0
-
-    // Master fade, so a surface that comes and goes fades as one object rather
-    // than as seven layers.
     property real strength: 1.0
-
-    // No handlers anywhere: decoration only, never eats a click.
-
-    // 1. BODY
-    //
-    // Theme.glassOpacity decides how much wallpaper shows. The middle stop is
-    // the colour midpoint of the two ends thinned by Theme.glassClarity, so the
-    // slab is clearest through its centre -- at clarity 0 it renders identically
-    // to a plain two-stop ramp.
 
     Rectangle {
         anchors.fill: parent
@@ -64,12 +33,6 @@ Item {
             }
         }
     }
-
-    // 2. COLOUR WASH
-    //
-    // Accent bleeding in from the left. Crossed with the vertical ramp above,
-    // the pair reads as one diagonal gradient -- a Qt6 Gradient is only ever
-    // vertical or horizontal.
 
     Rectangle {
         anchors.fill: parent

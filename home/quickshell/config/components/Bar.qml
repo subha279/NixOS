@@ -131,7 +131,6 @@ PanelWindow {
 
             Glass {
                 anchors.fill: parent
-
                 radius: parent.radius
             }
 
