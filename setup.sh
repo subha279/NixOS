@@ -6,7 +6,7 @@ set -Eeuo pipefail
 # maintenance, rollback and system recovery.
 # ============================================================
 
-VERSION="1.3.0"
+VERSION="1.0"
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 VARS="$ROOT/lib/variables.nix"
 FLAKE_TARGET="$ROOT#laptop"
