@@ -231,6 +231,7 @@ PanelWindow {
             anchors.fill: parent
 
             radius: parent.radius
+            strength: 0.68
         }
 
         // Swallow clicks so the outside-click handler doesn't fire

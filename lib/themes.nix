@@ -88,7 +88,7 @@
       glassRimOpacity = 0.10;
 
       # Shadow strength.
-      shadowOpacity = 0.0;
+      shadowOpacity = 0.24;
 
       # Default application/window opacity.
       windowOpacity = 0.96;
