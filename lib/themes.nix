@@ -53,7 +53,7 @@
 
     ui = {
 
-      borderWidth = 1;
+      borderWidth = 0;
 
       radius = 15;
       radiusSmall = 10;

@@ -379,9 +379,33 @@ hl.window_rule({
 		class = "^zen$",
 	},
 
-	opacity = "1.0 override 1.0 override 1.0 override",
+	opacity = "0.92 override 0.92 override 0.92 override",
 
 	xray = true,
+})
+
+--------------------------------------------------
+-- Zen Google Authentication
+--------------------------------------------------
+
+hl.window_rule({
+	name = "zen-google-auth",
+
+	match = {
+		class = "^zen$",
+		title = "Google Accounts",
+	},
+
+	float = true,
+	center = true,
+
+	size = "700 700",
+
+	rounding = 10,
+
+	dim_around = true,
+
+	animation = "popin",
 })
 
 --------------------------------------------------
@@ -392,7 +416,8 @@ hl.window_rule({
 	name = "zen-picture-in-picture",
 
 	match = {
-		title = "^Picture-in-Picture$",
+		class = "^zen$",
+		title = "Picture-in-Picture",
 	},
 
 	float = true,
@@ -402,26 +427,6 @@ hl.window_rule({
 	move = "monitor_w-664 monitor_h-408",
 
 	rounding = 10,
-
-	opacity = "1.0 override 1.0 override",
-})
-
---------------------------------------------------
--- Zen Screen Sharing Indicator
---------------------------------------------------
-
-hl.window_rule({
-	name = "zen-sharing-indicator",
-
-	match = {
-		title = "(Firefox|Nightly) . Sharing Indicator$",
-	},
-
-	float = true,
-
-	move = "50% 0",
-
-	no_focus = true,
 })
 
 --------------------------------------------------
