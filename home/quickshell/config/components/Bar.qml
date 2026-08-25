@@ -107,75 +107,23 @@ PanelWindow {
 
         antialiasing: true
 
-        // Hyprland-style active border palette
+        // A ring, not a fill: a filled rect here is an opaque slab behind the
+        // glass, which defeats the compositor blur. Solid rather than a gradient
+        // because Rectangle.border.color cannot be a gradient.
+        color: "transparent"
 
-        gradient: Gradient {
+        border.width: Core.Theme.borderWidth
+        border.color: Core.Theme.borderActive
 
-            // Diagonal-style visual approximation using the same active Hyprland palette.
-            GradientStop {
-                position: 0.0
-                color: Core.Theme.borderWidth > 0 ? Core.Theme.borderActive : "transparent"
-            }
+        // Sibling, never a child: Elevation draws outside its own bounds. 0.83 is
+        // the lowest level in the shell -- the bar is always on screen.
 
-            GradientStop {
-                position: 1.0
-                color: Core.Theme.borderWidth > 0 ? Core.Theme.borderActiveEnd : "transparent"
-            }
-        }
+        Elevation {
+            anchors.fill: pillBorder
 
-        // Floating shadow
-        //
-        // Three stacked layers with falling opacity approximate a soft blur
-        // without pulling in GraphicalEffects. This is what lifts the pill off
-        // the wallpaper. Lower z is wider and fainter, so darkness builds up
-        // towards the pill edge.
+            radius: pillBorder.radius
 
-        Rectangle {
-            anchors.fill: parent
-
-            anchors.margins: -Core.Theme.shellShadowSpread
-
-            z: -4
-
-            radius: pillBorder.radius + Core.Theme.shellShadowSpread
-
-            color: "#000000"
-
-            opacity: Core.Theme.shellShadowOpacity * 0.16
-
-            antialiasing: true
-        }
-
-        Rectangle {
-            anchors.fill: parent
-
-            anchors.margins: -4
-
-            z: -3
-
-            radius: pillBorder.radius + 4
-
-            color: "#000000"
-
-            opacity: Core.Theme.shellShadowOpacity * 0.30
-
-            antialiasing: true
-        }
-
-        Rectangle {
-            anchors.fill: parent
-
-            anchors.margins: -2
-
-            z: -2
-
-            radius: pillBorder.radius + 2
-
-            color: "#000000"
-
-            opacity: Core.Theme.shellShadowOpacity * 0.55
-
-            antialiasing: true
+            level: 0.83
         }
 
         // ACTUAL BAR SURFACE
@@ -191,9 +139,17 @@ PanelWindow {
 
             radius: height / 2
 
-            color: Core.Theme.background
+            // Frosted, not filled: Hyprland blurs behind the aurora-bar layer
+            // (layerules.lua) and Glass is what lets that blur through.
+            color: "transparent"
 
             antialiasing: true
+
+            Glass {
+                anchors.fill: parent
+
+                radius: parent.radius
+            }
 
             // Hover detection
 

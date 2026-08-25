@@ -102,6 +102,35 @@ let
 
           shadowOpacity = ${toString ui.shadowOpacity},
           windowOpacity = ${toString ui.windowOpacity},
+
+          -- Liquid glass. Consumed by Quickshell rather than by Hyprland, but
+          -- emitted here too so both generators describe the same global.ui
+          -- instead of the Lua side quietly holding a subset.
+          glassOpacity = ${toString ui.glassOpacity},
+          glassLuminosity = ${toString ui.glassLuminosity},
+          glassGradientOpacity = ${toString ui.glassGradientOpacity},
+          glassGrainOpacity = ${toString ui.glassGrainOpacity},
+          glassRimOpacity = ${toString ui.glassRimOpacity},
+
+          glassSpecularOpacity = ${toString ui.glassSpecularOpacity},
+          glassLensOpacity = ${toString ui.glassLensOpacity},
+          glassDepthOpacity = ${toString ui.glassDepthOpacity},
+          glassClarity = ${toString ui.glassClarity},
+
+          -- These two ARE read from Lua, and by neovim specifically:
+          -- ui/theme.lua dofiles this file and derives its transparency from
+          -- terminalOpacity, the same value themeToKitty below writes into
+          -- kitty's background_opacity. One knob, so the editor and the terminal
+          -- it runs in cannot end up disagreeing about whether they are glass.
+          terminalOpacity = ${toString ui.terminalOpacity},
+          editorFloatBlend = ${toString ui.editorFloatBlend},
+
+          clock = {
+            hour = "${ui.clock.hour}",
+            separator = "${ui.clock.separator}",
+            minute = "${ui.clock.minute}",
+            second = "${ui.clock.second}",
+          },
         },
       }
     '';
@@ -218,7 +247,24 @@ let
       # Transparency
       # --------------------------------------------------------
 
-      transparent_background_colors ${colors.background}
+      # Kitty's own opacity, deliberately NOT Hyprland's active_opacity --
+      # Hyprland fades glyphs too, this fades only the background. The blur is
+      # still Hyprland's; background_blur stays 0 in kitty.conf. Declared in
+      # themes.nix so all 21 themes necessarily agree and switching theme can
+      # never change how transparent the terminal is.
+      background_opacity ${toString ui.terminalOpacity}
+
+      # No transparent_background_colors here, on purpose. It makes cells whose
+      # background matches a listed colour translucent *on top of* a window
+      # background that background_opacity has already been applied to -- and the
+      # default cell background IS colors.background, so it matched every cell
+      # and squared the opacity. Padding is not a cell, so it kept the single
+      # application: measured 0.769 padding against 0.511 cells at 0.72, which is
+      # the solid frame that used to ring every window.
+      #
+      # The cost is that a TUI painting cells with the theme background
+      # explicitly gets an opaque block. Standard kitty behaviour, and Aurora's
+      # editor avoids it by setting those groups to NONE.
     '';
 
   # STARSHIP THEME GENERATOR

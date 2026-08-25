@@ -4,6 +4,7 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Wayland
 
+import "../components" as Components
 import "../core" as Core
 import "../services" as Services
 
@@ -269,11 +270,9 @@ PanelWindow {
                     }
                 }
 
-                // Floating shadow
-                //
-                // A sibling of the card, because the card clips its own
-                // children. It slides with the card so the shadow never
-                // detaches during the exit animation.
+                // Floating shadow. A sibling, because the card clips its own
+                // children; it slides with the card so the two never detach
+                // during the exit animation.
 
                 Item {
                     anchors.fill: card
@@ -284,43 +283,12 @@ PanelWindow {
                         x: wrapper.slide * 44
                     }
 
-                    Rectangle {
+                    Components.Elevation {
                         anchors.fill: parent
-                        anchors.margins: -root.toastGutter
 
-                        radius: card.radius + root.toastGutter
+                        radius: card.radius
 
-                        color: "#000000"
-
-                        opacity: Core.Theme.shellShadowOpacity * 0.16
-
-                        antialiasing: true
-                    }
-
-                    Rectangle {
-                        anchors.fill: parent
-                        anchors.margins: -4
-
-                        radius: card.radius + 4
-
-                        color: "#000000"
-
-                        opacity: Core.Theme.shellShadowOpacity * 0.30
-
-                        antialiasing: true
-                    }
-
-                    Rectangle {
-                        anchors.fill: parent
-                        anchors.margins: -2
-
-                        radius: card.radius + 2
-
-                        color: "#000000"
-
-                        opacity: Core.Theme.shellShadowOpacity * 0.55
-
-                        antialiasing: true
+                        level: 0.92
                     }
                 }
 
@@ -345,7 +313,10 @@ PanelWindow {
 
                     clip: true
 
-                    color: Core.Theme.backgroundSolid
+                    // Frosted, not filled. Hyprland blurs the
+                    // aurora-notifications layer (layerules.lua); Glass is what
+                    // lets that blur through.
+                    color: "transparent"
 
                     border.width: Core.Theme.borderWidth
 
@@ -354,6 +325,12 @@ PanelWindow {
 
                     transform: Translate {
                         x: wrapper.slide * 44
+                    }
+
+                    Components.Glass {
+                        anchors.fill: parent
+
+                        radius: parent.radius
                     }
 
                     // Hover
@@ -538,7 +515,7 @@ PanelWindow {
 
                                 font.family: Core.Theme.fontFamily
 
-                                font.pixelSize: Core.Theme.fontSizeBase
+                                font.pixelSize: Core.Theme.fontSize
 
                                 font.weight: Font.Medium
 

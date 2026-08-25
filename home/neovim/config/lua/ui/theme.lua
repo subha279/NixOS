@@ -46,16 +46,42 @@ function M.apply()
 
 	local c = theme.colors
 
+	-- Glass
+	--
+	-- Derived from the SAME knob kitty's background_opacity comes from, not a
+	-- second boolean of our own: a separate flag could disagree with the
+	-- terminal, giving either an editor with no background at all or an opaque
+	-- slab over the wallpaper. Neither is reachable from one value.
+	--
+	-- < 0.999 rather than ~= 1.0 because this is a float printed by Nix and read
+	-- back by Lua.
+	local glass = (theme.ui and theme.ui.terminalOpacity or 1.0) < 0.999
+
+	-- "NONE" means emit no background, so the cell keeps the terminal's -- which
+	-- kitty draws at terminalOpacity. There is no transparency setting in neovim,
+	-- only the choice not to paint.
+	--
+	-- Applied ONLY to groups that tile a whole window. In-buffer semantic
+	-- highlights (CursorLine, Visual, Search, Folded, ColorColumn, Diff*) keep
+	-- their real colours -- they exist to be seen against the background. Floats
+	-- keep c.surface, which is also what puts them on a separate layer.
+	local bg = glass and "NONE" or c.background
+
+	-- Diagnostic virtual text is the one tiling case not painted with
+	-- c.background, so it gets its own binding rather than borrowing bg, which
+	-- would recolour it on the way back to opaque.
+	local bgDark = glass and "NONE" or c.backgroundDark
+
 	-- Editor
 
 	set("Normal", {
 		fg = c.text,
-		bg = c.background,
+		bg = bg,
 	})
 
 	set("NormalNC", {
 		fg = c.text,
-		bg = c.background,
+		bg = bg,
 	})
 
 	set("NormalFloat", {
@@ -96,12 +122,12 @@ function M.apply()
 
 	set("SignColumn", {
 		fg = c.textMuted,
-		bg = c.background,
+		bg = bg,
 	})
 
 	set("FoldColumn", {
 		fg = c.textMuted,
-		bg = c.background,
+		bg = bg,
 	})
 
 	set("Folded", {
@@ -125,22 +151,22 @@ function M.apply()
 
 	set("StatusLine", {
 		fg = c.text,
-		bg = c.background,
+		bg = bg,
 	})
 
 	set("StatusLineNC", {
 		fg = c.textMuted,
-		bg = c.background,
+		bg = bg,
 	})
 
 	set("WinBar", {
 		fg = c.textSecondary,
-		bg = c.background,
+		bg = bg,
 	})
 
 	set("WinBarNC", {
 		fg = c.textMuted,
-		bg = c.background,
+		bg = bg,
 	})
 
 	-- Search / Selection
@@ -215,7 +241,7 @@ function M.apply()
 
 	set("TabLineFill", {
 		fg = c.textMuted,
-		bg = c.background,
+		bg = bg,
 	})
 
 	set("TabLineSel", {
@@ -659,22 +685,22 @@ function M.apply()
 
 	set("DiagnosticVirtualTextError", {
 		fg = c.error,
-		bg = c.backgroundDark,
+		bg = bgDark,
 	})
 
 	set("DiagnosticVirtualTextWarn", {
 		fg = c.warning,
-		bg = c.backgroundDark,
+		bg = bgDark,
 	})
 
 	set("DiagnosticVirtualTextInfo", {
 		fg = c.info,
-		bg = c.backgroundDark,
+		bg = bgDark,
 	})
 
 	set("DiagnosticVirtualTextHint", {
 		fg = c.success,
-		bg = c.backgroundDark,
+		bg = bgDark,
 	})
 
 	-- Diff

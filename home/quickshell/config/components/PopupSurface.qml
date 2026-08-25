@@ -5,30 +5,12 @@ import Quickshell.Wayland
 
 import "../core" as Core
 
-// ================================================================
-// PopupSurface
-// ----------------------------------------------------------------
-// A full-width overlay layer that hosts ONE animated glass card.
+// A full-width overlay layer hosting one animated glass card, plus the shared
+// right-click context menu (openMenu). The card eases its height, scales from
+// the top, and its content fades in slightly behind the geometry so text
+// arrives as the card grows.
 //
-// Motion design:
-//   * The card's height is driven by a NumberAnimation, so growing
-//     and shrinking eases smoothly without overshoot — soft, not
-//     robotic.
-//   * The card scales subtly from the top with a cubic curve on open
-//     and collapses with an InCubic curve on close.
-//   * Inner content fades + slides, slightly behind the geometry,
-//     so text appears to "arrive" as the card grows and to leave
-//     before it collapses.
-//
-// Usage:
-//   PopupSurface {
-//       popupId: "network"
-//       contentComponent: Component { Column { ... } }
-//   }
-//
-// It also provides a shared right-click context menu through
-// `openMenu(x, y, items)`.
-// ================================================================
+//     PopupSurface { popupId: "network"; contentComponent: Component { ... } }
 
 PanelWindow {
     id: root
@@ -158,12 +140,10 @@ PanelWindow {
         }
     }
 
-    // Floating shadow
-    //
-    // A sibling of the card rather than a child: the card turns on layer
-    // caching while it scales, and a layer clips to the item's own bounds,
-    // which would cut off any shadow drawn past the edge. Widest layer first
-    // so darkness builds up towards the card.
+    // Floating shadow. A sibling, never a child: the card turns on layer
+    // caching while it scales and a layer clips to its own bounds, which would
+    // shave off anything drawn past the edge. Rides the card's opacity, scale
+    // and origin so the two never come apart mid-animation.
 
     Item {
         anchors.fill: card
@@ -178,43 +158,12 @@ PanelWindow {
 
         visible: card.height > 0
 
-        Rectangle {
+        Elevation {
             anchors.fill: parent
-            anchors.margins: -10
 
-            radius: card.radius + 10
+            radius: card.radius
 
-            color: "#000000"
-
-            opacity: Core.Theme.shellShadowOpacity * 0.15
-
-            antialiasing: true
-        }
-
-        Rectangle {
-            anchors.fill: parent
-            anchors.margins: -6
-
-            radius: card.radius + 6
-
-            color: "#000000"
-
-            opacity: Core.Theme.shellShadowOpacity * 0.30
-
-            antialiasing: true
-        }
-
-        Rectangle {
-            anchors.fill: parent
-            anchors.margins: -3
-
-            radius: card.radius + 3
-
-            color: "#000000"
-
-            opacity: Core.Theme.shellShadowOpacity * 0.55
-
-            antialiasing: true
+            level: 1.20
         }
     }
 
@@ -265,7 +214,9 @@ PanelWindow {
 
         radius: Core.Theme.radiusMenu
 
-        color: Core.Theme.backgroundSolid
+        // Frosted, not filled: Hyprland blurs behind the aurora-popup layer
+        // (layerules.lua) and Glass is what lets that blur through.
+        color: "transparent"
 
         border.width: Core.Theme.borderWidth
         border.color: Core.Theme.borderActive
@@ -275,6 +226,12 @@ PanelWindow {
         // Cache the card while it is being scaled/faded.
         layer.enabled: root.open || root.rendering
         layer.smooth: true
+
+        Glass {
+            anchors.fill: parent
+
+            radius: parent.radius
+        }
 
         // Swallow clicks so the outside-click handler doesn't fire
         MouseArea {
@@ -372,6 +329,32 @@ PanelWindow {
 
         visible: menuLayer.active || menuBox.opacity > 0.01
 
+        // Floating shadow, same sibling pattern as the card's. anchors.fill
+        // tracks menuBox's x/y bindings, so it follows the cursor position the
+        // menu opened at.
+
+        Item {
+            anchors.fill: menuBox
+
+            z: -1
+
+            opacity: menuBox.opacity
+
+            scale: menuBox.scale
+
+            transformOrigin: menuBox.transformOrigin
+
+            visible: menuBox.height > 0
+
+            Elevation {
+                anchors.fill: parent
+
+                radius: menuBox.radius
+
+                level: 1.10
+            }
+        }
+
         Rectangle {
             id: menuBox
 
@@ -385,7 +368,8 @@ PanelWindow {
 
             radius: 14
 
-            color: Core.Theme.backgroundSolid
+            // Frosted like the card above it.
+            color: "transparent"
 
             border.width: Core.Theme.borderWidth
             border.color: Core.Theme.border
@@ -421,15 +405,10 @@ PanelWindow {
                 }
             }
 
-            Rectangle {
+            Glass {
                 anchors.fill: parent
-                anchors.margins: -3
 
-                z: -1
-
-                radius: parent.radius + 3
-                color: "#000000"
-                opacity: 0.18
+                radius: parent.radius
             }
 
             Column {

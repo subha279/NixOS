@@ -27,6 +27,12 @@ telescope.setup({
 			},
 		},
 
+		-- Telescope sets winblend on the windows it creates, so the global
+		-- opt.winblend in core/options.lua never reaches it. Matches
+		-- global.ui.editorFloatBlend, like every other float.
+
+		winblend = 12,
+
 		-- Borders
 
 		border = true,

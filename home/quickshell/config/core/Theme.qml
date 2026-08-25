@@ -176,31 +176,139 @@ QtObject {
 
     readonly property color clockSecond: resolveColor(ui.clock?.second, foregroundFaint)
 
-    // Glass
+    // Liquid Glass
+    //
+    // Feeds components/Glass.qml; the blur itself is Hyprland's (layerules.lua).
+    // Read with `!== undefined ?` rather than `||`, because `0 || 0.14` is 0.14 --
+    // `||` would make setting a knob to 0 in themes.nix silently fail.
 
-    readonly property real glassOpacity: ui.glassOpacity || 0.80
+    readonly property real glassOpacity: ui.glassOpacity !== undefined ? ui.glassOpacity : 0.51
+
+    readonly property real glassLuminosity: ui.glassLuminosity !== undefined ? ui.glassLuminosity : 0.20
+
+    readonly property real glassGradientOpacity: ui.glassGradientOpacity !== undefined ? ui.glassGradientOpacity : 0.055
+
+    readonly property real glassGrainOpacity: ui.glassGrainOpacity !== undefined ? ui.glassGrainOpacity : 0.010
+
+    readonly property real glassRimOpacity: ui.glassRimOpacity !== undefined ? ui.glassRimOpacity : 0.10
+
+    // The gloss: a bright catch along the top, a darker shade along the bottom,
+    // inner shading for thickness, and a middle thinner than either end. Zero
+    // the first three and every surface falls back to flat frost.
+
+    readonly property real glassSpecularOpacity: ui.glassSpecularOpacity !== undefined ? ui.glassSpecularOpacity : 0.14
+
+    readonly property real glassLensOpacity: ui.glassLensOpacity !== undefined ? ui.glassLensOpacity : 0.10
+
+    readonly property real glassDepthOpacity: ui.glassDepthOpacity !== undefined ? ui.glassDepthOpacity : 0.07
+
+    readonly property real glassClarity: ui.glassClarity !== undefined ? ui.glassClarity : 0.06
+
+    // Gradient endpoints, derived from each theme's palette so all 20
+    // colourschemes retint the glass for free.
+
+    // The body every tint stop is built from: the theme background lifted
+    // towards white by glassLuminosity, proportional to each channel's remaining
+    // headroom so hue survives and pale themes self-limit. Derived rather than
+    // replacing `background`, because glassOnLight below tests its lightness and
+    // lifting that value would invert a dark theme's specular.
+
+    readonly property color glassBody: Qt.rgba(background.r + (1.0 - background.r) * glassLuminosity, background.g + (1.0 - background.g) * glassLuminosity, background.b + (1.0 - background.b) * glassLuminosity, 1.0)
+
+    readonly property color glassTintTop: {
+        const mixed = Qt.tint(glassBody, Qt.rgba(accent.r, accent.g, accent.b, 0.10));
+
+        return Qt.rgba(mixed.r, mixed.g, mixed.b, glassOpacity);
+    }
+
+    readonly property color glassTintBottom: {
+        const mixed = Qt.tint(glassBody, Qt.rgba(backgroundDark.r, backgroundDark.g, backgroundDark.b, 0.60));
+
+        return Qt.rgba(mixed.r, mixed.g, mixed.b, glassOpacity);
+    }
+
+    // The middle of the ramp, thinned by glassClarity -- real glass is clearest
+    // where it is thinnest. Its colour is the exact midpoint of the two
+    // endpoints, so glassClarity = 0 renders byte-identical to a two-stop ramp.
+
+    readonly property color glassTintMid: {
+        const top = Qt.tint(glassBody, Qt.rgba(accent.r, accent.g, accent.b, 0.10));
+
+        const bottom = Qt.tint(glassBody, Qt.rgba(backgroundDark.r, backgroundDark.g, backgroundDark.b, 0.60));
+
+        return Qt.rgba((top.r + bottom.r) / 2, (top.g + bottom.g) / 2, (top.b + bottom.b) / 2, glassOpacity * (1.0 - glassClarity));
+    }
+
+    // Horizontal accent wash. Stacked over the vertical ramp, the pair reads as
+    // one diagonal gradient -- a Qt6 Gradient is only vertical or horizontal.
+
+    readonly property color glassWash: Qt.rgba(accent.r, accent.g, accent.b, glassGradientOpacity)
+
+    readonly property color glassWashEnd: Qt.rgba(accent.r, accent.g, accent.b, 0.0)
+
+    // Whether this theme's background is pale. Every polarity decision below
+    // hangs off this: a highlight that works on charcoal vanishes on cream.
+
+    readonly property bool glassOnLight: background.hslLightness > 0.5
+
+    // Inner edge, so the glass reads as having thickness. Lifts on dark themes
+    // and darkens on light ones -- a white rim on solarized-light would look
+    // like a scratch.
+
+    readonly property color glassRim: glassOnLight ? Qt.rgba(0, 0, 0, glassRimOpacity) : Qt.rgba(1, 1, 1, glassRimOpacity)
+
+    // Specular catch-light, top edge. Stays white on every theme -- tinting a
+    // highlight to the accent reads as coloured plastic; what a pale background
+    // changes is its strength, not its hue. Both ends are declared because a Qt6
+    // gradient stop needs a real colour, and transparent white and transparent
+    // black interpolate differently.
+
+    readonly property color glassSpecular: Qt.rgba(1, 1, 1, glassSpecularOpacity * (glassOnLight ? 0.45 : 1.0))
+
+    readonly property color glassSpecularEnd: Qt.rgba(1, 1, 1, 0.0)
+
+    // Refractive shade, bottom edge. The other half of the convex read, and the
+    // half that carries it on light themes.
+
+    readonly property color glassLensShade: Qt.rgba(0, 0, 0, glassLensOpacity * (glassOnLight ? 1.60 : 1.0))
+
+    readonly property color glassLensShadeEnd: Qt.rgba(0, 0, 0, 0.0)
+
+    // Inner shading. Gives the slab thickness -- without it the specular and
+    // shade read as painted on a flat sheet rather than wrapping an edge.
+
+    readonly property color glassDepth: Qt.rgba(0, 0, 0, glassDepthOpacity * (glassOnLight ? 1.30 : 1.0))
+
+    // The noise tile. Resolved against this file, so it points at
+    // quickshell/config/assets/grain.png. Kept at a trace opacity to stop wide
+    // gradients banding -- it is no longer a texture you are meant to see.
+
+    readonly property url glassGrainSource: Qt.resolvedUrl("../assets/grain.png")
 
     readonly property color backgroundGlass: Qt.rgba(background.r, background.g, background.b, glassOpacity)
 
     readonly property color backgroundSolid: background
 
     // UI
+    //
+    // Same `!== undefined` idiom as the glass knobs above: `0 || 10` is 10, so
+    // `||` would make radius = 0 (square corners) or borderWidth = 0 impossible.
 
-    readonly property int borderWidth: ui.borderWidth || 0
+    readonly property int borderWidth: ui.borderWidth !== undefined ? ui.borderWidth : 0
 
-    readonly property int radius: ui.radius || 10
+    readonly property int radius: ui.radius !== undefined ? ui.radius : 10
 
-    readonly property int radiusSmall: ui.radiusSmall || 6
+    readonly property int radiusSmall: ui.radiusSmall !== undefined ? ui.radiusSmall : 6
 
-    readonly property int radiusLarge: ui.radiusLarge || 18
+    readonly property int radiusLarge: ui.radiusLarge !== undefined ? ui.radiusLarge : 18
 
-    readonly property int iconSize: ui.iconSize || 16
+    readonly property int iconSize: ui.iconSize !== undefined ? ui.iconSize : 16
 
-    readonly property int fontSize: ui.fontSize || 13
+    readonly property int fontSize: ui.fontSize !== undefined ? ui.fontSize : 13
 
-    readonly property int fontSizeSmall: ui.fontSizeSmall || 10
+    readonly property int fontSizeSmall: ui.fontSizeSmall !== undefined ? ui.fontSizeSmall : 10
 
-    readonly property int fontSizeLarge: ui.fontSizeLarge || 15
+    readonly property int fontSizeLarge: ui.fontSizeLarge !== undefined ? ui.fontSizeLarge : 15
 
     readonly property real shadowOpacity: ui.shadowOpacity !== undefined ? ui.shadowOpacity : 0.20
 

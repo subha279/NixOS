@@ -6,50 +6,451 @@ set -Eeuo pipefail
 # maintenance, rollback and system recovery.
 # ============================================================
 
-VERSION="1.2.1"
+VERSION="1.3.0"
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 VARS="$ROOT/lib/variables.nix"
 FLAKE_TARGET="$ROOT#laptop"
 
-RESET='\033[0m'
-BOLD='\033[1m'
-DIM='\033[2m'
-RED='\033[31m'
-GREEN='\033[32m'
-YELLOW='\033[33m'
-BLUE='\033[34m'
-MAGENTA='\033[35m'
-CYAN='\033[36m'
-WHITE='\033[37m'
+
+# ============================================================
+# PRESENTATION LAYER
+#
+# One vocabulary for everything this script prints. The names
+# below -- info / success / warning / error / run_cmd / section /
+# pause / confirm, plus v_ok / v_fail / v_info for the validator's
+# aligned results -- are the whole set. There used to be three
+# parallel copies of this: these, an m_* family for the maintenance
+# dashboard, and a v_* family nested inside the validator. They are
+# now one implementation.
+#
+# The colour variables keep their old names (RED, CYAN, ...) on
+# purpose. Around a hundred printf call sites in the maintenance
+# and validator sections reference them directly, so re-pointing
+# the values at the live theme upgrades all of them without
+# touching any of them.
+# ============================================================
+
+
+# Terminal capabilities
+#
+# None of this was detected before: the script emitted escape codes
+# unconditionally, so `./setup.sh validate | tee log` wrote escape
+# sequences into the file and NO_COLOR was ignored.
+
+if [[ -t 1 ]]; then IS_TTY=1; else IS_TTY=0; fi
+
+# Colour is off when asked for (NO_COLOR), when the terminal says it
+# cannot render it (TERM=dumb), or when stdout is not a terminal at all.
+#
+# Only an *explicit* TERM=dumb disables it. An unset TERM alongside a real
+# tty means a stripped environment rather than a teletype, and every
+# terminal emulator that can give us a tty can also handle basic ANSI --
+# the -t 1 test above is what actually protects pipes and log files.
+UI_COLOR=1
+if [[ -n "${NO_COLOR:-}" ]]; then UI_COLOR=0; fi
+if [[ "${TERM:-}" == "dumb" ]]; then UI_COLOR=0; fi
+if [[ "$IS_TTY" -eq 0 ]]; then UI_COLOR=0; fi
+
+# 24-bit colour is what lets the palette be the actual theme rather
+# than an approximation of it. Without it we fall back to the 3-bit
+# codes this script used to hardcode.
+#
+# COLORTERM is the reliable signal and kitty sets it, but it is lost
+# across sudo and some multiplexers, so a TERM that advertises direct
+# or 256 colour counts too.
+UI_TRUECOLOR=0
+if [[ "$UI_COLOR" -eq 1 ]]; then
+  case "${COLORTERM:-}" in
+    truecolor | 24bit) UI_TRUECOLOR=1 ;;
+  esac
+
+  case "${TERM:-}" in
+    *-direct* | *-256color | kitty | xterm-kitty | alacritty | foot | wezterm)
+      UI_TRUECOLOR=1
+      ;;
+  esac
+fi
+
+# Box drawing and the nicer glyphs need a UTF-8 locale.
+#
+# Also dropped without a tty. Strictly, UTF-8 keeps working through a
+# pipe -- but validator output gets redirected into logs, pasted into
+# issues and mailed around, and ASCII survives all of those intact.
+UI_UNICODE=1
+case "${LC_ALL:-${LC_CTYPE:-${LANG:-}}}" in
+  *UTF-8* | *utf-8* | *UTF8* | *utf8*) ;;
+  *) UI_UNICODE=0 ;;
+esac
+if [[ "${TERM:-}" == "dumb" ]]; then UI_UNICODE=0; fi
+if [[ "$IS_TTY" -eq 0 ]]; then UI_UNICODE=0; fi
+
+# Width for the panel frame and the section rules. Clamped: a rule
+# stretched across a 210-column terminal reads as a divider in a
+# spreadsheet, not a heading.
+UI_WIDTH=64
+if [[ "$IS_TTY" -eq 1 ]]; then
+  UI_WIDTH="$(tput cols 2>/dev/null || printf '64')"
+  if [[ "$UI_WIDTH" -gt 74 ]]; then UI_WIDTH=74; fi
+  if [[ "$UI_WIDTH" -lt 40 ]]; then UI_WIDTH=40; fi
+fi
+
+
+# Palette, read from the live Aurora theme
+#
+# ~/.config/aurora/active-theme and themes/<id>.json are the same
+# files core/Theme.qml watches, so the installer wears whatever
+# colourscheme the desktop is currently wearing. Strictly read-only:
+# this participates in no part of the theme pipeline, it only looks
+# at the output. Every lookup carries the built-in aurora value as a
+# fallback, so a missing or half-written file costs nothing.
+
+AURORA_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/aurora"
+UI_THEME_FILE=""
+
+if [[ -r "$AURORA_DIR/active-theme" ]]; then
+  UI_THEME_ID="$(tr -d '[:space:]' <"$AURORA_DIR/active-theme" 2>/dev/null || printf '')"
+
+  if [[ -n "$UI_THEME_ID" && -r "$AURORA_DIR/themes/$UI_THEME_ID.json" ]]; then
+    UI_THEME_FILE="$AURORA_DIR/themes/$UI_THEME_ID.json"
+  fi
+fi
+
+# Pull one "key":"#rrggbb" pair out of the theme JSON. Deliberately
+# grep rather than jq: jq is not guaranteed present on a machine that
+# is still being installed, and this needs exactly one field.
+ui_hex() {
+  local key="$1" fallback="$2" hex=""
+
+  if [[ -n "$UI_THEME_FILE" ]]; then
+    hex="$(grep -o "\"$key\"[[:space:]]*:[[:space:]]*\"#[0-9a-fA-F]\{6\}\"" "$UI_THEME_FILE" 2>/dev/null |
+      head -1 | grep -o '#[0-9a-fA-F]\{6\}' || printf '')"
+  fi
+
+  printf '%s' "${hex:-$fallback}"
+}
+
+# $1 theme key, $2 fallback hex, $3 basic ANSI code for 16-colour terminals
+ui_fg() {
+  local hex
+
+  if [[ "$UI_COLOR" -eq 0 ]]; then
+    printf ''
+    return 0
+  fi
+
+  if [[ "$UI_TRUECOLOR" -eq 1 ]]; then
+    hex="$(ui_hex "$1" "$2")"
+
+    printf '\033[38;2;%d;%d;%dm' \
+      "$((16#${hex:1:2}))" "$((16#${hex:3:2}))" "$((16#${hex:5:2}))"
+
+    return 0
+  fi
+
+  printf '\033[%sm' "$3"
+}
+
+if [[ "$UI_COLOR" -eq 1 ]]; then
+  RESET='\033[0m'
+  BOLD='\033[1m'
+else
+  RESET=''
+  BOLD=''
+fi
+
+# Semantic, not literal. The names are historical; the theme role in
+# the trailing comment is what each one actually means.
+RED="$(ui_fg error '#F38BA8' 31)"                # failure
+GREEN="$(ui_fg success '#A6E3A1' 32)"            # success
+YELLOW="$(ui_fg warning '#F9E2AF' 33)"           # warning
+BLUE="$(ui_fg info '#89B4FA' 34)"                # information
+MAGENTA="$(ui_fg terminalMagenta '#F5C2E7' 35)"  # a command about to run
+CYAN="$(ui_fg accent '#CBA6F7' 36)"              # chrome: headings, numbers, frames
+DIM="$(ui_fg textMuted '#989CAC' 2)"             # de-emphasised
+
+# Glyphs
+#
+# These literals are the Unicode / Nerd Font set. The block just below
+# them swaps in ASCII when the locale cannot render it, so nothing here
+# needs a conditional of its own.
 
 ICON_OK="✓"
 ICON_FAIL="✗"
 ICON_WARN="!"
 ICON_INFO="ℹ"
 ICON_ARROW="→"
-ICON_CHECK="✓"
-ICON_GEAR="⚙"
-ICON_GIT=""
-ICON_NIX=""
-ICON_DISK="▣"
-ICON_TRASH="✕"
 
-die() { printf '  %b%s%b\n' "${RED}${ICON_FAIL}${RESET}" "$*" "$RESET" >&2; exit 1; }
-info() { printf '  %b%s%b\n' "${BLUE}${ICON_INFO}${RESET}" "$*" "$RESET"; }
-success() { printf '  %b%s%b\n' "${GREEN}${ICON_OK}${RESET}" "$*" "$RESET"; }
-warning() { printf '  %b%s%b\n' "${YELLOW}${ICON_WARN}${RESET}" "$*" "$RESET"; }
-error() { printf '  %b%s%b\n' "${RED}${ICON_FAIL}${RESET}" "$*" "$RESET" >&2; }
-run_cmd() { printf '  %b%s%b\n' "${MAGENTA}${ICON_ARROW}${RESET}" "$*" "$RESET"; }
-section() {
-  printf '\n%b  %s%b\n' "${CYAN}${BOLD}" "$1" "$RESET"
-  printf '%b  ──────────────────────────────────────────────────────────%b\n' "$DIM" "$RESET"
+UI_TL="╭"
+UI_TR="╮"
+UI_BL="╰"
+UI_BR="╯"
+UI_H="─"
+UI_V="│"
+UI_RULE="─"
+
+UI_SPIN=("⠋" "⠙" "⠹" "⠸" "⠼" "⠴" "⠦" "⠧" "⠇" "⠏")
+
+# ASCII fallback, for a terminal without a UTF-8 locale. Everything
+# above is replaced wholesale rather than conditionally, so the rest of
+# the script only ever refers to the names.
+if [[ "$UI_UNICODE" -eq 0 ]]; then
+  ICON_OK="ok"
+  ICON_FAIL="x"
+  ICON_WARN="!"
+  ICON_INFO="i"
+  ICON_ARROW=">"
+
+  UI_TL="+"
+  UI_TR="+"
+  UI_BL="+"
+  UI_BR="+"
+  UI_H="-"
+  UI_V="|"
+  UI_RULE="-"
+
+  UI_SPIN=("|" "/" "-" "\\")
+fi
+
+
+# Cursor
+#
+# The trap lives here rather than three hundred lines further down next
+# to the maintenance dashboard, because a Ctrl-C anywhere in the script
+# has to put the cursor back.
+
+hide_cursor() {
+  if [[ "$IS_TTY" -eq 1 ]]; then tput civis 2>/dev/null || true; fi
 }
+
+show_cursor() {
+  if [[ "$IS_TTY" -eq 1 ]]; then tput cnorm 2>/dev/null || true; fi
+}
+
+trap show_cursor EXIT INT TERM
+
+
+# Primitives
+
+# Repeat $1 exactly $2 times.
+ui_repeat() {
+  local char="$1" count="$2" out="" i
+
+  for ((i = 0; i < count; i++)); do out+="$char"; done
+
+  printf '%s' "$out"
+}
+
+# Length of a string with escape sequences discounted, so the panel
+# border lines up whether or not colour is on.
+ui_visible_len() {
+  local stripped
+
+  stripped="$(printf '%b' "$1" | sed -e 's/\x1b\[[0-9;]*m//g')"
+
+  printf '%s' "${#stripped}"
+}
+
+clear_screen() {
+  if [[ "$IS_TTY" -eq 1 ]]; then clear 2>/dev/null || printf '\033[H\033[2J'; fi
+}
+
+hr() {
+  printf '  %b%s%b\n' "$DIM" "$(ui_repeat "$UI_RULE" "$((UI_WIDTH - 2))")" "$RESET"
+}
+
+
+# Log lines
+#
+# Two leading spaces, a coloured glyph, then the message -- the shape
+# this script has always had, so nothing downstream needs re-reading.
+
+die() { printf '  %b%s%b %s\n' "$RED" "$ICON_FAIL" "$RESET" "$*" >&2; exit 1; }
+info() { printf '  %b%s%b %s\n' "$BLUE" "$ICON_INFO" "$RESET" "$*"; }
+success() { printf '  %b%s%b %s\n' "$GREEN" "$ICON_OK" "$RESET" "$*"; }
+warning() { printf '  %b%s%b %s\n' "$YELLOW" "$ICON_WARN" "$RESET" "$*"; }
+error() { printf '  %b%s%b %s\n' "$RED" "$ICON_FAIL" "$RESET" "$*" >&2; }
+run_cmd() { printf '  %b%s%b %b%s%b\n' "$MAGENTA" "$ICON_ARROW" "$RESET" "$DIM" "$*" "$RESET"; }
+
+section() {
+  printf '\n  %b%b%s%b\n' "$CYAN" "$BOLD" "$1" "$RESET"
+  hr
+}
+
 pause() { echo; read -r -p "  Press Enter to continue..." _ || true; }
+
 confirm() {
   local prompt="${1:-Continue?}" answer
   echo
   read -r -p "  $prompt [y/N]: " answer
   [[ "$answer" =~ ^[Yy]([Ee][Ss])?$ ]]
+}
+
+
+# Validator results
+#
+# A distinct shape from the log lines above: a check result, not an
+# event. These used to be defined inside validator_run, which put a
+# hundred-odd call sites behind a function-local definition; the names
+# are kept exactly because those call sites are unchanged.
+
+V_FAILED=0
+
+v_ok() { printf '  %b%s%b %s\n' "$GREEN" "$ICON_OK" "$RESET" "$1"; }
+
+v_fail() {
+  printf '  %b%s%b %s\n' "$RED" "$ICON_FAIL" "$RESET" "$1"
+  V_FAILED=1
+}
+
+v_info() { printf '  %b%s%b %s\n' "$YELLOW" "$ICON_WARN" "$RESET" "$1"; }
+
+v_separator() { hr; }
+
+
+# Panel
+#
+# The framed header. $1 is the title, $2 an optional right-aligned tag
+# (the version), and any further arguments become dimmed fact lines
+# inside the frame.
+
+panel() {
+  local title="$1" tag="${2:-}"
+  shift || true
+  shift || true
+
+  local inner=$((UI_WIDTH - 2))
+  local head=" $title " tail="" pad
+
+  if [[ -n "$tag" ]]; then tail=" $tag "; fi
+
+  pad=$((inner - ${#head} - ${#tail} - 1))
+  if [[ "$pad" -lt 1 ]]; then pad=1; fi
+
+  printf '%b%s%s%b%s%b%s%s%s%b\n' \
+    "$CYAN" "$UI_TL" "$UI_H" \
+    "$BOLD" "$head" "$RESET$CYAN" \
+    "$(ui_repeat "$UI_H" "$pad")" "$tail" "$UI_TR" "$RESET"
+
+  local line len
+  for line in "$@"; do
+    len="$(ui_visible_len "$line")"
+
+    pad=$((inner - len - 2))
+    if [[ "$pad" -lt 0 ]]; then pad=0; fi
+
+    printf '%b%s%b %b%s%b%s %b%s%b\n' \
+      "$CYAN" "$UI_V" "$RESET" \
+      "$DIM" "$line" "$RESET" "$(ui_repeat ' ' "$pad")" \
+      "$CYAN" "$UI_V" "$RESET"
+  done
+
+  printf '%b%s%s%s%b\n' \
+    "$CYAN" "$UI_BL" "$(ui_repeat "$UI_H" "$inner")" "$UI_BR" "$RESET"
+}
+
+
+# Verdict
+#
+# The framed one-line result the validator ends on. Same framing as
+# panel() but tinted by outcome and centred, and it respects UI_WIDTH and
+# UI_UNICODE rather than the fixed 62-column unicode box it replaces --
+# which used to survive `| cat` as raw box characters.
+
+verdict() {
+  local tint="$1" icon="$2" msg="$3"
+
+  local inner=$((UI_WIDTH - 2))
+  local body="$icon  $msg"
+  local len=${#body}
+
+  if [[ "$len" -gt "$inner" ]]; then
+    body="${body:0:$inner}"
+    len="$inner"
+  fi
+
+  local left=$(((inner - len) / 2))
+  local right=$((inner - len - left))
+
+  local rule
+  rule="$(ui_repeat "$UI_H" "$inner")"
+
+  printf '%b%s%s%s%b\n' "$tint" "$UI_TL" "$rule" "$UI_TR" "$RESET"
+
+  printf '%b%s%b%s%b%s%b%s%b%s%b\n' \
+    "$tint" "$UI_V" "$RESET" \
+    "$(ui_repeat ' ' "$left")" \
+    "$tint$BOLD" "$body" "$RESET" \
+    "$(ui_repeat ' ' "$right")" \
+    "$tint" "$UI_V" "$RESET"
+
+  printf '%b%s%s%s%b\n' "$tint" "$UI_BL" "$rule" "$UI_BR" "$RESET"
+}
+
+
+# Spinner
+#
+# Wraps a long operation whose output we do not need to watch, showing
+# an elapsed second count so that a slow `nix flake check` never looks
+# hung. Operations whose output IS the point -- nixos-rebuild switch
+# above all -- are deliberately left streaming to the terminal.
+#
+# Without a TTY it degrades to plain lines, so piped output stays
+# readable and no escape sequences leak into a log file. On failure the
+# captured output is replayed to stderr, so nothing is ever swallowed.
+
+spinner() {
+  local label="$1"
+  shift
+
+  local log rc=0
+  log="$(mktemp)"
+
+  if [[ "$IS_TTY" -eq 0 ]]; then
+    run_cmd "$label"
+
+    if "$@" >"$log" 2>&1; then
+      success "$label"
+    else
+      rc=$?
+      error "$label"
+      cat "$log" >&2
+    fi
+
+    rm -f "$log"
+    return "$rc"
+  fi
+
+  "$@" >"$log" 2>&1 &
+  local pid=$!
+  local frame=0 start=$SECONDS
+
+  hide_cursor
+
+  while kill -0 "$pid" 2>/dev/null; do
+    printf '\r  %b%s%b %s %b%ds%b' \
+      "$CYAN" "${UI_SPIN[$frame]}" "$RESET" \
+      "$label" "$DIM" "$((SECONDS - start))" "$RESET"
+
+    frame=$(((frame + 1) % ${#UI_SPIN[@]}))
+    sleep 0.08
+  done
+
+  wait "$pid" || rc=$?
+
+  show_cursor
+
+  # Erase the spinner line before the result replaces it.
+  printf '\r\033[2K'
+
+  if [[ "$rc" -eq 0 ]]; then
+    success "$label ($((SECONDS - start))s)"
+  else
+    error "$label failed after $((SECONDS - start))s"
+    cat "$log" >&2
+  fi
+
+  rm -f "$log"
+  return "$rc"
 }
 
 need_cmd() { command -v "$1" >/dev/null 2>&1 || die "Required command not found: $1"; }
@@ -156,6 +557,7 @@ refresh_hardware() {
   section "Hardware configuration"
   backup_config
   mkdir -p "$ROOT/hosts/laptop"
+  # shellcheck disable=SC2024  # sudo is for probing hardware; the target is user-owned
   sudo nixos-generate-config --show-hardware-config > "$ROOT/hosts/laptop/hardware-configuration.nix"
   success "Hardware configuration regenerated."
   warning "Review the generated file before rebuilding."
@@ -281,37 +683,93 @@ system_overview() {
   printf '  Host:    %s\n' "$(hostname)"
   printf '  Kernel:  %s\n' "$(uname -r)"
   printf '  Nix:     %s\n' "$(nix --version 2>/dev/null || echo unavailable)"
-  printf '  Uptime:  %s\n' "$(uptime -p 2>/dev/null || echo unknown)"
+  printf '  Uptime:  %s\n' "$(uptime_human)"
+}
+
+# Uptime, without `uptime -p`
+#
+# -p is a procps extension and the uptime on this system rejects it, so
+# all three call sites used to fall back to their placeholder string.
+# /proc/uptime is always there and needs no external command.
+
+uptime_human() {
+  local secs d h m
+
+  if [[ ! -r /proc/uptime ]]; then
+    printf 'unknown'
+    return
+  fi
+
+  read -r secs _ < /proc/uptime
+  secs="${secs%%.*}"
+
+  d=$((secs / 86400))
+  h=$((secs % 86400 / 3600))
+  m=$((secs % 3600 / 60))
+
+  if [[ "$d" -gt 0 ]]; then
+    printf '%dd %dh' "$d" "$h"
+  elif [[ "$h" -gt 0 ]]; then
+    printf '%dh %dm' "$h" "$m"
+  else
+    printf '%dm' "$m"
+  fi
+}
+
+# One compact "user · kernel · nix · uptime" line for the menu panel.
+overview_facts() {
+  local nixv
+  nixv="$(nix --version 2>/dev/null | grep -o '[0-9.]\+' | head -1)"
+
+  printf '%s · %s · nix %s · up %s' \
+    "${USER:-$(whoami 2>/dev/null || echo user)}" \
+    "$(uname -r)" \
+    "${nixv:-?}" \
+    "$(uptime_human)"
+}
+
+# One menu row: number, label, dimmed description. The number keeps its
+# colour so the eye can jump to it; the label is padded to a fixed
+# column so the descriptions line up.
+menu_item() {
+  local num="$1" label="$2" desc="$3"
+
+  printf '   %b%2s%b  %-22s%b%s%b\n' \
+    "$CYAN" "$num" "$RESET" "$label" "$DIM" "$desc" "$RESET"
 }
 
 menu() {
   while true; do
-    clear 2>/dev/null || true
-    printf "%b╭────────────────────────────────────────────╮%b\n" "$MAGENTA" "$RESET"
-    printf "%b│        NixOS Configuration Manager         │%b\n" "$MAGENTA" "$RESET"
-    printf "%b│                   v%s                   │%b\n" "$MAGENTA" "$VERSION" "$RESET"
-    printf "%b╰────────────────────────────────────────────╯%b\n" "$MAGENTA" "$RESET"
+    clear_screen
 
-    system_overview
-    section "Configuration"
-    printf '  %b1%b  Install / Setup\n' "$CYAN" "$RESET"
-    printf '  %b2%b  Update configuration\n' "$CYAN" "$RESET"
-    printf '  %b3%b  Rebuild / Switch\n' "$CYAN" "$RESET"
-    printf '  %b4%b  Dry rebuild\n' "$CYAN" "$RESET"
-    printf '  %b5%b  Check flake\n' "$CYAN" "$RESET"
-    printf '  %b6%b  Rollback\n' "$CYAN" "$RESET"
-    printf '  %b7%b  Refresh hardware config\n' "$CYAN" "$RESET"
-    printf '  %b8%b  List generations\n' "$CYAN" "$RESET"
-    section "Validation & Maintenance"
-    printf '  %b9%b  Full configuration check\n' "$CYAN" "$RESET"
-    printf ' %b10%b  Maintenance dashboard\n' "$CYAN" "$RESET"
-    printf ' %b11%b  Test installer preview\n' "$CYAN" "$RESET"
-    printf ' %b12%b  Garbage collection\n' "$CYAN" "$RESET"
-    printf ' %b13%b  Optimize Nix store\n' "$CYAN" "$RESET"
-    printf ' %b14%b  Verify Nix store\n' "$CYAN" "$RESET"
-    printf ' %b15%b  Systemd health\n' "$CYAN" "$RESET"
-    printf ' %b16%b  Nix store usage\n' "$CYAN" "$RESET"
-    printf '  %b0%b  Exit\n\n' "$CYAN" "$RESET"
+    echo
+    panel "NixOS Configuration Manager" "v$VERSION" "$(overview_facts)"
+    echo
+
+    printf '  %b%bCONFIGURATION%b\n' "$CYAN" "$BOLD" "$RESET"
+    menu_item 1 "Install / Setup" "first-time bootstrap"
+    menu_item 2 "Update" "pull repo + flake update"
+    menu_item 3 "Rebuild / Switch" "validate then switch"
+    menu_item 4 "Dry rebuild" "build without switching"
+    menu_item 5 "Check flake" "evaluate the flake"
+    menu_item 6 "Rollback" "previous generation"
+    menu_item 7 "Refresh hardware" "regenerate hardware config"
+    menu_item 8 "List generations" "system profile history"
+
+    echo
+    printf '  %b%bVALIDATION & MAINTENANCE%b\n' "$CYAN" "$BOLD" "$RESET"
+    menu_item 9 "Configuration check" "full validator"
+    menu_item 10 "Maintenance" "cleanup dashboard"
+    menu_item 11 "Installer preview" "dry-run the installer"
+    menu_item 12 "Garbage collection" "reclaim store space"
+    menu_item 13 "Optimize store" "deduplicate the store"
+    menu_item 14 "Verify store" "check store integrity"
+    menu_item 15 "Systemd health" "failed units"
+    menu_item 16 "Store usage" "disk footprint"
+
+    echo
+    menu_item 0 "Exit" ""
+    echo
 
     local choice
     read -r -p "  Select: " choice
@@ -332,7 +790,7 @@ menu() {
       14) m_verify_store; pause ;;
       15) m_systemd_health; pause ;;
       16) m_store_usage; pause ;;
-      0) clear 2>/dev/null || true; exit 0 ;;
+      0) clear_screen; exit 0 ;;
       *) warning "Invalid option."; sleep 1 ;;
     esac
   done
@@ -344,10 +802,7 @@ M_NIXOS_DIR="$ROOT"
 M_FLAKE_TARGET="$ROOT#laptop"
 M_KEEP_GENERATIONS=5
 M_ICON_OK="✓"
-M_ICON_FAIL="✗"
-M_ICON_WARN="!"
 M_ICON_INFO="ℹ"
-M_ICON_ARROW="→"
 M_ICON_CLEAN="✦"
 M_ICON_NIX=""
 M_ICON_GIT=""
@@ -356,89 +811,11 @@ M_ICON_DISK="▣"
 M_ICON_TRASH="✕"
 M_ICON_CHECK="✓"
 
-# Terminal helpers
-
-m_clear_screen() {
-  printf '\033c'
-}
-
-m_hide_cursor() {
-  tput civis 2>/dev/null || true
-}
-
-m_show_cursor() {
-  tput cnorm 2>/dev/null || true
-}
-
-trap m_show_cursor EXIT INT TERM
-
-m_hr() {
-  printf '%b\n' "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}"
-}
-
-m_header() {
-  m_clear_screen
-
-  echo
-  printf '%b\n' "${CYAN}${BOLD}"
-  echo "   ███╗   ██╗██╗██╗  ██╗ ██████╗ ███████╗"
-  echo "   ████╗  ██║██║╚██╗██╔╝██╔═══██╗██╔════╝"
-  echo "   ██╔██╗ ██║██║ ╚███╔╝ ██║   ██║███████╗"
-  echo "   ██║╚██╗██║██║ ██╔██╗ ██║   ██║╚════██║"
-  echo "   ██║ ╚████║██║██╔╝ ██╗╚██████╔╝███████║"
-  echo "   ╚═╝  ╚═══╝╚═╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝"
-  printf '%b\n' "${RESET}"
-
-  printf '%b\n' "${DIM}   NixOS system maintenance dashboard${RESET}"
-  echo
-  m_hr
-  echo
-}
-
-m_section() {
-  echo
-  printf '%b\n' "${CYAN}${BOLD}  $1${RESET}"
-  printf '%b\n' "${DIM}  ──────────────────────────────────────────────────────────${RESET}"
-}
-
-m_info() {
-  printf '  %b %s\n' "${BLUE}${M_ICON_INFO}${RESET}" "$1"
-}
-
-m_success() {
-  printf '  %b %s\n' "${GREEN}${M_ICON_OK}${RESET}" "$1"
-}
-
-m_warning() {
-  printf '  %b %s\n' "${YELLOW}${M_ICON_WARN}${RESET}" "$1"
-}
-
-m_error() {
-  printf '  %b %s\n' "${RED}${M_ICON_FAIL}${RESET}" "$1"
-}
-
-m_run() {
-  printf '  %b %s\n' "${MAGENTA}${M_ICON_ARROW}${RESET}" "$1"
-}
-
-m_separator() {
-  echo
-  printf '%b\n' "${DIM}  ──────────────────────────────────────────────────────────${RESET}"
-}
-
-m_pause() {
-  echo
-  read -rp "  Press Enter to continue..."
-}
-
-m_confirm() {
-  local prompt="$1"
-
-  echo
-  read -rp "  $prompt [y/N]: " answer
-
-  [[ "$answer" =~ ^[Yy]$ ]]
-}
+# The maintenance dashboard used to carry its own copy of the log and
+# framing helpers (m_section, m_info, m_run, m_header, ...). They are
+# gone; it now speaks the shared vocabulary defined at the top of the
+# file. The M_ICON_* and M_* configuration values above stay, because
+# the printf call sites in this section reference the icons directly.
 
 # Safety
 
@@ -513,7 +890,7 @@ m_check_flake() {
 
   section "${M_ICON_NIX} Flake validation"
 
-  m_run "nix flake check"
+  run_cmd "nix flake check"
 
   if nix flake check; then
     success "Flake check passed."
@@ -529,7 +906,7 @@ m_dry_build() {
 
   section "${M_ICON_CHECK} NixOS configuration"
 
-  m_run "nixos-rebuild dry-build"
+  run_cmd "nixos-rebuild dry-build"
 
   if sudo nixos-rebuild dry-build --flake "$M_FLAKE_TARGET"; then
     success "Dry-build passed."
@@ -644,7 +1021,7 @@ m_cleanup_generations() {
 
   if confirm "Remove these generations?"; then
 
-    m_run "Removing old generations..."
+    run_cmd "Removing old generations..."
 
     sudo nix-env \
       --profile /nix/var/nix/profiles/system \
@@ -687,7 +1064,7 @@ m_garbage_collect() {
 
   if confirm "Run garbage collection?"; then
 
-    m_run "Running Nix garbage collection..."
+    run_cmd "Running Nix garbage collection..."
 
     sudo nix-collect-garbage
 
@@ -708,7 +1085,7 @@ m_optimize_store() {
 
   if confirm "Optimize the Nix store?"; then
 
-    m_run "Optimizing Nix store..."
+    run_cmd "Optimizing Nix store..."
 
     sudo nix-store --optimise
 
@@ -734,9 +1111,13 @@ m_verify_store() {
     return
   fi
 
-  m_run "Verifying Nix store..."
-
-  if sudo nix-store --verify --check-contents; then
+  # The one operation in this script that a spinner genuinely improves:
+  # it runs for minutes, prints nothing at all while it succeeds, and
+  # prints the corrupt paths when it does not -- which spinner replays to
+  # stderr. The other long operations here (nix-collect-garbage,
+  # --optimise, flake check, dry-build) each end on a summary line worth
+  # reading, so they stay streaming.
+  if spinner "Verifying Nix store" sudo nix-store --verify --check-contents; then
     success "Nix store verification passed."
   else
     error "Nix store verification reported problems."
@@ -808,7 +1189,7 @@ m_system_overview() {
   hostname="$(hostname)"
   kernel="$(uname -r)"
   nix_version="$(nix --version)"
-  uptime="$(uptime -p 2>/dev/null || true)"
+  uptime="$(uptime_human)"
 
   printf '  %b Host:       %s\n' "${CYAN}${M_ICON_SYSTEM}${RESET}" "$hostname"
   printf '  %b Kernel:     %s\n' "${BLUE}${M_ICON_INFO}${RESET}" "$kernel"
@@ -818,20 +1199,22 @@ m_system_overview() {
 
 # Full maintenance is implemented by m_maintenance_dashboard above.
 m_maintenance_dashboard() {
-  m_header
+  clear_screen
+  panel "NixOS Maintenance" "v$VERSION" "System maintenance dashboard"
+  echo
   m_check_environment
   m_check_git
   echo
   if ! m_check_flake; then
-    m_error "Maintenance stopped."
-    m_pause
+    error "Maintenance stopped."
+    pause
     return
   fi
   if ! m_dry_build; then
-    m_error "Maintenance stopped."
+    error "Maintenance stopped."
     echo
     echo "Fix the NixOS configuration before cleanup."
-    m_pause
+    pause
     return
   fi
   m_generation_status
@@ -842,15 +1225,15 @@ m_maintenance_dashboard() {
   m_systemd_health
   m_store_usage
   echo
-  m_section "Final configuration check"
-  m_run "Running final dry-build..."
+  section "Final configuration check"
+  run_cmd "Running final dry-build..."
   if sudo nixos-rebuild dry-build --flake "$M_FLAKE_TARGET"; then
-    m_success "Final dry-build passed."
+    success "Final dry-build passed."
   else
-    m_error "Final dry-build failed."
+    error "Final dry-build failed."
   fi
   echo
-  m_hr
+  hr
   echo
   printf '%b\n' "${GREEN}${BOLD}  ${M_ICON_OK} Maintenance complete${RESET}"
   echo
@@ -859,60 +1242,32 @@ m_maintenance_dashboard() {
   echo
   printf '%b\n' "${DIM}  Your NixOS configuration was not modified.${RESET}"
   echo
-  m_pause
+  pause
 }
 
 
 validator_run() {
 
 # Integrated configuration validator (from check.sh)
+#
+# These four resets stay inside the function rather than moving up to the
+# initialisers, because the menu can run the validator twice in one
+# process and a stale V_FAILED from the first run would make the second
+# report a failure it never found. v_ok / v_fail / v_info / v_separator
+# now come from the shared definitions at the top of the file.
 V_FAILED=0
 V_FLAKE_LOG=""
 V_NVIM_LOG=""
 V_LUA_LOG=""
 
-v_ok() {
-    printf "  ${GREEN}✓${RESET} %s\n" "$1"
-}
-
-v_fail() {
-    printf "  ${RED}✗${RESET} %s\n" "$1"
-    V_FAILED=1
-}
-
-v_info() {
-    printf "  ${YELLOW}!${RESET} %s\n" "$1"
-}
-
-v_section() {
-    printf "\n${MAGENTA}${BOLD}==>${RESET} ${BOLD}%s${RESET}\n" "$1"
-}
-
-v_subsection() {
-    printf "  ${BLUE}•${RESET} ${BOLD}%s${RESET}\n" "$1"
-}
-
-v_separator() {
-    printf "${DIM}────────────────────────────────────────────────────────────${RESET}\n"
-}
-
 
 # Header
 
-clear 2>/dev/null || true
+clear_screen
 
-printf "${CYAN}${BOLD}"
-printf '╭────────────────────────────────────────────────────────────╮\n'
-printf '│                                                            │\n'
-printf '│                 NixOS Configuration Check                  │\n'
-printf '│                                                            │\n'
-printf '╰────────────────────────────────────────────────────────────╯\n'
-printf "${RESET}"
-
-printf "\n"
-printf "${DIM}Repository:${RESET} %s\n" "$ROOT"
-printf "${DIM}Branch:${RESET}     %s\n" \
-    "$(git branch --show-current 2>/dev/null || printf 'unknown')"
+panel "NixOS Configuration Check" "" \
+    "Repository: $ROOT" \
+    "Branch:     $(git branch --show-current 2>/dev/null || printf 'unknown')"
 
 # 1. Repository
 
@@ -2005,13 +2360,7 @@ V_RESULT=0
 
 if [[ "$V_FAILED" -eq 0 ]]; then
 
-    printf "${GREEN}${BOLD}"
-    printf '╭────────────────────────────────────────────────────────────╮\n'
-    printf '│                                                            │\n'
-    printf '│            ✓  Configuration is healthy                     │\n'
-    printf '│                                                            │\n'
-    printf '╰────────────────────────────────────────────────────────────╯\n'
-    printf "${RESET}"
+    verdict "$GREEN" "$ICON_OK" "Configuration is healthy"
 
     printf "\n"
     printf "${DIM}Safe to run:${RESET}\n"
@@ -2021,13 +2370,7 @@ if [[ "$V_FAILED" -eq 0 ]]; then
 
 else
 
-    printf "${RED}${BOLD}"
-    printf '╭────────────────────────────────────────────────────────────╮\n'
-    printf '│                                                            │\n'
-    printf '│             ✗  Problems require attention                  │\n'
-    printf '│                                                            │\n'
-    printf '╰────────────────────────────────────────────────────────────╯\n'
-    printf "${RESET}"
+    verdict "$RED" "$ICON_FAIL" "Problems require attention"
 
     printf "\n"
     printf "${YELLOW}Fix the problems above before rebuilding.${RESET}\n"

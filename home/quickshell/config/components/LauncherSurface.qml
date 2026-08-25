@@ -208,10 +208,8 @@ PanelWindow {
         }
     }
 
-    // Floating shadow
-    //
     // Declared after the scrim and before the card so it paints between them
-    // without needing an explicit z.
+    // without an explicit z. 1.42 is the highest level -- modal over a scrim.
 
     Item {
         anchors.fill: card
@@ -220,43 +218,12 @@ PanelWindow {
 
         visible: root.reveal > 0.001
 
-        Rectangle {
+        Elevation {
             anchors.fill: parent
-            anchors.margins: -12
 
-            radius: card.radius + 12
+            radius: card.radius
 
-            color: "#000000"
-
-            opacity: Core.Theme.shellShadowOpacity * 0.15
-
-            antialiasing: true
-        }
-
-        Rectangle {
-            anchors.fill: parent
-            anchors.margins: -7
-
-            radius: card.radius + 7
-
-            color: "#000000"
-
-            opacity: Core.Theme.shellShadowOpacity * 0.28
-
-            antialiasing: true
-        }
-
-        Rectangle {
-            anchors.fill: parent
-            anchors.margins: -3
-
-            radius: card.radius + 3
-
-            color: "#000000"
-
-            opacity: Core.Theme.shellShadowOpacity * 0.50
-
-            antialiasing: true
+            level: 1.42
         }
     }
 
@@ -282,12 +249,22 @@ PanelWindow {
 
         radius: Core.Theme.radiusSmall
 
-        color: Core.Theme.backgroundGlass
+        // Frosted, not filled: Glass takes over the fill. The card's own
+        // opacity: root.reveal still fades the whole thing, Glass included.
+        color: "transparent"
 
-        border.width: 0
+        // The lens edge. Drawn over the Glass fill (Glass fills this same rect),
+        // so it reads as the cut face of the slab.
+        border.width: Core.Theme.borderWidth
         border.color: Core.Theme.borderActive
 
         opacity: root.reveal
+
+        Glass {
+            anchors.fill: parent
+
+            radius: parent.radius
+        }
 
         MouseArea {
             anchors.fill: parent

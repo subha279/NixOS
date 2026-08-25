@@ -53,10 +53,10 @@
       borderWidth = 0;
 
       # Global corner radius.
-      radius = 10;
+      radius = 15;
 
       # Small UI radius.
-      radiusSmall = 6;
+      radiusSmall = 10;
 
       # Large popup / window radius.
       radiusLarge = 18;
@@ -69,14 +69,35 @@
       fontSizeSmall = 10;
       fontSizeLarge = 15;
 
-      # Quickshell glass panel opacity (bar + popups).
-      glassOpacity = 0.80;
+      # LIQUID GLASS
+      glassOpacity = 0.51;
+      glassLuminosity = 0.20;
+      glassGradientOpacity = 0.055;
+      glassGrainOpacity = 0.010;
+
+      # THE GLOSS
+      glassSpecularOpacity = 0.14;
+
+      glassLensOpacity = 0.10;
+
+      glassDepthOpacity = 0.07;
+
+      # wallpaper structure shows through.
+      glassClarity = 0.14;
+
+      glassRimOpacity = 0.10;
 
       # Shadow strength.
       shadowOpacity = 0.0;
 
       # Default application/window opacity.
       windowOpacity = 0.96;
+
+      # this declares what the terminal was actually showing.
+      terminalOpacity = 0.52;
+
+      # than as solid panels.
+      editorFloatBlend = 12;
 
       clock = {
         hour = "foreground";
