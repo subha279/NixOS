@@ -6,8 +6,6 @@
 
 **Hyprland** · **Quickshell** · **Stylix** · **Home Manager**
 
-> **GitHub-friendly:** the README uses standard Unicode/emoji icons instead of Nerd Font glyphs, so headings and badges render correctly without a special terminal font.
-
 <p>
   <a href="https://github.com/subha279/NixOS">
     <img src="https://img.shields.io/badge/NixOS-26.05-7E7DFF?style=for-the-badge&logo=nixos&logoColor=white" alt="NixOS 26.05">
@@ -19,7 +17,7 @@
     <img src="https://img.shields.io/badge/Quickshell-QML-BB86FC?style=for-the-badge" alt="Quickshell">
   </a>
   <a href="https://github.com/subha279/NixOS">
-    <img src="https://img.shields.io/badge/Stylix-21%20themes-C792EA?style=for-the-badge" alt="Stylix">
+    <img src="https://img.shields.io/badge/Stylix-20themes-C792EA?style=for-the-badge" alt="Stylix">
   </a>
 </p>
 
