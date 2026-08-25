@@ -17,7 +17,7 @@
     <img src="https://img.shields.io/badge/Quickshell-QML-BB86FC?style=for-the-badge" alt="Quickshell">
   </a>
   <a href="https://github.com/subha279/NixOS">
-    <img src="https://img.shields.io/badge/Stylix-20themes-C792EA?style=for-the-badge" alt="Stylix">
+    <img src="https://img.shields.io/badge/Stylix-themes-C792EA?style=for-the-badge" alt="Stylix">
   </a>
 </p>
 
