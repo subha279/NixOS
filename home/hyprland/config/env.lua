@@ -38,5 +38,5 @@ hl.env("__GLX_VENDOR_LIBRARY_NAME", "nvidia")
 -- Default Applications
 
 hl.env("EDITOR", "nvim")
-hl.env("BROWSER", "firefox")
+hl.env("BROWSER", "zen")
 hl.env("TERMINAL", "kitty")

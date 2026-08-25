@@ -24,6 +24,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    zen-browser = {
+      url = "github:youwen5/zen-browser-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
   };
 
   outputs =
@@ -34,6 +39,7 @@
       stylix,
       apple-fonts,
       claude-desktop,
+      zen-browser,
       ...
     }:
     let
@@ -49,6 +55,9 @@
               nixpkgs.overlays = [
                 apple-fonts.overlays.default
                 claude-desktop.overlays.default
+                (final: prev: {
+                  zen-browser = zen-browser.packages.${final.system}.default;
+                })
               ];
             }
 

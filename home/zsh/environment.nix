@@ -21,7 +21,7 @@
 
     # Applications
 
-    BROWSER = "firefox";
+    BROWSER = "zen";
 
     TERMINAL = "kitty";
 

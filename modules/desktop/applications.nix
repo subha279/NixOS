@@ -5,11 +5,10 @@
 
     # Browser
 
-    firefox
+    zen-browser
 
     # File Manager
 
-    # thunar, thunar-volman and tumbler are provided by programs.thunar / services.tumbler in ./services.nix, and gvfs by services.gvfs.
     shared-mime-info
     ffmpegthumbnailer
 

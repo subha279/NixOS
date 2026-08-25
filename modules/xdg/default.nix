@@ -25,7 +25,7 @@
 
     mime.defaultApplications =
       let
-        browser = "firefox.desktop";
+        browser = "zen.desktop";
 
         images = "org.kde.gwenview.desktop";
 

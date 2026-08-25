@@ -28,7 +28,6 @@ in
     ../../modules/stylix
     ../../modules/development
     ../../modules/creator
-    ../../modules/gaming
     ../../modules/virtualisation
   ];
 

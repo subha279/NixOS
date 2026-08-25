@@ -11,7 +11,7 @@ M.altMod = "ALT"
 
 M.terminal = "kitty"
 
-M.browser = "firefox"
+M.browser = "zen"
 
 M.fileManager = "thunar"
 
