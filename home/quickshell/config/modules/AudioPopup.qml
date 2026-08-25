@@ -112,7 +112,7 @@ Components.PopupSurface {
 
                 radius: Core.Theme.radiusRow
 
-                color: Core.Theme.surface
+                color: Core.Theme.surfaceGlass
 
                 Column {
                     anchors.fill: parent
@@ -294,6 +294,8 @@ Components.PopupSurface {
 
                             width: outputList.width
 
+                            glassActive: true
+
                             icon: popup.svc.iconFor(sinkRow.modelData)
 
                             title: popup.svc.label(sinkRow.modelData)
@@ -336,7 +338,7 @@ Components.PopupSurface {
 
                 radius: Core.Theme.radiusRow
 
-                color: Core.Theme.surface
+                color: Core.Theme.surfaceGlass
 
                 Column {
                     anchors.fill: parent
@@ -527,6 +529,8 @@ Components.PopupSurface {
                             required property var modelData
 
                             width: inputList.width
+
+                            glassActive: true
 
                             icon: popup.svc.iconFor(sourceRow.modelData)
 

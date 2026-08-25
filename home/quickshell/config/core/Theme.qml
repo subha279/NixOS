@@ -177,12 +177,10 @@ QtObject {
     readonly property color clockSecond: resolveColor(ui.clock?.second, foregroundFaint)
 
     // Liquid Glass
-    //
-    // Feeds components/Glass.qml; the blur itself is Hyprland's (layerules.lua).
-    // Read with `!== undefined ?` rather than `||`, because `0 || 0.14` is 0.14 --
-    // `||` would make setting a knob to 0 in themes.nix silently fail.
 
     readonly property real glassOpacity: ui.glassOpacity !== undefined ? ui.glassOpacity : 0.51
+
+    readonly property real surfaceOpacity: ui.surfaceOpacity !== undefined ? ui.surfaceOpacity : 0.38
 
     readonly property real glassLuminosity: ui.glassLuminosity !== undefined ? ui.glassLuminosity : 0.20
 
@@ -204,16 +202,16 @@ QtObject {
 
     readonly property real glassClarity: ui.glassClarity !== undefined ? ui.glassClarity : 0.06
 
-    // Gradient endpoints, derived from each theme's palette so all 20
-    // colourschemes retint the glass for free.
+    readonly property color glassBody: {
+        if (glassOnLight) {
+            return Qt.rgba(background.r * (1.0 - glassLuminosity), background.g * (1.0 - glassLuminosity), background.b * (1.0 - glassLuminosity), 1.0);
+        }
 
-    // The body every tint stop is built from: the theme background lifted
-    // towards white by glassLuminosity, proportional to each channel's remaining
-    // headroom so hue survives and pale themes self-limit. Derived rather than
-    // replacing `background`, because glassOnLight below tests its lightness and
-    // lifting that value would invert a dark theme's specular.
+        return Qt.rgba(background.r + (1.0 - background.r) * glassLuminosity, background.g + (1.0 - background.g) * glassLuminosity, background.b + (1.0 - background.b) * glassLuminosity, 1.0);
+    }
 
-    readonly property color glassBody: Qt.rgba(background.r + (1.0 - background.r) * glassLuminosity, background.g + (1.0 - background.g) * glassLuminosity, background.b + (1.0 - background.b) * glassLuminosity, 1.0)
+    readonly property color surfaceGlass: Qt.alpha(surface, surfaceOpacity)
+    readonly property color surfaceGlassHover: Qt.alpha(surfaceHover, 0.55)
 
     readonly property color glassTintTop: {
         const mixed = Qt.tint(glassBody, Qt.rgba(accent.r, accent.g, accent.b, 0.10));
@@ -312,10 +310,6 @@ QtObject {
 
     readonly property real shadowOpacity: ui.shadowOpacity !== undefined ? ui.shadowOpacity : 0.20
 
-    // Shell surfaces draw their own stacked shadow to read as floating.
-    // Deliberately separate from ui.shadowOpacity, which decoration.lua also
-    // reads for Hyprland window shadows, so the shell can float without
-    // touching window decorations.
     readonly property real shellShadowOpacity: 0.0
 
     // How far the stacked shadow bleeds past a floating surface.

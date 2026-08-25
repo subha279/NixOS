@@ -192,7 +192,7 @@ PanelWindow {
 
     // Scrim opacity
 
-    readonly property real scrimAlpha: 0.12
+    readonly property real scrimAlpha: 0.0
 
     // Scrim
 
@@ -205,25 +205,6 @@ PanelWindow {
             anchors.fill: parent
             acceptedButtons: Qt.LeftButton
             onClicked: root.dismiss()
-        }
-    }
-
-    // Declared after the scrim and before the card so it paints between them
-    // without an explicit z. 1.42 is the highest level -- modal over a scrim.
-
-    Item {
-        anchors.fill: card
-
-        opacity: card.opacity
-
-        visible: root.reveal > 0.001
-
-        Elevation {
-            anchors.fill: parent
-
-            radius: card.radius
-
-            level: 1.42
         }
     }
 

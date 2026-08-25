@@ -21,7 +21,7 @@ Item {
 
         radius: height / 2
 
-        color: mouse.containsMouse ? Core.Theme.hover : "transparent"
+        color: mouse.containsMouse ? Core.Theme.surfaceGlassHover : "transparent"
 
         Behavior on color {
             ColorAnimation {

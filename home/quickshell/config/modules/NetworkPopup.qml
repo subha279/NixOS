@@ -304,7 +304,7 @@ Components.PopupSurface {
 
                         radius: Core.Theme.radiusRow
 
-                        color: Core.Theme.surface
+                        color: Core.Theme.surfaceGlass
 
                         border.width: Core.Theme.borderWidth
 
@@ -558,6 +558,8 @@ Components.PopupSurface {
                         required property bool saved
 
                         width: list.width
+
+                        glassActive: true
 
                         icon: popup.svc.signalIcon(netRow.strength, netRow.secured)
 

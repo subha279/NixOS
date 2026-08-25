@@ -229,6 +229,8 @@ Components.PopupSurface {
 
                         width: list.width
 
+                        glassActive: true
+
                         icon: devRow.deviceIcon
 
                         title: devRow.deviceName

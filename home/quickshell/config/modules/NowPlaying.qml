@@ -3,19 +3,6 @@ import QtQuick
 import "../core" as Core
 import "../services" as Services
 
-// Now playing indicator -- CAVA style
-//
-// A miniature spectrum analyser: eleven uniform 2px bars separated by 1px
-// gutters, flat topped, packed tight. Uniform width is the whole point of the
-// look -- the earlier mix of 1px and 2px bars read as a hand-drawn squiggle
-// rather than a spectrum. The two accent tints now sweep ACROSS the strip
-// instead of alternating, which is where cava's colour gradient comes from.
-//
-// 32px wide, 7px tall: long and low, under a 48px clock module, so it still
-// cannot change the size of the bar pill.
-//
-// Not a chip and not a panel: no background, no shadow, no click target. It is
-// a bare strip that lives inside an existing module -- see Clock.qml.
 
 Item {
     id: root
@@ -31,17 +18,6 @@ Item {
 
     readonly property bool shown: root.active && root.svc.available
 
-    // Bar profile
-    //
-    // Heights lean left, the way a real spectrum sits when the bass is loudest,
-    // and the tallest bar is deliberately the SECOND one rather than the middle
-    // one. A peak in the exact centre made the strip read as a symmetrical
-    // hill, which looks like a decoration rather than a meter.
-    //
-    // The durations are all different and share no tidy common multiple, so the
-    // bars drift permanently out of phase instead of falling into a marching
-    // pattern -- no phase bookkeeping and no driving timer, just eleven loops
-    // of different lengths.
 
     readonly property var bars: [
         {

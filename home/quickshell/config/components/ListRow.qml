@@ -16,6 +16,7 @@ Rectangle {
     property color trailingColor: Core.Theme.foregroundMuted
 
     property bool active: false
+    property bool glassActive: false
     property bool busy: false
     property bool dimmed: false
 
@@ -27,7 +28,7 @@ Rectangle {
 
     radius: Core.Theme.radiusRow
 
-    color: root.active ? Core.Theme.surfaceActive : mouse.containsMouse ? Core.Theme.surfaceHover : "transparent"
+    color: root.active ? Core.Theme.surfaceGlass : mouse.containsMouse ? Core.Theme.surfaceGlassHover : "transparent"
 
     Behavior on color {
         ColorAnimation {

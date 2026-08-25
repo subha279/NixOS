@@ -5,24 +5,6 @@ import QtQuick
 // ================================================================
 // Icons
 // ----------------------------------------------------------------
-// Central registry of every Nerd Font glyph the shell uses.
-//
-// WHY THIS EXISTS
-// Glyphs above U+FFFF have to be written as surrogate pairs in QML
-// string literals, and hand-computing those pairs is extremely
-// error prone — several icons in this config were silently
-// rendering the wrong symbol because a pair was off by one block.
-//
-// Every codepoint below is recorded in the comment next to it. To
-// convert a codepoint `cp` to a pair:
-//
-//     v    = cp - 0x10000
-//     high = 0xD800 + (v >> 10)
-//     low  = 0xDC00 + (v & 0x3FF)
-//
-// Prefer OUTLINE variants where a choice exists — they read as
-// lighter and sit better next to text at 12-16px.
-// ================================================================
 
 QtObject {
     // Network — Wi-Fi strength ramp

@@ -140,33 +140,6 @@ PanelWindow {
         }
     }
 
-    // Floating shadow. A sibling, never a child: the card turns on layer
-    // caching while it scales and a layer clips to its own bounds, which would
-    // shave off anything drawn past the edge. Rides the card's opacity, scale
-    // and origin so the two never come apart mid-animation.
-
-    Item {
-        anchors.fill: card
-
-        z: -1
-
-        opacity: card.opacity
-
-        scale: card.scale
-
-        transformOrigin: card.transformOrigin
-
-        visible: card.height > 0
-
-        Elevation {
-            anchors.fill: parent
-
-            radius: card.radius
-
-            level: 1.20
-        }
-    }
-
     // The card
 
     Rectangle {

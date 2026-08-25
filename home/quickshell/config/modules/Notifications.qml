@@ -392,7 +392,7 @@ PanelWindow {
 
                             radius: 11
 
-                            color: Core.Theme.surface
+                            color: Core.Theme.surfaceGlass
 
                             // Resolve the notification icon.
 

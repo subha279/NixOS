@@ -146,7 +146,7 @@ Components.LauncherSurface {
                 // solid accent fill. The accent moves to the bar on the left
                 // and into the text, so the row no longer has to invert
                 // everything sitting on it.
-                color: row.selected ? Core.Theme.surfaceActive : "transparent"
+                color: row.selected ? Core.Theme.surfaceGlass : "transparent"
 
                 Behavior on color {
                     ColorAnimation {

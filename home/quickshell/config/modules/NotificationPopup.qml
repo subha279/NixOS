@@ -275,7 +275,7 @@ Components.PopupSurface {
 
                         radius: Core.Theme.radiusRow
 
-                        color: noteMouse.containsMouse ? Core.Theme.surfaceHover : Core.Theme.surface
+                        color: noteMouse.containsMouse ? Core.Theme.surfaceGlassHover : Core.Theme.surfaceGlass
 
                         Behavior on color {
                             ColorAnimation {
@@ -395,7 +395,7 @@ Components.PopupSurface {
 
                                         radius: 11
 
-                                        color: chipMouse.containsMouse ? Core.Theme.surfaceActive : Core.Theme.hover
+                                        color: chipMouse.containsMouse ? Core.Theme.surfaceGlassHover : Core.Theme.surfaceGlass
 
                                         Behavior on color {
                                             ColorAnimation {

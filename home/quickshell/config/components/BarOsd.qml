@@ -82,7 +82,7 @@ Item {
 
             radius: 2
 
-            color: Core.Theme.surface
+            color: Core.Theme.surfaceGlass
 
             Rectangle {
                 id: fill

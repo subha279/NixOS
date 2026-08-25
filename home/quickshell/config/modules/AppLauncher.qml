@@ -100,7 +100,7 @@ Components.LauncherSurface {
                 // popup, instead of inverting to a solid accent bar.
                 radius: Core.Theme.radiusRow
 
-                color: row.selected ? Core.Theme.surfaceActive : "transparent"
+                color: row.selected ? Core.Theme.surfaceGlass : "transparent"
 
                 // The selected row grows past its slot, so it paints over its
                 // neighbours.

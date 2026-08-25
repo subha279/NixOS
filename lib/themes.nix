@@ -50,7 +50,7 @@
     ui = {
 
       # Window border.
-      borderWidth = 0;
+      borderWidth = 2;
 
       # Global corner radius.
       radius = 15;
@@ -71,8 +71,9 @@
 
       # LIQUID GLASS
       glassOpacity = 0.51;
+      surfaceOpacity = 0.38;
       glassLuminosity = 0.20;
-      glassGradientOpacity = 0.0;
+      glassGradientOpacity = 0.055;
       glassGrainOpacity = 0.0;
 
       # FLAT GLASS — match Kitty

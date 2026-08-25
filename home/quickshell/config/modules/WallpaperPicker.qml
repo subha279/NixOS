@@ -114,7 +114,7 @@ Components.LauncherSurface {
                     // Rounded to match the rows in the battery popup.
                     radius: Core.Theme.radiusRow
 
-                    color: Core.Theme.surface
+                    color: Core.Theme.surfaceGlass
                     clip: true
 
                     // Zoom on selection, now sized so it actually fits. The
@@ -196,7 +196,7 @@ Components.LauncherSurface {
                         anchors.bottom: parent.bottom
 
                         height: 26
-                        color: Qt.alpha(Core.Theme.backgroundDark, 0.78)
+                        color: Core.Theme.surfaceGlass
 
                         Row {
                             anchors.left: parent.left

@@ -101,11 +101,11 @@ let
           fontSizeLarge = ${toString ui.fontSizeLarge},
 
           shadowOpacity = ${toString ui.shadowOpacity},
+          shadowOpacity = ${toString ui.shadowOpacity},
+          surfaceOpacity = ${toString ui.surfaceOpacity},
           windowOpacity = ${toString ui.windowOpacity},
 
-          -- Liquid glass. Consumed by Quickshell rather than by Hyprland, but
-          -- emitted here too so both generators describe the same global.ui
-          -- instead of the Lua side quietly holding a subset.
+          -- Liquid glass. Consumed by Quickshell rather than by Hyprland
           glassOpacity = ${toString ui.glassOpacity},
           glassLuminosity = ${toString ui.glassLuminosity},
           glassGradientOpacity = ${toString ui.glassGradientOpacity},

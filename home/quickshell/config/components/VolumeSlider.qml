@@ -47,7 +47,7 @@ Item {
 
         radius: height / 2
 
-        color: Core.Theme.surface
+        color: Core.Theme.surfaceGlass
 
         Behavior on height {
             NumberAnimation {

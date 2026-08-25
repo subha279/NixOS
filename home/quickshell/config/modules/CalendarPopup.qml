@@ -166,7 +166,7 @@ Components.PopupSurface {
 
                     radius: 14
 
-                    color: prevMouse.containsMouse ? Core.Theme.surfaceHover : "transparent"
+                    color: prevMouse.containsMouse ? Core.Theme.surfaceGlassHover : "transparent"
 
                     Behavior on color {
                         ColorAnimation {
@@ -268,7 +268,7 @@ Components.PopupSurface {
 
                     radius: 14
 
-                    color: nextMouse.containsMouse ? Core.Theme.surfaceHover : "transparent"
+                    color: nextMouse.containsMouse ? Core.Theme.surfaceGlassHover : "transparent"
 
                     Behavior on color {
                         ColorAnimation {
@@ -399,7 +399,7 @@ Components.PopupSurface {
 
                             visible: dayCell.filled
 
-                            color: dayCell.today ? Core.Theme.accent : (dayMouse.containsMouse ? Core.Theme.surfaceHover : "transparent")
+                            color: dayCell.today ? Core.Theme.accent : (dayMouse.containsMouse ? Core.Theme.surfaceGlassHover : "transparent")
 
                             Behavior on color {
                                 ColorAnimation {
@@ -484,7 +484,7 @@ Components.PopupSurface {
 
                     radius: 13
 
-                    color: todayMouse.containsMouse ? Core.Theme.surfaceHover : Core.Theme.surface
+                    color: todayMouse.containsMouse ? Core.Theme.surfaceGlassHover : Core.Theme.surfaceGlass
 
                     Text {
                         anchors.centerIn: parent

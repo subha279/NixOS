@@ -24,7 +24,7 @@ Item {
 
         radius: height / 2
 
-        color: root.menuOpen ? Core.Theme.surfaceActive : mouse.containsMouse ? Core.Theme.hover : "transparent"
+        color: root.menuOpen ? Core.Theme.surfaceGlass : mouse.containsMouse ? Core.Theme.surfaceGlassHover : "transparent"
 
         Behavior on color {
             ColorAnimation {

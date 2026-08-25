@@ -75,7 +75,7 @@ Components.PopupSurface {
 
                 radius: Core.Theme.radiusRow + 2
 
-                color: Core.Theme.surface
+                color: Core.Theme.surfaceGlass
 
                 border.width: Core.Theme.borderWidth
                 border.color: Core.Theme.border
@@ -326,6 +326,7 @@ Components.PopupSurface {
                         subtitle: profileRow.modelData === 0 ? "Longest battery life" : profileRow.modelData === 2 ? "Maximum speed, more heat" : "Default — good all round"
 
                         active: popup.svc.profile === profileRow.modelData
+                        glassActive: true
 
                         trailing: (popup.svc.profile === profileRow.modelData) ? "\udb80\udd34" : ""
 
