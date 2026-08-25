@@ -107,24 +107,10 @@ PanelWindow {
 
         antialiasing: true
 
-        // A ring, not a fill: a filled rect here is an opaque slab behind the
-        // glass, which defeats the compositor blur. Solid rather than a gradient
-        // because Rectangle.border.color cannot be a gradient.
         color: "transparent"
 
         border.width: Core.Theme.borderWidth
         border.color: Core.Theme.borderActive
-
-        // Sibling, never a child: Elevation draws outside its own bounds. 0.83 is
-        // the lowest level in the shell -- the bar is always on screen.
-
-        Elevation {
-            anchors.fill: pillBorder
-
-            radius: pillBorder.radius
-
-            level: 0.83
-        }
 
         // ACTUAL BAR SURFACE
 
@@ -139,8 +125,6 @@ PanelWindow {
 
             radius: height / 2
 
-            // Frosted, not filled: Hyprland blurs behind the aurora-bar layer
-            // (layerules.lua) and Glass is what lets that blur through.
             color: "transparent"
 
             antialiasing: true
