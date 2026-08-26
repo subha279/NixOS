@@ -1,36 +1,20 @@
 import QtQuick
-
 import Quickshell
 import Quickshell.Wayland
 
 import "../core" as Core
 
-// A full-width overlay layer hosting one animated glass card, plus the shared
-// right-click context menu (openMenu). The card eases its height, scales from
-// the top, and its content fades in slightly behind the geometry so text
-// arrives as the card grows.
-//
-//     PopupSurface { popupId: "network"; contentComponent: Component { ... } }
-
 PanelWindow {
     id: root
 
-    // Public API
-
     property string popupId: ""
-
     property int cardWidth: Core.Theme.popupWidth
     property int maxCardHeight: Core.Theme.popupMaxHeight
-
-    // The card's body. Give its root item an implicitHeight; the
-    // card sizes (and springs) to match.
     property Component contentComponent: null
 
     readonly property bool open: Core.PopupManager.isOpen(root.popupId)
-
     readonly property bool menuOpen: menuLayer.active
 
-    // NOTE: these are deliberately NOT called opened()/closed().
     signal didOpen
     signal didClose
 
@@ -42,8 +26,6 @@ PanelWindow {
         menuLayer.close();
     }
 
-    // Window setup
-
     anchors {
         top: true
         left: true
@@ -54,21 +36,15 @@ PanelWindow {
 
     color: "transparent"
 
-    // Ignore mode already implies a zero exclusive zone.
     exclusionMode: ExclusionMode.Ignore
 
-    visible: root.open || root.rendering
+    visible: true
 
     WlrLayershell.layer: WlrLayer.Overlay
-
     WlrLayershell.namespace: "aurora-popup"
 
     WlrLayershell.keyboardFocus: root.open ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
-    // Keeps the window alive until the close animation finishes
-    property bool rendering: false
-
-    // While closed we must not steal clicks from the desktop
     property Region noInput: Region {
         width: 0
         height: 0
@@ -78,35 +54,18 @@ PanelWindow {
 
     onOpenChanged: {
         if (root.open) {
-            closeTimer.stop();
-            root.rendering = true;
             root.didOpen();
         } else {
             menuLayer.close();
-            closeTimer.restart();
             root.didClose();
         }
     }
 
-    Timer {
-        id: closeTimer
-
-        interval: Core.Theme.durClose + 420
-        repeat: false
-
-        onTriggered: root.rendering = false
-    }
-
-    // Geometry driven by the content
-
-    // Screen-space Y of the bottom edge of the bar pill.
     readonly property real barBottomY: Core.Theme.barMarginTop + 10 + Core.Theme.pillHeight + Core.Theme.borderWidth
 
     readonly property real naturalHeight: contentHost.implicitHeight + Core.Theme.padding * 2
 
     readonly property real targetHeight: Math.min(root.naturalHeight, root.maxCardHeight)
-
-    // Click outside to dismiss
 
     MouseArea {
         anchors.fill: parent
@@ -125,8 +84,6 @@ PanelWindow {
         }
     }
 
-    // Escape to dismiss
-
     Item {
         anchors.fill: parent
 
@@ -140,139 +97,110 @@ PanelWindow {
         }
     }
 
-    // The card
-
     Rectangle {
         id: card
 
         width: root.cardWidth
 
-        // Horizontally centred on the bar module that opened us, clamped so it never runs off screen.
         x: Math.round(Math.max(Core.Theme.popupGap, Math.min(root.width - root.cardWidth - Core.Theme.popupGap, Core.PopupManager.anchorCenter - root.cardWidth / 2)))
 
-        // Every module lives in the same pill, so the vertical anchor is always the same number.
         y: Math.round(root.barBottomY + Core.Theme.popupGap)
 
-        // The soft part: a single cubic animation drives the height.
+        height: root.targetHeight
 
-        height: root.open ? root.targetHeight : 0
-
-        Behavior on height {
-            NumberAnimation {
-                duration: root.open ? Core.Theme.durOpen : Core.Theme.durClose
-                easing.type: Easing.OutQuint
-            }
-        }
-
-        transformOrigin: Item.Top
-
-        scale: root.open ? 1.0 : 0.96
-
-        opacity: root.open ? 1.0 : 0.0
-
-        Behavior on scale {
-            NumberAnimation {
-                duration: root.open ? Core.Theme.durOpen : Core.Theme.durClose
-                easing.type: root.open ? Easing.OutQuint : Easing.InQuint
-            }
-        }
-
-        Behavior on opacity {
-            NumberAnimation {
-                duration: root.open ? Core.Theme.durBase : Core.Theme.durClose
-
-                easing.type: Easing.OutQuint
-            }
-        }
-
-        radius: Core.Theme.radiusMenu
-
-        // Frosted, not filled: Hyprland blurs behind the aurora-popup layer
-        // (layerules.lua) and Glass is what lets that blur through.
         color: "transparent"
-
-        border.width: Core.Theme.borderWidth
-        border.color: Core.Theme.borderActive
 
         antialiasing: true
 
-        // Cache the card while it is being scaled/faded.
-        layer.enabled: root.open || root.rendering
-        layer.smooth: true
-
-        Glass {
-            anchors.fill: parent
-
-            radius: parent.radius
-            strength: 0.68
-        }
-
-        // Swallow clicks so the outside-click handler doesn't fire
-        MouseArea {
-            anchors.fill: parent
-
-            acceptedButtons: Qt.LeftButton | Qt.RightButton
-
-            onPressed: function (mouse) {
-                if (menuLayer.active) {
-                    menuLayer.close();
-                    mouse.accepted = true;
-                    return;
-                }
-
-                mouse.accepted = false;
-            }
-        }
-
-        // Content host — fades and slides behind the geometry
-
         Item {
-            id: contentHost
+            id: visual
 
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.top: parent.top
+            anchors.fill: parent
 
-            anchors.margins: Core.Theme.padding
+            transformOrigin: Item.Top
 
-            implicitHeight: contentLoader.item ? contentLoader.item.implicitHeight : 0
+            scale: root.open ? 1.0 : 0.97
 
-            height: implicitHeight
+            y: root.open ? 0 : -8
 
             opacity: root.open ? 1.0 : 0.0
 
-            transform: Translate {
-                y: root.open ? 0 : -6
+            Behavior on scale {
+                NumberAnimation {
+                    duration: root.open ? 240 : 170
+                    easing.type: Easing.OutCubic
+                }
+            }
 
-                Behavior on y {
-                    NumberAnimation {
-                        duration: Core.Theme.durSlow
-                        easing.type: Easing.OutQuint
-                    }
+            Behavior on y {
+                NumberAnimation {
+                    duration: root.open ? 240 : 170
+                    easing.type: Easing.OutCubic
                 }
             }
 
             Behavior on opacity {
                 NumberAnimation {
-                    duration: root.open ? Core.Theme.durSlow : Core.Theme.durFast
-
-                    easing.type: Easing.OutQuint
+                    duration: root.open ? 180 : 120
+                    easing.type: Easing.OutCubic
                 }
             }
 
-            Loader {
-                id: contentLoader
+            Rectangle {
+                anchors.fill: parent
+
+                radius: Core.Theme.radiusMenu
+
+                color: "transparent"
+
+                border.width: Core.Theme.borderWidth
+                border.color: Core.Theme.borderActive
+
+                antialiasing: true
+
+                Glass {
+                    anchors.fill: parent
+
+                    radius: parent.radius
+
+                    strength: 0.68
+                }
+            }
+
+            Item {
+                id: contentHost
 
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.top: parent.top
 
-                sourceComponent: root.contentComponent
+                anchors.margins: Core.Theme.padding
+
+                implicitHeight: contentLoader.item ? contentLoader.item.implicitHeight : 0
+
+                height: implicitHeight
+
+                opacity: root.open ? 1.0 : 0.0
+
+                Behavior on opacity {
+                    NumberAnimation {
+                        duration: root.open ? 150 : 100
+                        easing.type: Easing.OutCubic
+                    }
+                }
+
+                Loader {
+                    id: contentLoader
+
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.top: parent.top
+
+                    sourceComponent: root.contentComponent
+                }
             }
         }
     }
-
-    // Shared right-click context menu
 
     Item {
         id: menuLayer
@@ -303,32 +231,6 @@ PanelWindow {
 
         visible: menuLayer.active || menuBox.opacity > 0.01
 
-        // Floating shadow, same sibling pattern as the card's. anchors.fill
-        // tracks menuBox's x/y bindings, so it follows the cursor position the
-        // menu opened at.
-
-        Item {
-            anchors.fill: menuBox
-
-            z: -1
-
-            opacity: menuBox.opacity
-
-            scale: menuBox.scale
-
-            transformOrigin: menuBox.transformOrigin
-
-            visible: menuBox.height > 0
-
-            Elevation {
-                anchors.fill: parent
-
-                radius: menuBox.radius
-
-                level: 1.10
-            }
-        }
-
         Rectangle {
             id: menuBox
 
@@ -342,7 +244,6 @@ PanelWindow {
 
             radius: 14
 
-            // Frosted like the card above it.
             color: "transparent"
 
             border.width: Core.Theme.borderWidth
@@ -350,32 +251,25 @@ PanelWindow {
 
             antialiasing: true
 
-            layer.enabled: menuLayer.active || menuBox.opacity > 0.01
-            layer.smooth: true
-
             transformOrigin: Item.TopLeft
 
             scale: menuLayer.active ? 1.0 : 0.96
+
             opacity: menuLayer.active ? 1.0 : 0.0
 
             Behavior on scale {
                 NumberAnimation {
-                    duration: menuLayer.active ? 180 : 120
-                    easing.type: menuLayer.active ? Easing.OutQuint : Easing.InQuint
+                    duration: menuLayer.active ? 190 : 130
+
+                    easing.type: Easing.OutCubic
                 }
             }
 
             Behavior on opacity {
                 NumberAnimation {
                     duration: menuLayer.active ? 150 : 110
-                    easing.type: Easing.OutQuint
-                }
-            }
 
-            Behavior on height {
-                NumberAnimation {
-                    duration: 180
-                    easing.type: Easing.OutQuint
+                    easing.type: Easing.OutCubic
                 }
             }
 

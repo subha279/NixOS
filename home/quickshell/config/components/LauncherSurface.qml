@@ -209,7 +209,6 @@ PanelWindow {
     }
 
     // Card
-
     Rectangle {
         id: card
 
@@ -219,233 +218,257 @@ PanelWindow {
 
         x: Math.round((parent.width - width) / 2)
 
-        y: Math.round((parent.height - height) / 2 + 60 + (1.0 - root.reveal) * 14)
+        y: Math.round((parent.height - height) / 2 + 60)
 
-        Behavior on height {
-            NumberAnimation {
-                duration: 160
-                easing.type: Easing.OutQuint
-            }
-        }
-
-        radius: Core.Theme.radiusSmall
-
-        // Frosted, not filled: Glass takes over the fill. The card's own
-        // opacity: root.reveal still fades the whole thing, Glass included.
         color: "transparent"
 
-        // The lens edge. Drawn over the Glass fill (Glass fills this same rect),
-        // so it reads as the cut face of the slab.
-        border.width: Core.Theme.borderWidth
-        border.color: Core.Theme.borderActive
+        antialiasing: true
 
-        opacity: root.reveal
+        Item {
+            id: visual
 
-        Glass {
             anchors.fill: parent
 
-            radius: parent.radius
-        }
+            transformOrigin: Item.Center
 
-        MouseArea {
-            anchors.fill: parent
-            acceptedButtons: Qt.LeftButton
-            onWheel: function (event) {
-                root.wheelSelect(event.angleDelta.y);
-                event.accepted = true;
+            scale: root.reveal > 0.001 ? 1.0 : 0.97
+
+            y: root.reveal > 0.001 ? 0 : 10
+
+            opacity: root.reveal
+
+            Behavior on scale {
+                NumberAnimation {
+                    duration: root.open ? 260 : 180
+
+                    easing.type: Easing.OutCubic
+                }
             }
-        }
-        Column {
-            anchors.fill: parent
-            anchors.bottomMargin: Core.Theme.radiusSmall
-            spacing: 0
 
-            // Header: prompt, counter, input
+            Behavior on y {
+                NumberAnimation {
+                    duration: root.open ? 260 : 180
 
-            Item {
-                id: header
-
-                width: parent.width
-                height: 46
-
-                Text {
-                    id: prompt
-
-                    anchors.left: parent.left
-                    anchors.leftMargin: Core.Theme.padding + 2
-                    anchors.verticalCenter: parent.verticalCenter
-
-                    text: root.promptIcon
-
-                    color: Core.Theme.accent
-
-                    font.family: Core.Theme.fontMono
-                    font.pixelSize: Core.Theme.fontSizeLarge
+                    easing.type: Easing.OutCubic
                 }
+            }
 
-                Text {
-                    id: counter
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: root.open ? 190 : 130
 
-                    anchors.right: parent.right
-                    anchors.rightMargin: Core.Theme.padding + 2
-                    anchors.verticalCenter: parent.verticalCenter
-
-                    text: root.counterText
-
-                    color: Core.Theme.foregroundFaint
-
-                    font.family: Core.Theme.fontMono
-                    font.pixelSize: Core.Theme.fontSizeSmall
+                    easing.type: Easing.OutCubic
                 }
+            }
 
-                TextInput {
-                    id: input
+            Rectangle {
+                anchors.fill: parent
 
-                    anchors.left: prompt.right
-                    anchors.leftMargin: Core.Theme.padding
-                    anchors.right: counter.left
-                    anchors.rightMargin: Core.Theme.padding
-                    anchors.verticalCenter: parent.verticalCenter
+                radius: Core.Theme.radiusSmall
 
-                    focus: true
-                    selectByMouse: true
+                color: "transparent"
 
-                    selectionColor: Core.Theme.accentMuted
+                border.width: Core.Theme.borderWidth
+                border.color: Core.Theme.borderActive
 
-                    color: Core.Theme.foreground
+                antialiasing: true
 
-                    font.family: Core.Theme.fontMono
-                    font.pixelSize: Core.Theme.fontSizeLarge
+                Glass {
+                    anchors.fill: parent
 
-                    // Any edit invalidates the current selection.
-                    onTextChanged: root.selectedIndex = 0
+                    radius: parent.radius
+                }
+            }
+
+            MouseArea {
+                anchors.fill: parent
+
+                acceptedButtons: Qt.LeftButton
+
+                onWheel: function (event) {
+                    root.wheelSelect(event.angleDelta.y);
+                    event.accepted = true;
+                }
+            }
+
+            Column {
+                anchors.fill: parent
+
+                anchors.bottomMargin: Core.Theme.radiusSmall
+
+                spacing: 0
+
+                Item {
+                    id: header
+
+                    width: parent.width
+                    height: 46
 
                     Text {
-                        anchors.verticalCenter: parent.verticalCenter
+                        id: prompt
+
                         anchors.left: parent.left
+                        anchors.leftMargin: Core.Theme.padding + 2
+                        anchors.verticalCenter: parent.verticalCenter
 
-                        visible: input.text.length === 0
+                        text: root.promptIcon
 
-                        text: root.placeholder
-
-                        color: Core.Theme.foregroundFaint
+                        color: Core.Theme.accent
 
                         font.family: Core.Theme.fontMono
                         font.pixelSize: Core.Theme.fontSizeLarge
                     }
 
-                    Keys.onPressed: function (event) {
-                        if (event.key === Qt.Key_Escape) {
-                            root.dismiss();
-                            event.accepted = true;
-                            return;
+                    Text {
+                        id: counter
+
+                        anchors.right: parent.right
+                        anchors.rightMargin: Core.Theme.padding + 2
+                        anchors.verticalCenter: parent.verticalCenter
+
+                        text: root.counterText
+
+                        color: Core.Theme.foregroundFaint
+
+                        font.family: Core.Theme.fontMono
+                        font.pixelSize: Core.Theme.fontSizeSmall
+                    }
+
+                    TextInput {
+                        id: input
+
+                        anchors.left: prompt.right
+                        anchors.leftMargin: Core.Theme.padding
+
+                        anchors.right: counter.left
+                        anchors.rightMargin: Core.Theme.padding
+
+                        anchors.verticalCenter: parent.verticalCenter
+
+                        focus: true
+                        selectByMouse: true
+
+                        selectionColor: Core.Theme.accentMuted
+
+                        color: Core.Theme.foreground
+
+                        font.family: Core.Theme.fontMono
+                        font.pixelSize: Core.Theme.fontSizeLarge
+
+                        onTextChanged: root.selectedIndex = 0
+
+                        Text {
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.left: parent.left
+
+                            visible: input.text.length === 0
+
+                            text: root.placeholder
+
+                            color: Core.Theme.foregroundFaint
+
+                            font.family: Core.Theme.fontMono
+                            font.pixelSize: Core.Theme.fontSizeLarge
                         }
 
-                        if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
-                            root.accepted();
-                            event.accepted = true;
-                            return;
-                        }
-
-                        const ctrl = (event.modifiers & Qt.ControlModifier) !== 0;
-
-                        if (event.key === Qt.Key_Down || (ctrl && event.key === Qt.Key_N) || (ctrl && event.key === Qt.Key_J)) {
-                            root.move(root.columns);
-                            event.accepted = true;
-                            return;
-                        }
-
-                        if (event.key === Qt.Key_Up || (ctrl && event.key === Qt.Key_P) || (ctrl && event.key === Qt.Key_K)) {
-                            root.move(-root.columns);
-                            event.accepted = true;
-                            return;
-                        }
-
-                        if (event.key === Qt.Key_Tab) {
-                            root.move(1);
-                            event.accepted = true;
-                            return;
-                        }
-
-                        if (event.key === Qt.Key_Backtab) {
-                            root.move(-1);
-                            event.accepted = true;
-                            return;
-                        }
-
-                        // Vim navigation
-                        //
-                        // Only with an empty query, and only unmodified:
-                        // the moment you start typing, h/j/k/l go back
-                        // to being letters, so searching for "khaki"
-                        // still works.
-                        if (root.vimNavigation && input.text.length === 0 && event.modifiers === Qt.NoModifier) {
-                            if (event.key === Qt.Key_H) {
-                                root.move(-1);
+                        Keys.onPressed: function (event) {
+                            if (event.key === Qt.Key_Escape) {
+                                root.dismiss();
                                 event.accepted = true;
                                 return;
                             }
 
-                            if (event.key === Qt.Key_L) {
-                                root.move(1);
+                            if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
+                                root.accepted();
                                 event.accepted = true;
                                 return;
                             }
 
-                            // In a one-column list, columns is 1,
-                            // so k and j are simply previous and next.
-                            if (event.key === Qt.Key_K) {
+                            const ctrl = (event.modifiers & Qt.ControlModifier) !== 0;
+
+                            if (event.key === Qt.Key_Down || (ctrl && event.key === Qt.Key_N) || (ctrl && event.key === Qt.Key_J)) {
+                                root.move(root.columns);
+                                event.accepted = true;
+                                return;
+                            }
+
+                            if (event.key === Qt.Key_Up || (ctrl && event.key === Qt.Key_P) || (ctrl && event.key === Qt.Key_K)) {
                                 root.move(-root.columns);
                                 event.accepted = true;
                                 return;
                             }
 
-                            if (event.key === Qt.Key_J) {
-                                root.move(root.columns);
-                                event.accepted = true;
-                                return;
-                            }
-                        }
-
-                        // Horizontal arrows only navigate in grids,
-                        // and only at the ends of the text, so editing
-                        // the query still works normally.
-                        if (root.columns > 1) {
-                            if (event.key === Qt.Key_Right && input.cursorPosition >= input.text.length) {
+                            if (event.key === Qt.Key_Tab) {
                                 root.move(1);
                                 event.accepted = true;
                                 return;
                             }
 
-                            if (event.key === Qt.Key_Left && input.cursorPosition <= 0) {
+                            if (event.key === Qt.Key_Backtab) {
                                 root.move(-1);
                                 event.accepted = true;
                                 return;
                             }
+
+                            if (root.vimNavigation && input.text.length === 0 && event.modifiers === Qt.NoModifier) {
+                                if (event.key === Qt.Key_H) {
+                                    root.move(-1);
+                                    event.accepted = true;
+                                    return;
+                                }
+
+                                if (event.key === Qt.Key_L) {
+                                    root.move(1);
+                                    event.accepted = true;
+                                    return;
+                                }
+
+                                if (event.key === Qt.Key_K) {
+                                    root.move(-root.columns);
+                                    event.accepted = true;
+                                    return;
+                                }
+
+                                if (event.key === Qt.Key_J) {
+                                    root.move(root.columns);
+                                    event.accepted = true;
+                                    return;
+                                }
+                            }
+
+                            if (root.columns > 1) {
+                                if (event.key === Qt.Key_Right && input.cursorPosition >= input.text.length) {
+                                    root.move(1);
+                                    event.accepted = true;
+                                    return;
+                                }
+
+                                if (event.key === Qt.Key_Left && input.cursorPosition <= 0) {
+                                    root.move(-1);
+                                    event.accepted = true;
+                                    return;
+                                }
+                            }
                         }
                     }
                 }
-            }
 
-            // Separator
+                Rectangle {
+                    width: parent.width
+                    height: 1
 
-            Rectangle {
-                width: parent.width
-                height: 1
+                    color: Core.Theme.separator
+                }
 
-                color: Core.Theme.separator
-            }
+                Loader {
+                    width: parent.width
 
-            // Results
+                    height: parent.height - header.height - 1
 
-            Loader {
-                width: parent.width
+                    active: true
 
-                height: parent.height - header.height - 1
-
-                active: root.visible
-
-                sourceComponent: root.contentComponent
+                    sourceComponent: root.contentComponent
+                }
             }
         }
     }

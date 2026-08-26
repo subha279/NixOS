@@ -101,7 +101,6 @@ let
           fontSizeLarge = ${toString ui.fontSizeLarge},
 
           shadowOpacity = ${toString ui.shadowOpacity},
-          shadowOpacity = ${toString ui.shadowOpacity},
           surfaceOpacity = ${toString ui.surfaceOpacity},
           windowOpacity = ${toString ui.windowOpacity},
 
@@ -910,9 +909,7 @@ in
     # ========================================================
 
     if [ ! -f "$theme_file" ]; then
-
-      printf '%s\n' "aurora" > "$theme_file"
-
+        printf '%s\n' "catppuccin-mocha" > "$theme_file"
     fi
 
 
@@ -928,11 +925,8 @@ in
     # ========================================================
 
     if [[ ! -f "$theme_dir/themes/$selected.lua" ]]; then
-
-      printf '%s\n' "aurora" > "$theme_file"
-
-      selected="aurora"
-
+        printf '%s\n' "catppuccin-mocha" > "$theme_file"
+        selected="catppuccin-mocha"
     fi
 
 
@@ -957,8 +951,8 @@ in
 
     else
 
-      ln -sfn \
-        "$theme_dir/themes/aurora.kitty.conf" \
+        ln -sfn \
+        "$theme_dir/themes/catppuccin-mocha.kitty.conf" \
         "$active_kitty"
 
     fi
@@ -975,11 +969,9 @@ in
         "$active_starship"
 
     else
-
-      ln -sfn \
-        "$theme_dir/themes/aurora.starship.toml" \
+        ln -sfn \
+        "$theme_dir/themes/catppuccin-mocha.starship.toml" \
         "$active_starship"
-
     fi
   '';
 
