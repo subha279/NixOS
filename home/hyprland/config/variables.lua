@@ -21,10 +21,14 @@ M.guieditor = "zeditor"
 
 M.note = "obsidian"
 
--- Quickshell owns the launcher, the wallpaper picker and the colorscheme picker.
+-- Quickshell owns the launcher, wallpaper picker, clipboard and the colorscheme picker.
 M.menu = "qs ipc call launcher toggle"
 
 M.colorscheme = "qs ipc call theme toggle"
+
+M.wallpaper = "qs ipc call wallpaper toggle"
+
+M.clipboard = "qs ipc call clipboard toggle"
 
 -- Screenshot
 
@@ -37,10 +41,6 @@ M.scriptDir = os.getenv("HOME") .. "/.config/hypr/scripts"
 -- Wallpapers
 
 M.wallpaperDir = os.getenv("HOME") .. "/Wallpapers"
-
--- Scripts
-
-M.wallpaperScript = "qs ipc call wallpaper toggle"
 
 -- Audio
 

@@ -21,4 +21,5 @@ Scope {
     AppLauncher {}
     WallpaperPicker {}
     ThemePicker {}
+    Clipboard {}
 }

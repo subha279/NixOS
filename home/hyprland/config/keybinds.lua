@@ -27,9 +27,13 @@ hl.bind(mainMod .. " + F", hl.dsp.window.float({ action = "toggle" }))
 
 hl.bind(mainMod .. " + SHIFT + S", hl.dsp.exec_cmd(vars.screenshot))
 
--- Scripts
+-- Wallpaper
 
-hl.bind(mainMod .. " + P", hl.dsp.exec_cmd(vars.wallpaperScript))
+hl.bind(mainMod .. " + P", hl.dsp.exec_cmd(vars.wallpaper))
+
+-- clipboard
+
+hl.bind(mainMod .. " + V", hl.dsp.exec_cmd(vars.clipboard))
 
 -- Focus Movement
 hl.bind(altMod .. " + H", hl.dsp.focus({ direction = "left" }))

@@ -15,6 +15,10 @@ PanelWindow {
     property string placeholder: "Search"
     property string counterText: ""
 
+    property string headerActionIcon: ""
+    property bool headerActionVisible: false
+    signal headerActionTriggered
+
     property int cardWidth: 620
     property int cardHeight: 460
 
@@ -62,6 +66,8 @@ PanelWindow {
     signal previewSelection
     signal didOpen
     signal didClose
+    signal deleteRequested
+    signal clearAllRequested
 
     Timer {
         id: previewTimer
@@ -319,19 +325,78 @@ PanelWindow {
                         font.pixelSize: Core.Theme.fontSizeLarge
                     }
 
-                    Text {
-                        id: counter
+                    Row {
+                        id: headerActions
 
                         anchors.right: parent.right
                         anchors.rightMargin: Core.Theme.padding + 2
                         anchors.verticalCenter: parent.verticalCenter
 
-                        text: root.counterText
+                        spacing: 8
 
-                        color: Core.Theme.foregroundFaint
+                        Text {
+                            text: root.counterText
 
-                        font.family: Core.Theme.fontMono
-                        font.pixelSize: Core.Theme.fontSizeSmall
+                            color: Core.Theme.foregroundFaint
+
+                            font.family: Core.Theme.fontMono
+                            font.pixelSize: Core.Theme.fontSizeSmall
+                        }
+
+                        Rectangle {
+                            id: headerAction
+
+                            width: 28
+                            height: 28
+
+                            radius: width / 2
+
+                            visible: root.headerActionVisible && root.headerActionIcon !== ""
+
+                            color: headerActionMouse.containsMouse ? Core.Theme.surfaceGlassHover : "transparent"
+
+                            border.width: headerActionMouse.containsMouse ? Core.Theme.borderWidth : 0
+
+                            border.color: Core.Theme.borderActive
+
+                            Behavior on color {
+                                ColorAnimation {
+                                    duration: 120
+                                    easing.type: Easing.OutQuint
+                                }
+                            }
+
+                            Text {
+                                anchors.centerIn: parent
+
+                                text: root.headerActionIcon
+
+                                color: headerActionMouse.containsMouse ? Core.Theme.danger : Core.Theme.foregroundMuted
+
+                                font.family: Core.Theme.fontFamily
+                                font.pixelSize: 14
+
+                                Behavior on color {
+                                    ColorAnimation {
+                                        duration: 100
+                                    }
+                                }
+                            }
+
+                            MouseArea {
+                                id: headerActionMouse
+
+                                anchors.fill: parent
+
+                                hoverEnabled: true
+
+                                cursorShape: Qt.PointingHandCursor
+
+                                onClicked: {
+                                    root.headerActionTriggered();
+                                }
+                            }
+                        }
                     }
 
                     TextInput {
@@ -372,6 +437,17 @@ PanelWindow {
                         }
 
                         Keys.onPressed: function (event) {
+                            if (event.key === Qt.Key_Delete && (event.modifiers & Qt.ControlModifier) && (event.modifiers & Qt.ShiftModifier)) {
+                                root.clearAllRequested();
+                                event.accepted = true;
+                                return;
+                            }
+
+                            if (event.key === Qt.Key_Delete && event.modifiers === Qt.NoModifier) {
+                                root.deleteRequested();
+                                event.accepted = true;
+                                return;
+                            }
                             if (event.key === Qt.Key_Escape) {
                                 root.dismiss();
                                 event.accepted = true;

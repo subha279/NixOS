@@ -14,6 +14,7 @@
     # Clipboard
     wl-clipboard
     cliphist
+    wtype
 
     # Hardware / Media Controls
     brightnessctl

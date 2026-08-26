@@ -199,7 +199,7 @@ QtObject {
     readonly property string chevronUp: "\udb80\udd43"    // F0143
 
     readonly property string calendar: "\udb80\udced"     // F00ED
-    readonly property string search: "\udb80\udd6c"       // F016C
+    readonly property string search: "\uf002"
     readonly property string info: "\udb80\udd7c"         // F017C
     // F0393 is not the cog: mdi-cog is F0493. One nibble out, which is why the
     // settings buttons in every popup were drawing something unrelated.
@@ -208,10 +208,7 @@ QtObject {
     readonly property string refresh: "\udb81\udc50"      // F0450  refresh
     readonly property string lock: "\udb80\udfba"         // F03BA
     readonly property string send: "\udb81\udc0c"         // F040C
-    readonly property string clipboard: "\udb81\udcd6"    // F04D6
-    // F051E used to double as the refresh/rescan glyph in the popup headers.
-    // Those buttons use `refresh` above now; this remains for anything that
-    // genuinely wants a bare spinner.
+    readonly property string clipboard: "\uf328"
     readonly property string spinner: "\udb81\udd1e"      // F051E
     readonly property string trash: "\udb80\uddb4"        // F01B4
     readonly property string link: "\udb80\udd74"         // F0174
