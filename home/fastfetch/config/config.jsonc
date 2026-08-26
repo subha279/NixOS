@@ -1,93 +1,104 @@
 {
     "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
     "logo": {
-        "type": "kitty",
         "source": "~/.config/fastfetch/logo/nixos_logo_1.webp",
-        "width": 32,
-        "height": 16,
-        "padding": {
-            "right": 4
-        }
+        "height": 18
     },
     "display": {
-        "separator": "  ",
-        // Use ANSI names, not hex. fastfetch then inherits whatever palette
-        // kitty is running, which is generated from lib/themes.nix -- so this
-        // now follows all 21 themes instead of being pinned to one purple.
-        "color": {
-            "keys": "magenta",
-            "output": "white",
-            "title": "magenta",
-            "separator": "blue"
-        }
+        "separator": " : "
     },
     "modules": [
         {
-            "type": "title",
-            "format": "{user-name}@{host-name}"
-        },
-        {
             "type": "custom",
-            "format": "────────────────────────────"
+            "format": "┌──────────────────────────────────────────┐"
         },
         {
             "type": "os",
-            "key": " ",
-            "format": "{name} {version}"
+            "key": "   OS",
+            "format": "{2}",
+            "keyColor": "red"
         },
         {
             "type": "kernel",
-            "key": "󰌽 ",
-            "format": "{release}"
-        },
-        {
-            "type": "uptime",
-            "key": "󰅐 "
+            "key": "   Kernel",
+            "format": "{2}",
+            "keyColor": "red"
         },
         {
             "type": "packages",
-            "key": "󰏖 "
+            "key": "  󰏗 Packages",
+            "keyColor": "green"
         },
         {
-            "type": "shell",
-            "key": " "
-        },
-        {
-            "type": "wm",
-            "key": " "
+            "type": "display",
+            "key": "  󰍹 Display",
+            "format": "{1}x{2} @ {3}Hz [{7}]",
+            "keyColor": "green"
         },
         {
             "type": "terminal",
-            "key": " "
+            "key": "   Terminal",
+            "keyColor": "yellow"
         },
         {
-            "type": "cpu",
-            "key": "󰍛 ",
-            "format": "{name}"
-        },
-        {
-            "type": "gpu",
-            "key": "󰢮 ",
-            "format": "{name}"
-        },
-        {
-            "type": "memory",
-            "key": "󰘚 "
-        },
-        {
-            "type": "disk",
-            "key": "󰋊 ",
-            "folders": [
-                "/"
-            ]
+            "type": "wm",
+            "key": "  󱗃 WM",
+            "format": "{2}",
+            "keyColor": "yellow"
         },
         {
             "type": "custom",
-            "format": "────────────────────────────"
+            "format": "└──────────────────────────────────────────┘"
+        },
+        "break",
+        {
+            "type": "custom",
+            "format": "┌──────────────────────────────────────────┐"
+        },
+        {
+            "type": "cpu",
+            "format": "{1} @ {7}",
+            "key": "   CPU",
+            "keyColor": "blue"
+        },
+        {
+            "type": "gpu",
+            "format": "{1} {2}",
+            "key": "  󰊴 GPU",
+            "keyColor": "blue"
+        },
+        {
+            "type": "gpu",
+            "format": "{3}",
+            "key": "   GPU Driver",
+            "keyColor": "magenta"
+        },
+        {
+            "type": "memory",
+            "key": "  󰍛 Memory ",
+            "keyColor": "magenta"
+        },
+        {
+            "type": "disk",
+            "key": "  󱦟 OS Age ",
+            "folders": "/",
+            "keyColor": "red",
+            "format": "{days} days"
+        },
+        {
+            "type": "uptime",
+            "key": "  󱫐 Uptime ",
+            "keyColor": "red"
+        },
+        {
+            "type": "custom",
+            "format": "└──────────────────────────────────────────┘"
         },
         {
             "type": "colors",
+            "paddingLeft": 2,
             "symbol": "circle"
-        }
+        },
+        "break"
     ]
 }
