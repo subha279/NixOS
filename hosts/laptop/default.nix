@@ -29,7 +29,13 @@ in
     ../../modules/development
     ../../modules/creator
     ../../modules/virtualisation
+    ../../modules/hardware/kreo-rgb
   ];
+
+  hardware.kreoRgb = {
+    enable = true;
+    followTheme = true;
+  };
 
   networking.hostName = vars.hostname;
 }

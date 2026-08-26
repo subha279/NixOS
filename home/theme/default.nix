@@ -1158,6 +1158,30 @@ in
 
       printf '%s\n' "$theme_id" > "$ACTIVE_THEME"
 
+      # ========================================================
+      # Optional Kreo RGB Theme Sync
+      # ========================================================
+
+      KREO_CONFIG="/etc/aurora/kreo-rgb.conf"
+
+      if [[ -r "$KREO_CONFIG" ]] &&
+         grep -q '^enabled=1$' "$KREO_CONFIG" &&
+         grep -q '^follow-theme=1$' "$KREO_CONFIG"; then
+
+        if command -v kreo-rgb >/dev/null 2>&1 &&
+           command -v jq >/dev/null 2>&1; then
+
+          kreo_accent="$(
+            jq -r '.colors.accent // empty' "$theme_json"
+          )"
+
+          if [[ "$kreo_accent" =~ ^#[0-9A-Fa-f]{6}$ ]]; then
+            kreo-rgb "$kreo_accent" >/dev/null 2>&1 || true
+          fi
+
+        fi
+
+      fi
 
       # ========================================================
       # Update Active Lua Theme
