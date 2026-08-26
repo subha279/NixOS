@@ -3,12 +3,8 @@ import Quickshell
 import Quickshell.Wayland
 import "../core" as Core
 
-// Launcher Surface
-
 PanelWindow {
     id: root
-
-    // API for subclasses
 
     property string launcherId: ""
     property string promptIcon: Core.Icons.search
@@ -17,11 +13,18 @@ PanelWindow {
 
     property string headerActionIcon: ""
     property bool headerActionVisible: false
+
     signal headerActionTriggered
+    signal accepted
+    signal previewSelection
+    signal didOpen
+    signal didClose
+    signal deleteRequested
+    signal clearAllRequested
 
     property int cardWidth: 620
     property int cardHeight: 460
-
+    property int preferredCardHeight: 0
     property int itemCount: 0
 
     readonly property int headerHeight: 46
@@ -34,40 +37,25 @@ PanelWindow {
     readonly property int cardMinHeight: 110
     readonly property int cardMaxHeight: 620
 
-    readonly property int visibleRows: root.columns > 1 ? Math.min(root.gridMaxRows, Math.max(1, Math.ceil(root.itemCount / root.columns))) : Math.min(root.listMaxRows, Math.max(1, root.itemCount))
-
-    readonly property int targetCardHeight: root.columns > 1 ? root.headerHeight + root.separatorHeight + root.visibleRows * Math.round((root.cardWidth / root.columns) * 0.70) : root.headerHeight + root.separatorHeight + root.visibleRows * root.rowHeight
-
-    // Grid launchers set this so Left/Right and Up/Down
-    // move by a row rather than by one item.
     property int columns: 1
-
     property int selectedIndex: 0
-
     property Component contentComponent: null
 
     property alias query: input.text
 
-    // Live selection
-    //
-    // Pickers that apply as you move (wallpaper, colourscheme) set this.
-    // The applier is debounced rather than fired on every step: spinning
-    // the wheel through forty wallpapers must not spawn forty processes,
-    // it should apply the one you stop on.
     property bool liveSelect: false
-
     property int liveSelectDelay: 200
-
-    // h/j/k/l navigation, live only while the query is empty so that
-    // typing a search containing those letters still types.
     property bool vimNavigation: false
 
-    signal accepted
-    signal previewSelection
-    signal didOpen
-    signal didClose
-    signal deleteRequested
-    signal clearAllRequested
+    readonly property int visibleRows: root.columns > 1 ? Math.min(root.gridMaxRows, Math.max(1, Math.ceil(root.itemCount / root.columns))) : Math.min(root.listMaxRows, Math.max(1, root.itemCount))
+
+    readonly property int targetCardHeight: root.preferredCardHeight > 0 ? root.preferredCardHeight : (root.columns > 1 ? root.headerHeight + root.separatorHeight + root.visibleRows * Math.round((root.cardWidth / root.columns) * 0.70) : root.headerHeight + root.separatorHeight + root.visibleRows * root.rowHeight)
+
+    readonly property bool open: Core.PopupManager.isOpen(root.launcherId)
+
+    property real wheelAccumulator: 0
+
+    readonly property real wheelStep: 120
 
     Timer {
         id: previewTimer
@@ -75,17 +63,11 @@ PanelWindow {
         interval: root.liveSelectDelay
         repeat: false
 
-        // Guarded: the last step before you hit Enter or Escape
-        // can land after the launcher has already closed.
         onTriggered: {
             if (root.open)
                 root.previewSelection();
         }
     }
-
-    readonly property bool open: Core.PopupManager.isOpen(root.launcherId)
-
-    // Open / close
 
     function show() {
         Core.PopupManager.open(root.launcherId, 0, 0);
@@ -103,71 +85,63 @@ PanelWindow {
     function move(delta) {
         if (root.itemCount <= 0)
             return;
-        let next = root.selectedIndex + delta;
+        const next = root.selectedIndex + delta;
 
-        // Wrap, so holding Down cycles instead of sticking.
-        while (next < 0)
-            next += root.itemCount;
+        root.selectedIndex = Math.max(0, Math.min(root.itemCount - 1, next));
 
-        root.selectedIndex = next % root.itemCount;
-
-        // Deliberately here rather than in onSelectedIndexChanged:
-        // hovering the grid with the mouse moves the selection, and so
-        // does retyping the query, and neither of those should apply
-        // anything.
         if (root.liveSelect && root.open)
             previewTimer.restart();
     }
 
-    property real wheelTravel: 0
-    readonly property bool wheelActive: wheelLock.running
-
-    Timer {
-        id: wheelLock
-
-        interval: 60
-        repeat: false
-    }
-
     function wheelSelect(deltaY) {
-        if (deltaY === 0 || root.itemCount <= 0)
+        if (!root.open || deltaY === 0 || root.itemCount <= 0)
             return;
+        root.wheelAccumulator += deltaY;
 
-        // Ignore additional wheel events until the current step is finished.
-        if (wheelLock.running)
-            return;
-        wheelLock.restart();
+        while (Math.abs(root.wheelAccumulator) >= root.wheelStep) {
+            if (root.wheelAccumulator > 0) {
+                root.move(-root.columns);
+                root.wheelAccumulator -= root.wheelStep;
+            } else {
+                root.move(root.columns);
+                root.wheelAccumulator += root.wheelStep;
+            }
+        }
 
-        if (deltaY > 0) {
-            root.move(-root.columns);
-        } else {
-            root.move(root.columns);
+        if (root.selectedIndex === 0 || root.selectedIndex === root.itemCount - 1) {
+            root.wheelAccumulator = 0;
         }
     }
 
     onItemCountChanged: {
+        if (root.itemCount <= 0) {
+            root.selectedIndex = 0;
+            root.wheelAccumulator = 0;
+            return;
+        }
+
         if (root.selectedIndex >= root.itemCount)
-            root.selectedIndex = Math.max(0, root.itemCount - 1);
+            root.selectedIndex = root.itemCount - 1;
     }
 
     onOpenChanged: {
         if (root.open) {
             input.text = "";
             root.selectedIndex = 0;
-            root.wheelTravel = 0;
+            root.wheelAccumulator = 0;
 
-            // Resetting the selection must not count as a move.
             previewTimer.stop();
 
             input.forceActiveFocus();
             root.didOpen();
         } else {
+            root.wheelAccumulator = 0;
+
             previewTimer.stop();
+
             root.didClose();
         }
     }
-
-    // Surface
 
     anchors.top: true
     anchors.bottom: true
@@ -178,12 +152,11 @@ PanelWindow {
 
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.namespace: "aurora-launcher"
+
     WlrLayershell.keyboardFocus: root.open ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
 
     exclusionMode: ExclusionMode.Ignore
 
-    // Driving everything from one animated value keeps the close animation
-    // visible: the window stays mapped until reveal has actually reached.
     property real reveal: root.open ? 1.0 : 0.0
 
     Behavior on reveal {
@@ -196,25 +169,22 @@ PanelWindow {
 
     visible: root.reveal > 0.001
 
-    // Scrim opacity
-
-    readonly property real scrimAlpha: 0.0
-
-    // Scrim
-
     Rectangle {
         anchors.fill: parent
 
-        color: Qt.alpha(Core.Theme.backgroundDark, root.scrimAlpha * root.reveal)
+        color: "transparent"
 
         MouseArea {
             anchors.fill: parent
+
             acceptedButtons: Qt.LeftButton
-            onClicked: root.dismiss()
+
+            onClicked: {
+                root.dismiss();
+            }
         }
     }
 
-    // Card
     Rectangle {
         id: card
 
@@ -281,7 +251,6 @@ PanelWindow {
 
                 Glass {
                     anchors.fill: parent
-
                     radius: parent.radius
                 }
             }
@@ -289,7 +258,7 @@ PanelWindow {
             MouseArea {
                 anchors.fill: parent
 
-                acceptedButtons: Qt.LeftButton
+                acceptedButtons: Qt.NoButton
 
                 onWheel: function (event) {
                     root.wheelSelect(event.angleDelta.y);
@@ -308,28 +277,33 @@ PanelWindow {
                     id: header
 
                     width: parent.width
-                    height: 46
+                    height: root.headerHeight
 
                     Text {
                         id: prompt
 
                         anchors.left: parent.left
+
                         anchors.leftMargin: Core.Theme.padding + 2
+
                         anchors.verticalCenter: parent.verticalCenter
 
                         text: root.promptIcon
 
                         color: Core.Theme.accent
 
-                        font.family: Core.Theme.fontMono
+                        font.family: Core.Theme.iconFont
+
                         font.pixelSize: Core.Theme.fontSizeLarge
                     }
 
                     Row {
-                        id: headerActions
+                        id: counter
 
                         anchors.right: parent.right
+
                         anchors.rightMargin: Core.Theme.padding + 2
+
                         anchors.verticalCenter: parent.verticalCenter
 
                         spacing: 8
@@ -340,6 +314,7 @@ PanelWindow {
                             color: Core.Theme.foregroundFaint
 
                             font.family: Core.Theme.fontMono
+
                             font.pixelSize: Core.Theme.fontSizeSmall
                         }
 
@@ -373,14 +348,9 @@ PanelWindow {
 
                                 color: headerActionMouse.containsMouse ? Core.Theme.danger : Core.Theme.foregroundMuted
 
-                                font.family: Core.Theme.fontFamily
-                                font.pixelSize: 14
+                                font.family: Core.Theme.iconFont
 
-                                Behavior on color {
-                                    ColorAnimation {
-                                        duration: 100
-                                    }
-                                }
+                                font.pixelSize: 14
                             }
 
                             MouseArea {
@@ -403,14 +373,17 @@ PanelWindow {
                         id: input
 
                         anchors.left: prompt.right
+
                         anchors.leftMargin: Core.Theme.padding
 
                         anchors.right: counter.left
+
                         anchors.rightMargin: Core.Theme.padding
 
                         anchors.verticalCenter: parent.verticalCenter
 
                         focus: true
+
                         selectByMouse: true
 
                         selectionColor: Core.Theme.accentMuted
@@ -418,13 +391,18 @@ PanelWindow {
                         color: Core.Theme.foreground
 
                         font.family: Core.Theme.fontMono
+
                         font.pixelSize: Core.Theme.fontSizeLarge
 
-                        onTextChanged: root.selectedIndex = 0
+                        onTextChanged: {
+                            root.selectedIndex = 0;
+                            root.wheelAccumulator = 0;
+                        }
 
                         Text {
-                            anchors.verticalCenter: parent.verticalCenter
                             anchors.left: parent.left
+
+                            anchors.verticalCenter: parent.verticalCenter
 
                             visible: input.text.length === 0
 
@@ -433,6 +411,7 @@ PanelWindow {
                             color: Core.Theme.foregroundFaint
 
                             font.family: Core.Theme.fontMono
+
                             font.pixelSize: Core.Theme.fontSizeLarge
                         }
 
@@ -448,6 +427,7 @@ PanelWindow {
                                 event.accepted = true;
                                 return;
                             }
+
                             if (event.key === Qt.Key_Escape) {
                                 root.dismiss();
                                 event.accepted = true;
@@ -531,7 +511,7 @@ PanelWindow {
 
                 Rectangle {
                     width: parent.width
-                    height: 1
+                    height: root.separatorHeight
 
                     color: Core.Theme.separator
                 }
@@ -539,7 +519,7 @@ PanelWindow {
                 Loader {
                     width: parent.width
 
-                    height: parent.height - header.height - 1
+                    height: parent.height - header.height - root.separatorHeight
 
                     active: true
 

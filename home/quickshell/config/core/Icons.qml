@@ -2,9 +2,7 @@ pragma Singleton
 
 import QtQuick
 
-// ================================================================
 // Icons
-// ----------------------------------------------------------------
 
 QtObject {
     // Network — Wi-Fi strength ramp
@@ -87,16 +85,6 @@ QtObject {
 
         return brightnessRamp[i];
     }
-
-    // Notifications
-
-    // F079E is nf-md-bus_school, NOT a bell with a badge -- that single wrong
-    // codepoint is why a school bus appeared in the bar the moment a
-    // notification arrived. F009A was also mislabelled as "off": it is the
-    // plain filled bell, so do-not-disturb was drawing a ringing bell.
-    //
-    // MDI bell block, verified: F009A bell, F009B bell-off,
-    // F009C bell-outline, F009E bell-ring, F009F bell-ring-outline.
 
     readonly property string bell: "\udb80\udc9c"            // F009C  bell-outline
     readonly property string bellFilled: "\udb80\udc9a"      // F009A  bell
@@ -181,48 +169,43 @@ QtObject {
 
     // Generic UI
 
-    readonly property string check: "\udb80\udc93"        // F0093
+    readonly property string check: "\udb80\udc93"
 
-    // F0094 is not close. MDI codepoints run alphabetically, and F009x lands in
-    // the b-names right next to the bells -- close is F0156. Same class of
-    // mistake as the bus, so every "x" button was drawing an unrelated glyph.
-    readonly property string close: "\udb80\udd56"        // F0156  close
+    readonly property string close: "\udb80\udd56"
 
-    readonly property string checkCircle: "\udb80\udd34"  // F0134
+    readonly property string checkCircle: "\udb80\udd34"
 
-    // F015C is close-octagon. close-circle is F0159.
-    readonly property string closeCircle: "\udb80\udd59"  // F0159  close-circle
+    readonly property string closeCircle: "\udb80\udd59"
 
-    readonly property string chevronDown: "\udb80\udd40"  // F0140
-    readonly property string chevronLeft: "\udb80\udd41"  // F0141
-    readonly property string chevronRight: "\udb80\udd42" // F0142
-    readonly property string chevronUp: "\udb80\udd43"    // F0143
+    readonly property string chevronDown: "\udb80\udd40"
+    readonly property string chevronLeft: "\udb80\udd41"
+    readonly property string chevronRight: "\udb80\udd42"
+    readonly property string chevronUp: "\udb80\udd43"
 
-    readonly property string calendar: "\udb80\udced"     // F00ED
-    readonly property string search: "\uf002"
-    readonly property string info: "\udb80\udd7c"         // F017C
-    // F0393 is not the cog: mdi-cog is F0493. One nibble out, which is why the
-    // settings buttons in every popup were drawing something unrelated.
-    readonly property string gear: "\udb81\udc93"         // F0493  cog
+    readonly property string calendar: "\udb80\udced"
+    readonly property string info: "\udb80\udd7c"
+    readonly property string gear: "\udb81\udc93"
 
-    readonly property string refresh: "\udb81\udc50"      // F0450  refresh
-    readonly property string lock: "\udb80\udfba"         // F03BA
-    readonly property string send: "\udb81\udc0c"         // F040C
-    readonly property string clipboard: "\uf328"
-    readonly property string spinner: "\udb81\udd1e"      // F051E
-    readonly property string trash: "\udb80\uddb4"        // F01B4
-    readonly property string link: "\udb80\udd74"         // F0174
-    readonly property string linkOff: "\udb80\udd75"      // F0175
-    readonly property string accountPlus: "\udb80\udd7f"  // F017F
+    readonly property string refresh: "\udb81\udc50"
+    readonly property string lock: "\udb80\udfba"
+    readonly property string send: "\udb81\udc0c"
+    readonly property string spinner: "\udb81\udd1e"
+    readonly property string link: "\udb80\udd74"
+    readonly property string linkOff: "\udb80\udd75"
+    readonly property string accountPlus: "\udb80\udd7f"
+
+    readonly property string search: "\udb80\udf49"
+    readonly property string clipboard: "\udb80\udd47"
+    readonly property string trash: "\udb80\uddb4"
 
     // Device classes (Bluetooth / battery peripherals)
 
-    readonly property string phone: "\udb80\udcb6"     // F00B6
-    readonly property string camera: "\udb80\udd00"    // F0100
-    readonly property string printer: "\udb80\udeb7"   // F02B7
-    readonly property string keyboard: "\udb80\udf0c"  // F030C
-    readonly property string computer: "\udb80\udf79"  // F0379
-    readonly property string mouse: "\udb80\udf7c"     // F037C
-    readonly property string watch: "\udb81\udd71"     // F0571
-    readonly property string gamepad: "\udb81\udd8b"   // F058B
+    readonly property string phone: "\udb80\udcb6"
+    readonly property string camera: "\udb80\udd00"
+    readonly property string printer: "\udb80\udeb7"
+    readonly property string keyboard: "\udb80\udf0c"
+    readonly property string computer: "\udb80\udf79"
+    readonly property string mouse: "\udb80\udf7c"
+    readonly property string watch: "\udb81\udd71"
+    readonly property string gamepad: "\udb81\udd8b"
 }

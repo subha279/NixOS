@@ -239,12 +239,8 @@ Components.LauncherSurface {
 
                 MouseArea {
                     anchors.fill: parent
-                    z: 3
-                    hoverEnabled: true
 
-                    onEntered: {
-                        launcher.selectedIndex = cell.index;
-                    }
+                    cursorShape: Qt.PointingHandCursor
 
                     onClicked: {
                         launcher.selectedIndex = cell.index;

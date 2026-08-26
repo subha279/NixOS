@@ -300,13 +300,10 @@ QtObject {
 
     readonly property int radiusLarge: ui.radiusLarge !== undefined ? ui.radiusLarge : 18
 
-    readonly property int iconSize: ui.iconSize !== undefined ? ui.iconSize : 16
-
-    readonly property int fontSize: ui.fontSize !== undefined ? ui.fontSize : 13
-
-    readonly property int fontSizeSmall: ui.fontSizeSmall !== undefined ? ui.fontSizeSmall : 10
-
-    readonly property int fontSizeLarge: ui.fontSizeLarge !== undefined ? ui.fontSizeLarge : 15
+    readonly property int iconSize: Math.max(8, ui.iconSize !== undefined ? ui.iconSize : 16)
+    readonly property int fontSize: Math.max(8, ui.fontSize !== undefined ? ui.fontSize : 13)
+    readonly property int fontSizeSmall: Math.max(8, ui.fontSizeSmall !== undefined ? ui.fontSizeSmall : 10)
+    readonly property int fontSizeLarge: Math.max(8, ui.fontSizeLarge !== undefined ? ui.fontSizeLarge : 15)
 
     readonly property real shadowOpacity: ui.shadowOpacity !== undefined ? ui.shadowOpacity : 0.20
 
@@ -336,11 +333,8 @@ QtObject {
     // Typography
 
     readonly property string fontFamily: fonts.interface || "Inter"
-
-    // themes.nix already defines a terminal font; only the interface
-    // font was ever exposed here. The launcher surfaces use this for
-    // their Omarchy-style monospace rows.
-    readonly property string fontMono: fonts.terminal || "monospace"
+    readonly property string fontMono: fonts.terminal || "JetBrainsMono Nerd Font Mono"
+    readonly property string iconFont: "JetBrainsMono Nerd Font Mono"
 
     // Popup Geometry
 

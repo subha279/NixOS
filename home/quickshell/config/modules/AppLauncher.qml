@@ -202,14 +202,12 @@ Components.LauncherSurface {
                         }
                     }
                 }
-
                 MouseArea {
                     anchors.fill: parent
-                    hoverEnabled: true
 
-                    onEntered: {
-                        launcher.selectedIndex = row.index;
-                    }
+                    anchors.rightMargin: 36
+
+                    cursorShape: Qt.PointingHandCursor
 
                     onClicked: {
                         launcher.selectedIndex = row.index;

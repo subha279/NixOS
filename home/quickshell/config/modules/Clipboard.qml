@@ -18,9 +18,16 @@ Components.LauncherSurface {
     headerActionVisible: Services.ClipboardService.items.length > 0
 
     cardWidth: 460
-    cardHeight: 460
+    cardHeight: clipboardCardHeight
 
     columns: 1
+
+    readonly property int clipboardMinRows: 2
+    readonly property int clipboardMaxRows: 10
+
+    readonly property int clipboardRows: Math.min(clipboardMaxRows, Math.max(clipboardMinRows, results.length))
+
+    readonly property int clipboardCardHeight: headerHeight + separatorHeight + clipboardRows * rowHeight
 
     readonly property var results: {
         const q = clipboard.query.trim().toLowerCase();
@@ -278,15 +285,10 @@ Components.LauncherSurface {
                         anchors.fill: parent
                         anchors.rightMargin: 36
 
-                        hoverEnabled: true
-
                         cursorShape: Qt.PointingHandCursor
 
-                        onEntered: {
-                            clipboard.selectedIndex = row.index;
-                        }
-
                         onClicked: {
+                            clipboard.selectedIndex = row.index;
                             clipboard.accepted();
                         }
                     }
