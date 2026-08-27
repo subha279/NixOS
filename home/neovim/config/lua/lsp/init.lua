@@ -290,107 +290,20 @@ end
 configure_capabilities()
 
 -- Server Configuration
-
-vim.lsp.config("lua_ls", {
-	settings = {
-		Lua = {
-			diagnostics = {
-				globals = {
-					"vim",
-				},
-			},
-
-			workspace = {
-				checkThirdParty = false,
-			},
-
-			telemetry = {
-				enable = false,
-			},
-		},
-	},
-})
-
-vim.lsp.config("rust_analyzer", {
-	settings = {
-		["rust-analyzer"] = {
-			check = {
-				command = "clippy",
-			},
-
-			cargo = {
-				allFeatures = true,
-			},
-
-			procMacro = {
-				enable = true,
-			},
-
-			inlayHints = {
-				bindingModeHints = {
-					enable = true,
-				},
-
-				chainingHints = {
-					enable = true,
-				},
-
-				closingBraceHints = {
-					enable = true,
-				},
-
-				closureCaptureHints = {
-					enable = true,
-				},
-
-				closureReturnTypeHints = {
-					enable = "always",
-				},
-
-				discriminantHints = {
-					enable = "always",
-				},
-
-				expressionAdjustmentHints = {
-					enable = "always",
-				},
-
-				lifetimeElisionHints = {
-					enable = "skip_trivial",
-				},
-
-				parameterHints = {
-					enable = true,
-				},
-
-				reborrowHints = {
-					enable = "always",
-				},
-
-				renderColons = true,
-
-				typeHints = {
-					enable = true,
-				},
-			},
-		},
-	},
-})
-
-vim.lsp.config("qmlls", {
-	cmd = { "qmlls" },
-	filetypes = {
-		"qml",
-		"qmljs",
-	},
-	root_markers = {
-		".qmlls.ini",
-		"CMakeLists.txt",
-		"qmldir",
-		".git",
-	},
-	workspace_required = false,
-})
+--
+-- Per-server settings live in config/lsp/<name>.lua, which Neovim picks up off
+-- the runtime path automatically. There are deliberately no vim.lsp.config()
+-- calls for individual servers here.
+--
+-- lua_ls, rust_analyzer and qmlls used to be configured in BOTH places. Since the
+-- runtime files are merged first and these calls overrode them, the files were
+-- misleading: qmlls was a byte-identical copy, and rust_analyzer genuinely
+-- disagreed (closureReturnTypeHints "with_block" in the file vs "always" here,
+-- plus five hint categories that only existed here). Those inline values have
+-- been folded into config/lsp/ so current behaviour is preserved with one source.
+--
+-- The one exception is the "*" config in configure_capabilities() above, which is
+-- a cross-server default rather than per-server settings.
 
 -- Enable Servers
 

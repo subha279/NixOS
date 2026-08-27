@@ -23,6 +23,9 @@ return {
       hint = {
         enable = true,
       },
+      telemetry = {
+        enable = false,
+      },
     },
   },
 }
