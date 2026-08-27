@@ -346,21 +346,13 @@ function M.setup()
 	return true
 end
 
--- Live Aurora Theme Refresh
-
-function M.refresh_theme()
-	apply_highlights()
-
-	vim.schedule(function()
-		vim.cmd("redraw!")
-	end)
-
-	return true
-end
-
 -- IMPORTANT
 
 M.setup()
+
+-- Live Aurora Theme Refresh
+
+aurora.on_change(apply_highlights)
 
 -- Return
 

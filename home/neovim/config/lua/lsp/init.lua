@@ -392,17 +392,10 @@ apply_highlights()
 
 -- Live Aurora Theme Refresh
 
-function M.refresh_theme()
+aurora.on_change(function()
 	apply_highlights()
 
 	configure_diagnostics()
-
-	vim.schedule(function()
-		vim.cmd("redraw!")
-		vim.cmd("redrawstatus!")
-	end)
-
-	return true
-end
+end)
 
 return M

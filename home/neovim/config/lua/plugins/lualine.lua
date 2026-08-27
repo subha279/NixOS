@@ -519,8 +519,14 @@ function M.setup()
 	return true
 end
 
-function M.refresh_theme()
-	return M.setup()
-end
+-- Live Aurora Theme Refresh
+--
+-- Registered at module level, not inside setup(): the subscriber calls setup()
+-- again to rebuild the config against the new palette, so registering from
+-- within it would add a fresh subscriber on every switch.
+
+aurora.on_change(function()
+	M.setup()
+end)
 
 return M

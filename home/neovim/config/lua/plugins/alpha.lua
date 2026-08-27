@@ -180,26 +180,23 @@ vim.api.nvim_create_autocmd("FileType", {
 })
 
 -- Live Aurora Theme Refresh
+--
+-- Registered with the shared watcher rather than running a second 500ms uv timer
+-- against the same file, which is what this used to do alongside ui/theme.lua's
+-- identical one.
+--
+-- Dropping the timer also stops the footer drifting: it recomputes elapsed time
+-- from vim.g.aurora_startup_time, so polling it twice a second made the
+-- "Ready in Xms" figure climb for as long as the dashboard stayed open.
 
-local timer = vim.uv.new_timer()
+aurora.on_change(function()
+	apply_theme()
 
-if timer then
-	timer:start(
-		500,
-		500,
-
-		vim.schedule_wrap(function()
-			apply_theme()
-
-			if vim.bo.filetype == "alpha" then
-				dashboard.section.footer.val = {
-					"",
-					"",
-					startup_time(),
-				}
-
-				vim.cmd("redraw!")
-			end
-		end)
-	)
-end
+	if vim.bo.filetype == "alpha" then
+		dashboard.section.footer.val = {
+			"",
+			"",
+			startup_time(),
+		}
+	end
+end)

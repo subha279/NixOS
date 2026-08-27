@@ -465,21 +465,21 @@ function M.setup()
 	return true
 end
 
--- Live Aurora Theme Refresh
-
-function M.refresh_theme()
-	apply_highlights()
-
-	vim.schedule(function()
-		vim.cmd("redraw!")
-	end)
-
-	return true
-end
-
 -- IMPORTANT
 
 M.setup()
+
+-- Live Aurora Theme Refresh
+--
+-- This module owns the @* capture groups, and until now nothing re-applied them
+-- after a theme switch: ui/theme.lua's private refresh list covered only itself,
+-- devicons, nvimtree and lualine. Syntax therefore kept the old palette while
+-- the rest of the UI moved, which is the drift you could see on a switch.
+--
+-- The redraw that used to live in refresh_theme() is gone: aurora.refresh() does
+-- one redraw for the whole pass instead of each module scheduling its own.
+
+aurora.on_change(apply_highlights)
 
 -- Return
 

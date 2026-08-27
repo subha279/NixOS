@@ -885,110 +885,42 @@ function M.apply()
 	})
 end
 
--- Plugin Refresh
+-- Apply, and re-apply on theme switch
+--
+-- This file used to own the refresh for the whole config: a private
+-- refresh_plugins() that knew about exactly four things (itself, devicons,
+-- nvimtree, lualine), plus its own reader for the active-theme pointer and its
+-- own 500ms uv timer.
+--
+-- Two problems with that. It duplicated plugins/alpha.lua's identical timer on
+-- the same file, and the list was incomplete: treesitter, LSP, gitsigns and
+-- blink all colour themselves and none were refreshed, so their groups kept the
+-- previous theme's colours until Neovim restarted. Since treesitter owns most
+-- @* captures, that is why syntax colours drifted out of step after a switch.
+--
+-- Now every module registers itself with aurora.theme, which owns the single
+-- watcher and calls subscribers in registration order.
 
-local function refresh_plugins()
-	-- Core theme first.
-	M.apply()
+M.apply()
 
-	-- DevIcons
+aurora.on_change(M.apply)
 
+-- devicons-theme and nvimtree-theme are pure highlight modules with no setup of
+-- their own, so this file drives them: once at startup, and again on change.
+
+local function apply_icon_themes()
 	pcall(function()
 		require("ui.devicons-theme").setup()
 	end)
 
-	-- NvimTree
-
 	pcall(function()
 		require("ui.nvimtree-theme").setup()
 	end)
-
-	-- Lualine
-
-	pcall(function()
-		local lualine = require("plugins.lualine")
-
-		if type(lualine.refresh_theme) == "function" then
-			lualine.refresh_theme()
-		end
-	end)
-
-	-- Refresh visible NvimTree
-
-	pcall(function()
-		local api = require("nvim-tree.api")
-
-		if api.tree.is_visible() then
-			api.tree.reload()
-		end
-	end)
-
-	-- Final redraw
-
-	vim.cmd("redraw!")
-	vim.cmd("redrawstatus!")
 end
 
--- Active Theme Reader
+apply_icon_themes()
 
-local last_theme = nil
-
-local function get_active_theme()
-	local file = io.open(ACTIVE_THEME, "r")
-
-	if not file then
-		return nil
-	end
-
-	local value = file:read("*l")
-
-	file:close()
-
-	return value
-end
-
--- Live Theme Watcher
-
-local function check_for_theme_change()
-	local current = get_active_theme()
-
-	if not current or current == "" then
-		return
-	end
-
-	-- First observation.
-	if last_theme == nil then
-		last_theme = current
-		return
-	end
-
-	-- No change.
-	if current == last_theme then
-		return
-	end
-
-	-- Remember immediately so polling cannot trigger a loop.
-	last_theme = current
-
-	-- Aurora changes the regular theme file and the symlink.
-	vim.defer_fn(function()
-		refresh_plugins()
-	end, 100)
-end
-
--- Polling Timer
-
-local timer = vim.uv.new_timer()
-
-if timer then
-	timer:start(500, 500, vim.schedule_wrap(check_for_theme_change))
-end
-
--- Initial Apply
-
-vim.defer_fn(function()
-	refresh_plugins()
-end, 100)
+aurora.on_change(apply_icon_themes)
 
 -- Return
 

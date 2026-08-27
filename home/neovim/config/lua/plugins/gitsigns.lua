@@ -200,7 +200,7 @@ end
 
 -- Live Aurora Theme Refresh
 
-function M.refresh_theme()
+aurora.on_change(function()
 	apply_highlights()
 
 	local ok, gitsigns = pcall(require, "gitsigns")
@@ -210,13 +210,7 @@ function M.refresh_theme()
 			gitsigns.refresh()
 		end)
 	end
-
-	vim.schedule(function()
-		vim.cmd("redraw!")
-	end)
-
-	return true
-end
+end)
 
 -- Return
 
