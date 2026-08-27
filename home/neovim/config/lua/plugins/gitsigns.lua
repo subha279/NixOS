@@ -59,34 +59,17 @@ local function apply_highlights()
 		fg = c.warning,
 	})
 
-	vim.api.nvim_set_hl(0, "GitSignsCurrentLineBlame", {
-		fg = c.textMuted,
-		italic = true,
-	})
-
-	vim.api.nvim_set_hl(0, "GitSignsAddLn", {
-		bg = c.successMuted,
-	})
-
-	vim.api.nvim_set_hl(0, "GitSignsChangeLn", {
-		bg = c.warningMuted,
-	})
-
-	vim.api.nvim_set_hl(0, "GitSignsDeleteLn", {
-		bg = c.errorMuted,
-	})
-
-	vim.api.nvim_set_hl(0, "GitSignsAddLnInline", {
-		bg = c.successMuted,
-	})
-
-	vim.api.nvim_set_hl(0, "GitSignsChangeLnInline", {
-		bg = c.warningMuted,
-	})
-
-	vim.api.nvim_set_hl(0, "GitSignsDeleteLnInline", {
-		bg = c.errorMuted,
-	})
+	-- No GitSigns*Ln / *LnInline groups here.
+	--
+	-- They used to be set from c.successMuted / c.warningMuted / c.errorMuted,
+	-- which lib/themes.nix does not define -- accentMuted is the only *Muted
+	-- colour there. Every one of them therefore resolved to bg = nil and cleared
+	-- the highlight instead of setting it.
+	--
+	-- They are also unreachable as configured: gitsigns only uses them when
+	-- `linehl` is on, and setup() below leaves it off. If you turn linehl on, add
+	-- real muted variants to themes.nix (all seven themes, plus the colour list in
+	-- home/theme/default.nix's themeToLua) and set them from there.
 
 	vim.api.nvim_set_hl(0, "GitSignsAddPreview", {
 		fg = c.success,
