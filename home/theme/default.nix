@@ -868,6 +868,29 @@ in
 
   stylix.targets.fontconfig.enable = true;
 
+  # GTK FONT RENDERING
+  #
+  # GTK on Wayland does not read fontconfig's hinting and antialiasing settings.
+  # There is no X server, so there is no XSettings to carry them, and GTK falls
+  # back to these gsettings keys instead -- which means the rasterisation
+  # configured in modules/fonts applied to Qt and to the shell but not to GTK
+  # apps, and the two families of application were rendering text differently on
+  # the same screen.
+  #
+  # Kept in step with fonts.fontconfig in modules/fonts by hand; there is no
+  # shared option that feeds both.
+  dconf.settings = {
+    "org/gnome/desktop/interface" = {
+      font-hinting = "slight";
+
+      # "rgba" is GTK's name for subpixel antialiasing.
+      font-antialiasing = "rgba";
+
+      # Explicit so a stray value cannot silently scale every GTK font.
+      text-scaling-factor = 1.0;
+    };
+  };
+
   # GENERATED AURORA THEME DATABASE
 
   xdg.configFile = {
