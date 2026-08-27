@@ -614,7 +614,7 @@ Components.PopupSurface {
         }
     }
 
-    // Clipboard helper (kept on the popup so delegates can reach
+    // Clipboard helper, kept on the popup so delegates can reach it.
 
     function copyText(text) {
         try {
