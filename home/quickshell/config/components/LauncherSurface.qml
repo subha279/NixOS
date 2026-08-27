@@ -23,13 +23,34 @@ PanelWindow {
     signal clearAllRequested
 
     property int cardWidth: 620
-    property int cardHeight: 460
-    property int preferredCardHeight: 0
     property int itemCount: 0
 
     readonly property int headerHeight: 46
     readonly property int separatorHeight: 1
-    readonly property int rowHeight: 40
+
+    // Geometry the card sizes itself from.
+    //
+    // Each launcher has to declare what its delegates actually measure, because
+    // the card height is computed from these and nothing reconciles them against
+    // the real content afterwards. A single rowHeight = 40 used to be assumed for
+    // every list, which was wrong for three of the five launchers: ThemePicker's
+    // rows are 56px, Clipboard's are 48px, and EmojiPicker's grid cells are 70px
+    // against a 65px derivation. At ten results ThemePicker's card came out 200px
+    // short, so a third of the list was only reachable by scrolling.
+    //
+    // rowHeight is delegate height PLUS the view's spacing. contentMargins is any
+    // padding the content view adds on top.
+    property int rowHeight: 40
+
+    property int contentMargins: 0
+
+    // Grid launchers: set cellHeight to pin it, or leave 0 to derive from the
+    // column width via cellAspect.
+    property int cellHeight: 0
+
+    property real cellAspect: 0.70
+
+    readonly property int gridCellHeight: root.cellHeight > 0 ? root.cellHeight : Math.round((root.cardWidth / root.columns) * root.cellAspect)
 
     readonly property int listMaxRows: 10
     readonly property int gridMaxRows: 4
@@ -47,9 +68,24 @@ PanelWindow {
     property int liveSelectDelay: 200
     property bool vimNavigation: false
 
-    readonly property int visibleRows: root.columns > 1 ? Math.min(root.gridMaxRows, Math.max(1, Math.ceil(root.itemCount / root.columns))) : Math.min(root.listMaxRows, Math.max(1, root.itemCount))
+    // Height of one row, whichever mode we are in.
+    readonly property int rowExtent: root.columns > 1 ? root.gridCellHeight : root.rowHeight
 
-    readonly property int targetCardHeight: root.preferredCardHeight > 0 ? root.preferredCardHeight : (root.columns > 1 ? root.headerHeight + root.separatorHeight + root.visibleRows * Math.round((root.cardWidth / root.columns) * 0.70) : root.headerHeight + root.separatorHeight + root.visibleRows * root.rowHeight)
+    // How many rows fit inside cardMaxHeight.
+    //
+    // Clamping the finished height against cardMaxHeight, as this used to, stops
+    // the card growing but leaves it ending mid-row: the wallpaper grid showed 3.2
+    // of 4 rows and the theme list 9.5 of 10, with the remainder sliced off
+    // horizontally. Clamping the row COUNT instead means the card always ends on a
+    // row boundary and the rest is reached by scrolling, which is what it looks
+    // like it is doing anyway.
+    readonly property int fittableRows: Math.max(1, Math.floor((root.cardMaxHeight - root.headerHeight - root.separatorHeight - root.contentMargins) / root.rowExtent))
+
+    readonly property int wantedRows: root.columns > 1 ? Math.max(1, Math.ceil(root.itemCount / root.columns)) : Math.max(1, root.itemCount)
+
+    readonly property int visibleRows: Math.min(root.columns > 1 ? root.gridMaxRows : root.listMaxRows, root.fittableRows, root.wantedRows)
+
+    readonly property int targetCardHeight: root.headerHeight + root.separatorHeight + root.contentMargins + root.visibleRows * root.rowExtent
 
     readonly property bool open: Core.PopupManager.isOpen(root.launcherId)
 

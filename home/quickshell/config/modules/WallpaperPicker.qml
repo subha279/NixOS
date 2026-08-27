@@ -15,9 +15,11 @@ Components.LauncherSurface {
     placeholder: "Search wallpapers"
 
     cardWidth: 760
-    cardHeight: 540
 
     columns: 3
+
+    // Derives correctly from cellAspect: the GridView computes its own cellHeight
+    // as round(cellWidth * 0.70), which is the same formula.
 
     // The wheel and h/j/k/l move the selection only -- nothing is applied
     // until Enter, so travelling through the grid is free.

@@ -15,9 +15,15 @@ Components.LauncherSurface {
     placeholder: "Search emoji"
 
     cardWidth: 560
-    cardHeight: 520
 
     columns: 6
+
+    // The GridView pins cellHeight at 70 to fit the glyph plus its label, which
+    // does not match the 0.70 aspect derivation (65px at this width), so declare
+    // it. Plus 12px of margin top and bottom on the grid itself.
+    cellHeight: 70
+
+    contentMargins: 24
 
     readonly property var results: {
         const result = Services.EmojiService.search(picker.query);

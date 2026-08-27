@@ -15,9 +15,12 @@ Components.LauncherSurface {
     placeholder: "Search colorschemes"
 
     cardWidth: 460
-    cardHeight: 460
 
     columns: 1
+
+    // 56px delegate + 4px ListView spacing. The card was being sized from the
+    // 40px default, leaving it 200px short at ten results.
+    rowHeight: 60
 
     // Selection only, same as the wallpaper picker: the wheel and h/j/k/l move
     // the highlight, and Enter applies. Applying a colourscheme relinks symlinks

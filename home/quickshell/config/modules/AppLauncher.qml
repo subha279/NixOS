@@ -15,9 +15,11 @@ Components.LauncherSurface {
     placeholder: "Search applications"
 
     cardWidth: 460
-    cardHeight: 460
 
     columns: 1
+
+    // 40px delegate + 4px ListView spacing.
+    rowHeight: 44
 
     readonly property var results: Services.AppsService.search(launcher.query)
 
