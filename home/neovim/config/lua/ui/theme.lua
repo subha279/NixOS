@@ -2,32 +2,9 @@
 
 local M = {}
 
--- Paths
+-- Theme
 
-local AURORA_DIR = vim.fn.expand("~/.config/aurora")
-
-local ACTIVE_THEME = AURORA_DIR .. "/active-theme"
-local ACTIVE_THEME_LUA = AURORA_DIR .. "/active-theme.lua"
-
--- Load Active Aurora Theme
-
-local function load_theme()
-	local ok, theme = pcall(dofile, ACTIVE_THEME_LUA)
-
-	if not ok then
-		return nil
-	end
-
-	if type(theme) ~= "table" then
-		return nil
-	end
-
-	if type(theme.colors) ~= "table" then
-		return nil
-	end
-
-	return theme
-end
+local aurora = require("aurora.theme")
 
 -- Highlight Helper
 
@@ -38,7 +15,7 @@ end
 -- Apply Aurora Theme
 
 function M.apply()
-	local theme = load_theme()
+	local theme = aurora.get()
 
 	if not theme then
 		return

@@ -4,30 +4,12 @@ local M = {}
 
 -- Theme Loader
 
-local function get_theme()
-	local path = vim.fn.expand("~/.config/aurora/active-theme.lua")
-
-	local ok, theme = pcall(dofile, path)
-
-	if not ok then
-		return nil
-	end
-
-	if type(theme) ~= "table" then
-		return nil
-	end
-
-	if type(theme.colors) ~= "table" then
-		return nil
-	end
-
-	return theme
-end
+local aurora = require("aurora.theme")
 
 -- Apply NvimTree Theme
 
 function M.setup()
-	local theme = get_theme()
+	local theme = aurora.get()
 
 	if not theme then
 		return

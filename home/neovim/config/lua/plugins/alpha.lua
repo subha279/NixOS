@@ -32,30 +32,12 @@ end
 
 -- Aurora Theme
 
-local theme_file = vim.fn.expand("~/.config/aurora/active-theme.lua")
-
-local function get_theme()
-	local ok, theme = pcall(dofile, theme_file)
-
-	if not ok then
-		return nil
-	end
-
-	if type(theme) ~= "table" then
-		return nil
-	end
-
-	if type(theme.colors) ~= "table" then
-		return nil
-	end
-
-	return theme
-end
+local aurora = require("aurora.theme")
 
 -- Apply Aurora Colors
 
 local function apply_theme()
-	local theme = get_theme()
+	local theme = aurora.get()
 
 	if not theme then
 		return
