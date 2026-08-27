@@ -9,7 +9,10 @@ local themePath = home .. "/.config/aurora/active-theme.lua"
 local ok, theme = pcall(dofile, themePath)
 
 if not ok or not theme then
-	local fallback = home .. "/.config/aurora/themes/aurora.lua"
+	-- Must name a theme that lib/themes.nix actually defines. This used to point
+	-- at themes/aurora.lua, which is never generated, so the fallback missed too
+	-- and the error() below took the whole Hyprland config down.
+	local fallback = home .. "/.config/aurora/themes/catppuccin-mocha.lua"
 
 	ok, theme = pcall(dofile, fallback)
 end

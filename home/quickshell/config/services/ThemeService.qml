@@ -41,13 +41,18 @@ QtObject {
 
     // Derived state
 
+    // Has to match a theme id that lib/themes.nix actually defines, and the
+    // default core/Theme.qml falls back to. This was "aurora", which is not a
+    // real theme, so with no active-theme file the picker marked nothing active.
+    readonly property string defaultId: "catppuccin-mocha"
+
     readonly property string activeId: {
         const raw = root.activeFile.text()
         if (!raw)
-            return "aurora"
+            return root.defaultId
 
         const trimmed = raw.trim()
-        return trimmed.length > 0 ? trimmed : "aurora"
+        return trimmed.length > 0 ? trimmed : root.defaultId
     }
 
     readonly property var catalogue: {
