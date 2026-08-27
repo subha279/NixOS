@@ -1,39 +1,34 @@
 { ... }:
 
 {
-  # Boot Loader
-
   boot.loader = {
     grub = {
       enable = true;
       efiSupport = true;
       device = "nodev";
       useOSProber = false;
+
+      # Install GRUB to the UEFI fallback path:
+      # /EFI/BOOT/BOOTX64.EFI
+      efiInstallAsRemovable = true;
     };
 
-    efi.canTouchEfiVariables = true;
+    # Don't depend on UEFI NVRAM entries.
+    efi.canTouchEfiVariables = false;
 
-    # NixOS defaults this to 5, which is five seconds spent staring at a menu you almost never use.
     timeout = 1;
   };
 
   # Initrd
-
-  # The legacy initrd is a shell script that does its work in sequence.
   boot.initrd.systemd.enable = true;
-
   boot.initrd.verbose = false;
 
-  # Console Verbosity
-
-  # Writing every kernel and udev message to the console costs real time during early boot, and none of it is readable at that speed anyway.
+  # Console verbosity
   boot.kernelParams = [
     "quiet"
     "loglevel=3"
     "udev.log_level=3"
     "rd.udev.log_level=3"
-
-    # No hardware watchdog on a laptop.
     "nowatchdog"
   ];
 
