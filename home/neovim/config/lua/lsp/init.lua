@@ -99,6 +99,15 @@ local function apply_highlights()
 		bold = true,
 	})
 
+	-- Adopted from ui/theme.lua, which was the only file setting it. Recoloured
+	-- from terminalBlue to accent to match the type-ish groups around it: accent
+	-- is what @lsp.type.class/.type and treesitter's @type actually render as,
+	-- terminalBlue was ui/theme.lua's own type colour from a block that was
+	-- already being overridden.
+	set_hl("@lsp.type.struct", {
+		fg = c.accent,
+	})
+
 	set_hl("@lsp.type.interface", {
 		fg = c.accent,
 	})

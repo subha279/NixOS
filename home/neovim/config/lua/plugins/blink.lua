@@ -52,7 +52,21 @@ local function apply_highlights()
 		bg = "NONE",
 	})
 
+	-- The matched substring of the label. Adopted from ui/theme.lua, which was the
+	-- only file setting it.
+	vim.api.nvim_set_hl(0, "BlinkCmpLabelMatch", {
+		fg = c.accent,
+		bold = true,
+	})
+
 	-- Kind Icons
+
+	-- Base group, the fallback for any kind missing from the table below. Also
+	-- adopted from ui/theme.lua.
+	vim.api.nvim_set_hl(0, "BlinkCmpKind", {
+		fg = c.info,
+		bg = "NONE",
+	})
 
 	local kinds = {
 		Text = c.textSecondary,

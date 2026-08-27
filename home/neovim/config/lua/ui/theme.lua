@@ -387,236 +387,20 @@ function M.apply()
 		bold = true,
 	})
 
-	-- Treesitter
-
-	set("@comment", {
-		link = "Comment",
-	})
-
-	set("@comment.documentation", {
-		fg = c.textMuted,
-		italic = true,
-	})
-
-	set("@string", {
-		fg = c.terminalGreen,
-	})
-
-	set("@string.documentation", {
-		fg = c.terminalGreen,
-	})
-
-	set("@string.escape", {
-		fg = c.terminalCyan,
-	})
-
-	set("@string.special", {
-		fg = c.terminalCyan,
-	})
-
-	set("@constant", {
-		fg = c.terminalMagenta,
-	})
-
-	set("@constant.builtin", {
-		fg = c.terminalMagenta,
-		bold = true,
-	})
-
-	set("@constant.macro", {
-		fg = c.terminalBlue,
-	})
-
-	set("@number", {
-		fg = c.terminalYellow,
-	})
-
-	set("@float", {
-		fg = c.terminalYellow,
-	})
-
-	set("@boolean", {
-		fg = c.terminalYellow,
-		bold = true,
-	})
-
-	set("@variable", {
-		fg = c.text,
-	})
-
-	set("@variable.builtin", {
-		fg = c.accentHover,
-	})
-
-	set("@variable.parameter", {
-		fg = c.textSecondary,
-	})
-
-	set("@variable.member", {
-		fg = c.info,
-	})
-
-	set("@property", {
-		fg = c.info,
-	})
-
-	set("@field", {
-		fg = c.info,
-	})
-
-	set("@function", {
-		fg = c.accent,
-		bold = true,
-	})
-
-	set("@function.builtin", {
-		fg = c.accentHover,
-	})
-
-	set("@function.call", {
-		fg = c.accent,
-	})
-
-	set("@function.method", {
-		fg = c.accent,
-	})
-
-	set("@function.method.call", {
-		fg = c.accent,
-	})
-
-	set("@keyword", {
-		fg = c.accent,
-		bold = true,
-	})
-
-	set("@keyword.function", {
-		fg = c.accent,
-		bold = true,
-	})
-
-	set("@keyword.operator", {
-		fg = c.terminalCyan,
-	})
-
-	set("@keyword.return", {
-		fg = c.accent,
-		bold = true,
-	})
-
-	set("@conditional", {
-		fg = c.accent,
-		bold = true,
-	})
-
-	set("@repeat", {
-		fg = c.accent,
-		bold = true,
-	})
-
-	set("@type", {
-		fg = c.terminalBlue,
-	})
-
-	set("@type.builtin", {
-		fg = c.terminalBlue,
-		bold = true,
-	})
-
-	set("@type.definition", {
-		fg = c.terminalBlue,
-	})
-
-	set("@operator", {
-		fg = c.terminalCyan,
-	})
-
-	set("@punctuation.delimiter", {
-		fg = c.textSecondary,
-	})
-
-	set("@punctuation.bracket", {
-		fg = c.textSecondary,
-	})
-
-	set("@punctuation.special", {
-		fg = c.terminalCyan,
-	})
-
-	set("@tag", {
-		fg = c.accent,
-	})
-
-	set("@tag.attribute", {
-		fg = c.info,
-	})
-
-	set("@tag.delimiter", {
-		fg = c.textSecondary,
-	})
-
-	set("@module", {
-		fg = c.terminalBlue,
-	})
-
-	set("@namespace", {
-		fg = c.terminalBlue,
-	})
-
-	set("@constructor", {
-		fg = c.terminalBlue,
-	})
-
-	set("@exception", {
-		fg = c.error,
-		bold = true,
-	})
-
-	-- LSP Semantic Tokens
-
-	set("@lsp.type.class", {
-		fg = c.terminalBlue,
-	})
-
-	set("@lsp.type.struct", {
-		fg = c.terminalBlue,
-	})
-
-	set("@lsp.type.enum", {
-		fg = c.terminalBlue,
-	})
-
-	set("@lsp.type.interface", {
-		fg = c.terminalBlue,
-	})
-
-	set("@lsp.type.type", {
-		fg = c.terminalBlue,
-	})
-
-	set("@lsp.type.function", {
-		fg = c.accent,
-	})
-
-	set("@lsp.type.method", {
-		fg = c.accent,
-	})
-
-	set("@lsp.type.variable", {
-		fg = c.text,
-	})
-
-	set("@lsp.type.parameter", {
-		fg = c.textSecondary,
-	})
-
-	set("@lsp.type.property", {
-		fg = c.info,
-	})
-
-	set("@lsp.type.namespace", {
-		fg = c.terminalBlue,
-	})
+	-- Treesitter captures and LSP semantic tokens are NOT set here.
+	--
+	-- plugins/treesitter.lua owns every @* capture and lsp/init.lua owns
+	-- @lsp.type.*. Both load after this file, so their values already won at
+	-- startup and the ~50 assignments that used to sit here were dead on arrival --
+	-- and actively harmful on a theme switch, because this file was refreshed while
+	-- treesitter was not, so @* briefly took these colours instead.
+	--
+	-- @variable.member moved to plugins/treesitter.lua and @lsp.type.struct to
+	-- lsp/init.lua; they were the only groups here that no other file set. The
+	-- legacy captures @conditional, @repeat, @exception and @namespace are simply
+	-- gone: Neovim stopped emitting them in 0.9, and their replacements
+	-- (@keyword.conditional, @keyword.repeat, @keyword.exception, @module) are all
+	-- set by plugins/treesitter.lua.
 
 	-- Diagnostics
 
@@ -702,19 +486,10 @@ function M.apply()
 		bg = c.accentMuted,
 	})
 
-	-- GitSigns
-
-	set("GitSignsAdd", {
-		fg = c.success,
-	})
-
-	set("GitSignsChange", {
-		fg = c.warning,
-	})
-
-	set("GitSignsDelete", {
-		fg = c.error,
-	})
+	-- GitSigns groups are NOT set here.
+	--
+	-- plugins/gitsigns.lua owns them, loads later, and set the same three groups to
+	-- the same three colours, so this was a verbatim duplicate.
 
 	-- Telescope
 
@@ -802,46 +577,14 @@ function M.apply()
 		fg = c.textMuted,
 	})
 
-	-- Blink Completion
-
-	set("BlinkCmpMenu", {
-		fg = c.text,
-		bg = c.surface,
-	})
-
-	set("BlinkCmpMenuBorder", {
-		fg = c.borderFocus,
-		bg = c.surface,
-	})
-
-	set("BlinkCmpMenuSelection", {
-		fg = c.accentForeground,
-		bg = c.accentMuted,
-		bold = true,
-	})
-
-	set("BlinkCmpLabel", {
-		fg = c.text,
-	})
-
-	set("BlinkCmpLabelMatch", {
-		fg = c.accent,
-		bold = true,
-	})
-
-	set("BlinkCmpKind", {
-		fg = c.info,
-	})
-
-	set("BlinkCmpDoc", {
-		fg = c.text,
-		bg = c.surface,
-	})
-
-	set("BlinkCmpDocBorder", {
-		fg = c.borderFocus,
-		bg = c.surface,
-	})
+	-- BlinkCmp groups are NOT set here.
+	--
+	-- plugins/blink.lua owns them and loads earlier, but its values differ (menus
+	-- transparent rather than filled with c.surface), so these seven assignments
+	-- were silently reverting its choices whenever this file re-applied.
+	--
+	-- BlinkCmpLabelMatch and the base BlinkCmpKind moved to plugins/blink.lua; they
+	-- were the only groups here it did not already set.
 
 	-- Dashboard
 

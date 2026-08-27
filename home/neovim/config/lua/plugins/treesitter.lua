@@ -251,6 +251,13 @@ local function apply_highlights()
 		bg = "NONE",
 	})
 
+	-- Modern name for @field. Adopted from ui/theme.lua, which was the only file
+	-- setting it; without it the capture falls back to whatever @property links to.
+	set("@variable.member", {
+		fg = c.info,
+		bg = "NONE",
+	})
+
 	-- Types
 
 	set("@type", {
