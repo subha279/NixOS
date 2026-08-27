@@ -216,7 +216,7 @@ Components.LauncherSurface {
 
                                 text: Core.Icons.checkCircle
 
-                                font.family: Core.Theme.fontFamily
+                                font.family: Core.Theme.iconFont
                                 font.pixelSize: Core.Theme.fontSizeSmall + 2
 
                                 color: Core.Theme.accent

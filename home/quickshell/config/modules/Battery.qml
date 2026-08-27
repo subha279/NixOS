@@ -86,7 +86,7 @@ Item {
 
             text: root.svc.icon
 
-            font.family: Core.Theme.fontFamily
+            font.family: Core.Theme.iconFont
             font.pixelSize: Core.Theme.iconSize
 
             color: root.svc.color

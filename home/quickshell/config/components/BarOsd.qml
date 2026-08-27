@@ -57,7 +57,7 @@ Item {
 
             text: root.glyph
 
-            font.family: Core.Theme.fontFamily
+            font.family: Core.Theme.iconFont
             font.pixelSize: Core.Theme.iconSize
 
             color: root.tint

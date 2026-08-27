@@ -92,7 +92,7 @@ Components.PopupSurface {
 
                     text: popup.svc.icon
 
-                    font.family: Core.Theme.fontFamily
+                    font.family: Core.Theme.iconFont
                     font.pixelSize: 26
 
                     color: popup.svc.color
@@ -226,7 +226,7 @@ Components.PopupSurface {
 
                     text: popup.svc.health >= 0 ? popup.svc.healthIcon + "  Health " + Math.round(popup.svc.health) + "%" : popup.svc.stateLabel
 
-                    font.family: Core.Theme.fontFamily
+                    font.families: Core.Theme.textFamilies
                     font.pixelSize: Core.Theme.fontSizeSmall
 
                     color: Core.Theme.foregroundMuted
@@ -388,7 +388,7 @@ Components.PopupSurface {
 
                     elide: Text.ElideRight
 
-                    font.family: Core.Theme.fontFamily
+                    font.family: Core.Theme.iconFont
                     font.pixelSize: Core.Theme.fontSizeSmall
 
                     color: Core.Theme.warning

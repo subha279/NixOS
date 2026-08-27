@@ -366,7 +366,7 @@ PanelWindow {
 
                                         text: entryLoader.modelData.icon ? entryLoader.modelData.icon : ""
 
-                                        font.family: Core.Theme.fontFamily
+                                        font.family: Core.Theme.iconFont
 
                                         font.pixelSize: 13
 

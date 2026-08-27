@@ -141,10 +141,16 @@ Components.LauncherSurface {
 
                         text: cell.modelData.emoji || ""
 
-                        font.family: "Noto Color Emoji"
+                        font.family: Core.Theme.emojiFont
 
                         font.pixelSize: 28
 
+                        // NativeRendering is required here, not a preference:
+                        // QtRendering rasterises glyphs into a monochrome distance
+                        // field, which strips the colour out of a COLR/CBDT emoji
+                        // font. It does mean this Text will not scale as smoothly
+                        // as the rest, which is why the cell animates and the glyph
+                        // does not.
                         renderType: Text.NativeRendering
                     }
 

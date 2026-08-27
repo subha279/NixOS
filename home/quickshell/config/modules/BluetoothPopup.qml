@@ -378,7 +378,7 @@ Components.PopupSurface {
 
                         text: popup.svc.powered ? "\udb80\udcaf" : "\udb80\udcb2"
 
-                        font.family: Core.Theme.fontFamily
+                        font.family: Core.Theme.iconFont
                         font.pixelSize: 20
 
                         color: Core.Theme.foregroundFaint

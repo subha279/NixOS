@@ -459,7 +459,7 @@ PanelWindow {
 
                                 text: "\udb80\udc7f"
 
-                                font.family: Core.Theme.fontFamily
+                                font.family: Core.Theme.iconFont
 
                                 font.pixelSize: 19
 
@@ -578,7 +578,7 @@ PanelWindow {
 
                                 text: "\udb80\udc6f"
 
-                                font.family: Core.Theme.fontFamily
+                                font.family: Core.Theme.iconFont
 
                                 font.pixelSize: 15
 
