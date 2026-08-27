@@ -1,95 +1,60 @@
 { ... }:
 
 {
-  programs.zsh.initContent= ''
+  programs.zsh.initContent = ''
     # ==================================================
-    # Zsh Keybindings
-    # ==================================================
-
-    bindkey -e
-
-    # ==================================================
-    # Cursor Movement
+    # Zsh Vim Mode
     # ==================================================
 
-    # Beginning of line
-    bindkey '^a' beginning-of-line
-
-    # End of line
-    bindkey '^e' end-of-line
-
-    # Previous word
-    bindkey '^[b' backward-word
-
-    # Next word
-    bindkey '^[f' forward-word
+    bindkey -v
+    export KEYTIMEOUT=1
 
     # ==================================================
-    # Editing
+    # Vim Normal Mode
     # ==================================================
 
-    # Delete previous word
-    bindkey '^w' backward-kill-word
+    bindkey -M vicmd 'h' backward-char
+    bindkey -M vicmd 'j' down-line-or-history
+    bindkey -M vicmd 'k' up-line-or-history
+    bindkey -M vicmd 'l' forward-char
 
-    # Delete everything before cursor
-    bindkey '^u' backward-kill-line
+    bindkey -M vicmd 'w' forward-word
+    bindkey -M vicmd 'b' backward-word
+    bindkey -M vicmd 'e' forward-word-end
 
-    # Delete everything after cursor
-    bindkey '^k' kill-line
-
-    # Delete previous character
-    bindkey '^h' backward-delete-char
-
-    # ==================================================
-    # History
-    # ==================================================
-
-    # Previous matching history entry
-    bindkey '^p' history-substring-search-up
-
-    # Next matching history entry
-    bindkey '^n' history-substring-search-down
+    bindkey -M vicmd '0' beginning-of-line
+    bindkey -M vicmd '$' end-of-line
 
     # ==================================================
-    # Completion
+    # Keep your existing insert-mode shortcuts
     # ==================================================
 
-    # Tab
-    bindkey '^i' expand-or-complete
+    bindkey -M viins '^a' beginning-of-line
+    bindkey -M viins '^e' end-of-line
+    bindkey -M viins '^[b' backward-word
+    bindkey -M viins '^[f' forward-word
 
-    # Shift + Tab
-    bindkey '^[[Z' reverse-menu-complete
+    bindkey -M viins '^w' backward-kill-word
+    bindkey -M viins '^u' backward-kill-line
+    bindkey -M viins '^k' kill-line
+    bindkey -M viins '^h' backward-delete-char
 
-    # ==================================================
-    # Screen
-    # ==================================================
+    bindkey -M viins '^p' history-substring-search-up
+    bindkey -M viins '^n' history-substring-search-down
 
-    # Clear screen
-    bindkey '^l' clear-screen
+    bindkey -M viins '^i' expand-or-complete
+    bindkey -M viins '^[[Z' reverse-menu-complete
 
-    # ==================================================
-    # Command Editor
-    # ==================================================
-
-    # Edit current command in $EDITOR
-    bindkey '^x^e' edit-command-line
-
-    # ==================================================
-    # Cancel
-    # ==================================================
-
-    bindkey '^c' send-break
+    bindkey -M viins '^l' clear-screen
+    bindkey -M viins '^x^e' edit-command-line
+    bindkey -M viins '^c' send-break
 
     # ==================================================
     # fzf
     # ==================================================
 
-    # These are intentionally documented here.
-    #
     # Ctrl-R → fzf history
     # Ctrl-T → fzf files
     # Alt-C  → fzf directories
-    #
-    # fzf's native Zsh integration installs these.
   '';
 }

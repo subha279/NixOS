@@ -28,7 +28,7 @@ opt.termguicolors = true
 
 opt.expandtab = true
 opt.smartindent = true
-
+opt.autoindent = true
 opt.tabstop = 4
 opt.shiftwidth = 4
 opt.softtabstop = 4
@@ -41,7 +41,7 @@ opt.wrap = false
 opt.linebreak = true
 opt.breakindent = true
 opt.autoindent = true
-opt.inccommand = 'split'
+opt.inccommand = "split"
 
 -- Search
 
