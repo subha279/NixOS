@@ -98,7 +98,7 @@ require("plugins.nvimtree")
 
 -- Git
 
-require("plugins.gitsigns")
+require("plugins.gitsigns").setup()
 
 -- Formatting
 
