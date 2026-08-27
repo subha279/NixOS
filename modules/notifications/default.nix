@@ -32,6 +32,12 @@
 
     percentageAction = 5;
 
-    criticalPowerAction = "Hibernate";
+    # NOT "Hibernate": this host has no resume device. hardware-configuration
+    # declares `swapDevices = [ ]` and modules/power enables zramSwap only, so a
+    # hibernate request fails and the battery keeps draining past percentageAction.
+    #
+    # To go back to hibernating, add swap of at least RAM size (a partition, or a
+    # file plus boot.resumeDevice + the resume_offset kernel param) and flip this.
+    criticalPowerAction = "PowerOff";
   };
 }
