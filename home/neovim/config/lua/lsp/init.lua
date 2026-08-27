@@ -452,7 +452,10 @@ vim.api.nvim_create_autocmd("LspAttach", {
 
 		map("n", "K", hover, "LSP: Hover")
 
-		map("n", "<C-k>", signature_help, "LSP: Signature help")
+		-- gK, not <C-k>: core/keymaps.lua maps <C-k> to <C-w>k globally, and a
+		-- buffer-local mapping wins, so binding it here silently broke
+		-- "move to the window above" in every buffer with a language server.
+		map("n", "gK", signature_help, "LSP: Signature help")
 
 		-- Refactoring
 
