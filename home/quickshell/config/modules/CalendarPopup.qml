@@ -104,7 +104,7 @@ Components.PopupSurface {
                         text: Qt.formatDateTime(popup.now, "HH:mm")
 
                         font.family: Core.Theme.fontFamily
-                        font.pixelSize: 34
+                        font.pixelSize: Core.Theme.fontSizeDisplay
                         font.weight: Font.DemiBold
 
                         color: Core.Theme.foreground
@@ -190,7 +190,7 @@ Components.PopupSurface {
                         text: "\udb80\udd41"
 
                         font.family: Core.Theme.iconFont
-                        font.pixelSize: 14
+                        font.pixelSize: Core.Theme.iconSizeSmall
 
                         color: Core.Theme.foregroundMuted
                     }
@@ -292,7 +292,7 @@ Components.PopupSurface {
                         text: "\udb80\udd42"
 
                         font.family: Core.Theme.iconFont
-                        font.pixelSize: 14
+                        font.pixelSize: Core.Theme.iconSizeSmall
 
                         color: Core.Theme.foregroundMuted
                     }

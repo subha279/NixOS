@@ -133,7 +133,7 @@ Components.PopupSurface {
                             text: popup.svc.icon
 
                             font.family: Core.Theme.iconFont
-                            font.pixelSize: 17
+                            font.pixelSize: Core.Theme.fontSizeHeading
 
                             color: popup.svc.muted ? Core.Theme.foregroundFaint : Core.Theme.accent
 
@@ -359,7 +359,7 @@ Components.PopupSurface {
                             text: popup.svc.micIcon
 
                             font.family: Core.Theme.iconFont
-                            font.pixelSize: 17
+                            font.pixelSize: Core.Theme.fontSizeHeading
 
                             color: popup.svc.micMuted ? Core.Theme.danger : Core.Theme.success
 

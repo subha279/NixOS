@@ -465,7 +465,11 @@ PanelWindow {
 
                                 color: Core.Theme.textMuted
 
-                                renderType: Text.NativeRendering
+                                // Deliberately left on the default (QtRendering).
+                                // This glyph sits inside a card that slides in and
+                                // out on a Translate, and NativeRendering snaps to
+                                // integer pixel positions, so it visibly juddered
+                                // against the smoothly-moving card around it.
                             }
                         }
 

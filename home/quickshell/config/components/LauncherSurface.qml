@@ -386,7 +386,7 @@ PanelWindow {
 
                                 font.family: Core.Theme.iconFont
 
-                                font.pixelSize: 14
+                                font.pixelSize: Core.Theme.iconSizeSmall
                             }
 
                             MouseArea {

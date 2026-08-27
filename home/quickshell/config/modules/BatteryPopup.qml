@@ -93,7 +93,7 @@ Components.PopupSurface {
                     text: popup.svc.icon
 
                     font.family: Core.Theme.iconFont
-                    font.pixelSize: 26
+                    font.pixelSize: Core.Theme.iconSizeLarge
 
                     color: popup.svc.color
 
@@ -115,7 +115,7 @@ Components.PopupSurface {
                     text: popup.svc.percentInt + "%"
 
                     font.family: Core.Theme.fontFamily
-                    font.pixelSize: 24
+                    font.pixelSize: Core.Theme.fontSizeTitle
                     font.weight: Font.DemiBold
 
                     color: Core.Theme.foreground

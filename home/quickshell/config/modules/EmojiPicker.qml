@@ -177,7 +177,10 @@ Components.LauncherSurface {
 
                         font.family: Core.Theme.fontFamily
 
-                        font.pixelSize: 8
+                        // Was a hardcoded 8px, below the floor Theme puts on every
+                        // other size and genuinely hard to read. The cell has room:
+                        // 7 + 28 glyph + label + 6 bottom margin fits inside 70.
+                        font.pixelSize: Core.Theme.fontSizeSmall
 
                         elide: Text.ElideRight
 

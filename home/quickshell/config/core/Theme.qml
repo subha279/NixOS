@@ -305,6 +305,26 @@ QtObject {
     readonly property int fontSizeSmall: Math.max(8, ui.fontSizeSmall !== undefined ? ui.fontSizeSmall : 10)
     readonly property int fontSizeLarge: Math.max(8, ui.fontSizeLarge !== undefined ? ui.fontSizeLarge : 15)
 
+    // Upper end of the type scale, derived rather than written out.
+    //
+    // The large sizes in the popups were hardcoded pixel values -- 34 for the
+    // calendar clock, 24 and 26 for the battery gauge, 17 for the audio section
+    // heads -- so changing ui.fontSize in themes.nix moved body text and left the
+    // headline sizes behind, and the hierarchy drifted apart.
+    //
+    // The ratios are chosen to reproduce those exact values at the current
+    // fontSize of 12 and iconSize of 16, so this is not a visual change today; it
+    // just means the scale moves together from now on.
+    readonly property int fontSizeDisplay: Math.round(fontSize * 2.8)
+
+    readonly property int fontSizeTitle: Math.round(fontSize * 2.0)
+
+    readonly property int fontSizeHeading: Math.round(fontSize * 1.45)
+
+    readonly property int iconSizeLarge: Math.round(iconSize * 1.6)
+
+    readonly property int iconSizeSmall: Math.round(iconSize * 0.875)
+
     readonly property real shadowOpacity: ui.shadowOpacity !== undefined ? ui.shadowOpacity : 0.20
 
     readonly property real shellShadowOpacity: 0.0

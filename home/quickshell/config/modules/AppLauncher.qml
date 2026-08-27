@@ -205,9 +205,12 @@ Components.LauncherSurface {
                     }
                 }
                 MouseArea {
+                    // Fills the row. The 36px rightMargin that used to be here was
+                    // copied from Clipboard, where it keeps the row's click target
+                    // clear of a per-row delete button. There is no such button
+                    // here, so it only made the right-hand 36px of every app row
+                    // silently unclickable.
                     anchors.fill: parent
-
-                    anchors.rightMargin: 36
 
                     cursorShape: Qt.PointingHandCursor
 
