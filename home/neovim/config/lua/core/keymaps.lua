@@ -203,22 +203,4 @@ map(
 	{ desc = "Rename Same Many Words Together In the Cursor" }
 )
 
--- Move selected lines up/down
-map("v", "K", ":m '<-2<CR>gv=gv", { desc = "Move Selected Line Up" })
-map("v", "J", ":m '>+1<CR>gv=gv", { desc = "Move Selected Line Down" })
-
--- Center screen on scroll
-map("n", "<C-d>", "<C-d>zz")
-map("n", "<C-u>", "<C-u>zz")
-
--- Center screen on search
-map("n", "n", "nzzzv")
-map("n", "N", "Nzzzv")
-
 map("n", "<leader>m", "<cmd>NvimTreeFocus<CR>", { desc = "Focus file explorer" })
-
--- Auto pairs
-map("i", "(", "()<Esc>i")
-map("i", "{", "{}<Esc>i")
-map("i", "[", "[]<Esc>i")
-map("i", '"', '""<Esc>i')

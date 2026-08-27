@@ -83,6 +83,9 @@
       ruff
       nixfmt
       shfmt
+      eslint_d
+      shellcheck
+      rustfmt
 
       # C / C++ development
 
