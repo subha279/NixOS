@@ -24,7 +24,11 @@ id_rsa
 id_dsa
 id_ecdsa
 id_ed25519
-*.pub
+
+# Note: *.pub is deliberately NOT ignored. Public keys are not secrets, and
+# ignoring them silently drops files you may want tracked (authorized_keys
+# material, host keys pinned in config). The private-key patterns above are the
+# ones that matter.
 
 # ==============================
 # Editors
