@@ -5,6 +5,8 @@ vim.g.loaded_netrwPlugin = 1
 
 local api = require("nvim-tree.api")
 
+local icons = require("aurora.icons")
+
 -- NvimTree Buffer Keymaps
 
 local function on_attach(bufnr)
@@ -232,11 +234,13 @@ require("nvim-tree").setup({
 
 		debounce_delay = 50,
 
+		-- Shared with the sign column and the statusline. This block used to spell
+		-- them out, and its info glyph (󰋼) differed from lualine's (󰋽).
 		icons = {
-			hint = "󰌵",
-			info = "󰋼",
-			warning = "󰀪",
-			error = "󰅚",
+			hint = icons.diagnostics.hint,
+			info = icons.diagnostics.info,
+			warning = icons.diagnostics.warn,
+			error = icons.diagnostics.error,
 		},
 	},
 

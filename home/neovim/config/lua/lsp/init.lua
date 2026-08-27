@@ -6,6 +6,8 @@ local M = {}
 
 local aurora = require("aurora.theme")
 
+local icons = require("aurora.icons")
+
 local colors = aurora.colors
 
 local function set_hl(name, opts)
@@ -195,13 +197,42 @@ end
 -- Diagnostics
 
 local function configure_diagnostics()
+	local sign_text = {}
+
+	for _, entry in ipairs(icons.diagnostic_severities) do
+		sign_text[entry.severity] = icons.diagnostics[entry.key]
+	end
+
 	vim.diagnostic.config({
-		-- Keep diagnostics native and predictable: no custom panel, header, prefix, or forced floating window.
-		virtual_text = true,
-		signs = true,
+		-- Virtual text with a marker and some air. Bare `true` butts the message
+		-- straight against the end of the code with a single space.
+		virtual_text = {
+			spacing = 2,
+			prefix = "●",
+		},
+
+		-- Glyphs, not Neovim's default E/W/I/H letters. `signs = true` left the
+		-- sign column showing letters while lualine and nvim-tree both showed
+		-- glyphs for the same severities.
+		signs = {
+			text = sign_text,
+		},
+
 		underline = true,
 		update_in_insert = false,
 		severity_sort = true,
+
+		-- Every other float in this config is rounded -- hover, signature help,
+		-- blink's menu and docs, gitsigns previews, which-key. open_float was the
+		-- one that wasn't, because it was never configured.
+		float = {
+			border = "rounded",
+			header = "",
+
+			-- Name the server only when more than one is reporting, otherwise it
+			-- is noise on every message.
+			source = "if_many",
+		},
 	})
 end
 

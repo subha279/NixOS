@@ -6,6 +6,8 @@ local M = {}
 
 local aurora = require("aurora.theme")
 
+local icons = require("aurora.icons")
+
 local colors = aurora.colors
 
 local function transparent(foreground)
@@ -349,10 +351,10 @@ local function build_config()
 					cond = has_diagnostics,
 					sources = { "nvim_diagnostic" },
 					symbols = {
-						error = "󰅚 ",
-						warn = "󰀪 ",
-						info = "󰋽 ",
-						hint = "󰌵 ",
+						error = icons.diagnostics.error .. " ",
+						warn = icons.diagnostics.warn .. " ",
+						info = icons.diagnostics.info .. " ",
+						hint = icons.diagnostics.hint .. " ",
 					},
 					diagnostics_color = {
 						error = { fg = c.error },
