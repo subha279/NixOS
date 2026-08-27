@@ -130,32 +130,43 @@ PanelWindow {
 
             anchors.fill: parent
 
+            // Grows from the bar edge it is anchored to, not from its own middle.
             transformOrigin: Item.Top
 
-            scale: root.open ? 1.0 : 0.97
+            scale: root.open ? 1.0 : 0.96
 
-            y: root.open ? 0 : -8
+            y: root.open ? 0 : -10
 
             opacity: root.open ? 1.0 : 0.0
 
+            // Decelerate in, accelerate out. This was OutCubic in both directions,
+            // so the card left as leisurely as it arrived.
             Behavior on scale {
                 NumberAnimation {
-                    duration: root.open ? 240 : 170
-                    easing.type: Easing.OutCubic
+                    duration: root.open ? Core.Theme.durMedium : Core.Theme.durExitMedium
+
+                    easing.type: Easing.BezierSpline
+                    easing.bezierCurve: root.open ? Core.Theme.easeDecelerate : Core.Theme.easeAccelerate
                 }
             }
 
             Behavior on y {
                 NumberAnimation {
-                    duration: root.open ? 240 : 170
-                    easing.type: Easing.OutCubic
+                    duration: root.open ? Core.Theme.durMedium : Core.Theme.durExitMedium
+
+                    easing.type: Easing.BezierSpline
+                    easing.bezierCurve: root.open ? Core.Theme.easeDecelerate : Core.Theme.easeAccelerate
                 }
             }
 
+            // Opacity resolves faster than the transform, so the card reads as
+            // present and settling rather than fading into place.
             Behavior on opacity {
                 NumberAnimation {
-                    duration: root.open ? 180 : 120
-                    easing.type: Easing.OutCubic
+                    duration: root.open ? Core.Theme.durShort : Core.Theme.durExitShort
+
+                    easing.type: Easing.BezierSpline
+                    easing.bezierCurve: root.open ? Core.Theme.easeDecelerate : Core.Theme.easeAccelerate
                 }
             }
 
@@ -197,8 +208,35 @@ PanelWindow {
 
                 Behavior on opacity {
                     NumberAnimation {
-                        duration: root.open ? 150 : 100
-                        easing.type: Easing.OutCubic
+                        duration: root.open ? Core.Theme.durShort : Core.Theme.durExitShort
+
+                        easing.type: Easing.BezierSpline
+                        easing.bezierCurve: root.open ? Core.Theme.easeDecelerate : Core.Theme.easeAccelerate
+                    }
+                }
+
+                // Two-stage reveal: the card arrives, then its contents rise into
+                // it. The offset is small and the delay short -- enough to read as
+                // the surface settling before it fills, not as a second animation.
+                //
+                // A Translate rather than a y binding because this Item is
+                // anchored, and anchors would overwrite y on every layout pass.
+                transform: Translate {
+                    y: root.open ? 0 : 6
+
+                    Behavior on y {
+                        SequentialAnimation {
+                            PauseAnimation {
+                                duration: root.open ? 60 : 0
+                            }
+
+                            NumberAnimation {
+                                duration: root.open ? Core.Theme.durShort : Core.Theme.durExitShort
+
+                                easing.type: Easing.BezierSpline
+                                easing.bezierCurve: root.open ? Core.Theme.easeDecelerate : Core.Theme.easeAccelerate
+                            }
+                        }
                     }
                 }
 
@@ -272,17 +310,19 @@ PanelWindow {
 
             Behavior on scale {
                 NumberAnimation {
-                    duration: menuLayer.active ? 190 : 130
+                    duration: menuLayer.active ? Core.Theme.durShort : Core.Theme.durExitShort
 
-                    easing.type: Easing.OutCubic
+                    easing.type: Easing.BezierSpline
+                    easing.bezierCurve: menuLayer.active ? Core.Theme.easeDecelerate : Core.Theme.easeAccelerate
                 }
             }
 
             Behavior on opacity {
                 NumberAnimation {
-                    duration: menuLayer.active ? 150 : 110
+                    duration: menuLayer.active ? Core.Theme.durInstant : Core.Theme.durExitShort
 
-                    easing.type: Easing.OutCubic
+                    easing.type: Easing.BezierSpline
+                    easing.bezierCurve: menuLayer.active ? Core.Theme.easeDecelerate : Core.Theme.easeAccelerate
                 }
             }
 

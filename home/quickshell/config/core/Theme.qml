@@ -384,28 +384,69 @@ QtObject {
 
     readonly property int rowHeight: 42
 
-    // Animation
+    // ============================================================
+    // MOTION
+    // ============================================================
+    //
+    // There were 20 distinct hardcoded durations across ~140 animations, and one
+    // curve -- Easing.OutQuint -- doing 147 of 176 jobs, including exits. A single
+    // decelerate curve on the way out is what makes an interface feel soft rather
+    // than crisp: the surface leaves slowly and lingers when it should get out of
+    // the way.
+    //
+    // Four durations and three curves, chosen by role. The four spring properties
+    // and `overshoot` that used to sit here were never referenced by anything and
+    // are gone; the pop scale below replaces them.
 
-    readonly property real springStiffness: 3.2
+    // Duration, by how much movement the eye has to follow.
 
-    readonly property real springDamping: 0.32
+    // Colour, hover, small state flips. Below ~100ms motion reads as a jump.
+    readonly property int durInstant: 110
 
-    readonly property real springEpsilon: 0.25
+    // Small transforms: row selection, a chevron turning, a badge appearing.
+    readonly property int durShort: 180
 
-    readonly property real springMass: 1.1
+    // A popup or menu arriving.
+    readonly property int durMedium: 260
 
-    // Motion is intentionally short and deterministic.
-    readonly property int durFast: 110
+    // A large surface crossing real distance.
+    readonly property int durLong: 340
 
-    readonly property int durBase: 180
+    // Exits run at roughly 70% of the matching entrance. An entrance is
+    // information arriving and can afford to be savoured; an exit is the user
+    // having already moved on.
+    readonly property int durExitShort: 130
 
-    readonly property int durSlow: 260
+    readonly property int durExitMedium: 180
 
-    readonly property int durOpen: 220
+    // Easing, as cubic bezier control points for easing.bezierCurve. Same three
+    // roles every good motion system settles on.
 
-    readonly property int durClose: 150
+    // General purpose. Firm start, clean stop.
+    readonly property var easeStandard: [0.2, 0.0, 0.0, 1.0, 1, 1]
 
-    readonly property real overshoot: 1.0
+    // Entrances. Most of the travel happens early and it eases into place, which
+    // is what makes an arriving surface feel weighted rather than floaty.
+    readonly property var easeDecelerate: [0.05, 0.7, 0.1, 1.0, 1, 1]
+
+    // Exits. Slow to release, then leaves quickly -- the mirror of the above.
+    readonly property var easeAccelerate: [0.3, 0.0, 0.8, 0.15, 1, 1]
+
+    // How far an icon overshoots when its glyph changes. 1.22 was distinctly
+    // rubbery on a 16px glyph.
+    readonly property real popScale: 1.16
+
+    // Legacy names, kept so the ~26 existing call sites keep working, and mapped
+    // onto the scale above rather than carrying their own numbers.
+    readonly property int durFast: durInstant
+
+    readonly property int durBase: durShort
+
+    readonly property int durSlow: durMedium
+
+    readonly property int durOpen: durMedium
+
+    readonly property int durClose: durExitMedium
 
     // Collapsing Bar
 

@@ -67,7 +67,12 @@ PanelWindow {
     Behavior on reveal {
         NumberAnimation {
             duration: root.expanded ? Core.Theme.barRevealDuration : Core.Theme.barHideDuration
-            easing.type: Easing.OutQuint
+
+            // Decelerate as the modules arrive, accelerate as they collapse. The
+            // bar widens as it reveals, so this is the one transition in the shell
+            // where the eye is tracking real distance.
+            easing.type: Easing.BezierSpline
+            easing.bezierCurve: root.expanded ? Core.Theme.easeDecelerate : Core.Theme.easeAccelerate
         }
     }
 

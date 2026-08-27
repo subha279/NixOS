@@ -104,20 +104,25 @@ Item {
             SequentialAnimation {
                 id: popAnim
 
+                // Out fast, then settle back with a slight overshoot so it reads
+                // as a spring rather than a two-step bounce. 1.22 was distinctly
+                // rubbery on a 16px glyph.
                 NumberAnimation {
                     target: icon
                     property: "scale"
-                    to: 1.22
-                    duration: 110
-                    easing.type: Easing.OutQuint
+                    to: Core.Theme.popScale
+                    duration: Core.Theme.durInstant
+                    easing.type: Easing.BezierSpline
+                    easing.bezierCurve: Core.Theme.easeDecelerate
                 }
 
                 NumberAnimation {
                     target: icon
                     property: "scale"
                     to: 1.0
-                    duration: 160
-                    easing.type: Easing.OutQuint
+                    duration: Core.Theme.durShort
+                    easing.type: Easing.OutBack
+                    easing.overshoot: 1.1
                 }
             }
         }

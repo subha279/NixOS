@@ -197,9 +197,10 @@ PanelWindow {
 
     Behavior on reveal {
         NumberAnimation {
-            duration: root.open ? Core.Theme.durOpen : Core.Theme.durClose
+            duration: root.open ? Core.Theme.durMedium : Core.Theme.durExitMedium
 
-            easing.type: root.open ? Easing.OutQuint : Easing.InQuint
+            easing.type: Easing.BezierSpline
+            easing.bezierCurve: root.open ? Core.Theme.easeDecelerate : Core.Theme.easeAccelerate
         }
     }
 
@@ -243,33 +244,37 @@ PanelWindow {
 
             transformOrigin: Item.Center
 
-            scale: root.reveal > 0.001 ? 1.0 : 0.97
+            scale: root.reveal > 0.001 ? 1.0 : 0.96
 
-            y: root.reveal > 0.001 ? 0 : 10
+            y: root.reveal > 0.001 ? 0 : 12
 
             opacity: root.reveal
 
+            // Decelerate in, accelerate out. Was OutCubic both ways.
             Behavior on scale {
                 NumberAnimation {
-                    duration: root.open ? 260 : 180
+                    duration: root.open ? Core.Theme.durMedium : Core.Theme.durExitMedium
 
-                    easing.type: Easing.OutCubic
+                    easing.type: Easing.BezierSpline
+                    easing.bezierCurve: root.open ? Core.Theme.easeDecelerate : Core.Theme.easeAccelerate
                 }
             }
 
             Behavior on y {
                 NumberAnimation {
-                    duration: root.open ? 260 : 180
+                    duration: root.open ? Core.Theme.durMedium : Core.Theme.durExitMedium
 
-                    easing.type: Easing.OutCubic
+                    easing.type: Easing.BezierSpline
+                    easing.bezierCurve: root.open ? Core.Theme.easeDecelerate : Core.Theme.easeAccelerate
                 }
             }
 
             Behavior on opacity {
                 NumberAnimation {
-                    duration: root.open ? 190 : 130
+                    duration: root.open ? Core.Theme.durShort : Core.Theme.durExitShort
 
-                    easing.type: Easing.OutCubic
+                    easing.type: Easing.BezierSpline
+                    easing.bezierCurve: root.open ? Core.Theme.easeDecelerate : Core.Theme.easeAccelerate
                 }
             }
 

@@ -76,9 +76,10 @@ PanelWindow {
             NumberAnimation {
                 property: "y"
 
-                duration: 180
+                duration: Core.Theme.durShort
 
-                easing.type: Easing.OutQuint
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: Core.Theme.easeStandard
             }
         }
 
@@ -188,9 +189,10 @@ PanelWindow {
                         from: 1.0
                         to: 0.0
 
-                        duration: 170
+                        duration: Core.Theme.durMedium
 
-                        easing.type: Easing.OutQuint
+                        easing.type: Easing.BezierSpline
+                        easing.bezierCurve: Core.Theme.easeDecelerate
                     }
 
                     NumberAnimation {
@@ -200,9 +202,10 @@ PanelWindow {
                         from: 0.0
                         to: 1.0
 
-                        duration: 140
+                        duration: Core.Theme.durShort
 
-                        easing.type: Easing.OutQuint
+                        easing.type: Easing.BezierSpline
+                        easing.bezierCurve: Core.Theme.easeDecelerate
                     }
                 }
 
@@ -219,9 +222,10 @@ PanelWindow {
 
                             to: 1.0
 
-                            duration: 150
+                            duration: Core.Theme.durExitMedium
 
-                            easing.type: Easing.InQuint
+                            easing.type: Easing.BezierSpline
+                            easing.bezierCurve: Core.Theme.easeAccelerate
                         }
 
                         NumberAnimation {
@@ -230,9 +234,10 @@ PanelWindow {
 
                             to: 0.0
 
-                            duration: 170
+                            duration: Core.Theme.durExitMedium
 
-                            easing.type: Easing.InQuint
+                            easing.type: Easing.BezierSpline
+                            easing.bezierCurve: Core.Theme.easeAccelerate
                         }
 
                         NumberAnimation {
@@ -241,9 +246,10 @@ PanelWindow {
 
                             to: 0.0
 
-                            duration: 130
+                            duration: Core.Theme.durExitShort
 
-                            easing.type: Easing.InQuint
+                            easing.type: Easing.BezierSpline
+                            easing.bezierCurve: Core.Theme.easeAccelerate
                         }
                     }
 
