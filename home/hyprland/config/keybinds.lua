@@ -35,6 +35,10 @@ hl.bind(mainMod .. " + P", hl.dsp.exec_cmd(vars.wallpaper))
 
 hl.bind(mainMod .. " + V", hl.dsp.exec_cmd(vars.clipboard))
 
+-- Emoji
+--
+hl.bind(mainMod .. " + I", hl.dsp.exec_cmd(vars.emoji))
+
 -- Focus Movement
 hl.bind(altMod .. " + H", hl.dsp.focus({ direction = "left" }))
 hl.bind(altMod .. " + J", hl.dsp.focus({ direction = "down" }))

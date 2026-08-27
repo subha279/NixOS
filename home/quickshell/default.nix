@@ -1,18 +1,97 @@
 { pkgs, ... }:
 
-{
-  # Quickshell
+let
+  emojiSource = pkgs.fetchurl {
+    url = "https://www.unicode.org/Public/17.0.0/emoji/emoji-test.txt";
+    hash = "sha256-HYqUT4jXlS9+98UWf+88Z5lbyuJFQ5SXECMbA6IBrNo=";
+  };
 
+  emojiDatabase =
+    pkgs.runCommand "aurora-emoji-database"
+      {
+        nativeBuildInputs = [ pkgs.python3 ];
+      }
+      ''
+        python3 - "${emojiSource}" "$out" <<'PY'
+        import json
+        import re
+        import sys
+
+        source = sys.argv[1]
+        output = sys.argv[2]
+
+        items = []
+        group = ""
+        subgroup = ""
+
+        with open(source, encoding="utf-8") as f:
+            for line in f:
+                line = line.rstrip()
+
+                if line.startswith("# group:"):
+                    group = line.split(":", 1)[1].strip()
+                    continue
+
+                if line.startswith("# subgroup:"):
+                    subgroup = line.split(":", 1)[1].strip()
+                    continue
+
+                if not line or line.startswith("#"):
+                    continue
+
+                match = re.match(
+                    r"^([0-9A-F ]+);\s+fully-qualified\s+#\s+(\S+)\s+(.+)$",
+                    line
+                )
+
+                if not match:
+                    continue
+
+                emoji = "".join(
+                    chr(int(cp, 16))
+                    for cp in match.group(1).split()
+                )
+
+                items.append({
+                    "emoji": emoji,
+                    "name": match.group(3).strip().lower(),
+                    "group": group.lower(),
+                    "subgroup": subgroup.lower(),
+                })
+
+        with open(output, "w", encoding="utf-8") as f:
+            json.dump(
+                items,
+                f,
+                ensure_ascii=False,
+                separators=(",", ":")
+            )
+        PY
+      '';
+
+  quickshellConfig = pkgs.runCommand "aurora-quickshell-config" { } ''
+    mkdir -p "$out"
+
+    cp -r ${./config}/. "$out/"
+
+    chmod -R u+w "$out"
+
+    mkdir -p "$out/assets"
+
+    cp ${emojiDatabase} "$out/assets/emoji.json"
+
+    chmod -R u-w "$out"
+  '';
+in
+{
   home.packages = with pkgs; [
     quickshell
-
-    # notify-send.
     libnotify
+    wtype
+    wl-clipboard
   ];
 
-  xdg.configFile."quickshell".source = ./config;
-
-  # D-Bus Activation
+  xdg.configFile."quickshell".source = quickshellConfig;
 
   xdg.dataFile."dbus-1/services/org.freedesktop.Notifications.service".text = ''
     [D-BUS Service]
@@ -20,13 +99,6 @@
     Exec=${pkgs.quickshell}/bin/qs
     SystemdService=quickshell.service
   '';
-
-  # Applet notifications
-  #
-  # nm-applet and blueman-applet run only as the NetworkManager secret agent
-  # and the Bluetooth pairing agent. Tray.qml hides their icons and the bar
-  # draws its own indicators, but they still raised their own popups -- which
-  # is why "Wi-Fi off" and "Connection Established" appeared together.
 
   dconf.settings = {
     "org/gnome/nm-applet" = {
@@ -41,13 +113,10 @@
     };
   };
 
-  # Service
-
   systemd.user.services.quickshell = {
     Unit = {
       Description = "Quickshell desktop shell and notification daemon";
 
-      # Tie the shell to the graphical session.
       PartOf = [ "graphical-session.target" ];
 
       After = [
@@ -57,8 +126,6 @@
 
       Requires = [ "dbus.socket" ];
 
-      # Refuse to start before the compositor has exported WAYLAND_DISPLAY.
-      # Starting early is what turned Restart=on-failure into a crash loop.
       ConditionEnvironment = "WAYLAND_DISPLAY";
     };
 
@@ -71,7 +138,6 @@
 
       RestartSec = 2;
 
-      # Do not give up permanently after a few early failures.
       StartLimitBurst = 8;
 
       Slice = "session.slice";

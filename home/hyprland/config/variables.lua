@@ -21,7 +21,7 @@ M.guieditor = "zeditor"
 
 M.note = "obsidian"
 
--- Quickshell owns the launcher, wallpaper picker, clipboard and the colorscheme picker.
+-- Quickshell owns the launcher, wallpaper picker, clipboard, emoji picker and the colorscheme picker.
 M.menu = "qs ipc call launcher toggle"
 
 M.colorscheme = "qs ipc call theme toggle"
@@ -29,6 +29,8 @@ M.colorscheme = "qs ipc call theme toggle"
 M.wallpaper = "qs ipc call wallpaper toggle"
 
 M.clipboard = "qs ipc call clipboard toggle"
+
+M.emoji = "qs ipc call emoji toggle"
 
 -- Screenshot
 

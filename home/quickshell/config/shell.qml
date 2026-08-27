@@ -22,4 +22,5 @@ Scope {
     WallpaperPicker {}
     ThemePicker {}
     Clipboard {}
+    EmojiPicker {}
 }

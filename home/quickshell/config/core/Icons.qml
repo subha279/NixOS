@@ -197,6 +197,7 @@ QtObject {
     readonly property string search: "\udb80\udf49"
     readonly property string clipboard: "\udb80\udd47"
     readonly property string trash: "\udb80\uddb4"
+    readonly property string emoji: "\uf118"
 
     // Device classes (Bluetooth / battery peripherals)
 
