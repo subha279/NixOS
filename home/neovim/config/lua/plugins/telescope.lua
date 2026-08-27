@@ -188,8 +188,25 @@ telescope.setup({
 
 	-- Extensions
 
-	extensions = {},
+	extensions = {
+		fzf = {
+			fuzzy = true,
+
+			override_generic_sorter = true,
+			override_file_sorter = true,
+
+			-- Matches the ignorecase + smartcase pair in core/options.lua.
+			case_mode = "smart_case",
+		},
+	},
 })
+
+-- Compiled sorter.
+--
+-- Replaces Telescope's pure-Lua sorter, which is what makes typing in a picker
+-- feel heavy once the list is large. pcall'd so a missing or unbuilt extension
+-- degrades to the built-in sorter rather than breaking every picker.
+pcall(telescope.load_extension, "fzf")
 
 -- Keymaps
 
