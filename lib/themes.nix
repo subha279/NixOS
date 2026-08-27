@@ -17,8 +17,22 @@
         package = "inter";
       };
 
+      # NOTE the un-spaced "JetBrainsMono".
+      #
+      # Nerd Fonts name patched families "<FontName> Nerd Font [Mono|Propo]" using
+      # the font's own un-spaced name, so this family is "JetBrainsMono Nerd Font
+      # Mono". "JetBrains Mono Nerd Font", which is what this said, is not a real
+      # family at all: every consumer -- kitty's font_family, stylix's monospace,
+      # Theme.fontMono in the shell -- was handing that string to fontconfig and
+      # getting whatever approximate match it decided on, which is silent and not
+      # guaranteed to be this font.
+      #
+      # The Mono ("NFM") variant is the one to use here: its glyphs are confined to
+      # a single cell, which is what a terminal needs and what makes icon widths
+      # predictable in the shell. The plain "Nerd Font" variant draws them 1.3-1.8
+      # cells wide.
       terminal = {
-        name = "JetBrains Mono Nerd Font";
+        name = "JetBrainsMono Nerd Font Mono";
         package = "nerd-fonts.jetbrains-mono";
       };
 

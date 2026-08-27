@@ -334,7 +334,24 @@ QtObject {
 
     readonly property string fontFamily: fonts.interface || "Inter"
     readonly property string fontMono: fonts.terminal || "JetBrainsMono Nerd Font Mono"
-    readonly property string iconFont: "JetBrainsMono Nerd Font Mono"
+
+    // The family that actually contains the Nerd Font glyphs.
+    //
+    // Derived from the theme rather than hardcoded, so it cannot drift from
+    // fonts.terminal in lib/themes.nix the way it had (this file said
+    // "JetBrainsMono Nerd Font Mono" while themes.nix said "JetBrains Mono Nerd
+    // Font", and only one of those is a real family).
+    readonly property string iconFont: fonts.terminal || "JetBrainsMono Nerd Font Mono"
+
+    // Emoji, which live in a colour font and must not be requested from the UI or
+    // icon families. Only NativeRendering draws colour glyphs correctly.
+    readonly property string emojiFont: fonts.emoji || "Noto Color Emoji"
+
+    // For labels that mix prose and glyphs in one string: prose family first,
+    // icon family as an explicit fallback for the glyph codepoints. Qt resolves
+    // per-character down this list, so it beats relying on fontconfig's global
+    // fallback chain to guess.
+    readonly property var textFamilies: [fontFamily, iconFont]
 
     // Popup Geometry
 
