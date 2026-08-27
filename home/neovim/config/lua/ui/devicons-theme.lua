@@ -55,8 +55,14 @@ function M.setup()
 	}
 
 	-- Apply colors to every registered icon
+	--
+	-- Collected and sorted before assigning, because the palette is handed out by
+	-- position: pairs() gives no order guarantee, so walking the icon table
+	-- directly dealt a different colour to each filetype on every launch. Sorting
+	-- by group name makes the result stable across restarts, and stable between
+	-- theme switches, without pinning a colour per filetype by hand.
 
-	local index = 1
+	local group_names = {}
 
 	for name, icon in pairs(icons) do
 		if type(icon) == "table" then
@@ -70,16 +76,24 @@ function M.setup()
 			end
 
 			if group_name then
-				vim.api.nvim_set_hl(0, group_name, {
-					fg = palette[index],
-				})
-
-				index = index + 1
-
-				if index > #palette then
-					index = 1
-				end
+				group_names[#group_names + 1] = group_name
 			end
+		end
+	end
+
+	table.sort(group_names)
+
+	local index = 1
+
+	for _, group_name in ipairs(group_names) do
+		vim.api.nvim_set_hl(0, group_name, {
+			fg = palette[index],
+		})
+
+		index = index + 1
+
+		if index > #palette then
+			index = 1
 		end
 	end
 
