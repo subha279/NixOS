@@ -570,16 +570,6 @@ Singleton {
         wifiListProc.running = true;
     }
 
-    // What the periodic poll actually needs.
-    //
-    // The bar module shows one glyph derived from link state, so with the popup
-    // closed only deviceProc is worth running. The other three exist for the
-    // popup's list: the scan (`nmcli device wifi list`) is by far the most
-    // expensive of the four, and saved profiles only change through actions this
-    // service performs itself -- which already call refresh() on completion.
-    //
-    // This was four spawns every 10s regardless, around 35k processes a day.
-    // Closed, it is now one.
     function refreshLink() {
         deviceProc.running = false;
         deviceProc.running = true;

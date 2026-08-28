@@ -37,16 +37,6 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 	end,
 })
 
--- Remove trailing whitespace
---
--- Skipped for filetypes where trailing space is meaningful or expected:
--- markdown treats two trailing spaces as a hard line break, so stripping them
--- silently reflowed documents on save.
---
--- Also skipped for very large buffers. The substitute walks the whole file on
--- every write, which is fine for source but not for a multi-megabyte log or
--- dump that snacks.bigfile has already put into a stripped-down mode.
-
 local keep_trailing_whitespace = {
 	markdown = true,
 	text = true,

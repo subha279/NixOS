@@ -16,8 +16,6 @@ PanelWindow {
     anchors.top: true
     anchors.right: true
 
-    // Reduced by exactly toastGutter, because the gutter added below carries
-    // the shadow. The visible card therefore stays in the same place as before.
     margins.top: 40
     margins.right: 6
 
@@ -25,19 +23,13 @@ PanelWindow {
 
     readonly property int toastWidth: 356
 
-    // Transparent room around each card for its drop shadow. Both the wrapper
-    // and the card clip, so the shadow cannot be drawn past their edges.
     readonly property int toastGutter: 8
 
-    // Adjacent gutters already supply the visual gap between cards.
     readonly property int toastSpacing: 0
     readonly property int maxHeight: 640
 
     implicitWidth: root.toastWidth + root.toastGutter * 2 + 14
 
-    // Fixed on purpose. Binding this to the column made the layer-shell surface
-    // resize on every animation frame, which is what caused the tearing and
-    // jumping. The mask below already limits input to the actual cards.
     implicitHeight: root.maxHeight
 
     color: "transparent"
@@ -67,11 +59,6 @@ PanelWindow {
 
         spacing: root.toastSpacing
 
-        // Cards glide when the stack reflows instead of snapping to a new
-        // position, which is what looked broken when two arrived at once.
-        //
-        // Positioners support add/move/populate only. "displaced" belongs to
-        // ListView/GridView and is rejected here; move covers the reflow.
         move: Transition {
             NumberAnimation {
                 property: "y"
@@ -252,14 +239,6 @@ PanelWindow {
                     }
                 }
 
-                // Lifetime
-                //
-                // 250ms rather than 100ms: this only decrements a countdown that
-                // nothing displays, so the extra granularity bought nothing and
-                // cost three wakeups a second per visible toast. Default lifetime
-                // is 3500ms, so the worst-case error is a toast lasting 250ms
-                // longer than asked.
-
                 Timer {
                     id: tick
 
@@ -275,10 +254,6 @@ PanelWindow {
                             wrapper.hide();
                     }
                 }
-
-                // Floating shadow. A sibling, because the card clips its own
-                // children; it slides with the card so the two never detach
-                // during the exit animation.
 
                 Item {
                     anchors.fill: card
@@ -319,9 +294,6 @@ PanelWindow {
 
                     clip: true
 
-                    // Frosted, not filled. Hyprland blurs the
-                    // aurora-notifications layer (layerules.lua); Glass is what
-                    // lets that blur through.
                     color: "transparent"
 
                     border.width: Core.Theme.borderWidth

@@ -151,20 +151,6 @@ Singleton {
 
     onLevelChanged: Core.OsdController.show("brightness", root.fraction, false)
 
-    // Timers
-
-    // Adaptive polling.
-    //
-    // This was a flat 100ms, i.e. ten sysfs reads a second for the entire
-    // session, to catch brightness changed from outside the shell -- the
-    // XF86MonBrightness keys run brightnessctl directly, so a poll is the only
-    // way we hear about it.
-    //
-    // Brightness changes arrive in bursts (you hold the key), so the fast rate is
-    // only needed for the length of a burst. Idle drops to 400ms, which is still
-    // well inside "the OSD appeared immediately" for a single tap, and any
-    // observed change switches to 100ms so a held key tracks as smoothly as
-    // before. Steady-state wakeups drop by 60%.
     property bool interacting: false
 
     function markInteraction() {

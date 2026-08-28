@@ -47,17 +47,7 @@ in
     cores = 0;
     max-jobs = "auto";
 
-    # Deliberately NOT auto-optimise-store: that hardlinks during every build,
-    # taxing the thing you are waiting on. nix.optimise below does the same work
-    # on a schedule instead.
   };
-
-  # Store hygiene
-  #
-  # Neither of these existed, so nothing ever reclaimed space: every rebuild
-  # added a generation and kept it forever. That grows /nix/store without bound
-  # and, because each generation is a GRUB menu entry, lengthens the boot menu
-  # too (see boot.loader.grub.configurationLimit in modules/boot).
 
   nix.gc = {
     automatic = true;
@@ -70,8 +60,6 @@ in
     randomizedDelaySec = "30min";
   };
 
-  # Hardlinks duplicate files in the store. The theme generator alone writes 28
-  # files per rebuild (4 formats x 7 themes), most unchanged between generations.
   nix.optimise = {
     automatic = true;
 

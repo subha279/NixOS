@@ -27,10 +27,6 @@ telescope.setup({
 			},
 		},
 
-		-- Telescope sets winblend on the windows it creates, so the global
-		-- opt.winblend in core/options.lua never reaches it. Matches
-		-- global.ui.editorFloatBlend, like every other float.
-
 		winblend = 12,
 
 		-- Borders
@@ -201,11 +197,6 @@ telescope.setup({
 	},
 })
 
--- Compiled sorter.
---
--- Replaces Telescope's pure-Lua sorter, which is what makes typing in a picker
--- feel heavy once the list is large. pcall'd so a missing or unbuilt extension
--- degrades to the built-in sorter rather than breaking every picker.
 pcall(telescope.load_extension, "fzf")
 
 -- Keymaps

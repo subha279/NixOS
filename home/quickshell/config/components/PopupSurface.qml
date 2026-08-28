@@ -38,19 +38,6 @@ PanelWindow {
 
     exclusionMode: ExclusionMode.Ignore
 
-    // Only mapped while actually on screen.
-    //
-    // This was `visible: true`, which left all six PopupSurface windows
-    // (network, bluetooth, battery, audio, calendar, notifications) mapped as
-    // full-width WlrLayer.Overlay surfaces for the entire session. layerules.lua
-    // matches namespace ^aurora-popup$ with blur = true, so the compositor was
-    // re-blurring six permanently-mapped overlays every frame in order to
-    // display nothing -- at 180Hz that is the shell's largest idle GPU cost.
-    //
-    // LauncherSurface and Notifications already gate their windows this way.
-    //
-    // Tracks visual.opacity rather than root.open alone so the close animation
-    // finishes playing before the surface is unmapped.
     visible: root.open || visual.opacity > 0.01
 
     WlrLayershell.layer: WlrLayer.Overlay

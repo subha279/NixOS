@@ -30,9 +30,6 @@
 
       telescope-nvim
 
-      # Compiled sorter. Telescope's default sorter is pure Lua and is the
-      # bottleneck once a picker holds more than a few thousand entries, which
-      # find_files and live_grep hit easily in a large repo.
       telescope-fzf-native-nvim
 
       plenary-nvim

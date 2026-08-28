@@ -292,10 +292,6 @@ Singleton {
         root.syncDeviceNotifications();
     }
 
-    // Connecting a paired device neither adds nor removes it, so allDevices
-    // never changes and its handler never ran -- that is why connect and
-    // disconnect were silent. Reading every device's connected flag here makes
-    // QML re-evaluate this string on any state change.
     readonly property string connectedKey: {
         const parts = [];
 
@@ -311,18 +307,6 @@ Singleton {
         root.syncDeviceNotifications();
     }
 
-    // Safety-net rebuild.
-    //
-    // The real triggers are reactive: onAllDevicesChanged covers devices
-    // appearing and disappearing, and onConnectedKeyChanged covers connect and
-    // disconnect. This timer exists only for values those two cannot observe,
-    // chiefly a peripheral's battery percentage ticking down.
-    //
-    // It used to run every 3s even with the popup shut, rebuilding and re-sorting
-    // the whole ListModel to update a list nothing was looking at. fastPoll is
-    // bound to "the bluetooth popup is open" by Bluetooth.qml, so closed now
-    // means 30s -- ten times fewer rebuilds for information that is not on
-    // screen, with no loss of responsiveness when it is.
     property Timer syncTimer: Timer {
         interval: root.fastPoll ? 800 : 30000
         running: true
