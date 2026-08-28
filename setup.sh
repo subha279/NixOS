@@ -2526,6 +2526,9 @@ CI_DEST=""
 CI_PARTITIONER=""
 CI_MKFS_FAT=""
 
+# Set while install-time swap is active, so it can be torn down on any exit.
+CI_SWAPFILE=""
+
 # The ISO does not necessarily enable flakes, and this repository only turns
 # them on for the system it installs.
 CI_NIX_FLAGS=(--extra-experimental-features "nix-command flakes")
@@ -2559,6 +2562,36 @@ ci_run() {
 # resolved up front. Where a tool has more than one common name, or where two
 # different tools would do, the alternative is accepted rather than demanded,
 # so a stock installer ISO needs nothing installed.
+# Can we reach the binary cache?
+#
+# Checked explicitly because the alternative is discovering it as a wall of nix
+# download errors after the disk has already been repartitioned.
+ci_check_network() {
+  local ok=0
+
+  if command -v curl >/dev/null 2>&1; then
+    curl -fsS --max-time 12 -o /dev/null https://cache.nixos.org/nix-cache-info 2>/dev/null && ok=1
+  elif command -v ping >/dev/null 2>&1; then
+    ping -c1 -W3 cache.nixos.org >/dev/null 2>&1 && ok=1
+  else
+    v_info "neither curl nor ping available; connectivity not tested"
+    return 0
+  fi
+
+  if [[ "$ok" -eq 1 ]]; then
+    v_ok "cache.nixos.org reachable"
+    return 0
+  fi
+
+  v_fail "cannot reach cache.nixos.org"
+  warning "This install downloads almost everything; it cannot run offline."
+  info "Wired is usually automatic. If not:  sudo dhcpcd"
+  info "Wi-Fi, easiest:  nmcli device wifi connect <SSID> password <password>"
+  info "Wi-Fi, fallback: sudo systemctl start wpa_supplicant"
+  info "                 then wpa_cli -i <iface>"
+  return 1
+}
+
 ci_preflight() {
   section "Preflight"
 
@@ -2624,6 +2657,20 @@ ci_preflight() {
     v_ok "git present"
   else
     v_info "git absent; the repository must already be on disk"
+  fi
+
+  # Reported rather than gated. The writable half of the ISO's /nix/store is a
+  # tmpfs in RAM, so this number is what the build has to fit in until swap is
+  # added on the target after mounting.
+  local ram_kb
+  ram_kb="$(awk '/^MemTotal:/{print $2}' /proc/meminfo 2>/dev/null || printf 0)"
+  if [[ "$ram_kb" -gt 0 ]]; then
+    v_info "RAM $((ram_kb / 1024 / 1024)) GiB; the ISO store is RAM-backed until swap is added"
+  fi
+
+  if ! ci_check_network; then
+    [[ "$CI_DRY_RUN" -eq 1 ]] && { warning "Dry run continues anyway."; return 0; }
+    return 1
   fi
 
   success "Toolchain complete; nothing needs installing."
@@ -2884,6 +2931,76 @@ ci_mount() {
   fi
 
   success "Mounted."
+}
+
+# Install-time swap and scratch space on the target.
+#
+# The writable layer of the ISO's /nix/store is a tmpfs, so every path this
+# build downloads or produces is held in RAM until nixos-install copies it to
+# the target. A closure this size, Hyprland and Quickshell and Neovim and
+# Stylix and the font set, is a well known way to run a live installer out of
+# memory partway through.
+#
+# Swap on the freshly mounted target lets that tmpfs spill to disk instead.
+# Both the swapfile and the scratch directory exist only for the install and
+# are removed afterwards, so hardware-configuration.nix keeps
+# swapDevices = [ ] and nothing is left behind.
+ci_setup_swap() {
+  section "Install-time swap"
+
+  if [[ "$CI_DRY_RUN" -eq 1 ]]; then
+    run_cmd "fallocate + mkswap + swapon $CI_TARGET/.setup-swapfile"
+    run_cmd "TMPDIR=$CI_TARGET/.setup-tmp"
+    info "Both removed again once the install finishes."
+    return 0
+  fi
+
+  export TMPDIR="$CI_TARGET/.setup-tmp"
+  mkdir -p "$TMPDIR"
+
+  local avail_kb size_g
+  avail_kb="$(df -Pk "$CI_TARGET" | awk 'NR==2{print $4}')"
+  size_g=$((avail_kb / 1024 / 1024 / 4))
+  ((size_g > 8)) && size_g=8
+
+  if ((size_g < 2)); then
+    v_info "too little free space for install-time swap; continuing without it"
+    return 0
+  fi
+
+  local f="$CI_TARGET/.setup-swapfile"
+
+  if ! fallocate -l "${size_g}G" "$f" 2>/dev/null; then
+    if ! dd if=/dev/zero of="$f" bs=1M count=$((size_g * 1024)) status=none 2>/dev/null; then
+      v_info "could not create a swapfile; continuing without it"
+      rm -f "$f"
+      return 0
+    fi
+  fi
+
+  chmod 600 "$f"
+
+  if mkswap "$f" >/dev/null 2>&1 && swapon "$f" 2>/dev/null; then
+    CI_SWAPFILE="$f"
+    success "${size_g} GiB install-time swap active, scratch space on the target."
+  else
+    v_info "could not enable swap; continuing without it"
+    rm -f "$f"
+  fi
+}
+
+ci_teardown_swap() {
+  if [[ -n "$CI_SWAPFILE" ]]; then
+    swapoff "$CI_SWAPFILE" 2>/dev/null || true
+    rm -f "$CI_SWAPFILE"
+    CI_SWAPFILE=""
+    info "Install-time swap removed."
+  fi
+
+  if [[ -n "${TMPDIR:-}" && "$TMPDIR" == "$CI_TARGET/.setup-tmp" ]]; then
+    rm -rf "$TMPDIR" 2>/dev/null || true
+    unset TMPDIR
+  fi
 }
 
 ci_place_repo() {
@@ -3364,6 +3481,7 @@ ci_final_verify() {
 
 ci_on_error() {
   echo
+  ci_teardown_swap || true
   error "Clean installation stopped at line $1."
   warning "The target is left mounted at $CI_TARGET so it can be inspected."
   warning "Nothing was rebooted and no bootloader claim has been made."
@@ -3385,7 +3503,15 @@ clean_install() {
     warning "Dry run. Detection and planning only; nothing is written."
   else
     ci_require_live
-    [[ "$(id -u)" -eq 0 ]] || die "Clean installation must run as root inside the installer."
+
+    # The graphical ISO logs in as an unprivileged user, so this is a normal
+    # thing to hit rather than a mistake. Say what to do about it.
+    if [[ "$(id -u)" -ne 0 ]]; then
+      error "A clean installation has to run as root."
+      info "Re-run it as:  sudo ./setup.sh"
+      die "Not running as root."
+    fi
+
     trap 'ci_on_error $LINENO' ERR
   fi
 
@@ -3407,9 +3533,11 @@ clean_install() {
     ci_partition || return 1
     ci_format || return 1
     ci_mount || return 1
+    ci_setup_swap
     ci_place_repo || return 1
   else
     info "Would partition, format and mount $CI_DISK."
+    ci_setup_swap
     info "Would place the repository at $CI_DEST."
   fi
 
@@ -3443,6 +3571,11 @@ clean_install() {
   ci_validate_flake || return 1
   ci_build_system || return 1
   ci_install || return 1
+
+  # Nothing after this point needs the extra memory, and leaving a swapfile on
+  # a system whose configuration declares no swap would be a surprise.
+  ci_teardown_swap
+
   ci_fix_ownership || return 1
   ci_set_password || true
 
