@@ -11,6 +11,14 @@
       # Install GRUB to the UEFI fallback path:
       # /EFI/BOOT/BOOTX64.EFI
       efiInstallAsRemovable = true;
+
+      # Cap the generation list.
+      #
+      # Unbounded, every rebuild adds a menu entry permanently: GRUB has to read
+      # and render the whole list before the timeout, and it becomes unusable as a
+      # recovery tool long before that. Older generations still exist and are
+      # still bootable via nixos-rebuild; they just stop being offered here.
+      configurationLimit = 10;
     };
 
     # Don't depend on UEFI NVRAM entries.

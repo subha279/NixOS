@@ -455,16 +455,58 @@ function M.setup()
 		return false
 	end
 
-	-- New nvim-treesitter API
+	-- nvim-treesitter main-branch API.
+	--
+	-- setup() here accepts install_dir and little else. It does NOT take the
+	-- highlight/indent tables the classic nvim-treesitter.configs API did, and it
+	-- ignores them silently rather than warning -- so passing them, as this used
+	-- to, enabled nothing at all. Highlighting has to be started per buffer.
+	--
+	-- Parsers come from pkgs.vimPlugins.nvim-treesitter.withAllGrammars in
+	-- home/neovim/default.nix, so they are already on the runtimepath and no
+	-- install_dir is needed.
 
-	treesitter.setup({
-		highlight = {
-			enable = true,
-		},
+	treesitter.setup()
 
-		indent = {
-			enable = true,
-		},
+	-- Start highlighting per buffer.
+	--
+	-- Without this, treesitter highlighting never runs: buffers fall back to Vim's
+	-- regex syntax engine, and every @* group defined in this file goes unused
+	-- (which also makes the theme's Treesitter colours invisible).
+	--
+	-- Guarded three ways so it is safe regardless of which nvim-treesitter API is
+	-- actually installed: it skips non-file buffers, skips buffers that already
+	-- have an active highlighter -- so it cannot double-attach if something else
+	-- started one -- and only starts when a parser for the language really exists,
+	-- leaving unsupported filetypes on regex syntax instead of erroring.
+
+	vim.api.nvim_create_autocmd("FileType", {
+		group = vim.api.nvim_create_augroup("AuroraTreesitterStart", {
+			clear = true,
+		}),
+
+		callback = function(event)
+			local buf = event.buf
+
+			if vim.bo[buf].buftype ~= "" then
+				return
+			end
+
+			local active = vim.treesitter.highlighter and vim.treesitter.highlighter.active
+
+			if active and active[buf] then
+				return
+			end
+
+			local lang = vim.treesitter.language.get_lang(event.match) or event.match
+
+			-- language.add() throws when no parser is available.
+			if not pcall(vim.treesitter.language.add, lang) then
+				return
+			end
+
+			pcall(vim.treesitter.start, buf, lang)
+		end,
 	})
 
 	apply_highlights()

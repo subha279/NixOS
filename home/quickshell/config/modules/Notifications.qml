@@ -253,11 +253,17 @@ PanelWindow {
                 }
 
                 // Lifetime
+                //
+                // 250ms rather than 100ms: this only decrements a countdown that
+                // nothing displays, so the extra granularity bought nothing and
+                // cost three wakeups a second per visible toast. Default lifetime
+                // is 3500ms, so the worst-case error is a toast lasting 250ms
+                // longer than asked.
 
                 Timer {
                     id: tick
 
-                    interval: 100
+                    interval: 250
                     repeat: true
 
                     running: wrapper.lifetime > 0 && !cardHover.hovered && !wrapper.dismissing

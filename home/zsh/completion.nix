@@ -22,6 +22,18 @@
 
     initContent = ''
       # --------------------------------------------------
+      # Syntax highlighting cost ceiling
+      # --------------------------------------------------
+      #
+      # zsh-syntax-highlighting re-highlights the whole buffer on every keystroke,
+      # so editing a very long line -- a pasted command, a long here-string --
+      # gets visibly laggy. Past a few hundred characters the colouring is not
+      # telling you anything useful, so stop doing it.
+
+      ZSH_HIGHLIGHT_MAXLENGTH=512
+
+
+      # --------------------------------------------------
       # Case-insensitive completion
       # --------------------------------------------------
 

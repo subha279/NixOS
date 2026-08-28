@@ -311,8 +311,20 @@ Singleton {
         root.syncDeviceNotifications();
     }
 
+    // Safety-net rebuild.
+    //
+    // The real triggers are reactive: onAllDevicesChanged covers devices
+    // appearing and disappearing, and onConnectedKeyChanged covers connect and
+    // disconnect. This timer exists only for values those two cannot observe,
+    // chiefly a peripheral's battery percentage ticking down.
+    //
+    // It used to run every 3s even with the popup shut, rebuilding and re-sorting
+    // the whole ListModel to update a list nothing was looking at. fastPoll is
+    // bound to "the bluetooth popup is open" by Bluetooth.qml, so closed now
+    // means 30s -- ten times fewer rebuilds for information that is not on
+    // screen, with no loss of responsiveness when it is.
     property Timer syncTimer: Timer {
-        interval: root.fastPoll ? 800 : 3000
+        interval: root.fastPoll ? 800 : 30000
         running: true
         repeat: true
         triggeredOnStart: true

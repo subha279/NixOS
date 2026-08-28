@@ -51,25 +51,50 @@ function M.setup()
 		clear = true,
 	})
 
+	-- Debounced, and no longer on InsertLeave.
+	--
+	-- try_lint() spawns a linter process per matching filetype -- eslint_d,
+	-- shellcheck, ruff. Firing on InsertLeave meant a spawn every single time you
+	-- left insert mode, which in normal editing is constant: dozens of processes
+	-- a minute, each one able to stall the UI briefly while it starts.
+	--
+	-- Save and open are the points where linting is actually wanted. The debounce
+	-- then collapses bursts, since BufWritePost fires per buffer and :wa on a
+	-- handful of files would otherwise start a linter for each at once.
+	local function lint_now()
+		-- Only lint normal file buffers.
+		if vim.bo.buftype ~= "" then
+			return
+		end
+
+		if not vim.api.nvim_buf_is_valid(0) then
+			return
+		end
+
+		lint.try_lint()
+	end
+
+	-- One reusable timer, restarted on each event, rather than a new handle per
+	-- event that would need closing.
+	local debounce = vim.uv.new_timer()
+
+	local function schedule_lint()
+		if not debounce then
+			lint_now()
+			return
+		end
+
+		debounce:stop()
+		debounce:start(120, 0, vim.schedule_wrap(lint_now))
+	end
+
 	vim.api.nvim_create_autocmd({
 		"BufWritePost",
 		"BufReadPost",
-		"InsertLeave",
 	}, {
 		group = group,
 
-		callback = function()
-			-- Only lint normal file buffers.
-			if vim.bo.buftype ~= "" then
-				return
-			end
-
-			if not vim.api.nvim_buf_is_valid(0) then
-				return
-			end
-
-			lint.try_lint()
-		end,
+		callback = schedule_lint,
 	})
 
 	-- Manual lint

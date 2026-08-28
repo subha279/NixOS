@@ -47,8 +47,13 @@ Singleton {
         const value = Math.max(0, Math.min(100, Math.round(percent)));
 
         // Only assign on a real change.
-        if (value !== root.level)
+        if (value !== root.level) {
             root.level = value;
+
+            // Something moved the backlight, so poll fast for a moment in case
+            // this is the start of a burst (a held brightness key).
+            root.markInteraction();
+        }
     }
 
     // One-shot discovery
@@ -113,6 +118,9 @@ Singleton {
 
         root.ignoreReadsUntil = Date.now() + 120;
 
+        // A local change is interaction by definition.
+        root.markInteraction();
+
         if (clamped !== root.level) {
             root.level = clamped;
         } else {
@@ -145,9 +153,35 @@ Singleton {
 
     // Timers
 
-    // 100ms of a plain file read.
+    // Adaptive polling.
+    //
+    // This was a flat 100ms, i.e. ten sysfs reads a second for the entire
+    // session, to catch brightness changed from outside the shell -- the
+    // XF86MonBrightness keys run brightnessctl directly, so a poll is the only
+    // way we hear about it.
+    //
+    // Brightness changes arrive in bursts (you hold the key), so the fast rate is
+    // only needed for the length of a burst. Idle drops to 400ms, which is still
+    // well inside "the OSD appeared immediately" for a single tap, and any
+    // observed change switches to 100ms so a held key tracks as smoothly as
+    // before. Steady-state wakeups drop by 60%.
+    property bool interacting: false
+
+    function markInteraction() {
+        root.interacting = true;
+        root.interactionCooldown.restart();
+    }
+
+    property Timer interactionCooldown: Timer {
+        interval: 2500
+
+        repeat: false
+
+        onTriggered: root.interacting = false
+    }
+
     property Timer poll: Timer {
-        interval: 100
+        interval: root.interacting ? 100 : 400
 
         running: root.device !== ""
         repeat: true

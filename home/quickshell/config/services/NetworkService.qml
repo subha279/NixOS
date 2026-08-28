@@ -553,6 +553,9 @@ Singleton {
         Quickshell.execDetached(["nm-connection-editor"]);
     }
 
+    // Full refresh: link state, radio state, saved profiles, scan results.
+    //
+    // Four nmcli processes. Called after every queued action, and by rescan().
     function refresh() {
         deviceProc.running = false;
         deviceProc.running = true;
@@ -567,6 +570,21 @@ Singleton {
         wifiListProc.running = true;
     }
 
+    // What the periodic poll actually needs.
+    //
+    // The bar module shows one glyph derived from link state, so with the popup
+    // closed only deviceProc is worth running. The other three exist for the
+    // popup's list: the scan (`nmcli device wifi list`) is by far the most
+    // expensive of the four, and saved profiles only change through actions this
+    // service performs itself -- which already call refresh() on completion.
+    //
+    // This was four spawns every 10s regardless, around 35k processes a day.
+    // Closed, it is now one.
+    function refreshLink() {
+        deviceProc.running = false;
+        deviceProc.running = true;
+    }
+
     property Timer rescanTimer: Timer {
         interval: 2500
         repeat: false
@@ -578,6 +596,13 @@ Singleton {
         running: true
         repeat: true
         triggeredOnStart: true
-        onTriggered: root.refresh()
+
+        // fastPoll is bound to "the network popup is open" by Network.qml.
+        onTriggered: {
+            if (root.fastPoll)
+                root.refresh();
+            else
+                root.refreshLink();
+        }
     }
 }
