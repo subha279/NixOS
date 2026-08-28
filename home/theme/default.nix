@@ -578,47 +578,60 @@ let
       format = "[$symbol ]($style)"
 
 
+      # Linux distros are Font Logos (U+F300-F375); non-Linux systems are Devicons
+      # (U+E700-E8EF).
+      #
+      # Font Logos is the only family that carries a NixOS mark, and its glyphs are
+      # drawn as one set, so they share metrics. This block used to be three
+      # families deep -- most distros on Material Design, NixOS and a few others on
+      # Font Logos, Amazon on Font Awesome -- which meant the one symbol that
+      # actually renders on a given machine was rarely the same size as its
+      # neighbours. Font Logos has no Windows, Android or AWS mark, hence Devicons
+      # for those four.
+      #
+      # Note that none of this currently renders: `$os` is absent from the prompt
+      # `format` above, so the module is inert regardless of `disabled = false`.
       [os.symbols]
 
       NixOS = ""
 
-      Linux = "󰌽"
+      Linux = ""
 
-      Arch = "󰣇"
+      Arch = ""
 
-      Artix = "󰣇"
+      Artix = ""
 
-      Ubuntu = "󰕈"
+      Ubuntu = ""
 
-      Fedora = "󰣛"
+      Fedora = ""
 
-      Debian = "󰣚"
+      Debian = ""
 
-      Gentoo = "󰣨"
+      Gentoo = ""
 
       Manjaro = ""
 
-      Mint = "󰣭"
+      Mint = ""
 
       SUSE = ""
 
-      Raspbian = "󰐿"
+      Raspbian = ""
 
       Alpine = ""
 
-      Amazon = ""
+      Amazon = ""
 
       Android = ""
 
       CentOS = ""
 
-      Redhat = "󱄛"
+      Redhat = ""
 
-      RedHatEnterprise = "󱄛"
+      RedHatEnterprise = ""
 
       Macos = ""
 
-      Windows = "󰍲"
+      Windows = ""
 
 
       # ========================================================
@@ -651,24 +664,35 @@ let
 
       description = "Display symbol for remote Git server"
 
+      # All five glyphs are Material Design (U+F0001-F1AF0), deliberately.
+      #
+      # They used to be a mix: GitHub was Octicons U+F408, GitLab and Bitbucket
+      # were Font Awesome, and the generic arm was U+F7A1. Octicons and Font
+      # Awesome are drawn on different em boxes with different vertical bearings,
+      # so in a Nerd Font the GitHub mark sat visibly off the text baseline while
+      # the glyphs either side of it did not.
+      #
+      # U+F7A1 was worse than misaligned. F500-FD46 is the old Material Design
+      # block that Nerd Fonts v3 removed when those glyphs moved to F0001-F1AF0,
+      # so that arm was drawing a blank box.
       command = """
       GIT_REMOTE=$(git remote get-url origin 2>/dev/null)
 
       case "$GIT_REMOTE" in
           *github*)
-              echo ""
+              echo "󰊤"
               ;;
           *gitlab*)
-              echo ""
+              echo "󰮠"
               ;;
           *bitbucket*)
-              echo ""
+              echo "󰂨"
               ;;
           *git*)
-              echo ""
+              echo "󰊢"
               ;;
           *)
-              echo ""
+              echo "󰳏"
               ;;
       esac
       """
@@ -688,7 +712,7 @@ let
 
       [git_branch]
 
-      symbol = " "
+      symbol = "󰘬 "
 
       format = "[](purple)[ $symbol$branch ](bold bg bg:purple)[](purple) "
 
@@ -707,7 +731,7 @@ let
           git_dir=$(git rev-parse --path-format=absolute --git-dir 2>/dev/null)
 
           if [ "$common_dir" != "$git_dir" ]; then
-              echo "⛓"
+              echo "󰙅"
           fi
       fi
       """
@@ -748,7 +772,7 @@ let
 
       stashed = "[≡](bold purple)"
 
-      typechanged = "[󰜄](bold cyan)"
+      typechanged = "[~](bold cyan)"
 
 
       ahead = "[⇡''${count}](bold cyan)"
@@ -776,6 +800,27 @@ let
 
 
       # ========================================================
+      # LANGUAGE AND TOOL SYMBOLS
+      # ========================================================
+      #
+      # All Devicons (U+E700-E8EF).
+      #
+      # This run used to be five families: Devicons for node and rust, Seti-UI for
+      # go, php, kotlin, haskell, python and c, Font Awesome Extension for java,
+      # Font Logos for docker, and a literal 🥟 emoji for bun. The emoji was the
+      # worst of it -- it renders from Noto Color Emoji, not the terminal font, so
+      # it came out a different size and double width, and shifted everything after
+      # it on the line.
+      #
+      # Devicons carries every one of these, including bun, so the whole run can
+      # come from one source and share metrics.
+      #
+      # Abstract concepts stay on Material Design: `package` above is a category,
+      # not a product, and Devicons has no glyph for it.
+      # ========================================================
+
+
+      # ========================================================
       # NODE.JS
       # ========================================================
 
@@ -794,7 +839,7 @@ let
 
       [bun]
 
-      symbol = "🥟"
+      symbol = ""
 
       style = "bold orange"
 
@@ -812,7 +857,7 @@ let
 
       [c]
 
-      symbol = " "
+      symbol = " "
 
       style = "bold blue"
 
@@ -838,7 +883,7 @@ let
 
       [golang]
 
-      symbol = ""
+      symbol = ""
 
       style = "bold cyan"
 
@@ -855,7 +900,7 @@ let
 
       [php]
 
-      symbol = ""
+      symbol = ""
 
       style = "bold purple"
 
@@ -868,7 +913,7 @@ let
 
       [java]
 
-      symbol = " "
+      symbol = " "
 
       style = "bold red"
 
@@ -881,7 +926,7 @@ let
 
       [kotlin]
 
-      symbol = ""
+      symbol = ""
 
       style = "bold pink"
 
@@ -894,7 +939,7 @@ let
 
       [haskell]
 
-      symbol = ""
+      symbol = ""
 
       style = "bold purple"
 
@@ -907,7 +952,7 @@ let
 
       [python]
 
-      symbol = ""
+      symbol = ""
 
       style = "bold yellow"
 
@@ -920,7 +965,7 @@ let
 
       [docker_context]
 
-      symbol = ""
+      symbol = ""
 
       style = "bold cyan"
 

@@ -3,6 +3,24 @@ pragma Singleton
 import QtQuick
 
 // Icons
+//
+// Every glyph in this file is Material Design (U+F0001-F1AF0), and new ones must
+// be too.
+//
+// This is not pedantry. Nerd Fonts is a bundle of unrelated icon fonts, and each
+// source family was drawn on its own em box with its own vertical bearings. Two
+// glyphs from different families at the same pixelSize come out visibly different
+// sizes and sit on different baselines, which is what makes a bar look like the
+// icons were pasted in from somewhere else.
+//
+// The trailing comments are the Material Design codepoints. QML has no way to
+// write an astral-plane character directly, so they are surrogate pairs: for
+// codepoint C, high = 0xD800 + ((C - 0x10000) >> 10) and
+// low = 0xDC00 + ((C - 0x10000) & 0x3FF). Keep the comment, it is the only
+// readable form.
+//
+// Never use the U+F500-FD46 block. That was Material Design v1 in Nerd Fonts v2
+// and it was deleted in v3, so those codepoints now render as blank boxes.
 
 QtObject {
     // Network — Wi-Fi strength ramp
@@ -197,7 +215,11 @@ QtObject {
     readonly property string search: "\udb80\udf49"
     readonly property string clipboard: "\udb80\udd47"
     readonly property string trash: "\udb80\uddb4"
-    readonly property string emoji: "\uf118"
+
+    // Was the Font Awesome smiley at U+F118, the single glyph in this file that
+    // was not Material Design. Font Awesome is drawn on a different em box, so it
+    // rendered noticeably smaller than every other icon beside it in the bar.
+    readonly property string emoji: "\udb80\uddf2"        // F01F2
 
     // Device classes (Bluetooth / battery peripherals)
 

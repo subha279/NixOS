@@ -129,30 +129,30 @@ require("nvim-tree").setup({
 
 			glyphs = {
 				default = "󰈚",
-				symlink = "",
+				symlink = "󱅸",
 
 				folder = {
-					arrow_closed = "",
-					arrow_open = "",
+					arrow_closed = "󰅂",
+					arrow_open = "󰅀",
 
-					default = "",
-					open = "",
+					default = "󰉋",
+					open = "󰝰",
 
-					empty = "",
-					empty_open = "",
+					empty = "󰉖",
+					empty_open = "󰷏",
 
-					symlink = "",
-					symlink_open = "",
+					symlink = "󱉆",
+					symlink_open = "󱉆",
 				},
 
 				git = {
-					unstaged = "",
-					staged = "✓",
-					unmerged = "",
-					renamed = "➜",
-					untracked = "★",
-					deleted = "",
-					ignored = "◌",
+					unstaged = "󰧞",
+					staged = "󰄬",
+					unmerged = "󰘭",
+					renamed = "󰑕",
+					untracked = "󰓒",
+					deleted = "󰍷",
+					ignored = "󰝦",
 				},
 			},
 		},

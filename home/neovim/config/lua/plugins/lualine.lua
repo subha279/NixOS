@@ -377,7 +377,7 @@ local function build_config()
 					shorting_target = 24,
 					symbols = {
 						modified = " ●",
-						readonly = " ",
+						readonly = " 󰌾",
 						unnamed = "[No Name]",
 						newfile = "[New]",
 					},

@@ -100,8 +100,8 @@ opt.clipboard = "unnamedplus"
 opt.fillchars = {
 	eob = " ",
 	fold = " ",
-	foldopen = "",
-	foldclose = "",
+	foldopen = "󰅀",
+	foldclose = "󰅂",
 	foldsep = " ",
 }
 

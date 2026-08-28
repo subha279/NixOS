@@ -89,9 +89,9 @@ dashboard.section.header.val = {
 
 dashboard.section.buttons.val = {
 
-	dashboard.button("e", "    New File", "<cmd>ene<CR>"),
+	dashboard.button("e", "󰻭  󰅂  New File", "<cmd>ene<CR>"),
 
-	dashboard.button("q", "    Quit NVIM", "<cmd>qa<CR>"),
+	dashboard.button("q", "󰈆  󰅂  Quit NVIM", "<cmd>qa<CR>"),
 }
 
 -- Footer
