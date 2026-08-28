@@ -45,17 +45,12 @@ Components.PopupSurface {
             popup.dismiss(snapshot[i]);
     }
 
+    // Invoking an action closes the notification for us unless the sender marked
+    // it resident. This used to call dismiss() afterwards, which meant a second
+    // close on an already-destroyed object and a "Cannot close destroyed
+    // notification" critical from Quickshell on every single action press.
     function invoke(n, action) {
-        if (!n || !action)
-            return;
-        try {
-            if (typeof action.invoke === "function")
-                action.invoke();
-        } catch (e) {
-            // Some senders drop off the bus before we get here.
-        }
-
-        popup.dismiss(n);
+        Services.NotificationServer.invokeAction(n, action);
     }
 
     function copyText(text) {
@@ -69,29 +64,14 @@ Components.PopupSurface {
         }
     }
 
+    // Both of these live on the service so the toast overlay and this panel
+    // cannot disagree about what a notification is called or how urgent it is.
     function appLabel(n) {
-        if (!n)
-            return "";
-
-        if (n.appName && n.appName !== "")
-            return n.appName;
-
-        if (n.desktopEntry && n.desktopEntry !== "")
-            return n.desktopEntry;
-
-        return "Notification";
+        return Services.NotificationServer.appLabel(n);
     }
 
     function isCritical(n) {
-        if (!n)
-            return false;
-
-        // Urgency is an enum; 2 == Critical in the freedesktop spec.
-        try {
-            return Number(n.urgency) === 2;
-        } catch (e) {
-            return false;
-        }
+        return Services.NotificationServer.isCritical(n);
     }
 
     Process {
@@ -255,7 +235,9 @@ Components.PopupSurface {
 
                         width: list.width
 
-                        implicitHeight: noteLayout.implicitHeight + 20
+                        // The icon is a fixed 32 and can outrun a one-line body, so
+                        // the row has to be tall enough for whichever is bigger.
+                        implicitHeight: Math.max(noteLayout.implicitHeight, iconBox.height) + 20
                         height: implicitHeight
 
                         radius: Core.Theme.radiusRow
@@ -294,31 +276,123 @@ Components.PopupSurface {
                             opacity: popup.isCritical(noteRow.modelData) ? 1.0 : 0.55
                         }
 
+                        // Application icon or attached image.
+                        //
+                        // The centre used to render neither. Every avatar, album
+                        // cover and app icon the sender went to the trouble of
+                        // attaching was resolved by the toast and then thrown away
+                        // here, which is why history read as an undifferentiated
+                        // wall of text.
+                        Rectangle {
+                            id: iconBox
+
+                            anchors.left: parent.left
+                            anchors.top: parent.top
+
+                            anchors.leftMargin: 16
+                            anchors.topMargin: 10
+
+                            width: 32
+                            height: 32
+
+                            radius: 10
+
+                            color: Core.Theme.surfaceGlass
+
+                            readonly property string resolvedIcon: Services.NotificationServer.iconFor(noteRow.modelData)
+
+                            Image {
+                                id: noteIcon
+
+                                anchors.centerIn: parent
+
+                                width: 22
+                                height: 22
+
+                                source: iconBox.resolvedIcon
+
+                                visible: iconBox.resolvedIcon !== "" && status === Image.Ready
+
+                                asynchronous: true
+                                cache: true
+                                smooth: true
+                                mipmap: true
+
+                                fillMode: Image.PreserveAspectFit
+                            }
+
+                            Text {
+                                anchors.centerIn: parent
+
+                                visible: !noteIcon.visible
+
+                                text: Core.Icons.forApp(popup.appLabel(noteRow.modelData))
+
+                                font.family: Core.Theme.iconFont
+                                font.pixelSize: Core.Theme.iconSizeSmall
+
+                                color: Core.Theme.foregroundFaint
+                            }
+                        }
+
                         Column {
                             id: noteLayout
 
-                            anchors.left: parent.left
+                            anchors.left: iconBox.right
                             anchors.right: parent.right
                             anchors.top: parent.top
 
-                            anchors.leftMargin: 18
+                            anchors.leftMargin: 10
                             anchors.rightMargin: 34
                             anchors.topMargin: 10
 
                             spacing: 3
 
-                            Text {
+                            // App name, with how long ago it arrived.
+                            Item {
                                 width: parent.width
 
-                                text: popup.appLabel(noteRow.modelData).toUpperCase()
+                                height: appText.implicitHeight
 
-                                elide: Text.ElideRight
+                                Text {
+                                    id: appText
 
-                                font.family: Core.Theme.fontFamily
-                                font.pixelSize: Core.Theme.fontSizeSmall
-                                font.letterSpacing: 0.8
+                                    anchors.left: parent.left
+                                    anchors.right: ageText.left
+                                    anchors.rightMargin: 6
 
-                                color: Core.Theme.foregroundFaint
+                                    text: popup.appLabel(noteRow.modelData).toUpperCase()
+
+                                    elide: Text.ElideRight
+
+                                    font.family: Core.Theme.fontFamily
+                                    font.pixelSize: Core.Theme.fontSizeSmall
+                                    font.letterSpacing: 0.8
+
+                                    color: Core.Theme.foregroundFaint
+                                }
+
+                                // The notification spec has no timestamp, so this
+                                // comes from the arrival time the service records.
+                                Text {
+                                    id: ageText
+
+                                    anchors.right: parent.right
+                                    anchors.baseline: appText.baseline
+
+                                    // Reading ageTick is what makes this binding
+                                    // re-evaluate as the label goes stale.
+                                    text: {
+                                        const tick = Services.NotificationServer.ageTick;
+
+                                        return Services.NotificationServer.ageText(noteRow.modelData);
+                                    }
+
+                                    font.family: Core.Theme.fontMono
+                                    font.pixelSize: Core.Theme.fontSizeSmall
+
+                                    color: Core.Theme.foregroundFaint
+                                }
                             }
 
                             Text {
@@ -348,7 +422,19 @@ Components.PopupSurface {
                                 maximumLineCount: 3
                                 elide: Text.ElideRight
 
-                                textFormat: Text.PlainText
+                                // The server advertises body-markup and
+                                // body-hyperlinks, so senders may send <b> and
+                                // <a href>. This was PlainText while the toast left
+                                // textFormat at its default, so the same
+                                // notification rendered differently in the two
+                                // surfaces. Both are StyledText now.
+                                textFormat: Text.StyledText
+
+                                linkColor: Core.Theme.accent
+
+                                onLinkActivated: function (link) {
+                                    Quickshell.execDetached(["xdg-open", link]);
+                                }
 
                                 font.family: Core.Theme.fontFamily
                                 font.pixelSize: Core.Theme.fontSizeSmall
@@ -356,66 +442,17 @@ Components.PopupSurface {
                                 color: Core.Theme.foregroundMuted
                             }
 
-                            // Inline action buttons
-                            Row {
-                                spacing: 6
+                            // Named actions, action icons and the reply field.
+                            //
+                            // Shared with the toast overlay. Replaces a local chip
+                            // implementation that rendered action text only, never
+                            // action icons, and had no reply field at all.
+                            Components.NotificationActions {
+                                width: parent.width
 
-                                topPadding: 4
+                                chipHeight: 22
 
-                                visible: actionRepeater.count > 0
-
-                                Repeater {
-                                    id: actionRepeater
-
-                                    model: noteRow.modelData.actions ? noteRow.modelData.actions : []
-
-                                    delegate: Rectangle {
-                                        id: actionChip
-
-                                        required property var modelData
-
-                                        height: 22
-
-                                        width: chipText.implicitWidth + 18
-
-                                        radius: 11
-
-                                        color: chipMouse.containsMouse ? Core.Theme.surfaceGlassHover : Core.Theme.surfaceGlass
-
-                                        Behavior on color {
-                                            ColorAnimation {
-                                                duration: 120
-                                                easing.type: Easing.OutQuint
-                                            }
-                                        }
-
-                                        Text {
-                                            id: chipText
-
-                                            anchors.centerIn: parent
-
-                                            text: actionChip.modelData.text ? actionChip.modelData.text : "Open"
-
-                                            font.family: Core.Theme.fontFamily
-
-                                            font.pixelSize: Core.Theme.fontSizeSmall
-
-                                            color: Core.Theme.foreground
-                                        }
-
-                                        MouseArea {
-                                            id: chipMouse
-
-                                            anchors.fill: parent
-
-                                            hoverEnabled: true
-
-                                            cursorShape: Qt.PointingHandCursor
-
-                                            onClicked: popup.invoke(noteRow.modelData, actionChip.modelData)
-                                        }
-                                    }
-                                }
+                                notification: noteRow.modelData
                             }
                         }
 
