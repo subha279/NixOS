@@ -28,24 +28,12 @@ PanelWindow {
     readonly property int headerHeight: 46
     readonly property int separatorHeight: 1
 
-    // Geometry the card sizes itself from.
-    //
-    // Each launcher has to declare what its delegates actually measure, because
-    // the card height is computed from these and nothing reconciles them against
-    // the real content afterwards. A single rowHeight = 40 used to be assumed for
-    // every list, which was wrong for three of the five launchers: ThemePicker's
-    // rows are 56px, Clipboard's are 48px, and EmojiPicker's grid cells are 70px
-    // against a 65px derivation. At ten results ThemePicker's card came out 200px
-    // short, so a third of the list was only reachable by scrolling.
-    //
-    // rowHeight is delegate height PLUS the view's spacing. contentMargins is any
-    // padding the content view adds on top.
+    // Must match the delegate: height + the view spacing. The card is sized from
+    // this and nothing reconciles it afterwards, so a wrong value clips the list.
     property int rowHeight: 40
 
     property int contentMargins: 0
 
-    // Grid launchers: set cellHeight to pin it, or leave 0 to derive from the
-    // column width via cellAspect.
     property int cellHeight: 0
 
     property real cellAspect: 0.70
@@ -68,17 +56,8 @@ PanelWindow {
     property int liveSelectDelay: 200
     property bool vimNavigation: false
 
-    // Height of one row, whichever mode we are in.
     readonly property int rowExtent: root.columns > 1 ? root.gridCellHeight : root.rowHeight
 
-    // How many rows fit inside cardMaxHeight.
-    //
-    // Clamping the finished height against cardMaxHeight, as this used to, stops
-    // the card growing but leaves it ending mid-row: the wallpaper grid showed 3.2
-    // of 4 rows and the theme list 9.5 of 10, with the remainder sliced off
-    // horizontally. Clamping the row COUNT instead means the card always ends on a
-    // row boundary and the rest is reached by scrolling, which is what it looks
-    // like it is doing anyway.
     readonly property int fittableRows: Math.max(1, Math.floor((root.cardMaxHeight - root.headerHeight - root.separatorHeight - root.contentMargins) / root.rowExtent))
 
     readonly property int wantedRows: root.columns > 1 ? Math.max(1, Math.ceil(root.itemCount / root.columns)) : Math.max(1, root.itemCount)
@@ -197,10 +176,10 @@ PanelWindow {
 
     Behavior on reveal {
         NumberAnimation {
-            duration: root.open ? Core.Theme.durMedium : Core.Theme.durExitMedium
+            duration: root.open ? Core.Theme.durShort : Core.Theme.durExitShort
 
             easing.type: Easing.BezierSpline
-            easing.bezierCurve: root.open ? Core.Theme.easeDecelerate : Core.Theme.easeAccelerate
+            easing.bezierCurve: Core.Theme.easeStandard
         }
     }
 
@@ -244,37 +223,36 @@ PanelWindow {
 
             transformOrigin: Item.Center
 
-            scale: root.reveal > 0.001 ? 1.0 : 0.96
+            scale: root.reveal > 0.001 ? 1.0 : 0.98
 
-            y: root.reveal > 0.001 ? 0 : 12
+            y: root.reveal > 0.001 ? 0 : 6
 
             opacity: root.reveal
 
-            // Decelerate in, accelerate out. Was OutCubic both ways.
             Behavior on scale {
                 NumberAnimation {
-                    duration: root.open ? Core.Theme.durMedium : Core.Theme.durExitMedium
+                    duration: root.open ? Core.Theme.durShort : Core.Theme.durExitShort
 
                     easing.type: Easing.BezierSpline
-                    easing.bezierCurve: root.open ? Core.Theme.easeDecelerate : Core.Theme.easeAccelerate
+                    easing.bezierCurve: Core.Theme.easeStandard
                 }
             }
 
             Behavior on y {
                 NumberAnimation {
-                    duration: root.open ? Core.Theme.durMedium : Core.Theme.durExitMedium
+                    duration: root.open ? Core.Theme.durShort : Core.Theme.durExitShort
 
                     easing.type: Easing.BezierSpline
-                    easing.bezierCurve: root.open ? Core.Theme.easeDecelerate : Core.Theme.easeAccelerate
+                    easing.bezierCurve: Core.Theme.easeStandard
                 }
             }
 
             Behavior on opacity {
                 NumberAnimation {
-                    duration: root.open ? Core.Theme.durShort : Core.Theme.durExitShort
+                    duration: root.open ? Core.Theme.durInstant : Core.Theme.durExitShort
 
                     easing.type: Easing.BezierSpline
-                    easing.bezierCurve: root.open ? Core.Theme.easeDecelerate : Core.Theme.easeAccelerate
+                    easing.bezierCurve: Core.Theme.easeStandard
                 }
             }
 

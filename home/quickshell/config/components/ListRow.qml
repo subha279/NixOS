@@ -2,7 +2,6 @@ import QtQuick
 
 import "../core" as Core
 
-// ListRow
 
 Rectangle {
     id: root
@@ -20,7 +19,6 @@ Rectangle {
     property bool busy: false
     property bool dimmed: false
 
-    // Right-click gives window-space coordinates for the menu
     signal activated
     signal contextRequested(real mx, real my)
 
@@ -46,7 +44,6 @@ Rectangle {
         }
     }
 
-    // Active indicator bar
 
     Rectangle {
         anchors.left: parent.left
@@ -69,7 +66,6 @@ Rectangle {
         }
     }
 
-    // Leading icon
 
     Text {
         id: iconText
@@ -104,7 +100,6 @@ Rectangle {
         }
     }
 
-    // Busy spinner (replaces the icon)
 
     Text {
         anchors.centerIn: iconText
@@ -136,7 +131,6 @@ Rectangle {
         }
     }
 
-    // Title + subtitle
 
     Column {
         anchors.left: iconText.right
@@ -178,7 +172,6 @@ Rectangle {
         }
     }
 
-    // Trailing badge
 
     Text {
         id: trailingText
@@ -195,7 +188,6 @@ Rectangle {
         color: root.trailingColor
     }
 
-    // Interaction
 
     MouseArea {
         id: mouse
@@ -220,7 +212,6 @@ Rectangle {
         }
     }
 
-    // Press feedback
 
     scale: mouse.pressed ? 0.97 : 1.0
 

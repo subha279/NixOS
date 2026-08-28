@@ -8,7 +8,6 @@ import "../core" as Core
 import "../modules" as Modules
 import "../services" as Services
 
-// Bar
 
 PanelWindow {
     id: root
@@ -29,12 +28,10 @@ PanelWindow {
 
     WlrLayershell.namespace: "aurora-bar"
 
-    // Only the actual pill receives input.
     mask: Region {
         item: pill
     }
 
-    // Reveal state
 
     readonly property bool launcherPopupOpen: Core.PopupManager.current === "launcher" || Core.PopupManager.current === "wallpaper" || Core.PopupManager.current === "theme" || Core.PopupManager.current === "clipboard" || Core.PopupManager.current === "emoji"
 
@@ -60,29 +57,22 @@ PanelWindow {
         onTriggered: root.expanded = root.wantExpanded
     }
 
-    // 0 = collapsed
-    // 1 = fully expanded
     property real reveal: root.expanded ? 1.0 : 0.0
 
     Behavior on reveal {
         NumberAnimation {
             duration: root.expanded ? Core.Theme.barRevealDuration : Core.Theme.barHideDuration
 
-            // Decelerate as the modules arrive, accelerate as they collapse. The
-            // bar widens as it reveals, so this is the one transition in the shell
-            // where the eye is tracking real distance.
             easing.type: Easing.BezierSpline
-            easing.bezierCurve: root.expanded ? Core.Theme.easeDecelerate : Core.Theme.easeAccelerate
+            easing.bezierCurve: Core.Theme.easeStandard
         }
     }
 
     readonly property bool modulesVisible: root.reveal > 0.012
 
-    // OSD takeover
 
     readonly property bool osd: Core.OsdController.active && !root.expanded
 
-    // One animated value drives the entire OSD morph
 
     property real osdMix: root.osd ? 1.0 : 0.0
 
@@ -93,10 +83,8 @@ PanelWindow {
         }
     }
 
-    // Deliberately NOT animated.
     readonly property real barContentWidth: content.implicitWidth + (osdView.implicitWidth - content.implicitWidth) * root.osdMix
 
-    // OUTER BORDER RING
 
     Rectangle {
         id: pillBorder
@@ -117,7 +105,6 @@ PanelWindow {
         border.width: Core.Theme.borderWidth
         border.color: Core.Theme.borderActive
 
-        // ACTUAL BAR SURFACE
 
         Rectangle {
             id: pill
@@ -139,27 +126,21 @@ PanelWindow {
                 radius: parent.radius
             }
 
-            // Hover detection
 
             HoverHandler {
                 id: pillHover
             }
 
-            // CONTENT
-
-            // OSD READOUT
 
             BarOsd {
                 id: osdView
 
                 anchors.centerIn: parent
 
-                // Straight off the shared mix value — no Behavior of its own, so it is exactly in step with the width and the fading module row.
                 opacity: root.osdMix
 
                 visible: root.osdMix > 0.01
 
-                // Rises into place rather than just appearing.
                 transform: Translate {
                     y: (1.0 - root.osdMix) * 4
                 }
@@ -172,12 +153,10 @@ PanelWindow {
 
                 spacing: 3
 
-                // Fades out while the bar is acting as an OSD.
                 opacity: 1.0 - root.osdMix
 
                 visible: root.osdMix < 0.99
 
-                // Notification center
 
                 Modules.NotificationCenter {
                     id: notificationCenter
@@ -195,7 +174,6 @@ PanelWindow {
                     reveal: root.reveal
                 }
 
-                // Volume
 
                 Modules.Volume {
                     Layout.preferredWidth: 58 * root.reveal
@@ -211,7 +189,6 @@ PanelWindow {
                     reveal: root.reveal
                 }
 
-                // Brightness
 
                 Modules.Brightness {
                     Layout.preferredWidth: 58 * root.reveal
@@ -227,7 +204,6 @@ PanelWindow {
                     reveal: root.reveal
                 }
 
-                // Clock
 
                 Modules.Clock {
                     id: clockModule
@@ -236,9 +212,6 @@ PanelWindow {
 
                     Layout.preferredHeight: Core.Theme.moduleHeight
 
-                    // The clock hides its now-playing line whenever the bar is
-                    // wide, so it needs the same reveal value the collapsible
-                    // modules already use.
                     reveal: root.reveal
                 }
 
@@ -246,7 +219,6 @@ PanelWindow {
                     reveal: root.reveal
                 }
 
-                // Network
 
                 Modules.Network {
                     Layout.preferredWidth: 30 * root.reveal
@@ -258,13 +230,11 @@ PanelWindow {
                     opacity: root.reveal
                 }
 
-                // Wi-Fi / Bluetooth separator
 
                 Separator {
                     reveal: root.reveal
                 }
 
-                // Bluetooth
 
                 Modules.Bluetooth {
                     Layout.preferredWidth: 30 * root.reveal
@@ -280,7 +250,6 @@ PanelWindow {
                     reveal: root.reveal
                 }
 
-                // Battery
 
                 Modules.Battery {
                     Layout.preferredWidth: 58 * root.reveal
@@ -292,7 +261,6 @@ PanelWindow {
                     opacity: root.reveal
                 }
 
-                // Battery separator
 
                 Separator {
                     reveal: root.reveal
@@ -300,7 +268,6 @@ PanelWindow {
                     available: Services.BatteryService.available
                 }
 
-                // System tray
 
                 Modules.Tray {
                     id: tray
@@ -334,7 +301,6 @@ PanelWindow {
 
         visible: sep.available && sep.reveal > 0.012
 
-        // Slightly under full strength so it never competes with the glyphs.
         opacity: sep.reveal * 0.9
 
         Rectangle {

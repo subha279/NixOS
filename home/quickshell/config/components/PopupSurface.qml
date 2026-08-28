@@ -38,19 +38,8 @@ PanelWindow {
 
     exclusionMode: ExclusionMode.Ignore
 
-    // Only mapped while actually on screen.
-    //
-    // This was `visible: true`, which left all six PopupSurface windows
-    // (network, bluetooth, battery, audio, calendar, notifications) mapped as
-    // full-width WlrLayer.Overlay surfaces for the entire session. layerules.lua
-    // matches namespace ^aurora-popup$ with blur = true, so the compositor was
-    // re-blurring six permanently-mapped overlays every frame in order to
-    // display nothing -- at 180Hz that is the shell's largest idle GPU cost.
-    //
-    // LauncherSurface and Notifications already gate their windows this way.
-    //
-    // Tracks visual.opacity rather than root.open alone so the close animation
-    // finishes playing before the surface is unmapped.
+    // Only mapped while on screen; six always-mapped overlays get blurred by the
+    // compositor for nothing. Tracks opacity so the close animation still plays.
     visible: root.open || visual.opacity > 0.01
 
     WlrLayershell.layer: WlrLayer.Overlay
@@ -130,43 +119,38 @@ PanelWindow {
 
             anchors.fill: parent
 
-            // Grows from the bar edge it is anchored to, not from its own middle.
             transformOrigin: Item.Top
 
-            scale: root.open ? 1.0 : 0.96
+            scale: root.open ? 1.0 : 0.98
 
-            y: root.open ? 0 : -10
+            y: root.open ? 0 : -4
 
             opacity: root.open ? 1.0 : 0.0
 
-            // Decelerate in, accelerate out. This was OutCubic in both directions,
-            // so the card left as leisurely as it arrived.
             Behavior on scale {
                 NumberAnimation {
-                    duration: root.open ? Core.Theme.durMedium : Core.Theme.durExitMedium
+                    duration: root.open ? Core.Theme.durShort : Core.Theme.durExitShort
 
                     easing.type: Easing.BezierSpline
-                    easing.bezierCurve: root.open ? Core.Theme.easeDecelerate : Core.Theme.easeAccelerate
+                    easing.bezierCurve: Core.Theme.easeStandard
                 }
             }
 
             Behavior on y {
                 NumberAnimation {
-                    duration: root.open ? Core.Theme.durMedium : Core.Theme.durExitMedium
-
-                    easing.type: Easing.BezierSpline
-                    easing.bezierCurve: root.open ? Core.Theme.easeDecelerate : Core.Theme.easeAccelerate
-                }
-            }
-
-            // Opacity resolves faster than the transform, so the card reads as
-            // present and settling rather than fading into place.
-            Behavior on opacity {
-                NumberAnimation {
                     duration: root.open ? Core.Theme.durShort : Core.Theme.durExitShort
 
                     easing.type: Easing.BezierSpline
-                    easing.bezierCurve: root.open ? Core.Theme.easeDecelerate : Core.Theme.easeAccelerate
+                    easing.bezierCurve: Core.Theme.easeStandard
+                }
+            }
+
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: root.open ? Core.Theme.durInstant : Core.Theme.durExitShort
+
+                    easing.type: Easing.BezierSpline
+                    easing.bezierCurve: Core.Theme.easeStandard
                 }
             }
 
@@ -208,35 +192,10 @@ PanelWindow {
 
                 Behavior on opacity {
                     NumberAnimation {
-                        duration: root.open ? Core.Theme.durShort : Core.Theme.durExitShort
+                        duration: root.open ? Core.Theme.durInstant : Core.Theme.durExitShort
 
                         easing.type: Easing.BezierSpline
-                        easing.bezierCurve: root.open ? Core.Theme.easeDecelerate : Core.Theme.easeAccelerate
-                    }
-                }
-
-                // Two-stage reveal: the card arrives, then its contents rise into
-                // it. The offset is small and the delay short -- enough to read as
-                // the surface settling before it fills, not as a second animation.
-                //
-                // A Translate rather than a y binding because this Item is
-                // anchored, and anchors would overwrite y on every layout pass.
-                transform: Translate {
-                    y: root.open ? 0 : 6
-
-                    Behavior on y {
-                        SequentialAnimation {
-                            PauseAnimation {
-                                duration: root.open ? 60 : 0
-                            }
-
-                            NumberAnimation {
-                                duration: root.open ? Core.Theme.durShort : Core.Theme.durExitShort
-
-                                easing.type: Easing.BezierSpline
-                                easing.bezierCurve: root.open ? Core.Theme.easeDecelerate : Core.Theme.easeAccelerate
-                            }
-                        }
+                        easing.bezierCurve: Core.Theme.easeStandard
                     }
                 }
 
@@ -310,10 +269,10 @@ PanelWindow {
 
             Behavior on scale {
                 NumberAnimation {
-                    duration: menuLayer.active ? Core.Theme.durShort : Core.Theme.durExitShort
+                    duration: menuLayer.active ? Core.Theme.durInstant : Core.Theme.durExitShort
 
                     easing.type: Easing.BezierSpline
-                    easing.bezierCurve: menuLayer.active ? Core.Theme.easeDecelerate : Core.Theme.easeAccelerate
+                    easing.bezierCurve: Core.Theme.easeStandard
                 }
             }
 
@@ -322,7 +281,7 @@ PanelWindow {
                     duration: menuLayer.active ? Core.Theme.durInstant : Core.Theme.durExitShort
 
                     easing.type: Easing.BezierSpline
-                    easing.bezierCurve: menuLayer.active ? Core.Theme.easeDecelerate : Core.Theme.easeAccelerate
+                    easing.bezierCurve: Core.Theme.easeStandard
                 }
             }
 

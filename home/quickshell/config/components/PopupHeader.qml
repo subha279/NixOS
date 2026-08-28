@@ -2,7 +2,6 @@ import QtQuick
 
 import "../core" as Core
 
-// PopupHeader
 
 Item {
     id: root
@@ -10,13 +9,11 @@ Item {
     property string title: ""
     property string subtitle: ""
 
-    // Toggle switch
     property bool showToggle: false
     property bool toggled: false
 
     signal toggleRequested
 
-    // Action buttons: [{ icon, tooltip, spinning, action }]
     property var actions: []
 
     implicitHeight: 40
@@ -138,7 +135,6 @@ Item {
             }
         }
 
-        // Toggle switch
 
         Item {
             visible: root.showToggle

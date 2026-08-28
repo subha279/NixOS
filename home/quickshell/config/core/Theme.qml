@@ -7,13 +7,11 @@ import Quickshell.Io
 QtObject {
     id: theme
 
-    // Aurora Runtime Theme
 
     readonly property string auroraDirectory: Quickshell.env("HOME") + "/.config/aurora"
 
     readonly property string activeThemePath: auroraDirectory + "/active-theme"
 
-    // Active Theme
 
     property var activeThemeFile: FileView {
         path: theme.activeThemePath
@@ -27,11 +25,9 @@ QtObject {
         }
     }
 
-    // Active Theme ID
 
     readonly property string activeTheme: activeThemeFile.loaded ? activeThemeFile.text().trim() : "catppuccin-mocha"
 
-    // Active Theme JSON
 
     property var themeFile: FileView {
         path: theme.auroraDirectory + "/themes/" + theme.activeTheme + ".json"
@@ -44,7 +40,6 @@ QtObject {
         }
     }
 
-    // Parsed Theme
 
     readonly property var data: {
         if (!theme.themeFile.loaded)
@@ -65,13 +60,11 @@ QtObject {
 
     readonly property var ui: data.ui || ({})
 
-    // Background
 
     readonly property color background: colors.background || "#181D25"
 
     readonly property color backgroundDark: colors.backgroundDark || "#141920"
 
-    // Surfaces
 
     readonly property color surface: colors.surface || "#282E37"
 
@@ -79,7 +72,6 @@ QtObject {
 
     readonly property color surfaceActive: colors.surfaceActive || "#363D49"
 
-    // Borders
 
     readonly property color border: colors.border || "#3B4350"
 
@@ -89,7 +81,6 @@ QtObject {
 
     readonly property color separator: colors.separator || "#343B47"
 
-    // Text
 
     readonly property color text: colors.text || "#F2F3F7"
 
@@ -97,7 +88,6 @@ QtObject {
 
     readonly property color textMuted: colors.textMuted || "#858D9A"
 
-    // Accent
 
     readonly property color accent: colors.accent || "#A970FF"
 
@@ -109,7 +99,6 @@ QtObject {
 
     readonly property color accentForeground: colors.accentForeground || "#181D25"
 
-    // Semantic States
 
     readonly property color success: colors.success || "#8FE3A5"
 
@@ -119,7 +108,6 @@ QtObject {
 
     readonly property color info: colors.info || "#8FB8FF"
 
-    // Compatibility Aliases
 
     readonly property color foreground: text
 
@@ -137,7 +125,6 @@ QtObject {
 
     readonly property color pressed: surfaceActive
 
-    // Semantic Color Resolver
 
     function resolveColor(name, fallback) {
         switch (name) {
@@ -166,7 +153,6 @@ QtObject {
         }
     }
 
-    // Clock
 
     readonly property color clockHour: resolveColor(ui.clock?.hour, foreground)
 
@@ -176,7 +162,6 @@ QtObject {
 
     readonly property color clockSecond: resolveColor(ui.clock?.second, foregroundFaint)
 
-    // Liquid Glass
 
     readonly property real glassOpacity: ui.glassOpacity !== undefined ? ui.glassOpacity : 0.51
 
@@ -190,9 +175,6 @@ QtObject {
 
     readonly property real glassRimOpacity: ui.glassRimOpacity !== undefined ? ui.glassRimOpacity : 0.10
 
-    // The gloss: a bright catch along the top, a darker shade along the bottom,
-    // inner shading for thickness, and a middle thinner than either end. Zero
-    // the first three and every surface falls back to flat frost.
 
     readonly property real glassSpecularOpacity: ui.glassSpecularOpacity !== undefined ? ui.glassSpecularOpacity : 0.14
 
@@ -225,9 +207,6 @@ QtObject {
         return Qt.rgba(mixed.r, mixed.g, mixed.b, glassOpacity);
     }
 
-    // The middle of the ramp, thinned by glassClarity -- real glass is clearest
-    // where it is thinnest. Its colour is the exact midpoint of the two
-    // endpoints, so glassClarity = 0 renders byte-identical to a two-stop ramp.
 
     readonly property color glassTintMid: {
         const top = Qt.tint(glassBody, Qt.rgba(accent.r, accent.g, accent.b, 0.10));
@@ -237,49 +216,30 @@ QtObject {
         return Qt.rgba((top.r + bottom.r) / 2, (top.g + bottom.g) / 2, (top.b + bottom.b) / 2, glassOpacity * (1.0 - glassClarity));
     }
 
-    // Horizontal accent wash. Stacked over the vertical ramp, the pair reads as
-    // one diagonal gradient -- a Qt6 Gradient is only vertical or horizontal.
 
     readonly property color glassWash: Qt.rgba(accent.r, accent.g, accent.b, glassGradientOpacity)
 
     readonly property color glassWashEnd: Qt.rgba(accent.r, accent.g, accent.b, 0.0)
 
-    // Whether this theme's background is pale. Every polarity decision below
-    // hangs off this: a highlight that works on charcoal vanishes on cream.
 
     readonly property bool glassOnLight: background.hslLightness > 0.5
 
-    // Inner edge, so the glass reads as having thickness. Lifts on dark themes
-    // and darkens on light ones -- a white rim on solarized-light would look
-    // like a scratch.
 
     readonly property color glassRim: glassOnLight ? Qt.rgba(0, 0, 0, glassRimOpacity) : Qt.rgba(1, 1, 1, glassRimOpacity)
 
-    // Specular catch-light, top edge. Stays white on every theme -- tinting a
-    // highlight to the accent reads as coloured plastic; what a pale background
-    // changes is its strength, not its hue. Both ends are declared because a Qt6
-    // gradient stop needs a real colour, and transparent white and transparent
-    // black interpolate differently.
 
     readonly property color glassSpecular: Qt.rgba(1, 1, 1, glassSpecularOpacity * (glassOnLight ? 0.45 : 1.0))
 
     readonly property color glassSpecularEnd: Qt.rgba(1, 1, 1, 0.0)
 
-    // Refractive shade, bottom edge. The other half of the convex read, and the
-    // half that carries it on light themes.
 
     readonly property color glassLensShade: Qt.rgba(0, 0, 0, glassLensOpacity * (glassOnLight ? 1.60 : 1.0))
 
     readonly property color glassLensShadeEnd: Qt.rgba(0, 0, 0, 0.0)
 
-    // Inner shading. Gives the slab thickness -- without it the specular and
-    // shade read as painted on a flat sheet rather than wrapping an edge.
 
     readonly property color glassDepth: Qt.rgba(0, 0, 0, glassDepthOpacity * (glassOnLight ? 1.30 : 1.0))
 
-    // The noise tile. Resolved against this file, so it points at
-    // quickshell/config/assets/grain.png. Kept at a trace opacity to stop wide
-    // gradients banding -- it is no longer a texture you are meant to see.
 
     readonly property url glassGrainSource: Qt.resolvedUrl("../assets/grain.png")
 
@@ -287,13 +247,10 @@ QtObject {
 
     readonly property color backgroundSolid: background
 
-    // UI
-    //
-    // Same `!== undefined` idiom as the glass knobs above: `0 || 10` is 10, so
-    // `||` would make radius = 0 (square corners) or borderWidth = 0 impossible.
 
     readonly property int borderWidth: ui.borderWidth !== undefined ? ui.borderWidth : 0
 
+    // `!== undefined` and not `||` throughout: 0 is a valid radius and width.
     readonly property int radius: ui.radius !== undefined ? ui.radius : 10
 
     readonly property int radiusSmall: ui.radiusSmall !== undefined ? ui.radiusSmall : 6
@@ -305,16 +262,6 @@ QtObject {
     readonly property int fontSizeSmall: Math.max(8, ui.fontSizeSmall !== undefined ? ui.fontSizeSmall : 10)
     readonly property int fontSizeLarge: Math.max(8, ui.fontSizeLarge !== undefined ? ui.fontSizeLarge : 15)
 
-    // Upper end of the type scale, derived rather than written out.
-    //
-    // The large sizes in the popups were hardcoded pixel values -- 34 for the
-    // calendar clock, 24 and 26 for the battery gauge, 17 for the audio section
-    // heads -- so changing ui.fontSize in themes.nix moved body text and left the
-    // headline sizes behind, and the hierarchy drifted apart.
-    //
-    // The ratios are chosen to reproduce those exact values at the current
-    // fontSize of 12 and iconSize of 16, so this is not a visual change today; it
-    // just means the scale moves together from now on.
     readonly property int fontSizeDisplay: Math.round(fontSize * 2.8)
 
     readonly property int fontSizeTitle: Math.round(fontSize * 2.0)
@@ -329,10 +276,8 @@ QtObject {
 
     readonly property real shellShadowOpacity: 0.0
 
-    // How far the stacked shadow bleeds past a floating surface.
     readonly property int shellShadowSpread: 7
 
-    // Existing QuickShell Geometry
 
     readonly property int pillHeight: 32
 
@@ -340,104 +285,55 @@ QtObject {
 
     readonly property int barMarginTop: 10
 
-    // Was a hardcoded 18, identical to radiusLarge.
     readonly property int radiusMenu: radiusLarge
 
-    // Was a hardcoded 12, an undeclared fourth radius step between radius (10) and radiusLarge (18).
     readonly property int radiusRow: radius + 2
 
     readonly property int padding: 10
 
     readonly property int spacing: 6
 
-    // Typography
 
     readonly property string fontFamily: fonts.interface || "Inter"
     readonly property string fontMono: fonts.terminal || "JetBrainsMono Nerd Font Mono"
 
-    // The family that actually contains the Nerd Font glyphs.
-    //
-    // Derived from the theme rather than hardcoded, so it cannot drift from
-    // fonts.terminal in lib/themes.nix the way it had (this file said
-    // "JetBrainsMono Nerd Font Mono" while themes.nix said "JetBrains Mono Nerd
-    // Font", and only one of those is a real family).
     readonly property string iconFont: fonts.terminal || "JetBrainsMono Nerd Font Mono"
 
-    // Emoji, which live in a colour font and must not be requested from the UI or
-    // icon families. Only NativeRendering draws colour glyphs correctly.
     readonly property string emojiFont: fonts.emoji || "Noto Color Emoji"
 
-    // For labels that mix prose and glyphs in one string: prose family first,
-    // icon family as an explicit fallback for the glyph codepoints. Qt resolves
-    // per-character down this list, so it beats relying on fontconfig's global
-    // fallback chain to guess.
     readonly property var textFamilies: [fontFamily, iconFont]
 
-    // Popup Geometry
 
     readonly property int popupWidth: 340
 
     readonly property int popupMaxHeight: 460
 
-    // Visible detachment from the bar pill. At 2 the cards looked welded to it.
     readonly property int popupGap: 10
 
     readonly property int rowHeight: 42
 
-    // ============================================================
-    // MOTION
-    // ============================================================
-    //
-    // There were 20 distinct hardcoded durations across ~140 animations, and one
-    // curve -- Easing.OutQuint -- doing 147 of 176 jobs, including exits. A single
-    // decelerate curve on the way out is what makes an interface feel soft rather
-    // than crisp: the surface leaves slowly and lingers when it should get out of
-    // the way.
-    //
-    // Four durations and three curves, chosen by role. The four spring properties
-    // and `overshoot` that used to sit here were never referenced by anything and
-    // are gone; the pop scale below replaces them.
 
-    // Duration, by how much movement the eye has to follow.
-
-    // Colour, hover, small state flips. Below ~100ms motion reads as a jump.
     readonly property int durInstant: 110
 
-    // Small transforms: row selection, a chevron turning, a badge appearing.
     readonly property int durShort: 180
 
-    // A popup or menu arriving.
     readonly property int durMedium: 260
 
-    // A large surface crossing real distance.
     readonly property int durLong: 340
 
-    // Exits run at roughly 70% of the matching entrance. An entrance is
-    // information arriving and can afford to be savoured; an exit is the user
-    // having already moved on.
     readonly property int durExitShort: 130
 
     readonly property int durExitMedium: 180
 
-    // Easing, as cubic bezier control points for easing.bezierCurve. Same three
-    // roles every good motion system settles on.
 
-    // General purpose. Firm start, clean stop.
     readonly property var easeStandard: [0.2, 0.0, 0.0, 1.0, 1, 1]
 
-    // Entrances. Most of the travel happens early and it eases into place, which
-    // is what makes an arriving surface feel weighted rather than floaty.
     readonly property var easeDecelerate: [0.05, 0.7, 0.1, 1.0, 1, 1]
 
-    // Exits. Slow to release, then leaves quickly -- the mirror of the above.
     readonly property var easeAccelerate: [0.3, 0.0, 0.8, 0.15, 1, 1]
 
-    // How far an icon overshoots when its glyph changes. 1.22 was distinctly
-    // rubbery on a 16px glyph.
     readonly property real popScale: 1.16
 
-    // Legacy names, kept so the ~26 existing call sites keep working, and mapped
-    // onto the scale above rather than carrying their own numbers.
     readonly property int durFast: durInstant
 
     readonly property int durBase: durShort
@@ -448,7 +344,6 @@ QtObject {
 
     readonly property int durClose: durExitMedium
 
-    // Collapsing Bar
 
     readonly property int barRevealDuration: 200
 

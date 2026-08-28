@@ -2,7 +2,6 @@ import QtQuick
 
 import "../core" as Core
 
-// BarOsd
 
 Item {
     id: root
@@ -16,7 +15,6 @@ Item {
     implicitWidth: row.implicitWidth
     implicitHeight: Core.Theme.moduleHeight
 
-    // Colour + glyph per kind
 
     readonly property color tint: root.muted ? Core.Theme.danger : Core.Theme.accent
 
@@ -46,7 +44,6 @@ Item {
 
         spacing: 8
 
-        // Icon
 
         Text {
             width: 20
@@ -70,7 +67,6 @@ Item {
             }
         }
 
-        // Track
 
         Rectangle {
             id: track
@@ -97,7 +93,6 @@ Item {
 
                 antialiasing: true
 
-                // The one animated thing in here.
                 Behavior on width {
                     NumberAnimation {
                         duration: Core.Theme.durBase
@@ -114,7 +109,6 @@ Item {
             }
         }
 
-        // Readout
 
         Text {
             width: 34
