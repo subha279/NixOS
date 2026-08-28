@@ -796,32 +796,43 @@ menu() {
     echo
 
     if ci_is_live_installer; then
-      printf '  %b%b>> Installer environment detected. For a fresh machine use 17.%b\n\n' \
+      printf '  %b%bInstaller environment detected. Choose 1 to install NixOS.%b\n\n' \
         "$YELLOW" "$BOLD" "$RESET"
     fi
 
-    printf '  %b%bCONFIGURATION%b\n' "$CYAN" "$BOLD" "$RESET"
-    menu_item 1 "Install / Setup" "configure a running system"
-    menu_item 2 "Update" "pull repo + flake update"
-    menu_item 3 "Rebuild / Switch" "validate then switch"
-    menu_item 4 "Dry rebuild" "build without switching"
-    menu_item 5 "Check flake" "evaluate the flake"
-    menu_item 6 "Rollback" "previous generation"
-    menu_item 7 "Refresh hardware" "regenerate hardware config"
-    menu_item 8 "List generations" "system profile history"
+    # The first three are the whole lifecycle, in the order they are used:
+    # install the machine, keep it current, reclaim space. Everything below
+    # them is a tool you reach for only when you need it.
+    printf '  %b%bMAIN%b\n' "$CYAN" "$BOLD" "$RESET"
+    menu_item 1 "Install NixOS" "fresh install, partitions the disk"
+    menu_item 2 "Upgrade" "git pull, flake update, rebuild"
+    menu_item 3 "Free disk space" "old generations, GC, optimise"
 
     echo
-    printf '  %b%bVALIDATION & MAINTENANCE%b\n' "$CYAN" "$BOLD" "$RESET"
-    menu_item 9 "Configuration check" "full validator"
-    menu_item 10 "Maintenance" "cleanup dashboard"
-    menu_item 11 "Installer preview" "dry-run the installer"
-    menu_item 17 "Clean install" "fresh install from the ISO"
-    menu_item 18 "Clean install (dry)" "plan only, changes nothing"
-    menu_item 12 "Garbage collection" "reclaim store space"
-    menu_item 13 "Optimize store" "deduplicate the store"
-    menu_item 14 "Verify store" "check store integrity"
-    menu_item 15 "Systemd health" "failed units"
-    menu_item 16 "Store usage" "disk footprint"
+    printf '  %b%bSYSTEM%b\n' "$CYAN" "$BOLD" "$RESET"
+    menu_item 4 "Rebuild / Switch" "validate then switch"
+    menu_item 5 "Dry rebuild" "build without switching"
+    menu_item 6 "Check flake" "evaluate the flake"
+    menu_item 7 "Rollback" "previous generation"
+    menu_item 8 "List generations" "system profile history"
+    menu_item 9 "Refresh hardware" "regenerate hardware config"
+    menu_item 10 "Configure identity" "on an already-installed system"
+
+    echo
+    printf '  %b%bCHECKS & MAINTENANCE%b\n' "$CYAN" "$BOLD" "$RESET"
+    menu_item 11 "Configuration check" "full validator"
+    menu_item 12 "Maintenance dashboard" "guarded full cleanup"
+    menu_item 13 "Garbage collection" "reclaim store space"
+    menu_item 14 "Optimize store" "deduplicate the store"
+    menu_item 15 "Verify store" "check store integrity"
+    menu_item 16 "Systemd health" "failed units"
+    menu_item 17 "Store usage" "disk footprint"
+
+    echo
+    printf '  %b%bINSTALLER TOOLS%b\n' "$CYAN" "$BOLD" "$RESET"
+    menu_item 18 "Install dry-run" "plan the install, change nothing"
+    menu_item 19 "Verify boot" "re-check an install mounted at /mnt"
+    menu_item 20 "Identity preview" "preview the prompts only"
 
     echo
     menu_item 0 "Exit" ""
@@ -830,24 +841,30 @@ menu() {
     local choice
     read -r -p "  Select: " choice
     case "$choice" in
-      1) install_flow; pause ;;
+      1) clean_install; pause ;;
       2) update_config; pause ;;
-      3) rebuild; pause ;;
-      4) dry_build; pause ;;
-      5) flake_check; pause ;;
-      6) rollback; pause ;;
-      7) refresh_hardware; pause ;;
+      3) free_space; pause ;;
+
+      4) rebuild; pause ;;
+      5) dry_build; pause ;;
+      6) flake_check; pause ;;
+      7) rollback; pause ;;
       8) list_generations; pause ;;
-      9) validator_run; pause ;;
-      10) m_maintenance_dashboard ;;
-      11) test_install; pause ;;
-      12) m_garbage_collect; pause ;;
-      13) m_optimize_store; pause ;;
-      14) m_verify_store; pause ;;
-      15) m_systemd_health; pause ;;
-      16) m_store_usage; pause ;;
-      17) clean_install; pause ;;
+      9) refresh_hardware; pause ;;
+      10) install_flow; pause ;;
+
+      11) validator_run; pause ;;
+      12) m_maintenance_dashboard ;;
+      13) m_garbage_collect; pause ;;
+      14) m_optimize_store; pause ;;
+      15) m_verify_store; pause ;;
+      16) m_systemd_health; pause ;;
+      17) m_store_usage; pause ;;
+
       18) clean_install --dry-run; pause ;;
+      19) verify_boot; pause ;;
+      20) test_install; pause ;;
+
       0) clear_screen; exit 0 ;;
       *) warning "Invalid option."; sleep 1 ;;
     esac
@@ -2504,6 +2521,11 @@ CI_ROOT_PART=""
 CI_USER=""
 CI_DEST=""
 
+# Resolved by ci_preflight, because these tools are not named the same way in
+# every environment and the ISO does not guarantee one particular partitioner.
+CI_PARTITIONER=""
+CI_MKFS_FAT=""
+
 # The ISO does not necessarily enable flakes, and this repository only turns
 # them on for the system it installs.
 CI_NIX_FLAGS=(--extra-experimental-features "nix-command flakes")
@@ -2530,11 +2552,97 @@ ci_run() {
   "$@"
 }
 
+# Everything this needs, checked in one pass before anything is touched.
+#
+# Discovering a missing mkfs after the partition table has already been
+# written is the worst possible moment to find out, so the whole toolchain is
+# resolved up front. Where a tool has more than one common name, or where two
+# different tools would do, the alternative is accepted rather than demanded,
+# so a stock installer ISO needs nothing installed.
+ci_preflight() {
+  section "Preflight"
+
+  local -a missing=()
+  local c
+
+  for c in lsblk findmnt blkid wipefs mount umount mountpoint awk sed grep chown stat; do
+    command -v "$c" >/dev/null 2>&1 || missing+=("$c")
+  done
+
+  for c in nix nixos-generate-config nixos-install nixos-enter; do
+    command -v "$c" >/dev/null 2>&1 || missing+=("$c")
+  done
+
+  # Either partitioner is fine.
+  if command -v sgdisk >/dev/null 2>&1; then
+    CI_PARTITIONER="sgdisk"
+  elif command -v parted >/dev/null 2>&1; then
+    CI_PARTITIONER="parted"
+  else
+    missing+=("sgdisk or parted")
+  fi
+
+  # dosfstools has used both names.
+  if command -v mkfs.fat >/dev/null 2>&1; then
+    CI_MKFS_FAT="mkfs.fat"
+  elif command -v mkfs.vfat >/dev/null 2>&1; then
+    CI_MKFS_FAT="mkfs.vfat"
+  else
+    missing+=("mkfs.fat or mkfs.vfat")
+  fi
+
+  command -v mkfs.ext4 >/dev/null 2>&1 || missing+=("mkfs.ext4")
+
+  if [[ "${#missing[@]}" -gt 0 ]]; then
+    for c in "${missing[@]}"; do error "missing: $c"; done
+    echo
+    error "A stock NixOS installer ISO provides all of these."
+    info "If one really is absent, borrow it without installing anything:"
+    info "  nix-shell -p gptfdisk dosfstools e2fsprogs efibootmgr util-linux"
+
+    if [[ "$CI_DRY_RUN" -eq 1 ]]; then
+      CI_PARTITIONER="${CI_PARTITIONER:-sgdisk}"
+      CI_MKFS_FAT="${CI_MKFS_FAT:-mkfs.fat}"
+      warning "Dry run continues so the plan can still be reviewed."
+      return 0
+    fi
+    return 1
+  fi
+
+  v_ok "partitioner: $CI_PARTITIONER"
+  v_ok "fat filesystem tool: $CI_MKFS_FAT"
+
+  # Advisory here. ci_handle_stale_efi treats a missing efibootmgr as a
+  # verification failure, which is where it actually matters.
+  if command -v efibootmgr >/dev/null 2>&1; then
+    v_ok "efibootmgr present"
+  else
+    v_info "efibootmgr absent; stale UEFI entries could not be cleaned"
+  fi
+
+  if command -v git >/dev/null 2>&1; then
+    v_ok "git present"
+  else
+    v_info "git absent; the repository must already be on disk"
+  fi
+
+  success "Toolchain complete; nothing needs installing."
+}
+
+# Is this the NixOS installation ISO?
+#
+# This used to accept any overlay, tmpfs or squashfs root, which was wrong: a
+# container has an overlay root too, so `install` inside one would have decided
+# it was in an installer and offered to partition a disk. Testing caught it.
+#
+# Now it looks only for markers the ISO actually brings with it.
+# VARIANT_ID=installer is set by the installation-CD module itself and is the
+# most direct evidence; /iso and the read-only store are its own mounts.
 ci_is_live_installer() {
-  case "$(findmnt -no FSTYPE / 2>/dev/null || printf '')" in
-    overlay | tmpfs | squashfs) return 0 ;;
-  esac
-  [[ -d /iso ]]
+  grep -qsE '^VARIANT_ID="?installer"?' /etc/os-release && return 0
+  [[ -d /iso ]] && return 0
+  findmnt -no TARGET /nix/.ro-store >/dev/null 2>&1 && return 0
+  return 1
 }
 
 ci_require_live() {
@@ -2544,8 +2652,8 @@ ci_require_live() {
   ci_is_live_installer && return 0
 
   error "This is not the NixOS installer environment."
-  error "Root filesystem type: $(findmnt -no FSTYPE / 2>/dev/null || printf unknown)"
-  die "Refusing to partition a disk from a running installed system."
+  error "No VARIANT_ID=installer, no /iso, no read-only store mount."
+  die "Refusing to partition a disk from anything but the installer ISO."
 }
 
 ci_disk_desc() {
@@ -2711,31 +2819,44 @@ ci_wait_for_part() {
 }
 
 ci_partition() {
-  ci_need_cmd sgdisk
   section "Partitioning $CI_DISK"
 
   ci_run wipefs -a "$CI_DISK"
-  ci_run sgdisk --zap-all "$CI_DISK"
-  ci_run sgdisk \
-    --new="1:0:$CI_ESP_SGDISK_SIZE" --typecode=1:ef00 --change-name=1:"$CI_ESP_LABEL" \
-    --new=2:0:0 --typecode=2:8300 --change-name=2:"$CI_ROOT_LABEL" \
-    "$CI_DISK"
 
-  ci_run partprobe "$CI_DISK" || true
-  ci_run udevadm settle || true
+  # Both branches produce the same result: a 1 MiB-aligned 1 GiB EF00 ESP,
+  # then the remainder as Linux filesystem.
+  if [[ "$CI_PARTITIONER" == "parted" ]]; then
+    ci_run parted -s "$CI_DISK" mklabel gpt
+    ci_run parted -s "$CI_DISK" mkpart "$CI_ESP_LABEL" fat32 1MiB 1025MiB
+    ci_run parted -s "$CI_DISK" set 1 esp on
+    ci_run parted -s "$CI_DISK" mkpart "$CI_ROOT_LABEL" ext4 1025MiB 100%
+  else
+    ci_run sgdisk --zap-all "$CI_DISK"
+    ci_run sgdisk \
+      --new="1:0:$CI_ESP_SGDISK_SIZE" --typecode=1:ef00 --change-name=1:"$CI_ESP_LABEL" \
+      --new=2:0:0 --typecode=2:8300 --change-name=2:"$CI_ROOT_LABEL" \
+      "$CI_DISK"
+  fi
+
+  # partprobe ships with parted and udevadm with systemd; neither is worth
+  # requiring, because ci_wait_for_part is what actually guarantees the nodes.
+  if command -v partprobe >/dev/null 2>&1; then
+    ci_run partprobe "$CI_DISK" || true
+  fi
+  if command -v udevadm >/dev/null 2>&1; then
+    ci_run udevadm settle || true
+  fi
 
   ci_wait_for_part "$CI_ESP" || return 1
   ci_wait_for_part "$CI_ROOT_PART" || return 1
 
-  success "GPT written: 1 GiB ESP plus ext4 root."
+  success "GPT written by $CI_PARTITIONER: 1 GiB ESP plus ext4 root."
 }
 
 ci_format() {
-  ci_need_cmd mkfs.fat
-  ci_need_cmd mkfs.ext4
   section "Formatting"
 
-  ci_run mkfs.fat -F32 -n "$CI_ESP_LABEL" "$CI_ESP"
+  ci_run "$CI_MKFS_FAT" -F32 -n "$CI_ESP_LABEL" "$CI_ESP"
   ci_run mkfs.ext4 -F -L "$CI_ROOT_LABEL" "$CI_ROOT_PART"
 
   success "Filesystems created."
@@ -3273,6 +3394,8 @@ clean_install() {
   # reaches every nix invocation in this process tree, including that one.
   export NIX_CONFIG="experimental-features = nix-command flakes"
 
+  ci_preflight || return 1
+
   ci_collect_identity
 
   ci_show_disks
@@ -3331,17 +3454,62 @@ clean_install() {
   confirm "Reboot now?" && reboot
 }
 
+# Reclaim disk space.
+#
+# Composed from the maintenance functions rather than reimplementing them, so
+# there is one copy of each destructive step and each keeps its own
+# confirmation. Deliberately does not run the dry-build gate that the full
+# maintenance dashboard imposes: this is the quick "I need space now" path, and
+# nothing here touches the configuration.
+free_space() {
+  clear_screen
+  panel "Free disk space" "v$VERSION" \
+    "Old generations, garbage collection, store optimisation"
+  echo
+
+  info "The configuration is never modified. Only build artefacts and old"
+  info "generations are removed, and each step asks first."
+  echo
+
+  section "Before"
+  m_store_usage
+
+  m_generation_status
+  m_cleanup_generations
+  m_garbage_collect
+  m_optimize_store
+
+  section "After"
+  m_store_usage
+
+  echo
+  success "Cleanup complete."
+}
+
+# Re-run the post-install verification against whatever is mounted at /mnt.
+# Shared by the menu and the CLI so there is one copy.
+verify_boot() {
+  CI_USER="$(get_var username || printf '')"
+  CI_DEST="$CI_TARGET/home/$CI_USER/NixOS"
+  CI_ROOT_PART="$(findmnt -no SOURCE "$CI_TARGET" 2>/dev/null || printf '')"
+  CI_ESP="$(findmnt -no SOURCE "$CI_TARGET/boot" 2>/dev/null || printf '')"
+  ci_final_verify
+}
+
 usage() {
   cat <<EOF
 NixOS Configuration Manager v$VERSION
 
 Usage:
   ./setup.sh                         Interactive menu
-  ./setup.sh clean-install           Fresh install from the installer ISO
-  ./setup.sh clean-install --dry-run Plan a clean install, change nothing
+  ./setup.sh install                 Install this machine (see below)
+  ./setup.sh upgrade                 Pull repo + update flake inputs + rebuild
+  ./setup.sh free-space              Old generations, GC, store optimisation
+
+  ./setup.sh clean-install           Force the fresh installer
+  ./setup.sh clean-install --dry-run Plan a fresh install, change nothing
   ./setup.sh verify-boot             Re-verify an installation mounted at /mnt
-  ./setup.sh install                 First-time setup
-  ./setup.sh update                  Pull repo + update flake inputs
+  ./setup.sh configure               Identity pass on an existing install
   ./setup.sh rebuild                 Validate + rebuild/switch
   ./setup.sh dry                     Dry rebuild
   ./setup.sh check                   Flake check
@@ -3359,11 +3527,17 @@ Usage:
   ./setup.sh help                   Show this help
   ./setup.sh version                Show version
 
-Two different workflows:
-  clean-install  runs from the installer ISO, owns the disk, ends in
-                 nixos-install. Use this on a fresh machine.
-  install        configures a system already running NixOS and ends in
-                 nixos-rebuild switch.
+What 'install' does depends on where you run it:
+  from the installer ISO   partitions the disk and runs nixos-install
+  on a running NixOS       identity pass, ends in nixos-rebuild switch
+
+Typical life of a machine:
+  1. Boot the installer, clone this repo, ./setup.sh, choose 1.
+  2. Reboot into it. Later, ./setup.sh and choose 2 to upgrade.
+  3. When the disk fills up, choose 3.
+
+Nothing needs installing first. The installer ISO already carries every
+tool this uses, and preflight says so before anything is touched.
 
 Password handling:
   Linux passwords are never written to Nix. Setup uses 'passwd' interactively.
@@ -3374,16 +3548,17 @@ main() {
   cd "$ROOT"
   case "${1:-menu}" in
     menu) menu ;;
-    clean-install|clean_install) shift || true; clean_install "${1:-}" ;;
-    verify-boot|verify-install)
-      CI_USER="$(get_var username || printf '')"
-      CI_DEST="$CI_TARGET/home/$CI_USER/NixOS"
-      CI_ROOT_PART="$(findmnt -no SOURCE "$CI_TARGET" 2>/dev/null || printf '')"
-      CI_ESP="$(findmnt -no SOURCE "$CI_TARGET/boot" 2>/dev/null || printf '')"
-      ci_final_verify
+    # `install` means "install this machine" in whichever environment you are
+    # standing in. From the ISO that is a fresh install; on a running NixOS it
+    # is the identity/setup pass it has always been, so nobody's habit breaks.
+    install)
+      if ci_is_live_installer; then clean_install; else install_flow; fi
       ;;
-    install) install_flow ;;
-    update) update_config ;;
+    clean-install|clean_install) shift || true; clean_install "${1:-}" ;;
+    configure|identity) install_flow ;;
+    verify-boot|verify-install) verify_boot ;;
+    upgrade|update) update_config ;;
+    free-space|freespace|space) free_space ;;
     rebuild|switch) rebuild ;;
     dry|dry-build) dry_build ;;
     check) flake_check ;;
