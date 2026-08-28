@@ -82,7 +82,7 @@ Rectangle {
 
         text: root.icon
 
-        font.family: Core.Theme.fontFamily
+        font.family: Core.Theme.iconFont
         font.pixelSize: Core.Theme.iconSize
 
         color: root.active ? Core.Theme.accent : root.iconColor
@@ -111,7 +111,7 @@ Rectangle {
 
         text: "\udb81\udd1e"
 
-        font.family: Core.Theme.fontFamily
+        font.family: Core.Theme.iconFont
         font.pixelSize: Core.Theme.iconSize
 
         color: Core.Theme.accent

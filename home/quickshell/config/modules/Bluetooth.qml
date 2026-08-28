@@ -41,7 +41,7 @@ Item {
 
         text: !root.powered ? "\udb80\udcb2" : root.connectedCount > 0 ? "\udb80\udcb1" : "\udb80\udcaf"
 
-        font.family: Core.Theme.fontFamily
+        font.family: Core.Theme.iconFont
         font.pixelSize: Core.Theme.iconSize
 
         color: !root.powered ? Core.Theme.foregroundMuted : root.connectedCount > 0 ? Core.Theme.accent : Core.Theme.foreground
@@ -61,17 +61,17 @@ Item {
 
             NumberAnimation {
                 target: icon
-                property: "scale"
-                to: 1.22
-                duration: 110
+                property: "opacity"
+                to: 0.55
+                duration: 90
                 easing.type: Easing.OutQuint
             }
 
             NumberAnimation {
                 target: icon
-                property: "scale"
+                property: "opacity"
                 to: 1.0
-                duration: 160
+                duration: 150
                 easing.type: Easing.OutQuint
             }
         }

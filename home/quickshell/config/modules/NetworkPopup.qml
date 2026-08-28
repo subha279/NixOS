@@ -326,8 +326,8 @@ Components.PopupSurface {
 
                             text: "\udb80\udfba"
 
-                            font.family: Core.Theme.fontFamily
-                            font.pixelSize: 13
+                            font.family: Core.Theme.iconFont
+                            font.pixelSize: Core.Theme.iconSizeSmall
 
                             color: Core.Theme.foregroundMuted
                         }
@@ -417,8 +417,8 @@ Components.PopupSurface {
 
                                 text: "\udb81\udc0c"
 
-                                font.family: Core.Theme.fontFamily
-                                font.pixelSize: 13
+                                font.family: Core.Theme.iconFont
+                                font.pixelSize: Core.Theme.iconSizeSmall
 
                                 color: passwordInput.text !== "" ? Core.Theme.accent : Core.Theme.foregroundFaint
                             }
@@ -496,27 +496,12 @@ Components.PopupSurface {
                             duration: 160
                             easing.type: Easing.OutQuint
                         }
-
-                        NumberAnimation {
-                            property: "scale"
-                            from: 0.86
-                            to: 1
-                            duration: 180
-                            easing.type: Easing.OutQuint
-                        }
                     }
 
                     remove: Transition {
                         NumberAnimation {
                             property: "opacity"
                             to: 0
-                            duration: 160
-                            easing.type: Easing.InQuint
-                        }
-
-                        NumberAnimation {
-                            property: "scale"
-                            to: 0.8
                             duration: 160
                             easing.type: Easing.InQuint
                         }
@@ -713,8 +698,8 @@ Components.PopupSurface {
 
                         text: popup.svc.wifiEnabled ? "\udb82\udd2f" : "\udb82\udd2d"
 
-                        font.family: Core.Theme.fontFamily
-                        font.pixelSize: 20
+                        font.family: Core.Theme.iconFont
+                        font.pixelSize: Core.Theme.iconSizeMedium
 
                         color: Core.Theme.foregroundFaint
                     }

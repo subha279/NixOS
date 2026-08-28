@@ -301,6 +301,16 @@ QtObject {
     readonly property int radiusLarge: ui.radiusLarge !== undefined ? ui.radiusLarge : 18
 
     readonly property int iconSize: Math.max(8, ui.iconSize !== undefined ? ui.iconSize : 16)
+
+    // Glyph sizes were spread across ten different expressions from 10px to 26px,
+    // several taken from FONT tokens, which is why some icons looked large and
+    // others small. Four steps, derived from iconSize so they move together.
+    readonly property int iconSizeSmall: Math.round(iconSize * 0.875)
+
+    readonly property int iconSizeMedium: Math.round(iconSize * 1.25)
+
+    readonly property int iconSizeLarge: Math.round(iconSize * 1.6)
+
     readonly property int fontSize: Math.max(8, ui.fontSize !== undefined ? ui.fontSize : 13)
     readonly property int fontSizeSmall: Math.max(8, ui.fontSizeSmall !== undefined ? ui.fontSizeSmall : 10)
     readonly property int fontSizeLarge: Math.max(8, ui.fontSizeLarge !== undefined ? ui.fontSizeLarge : 15)
@@ -334,7 +344,19 @@ QtObject {
 
     readonly property string fontFamily: fonts.interface || "Inter"
     readonly property string fontMono: fonts.terminal || "JetBrainsMono Nerd Font Mono"
-    readonly property string iconFont: "JetBrainsMono Nerd Font Mono"
+
+    // The family that actually contains the Nerd Font glyphs. Derived from the
+    // theme so it cannot drift from fonts.terminal the way the hardcoded string
+    // here had already drifted from lib/themes.nix.
+    readonly property string iconFont: fonts.terminal || "JetBrainsMono Nerd Font Mono"
+
+    // Colour font. Only NativeRendering draws its glyphs in colour.
+    readonly property string emojiFont: fonts.emoji || "Noto Color Emoji"
+
+    // For labels mixing prose and glyphs in one string: Qt resolves per character
+    // down this list, so words come from Inter and glyphs from the Nerd Font,
+    // instead of leaving fontconfig to guess a fallback.
+    readonly property var textFamilies: [fontFamily, iconFont]
 
     // Popup Geometry
 
@@ -368,7 +390,6 @@ QtObject {
 
     readonly property int durClose: 150
 
-    readonly property real overshoot: 1.0
 
     // Collapsing Bar
 

@@ -96,8 +96,8 @@ Item {
 
                     text: modelData.icon
 
-                    font.family: Core.Theme.fontFamily
-                    font.pixelSize: 14
+                    font.family: Core.Theme.iconFont
+                    font.pixelSize: Core.Theme.iconSizeSmall
 
                     color: Core.Theme.foregroundMuted
 

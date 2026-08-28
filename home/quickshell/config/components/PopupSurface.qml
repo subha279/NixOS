@@ -38,7 +38,7 @@ PanelWindow {
 
     exclusionMode: ExclusionMode.Ignore
 
-    visible: root.open || visual.opacity > 0.01
+    visible: root.open
 
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.namespace: "aurora-popup"
@@ -117,34 +117,15 @@ PanelWindow {
 
             anchors.fill: parent
 
-            transformOrigin: Item.Top
-
-            scale: root.open ? 1.0 : 0.97
-
-            y: root.open ? 0 : -8
-
+            // No transform animation here on purpose.
+            //
+            // This is a layer surface, so Hyprland already animates it on map via
+            // layersIn + fadeLayersIn (see hyprland/config/animation.lua). Scaling
+            // it again from QML meant two independent scale animations running on
+            // the same window with different durations and curves, which is what
+            // made the motion read as unstable. The compositor owns the entrance;
+            // the card just draws itself at its final size.
             opacity: root.open ? 1.0 : 0.0
-
-            Behavior on scale {
-                NumberAnimation {
-                    duration: root.open ? 240 : 170
-                    easing.type: Easing.OutCubic
-                }
-            }
-
-            Behavior on y {
-                NumberAnimation {
-                    duration: root.open ? 240 : 170
-                    easing.type: Easing.OutCubic
-                }
-            }
-
-            Behavior on opacity {
-                NumberAnimation {
-                    duration: root.open ? 180 : 120
-                    easing.type: Easing.OutCubic
-                }
-            }
 
             Rectangle {
                 anchors.fill: parent
@@ -251,23 +232,14 @@ PanelWindow {
 
             antialiasing: true
 
-            transformOrigin: Item.TopLeft
-
-            scale: menuLayer.active ? 1.0 : 0.96
-
+            // The context menu is drawn inside this window rather than being its
+            // own surface, so Hyprland does not animate it. A plain fade, with no
+            // scale, so it does not pop toward the viewer either.
             opacity: menuLayer.active ? 1.0 : 0.0
-
-            Behavior on scale {
-                NumberAnimation {
-                    duration: menuLayer.active ? 190 : 130
-
-                    easing.type: Easing.OutCubic
-                }
-            }
 
             Behavior on opacity {
                 NumberAnimation {
-                    duration: menuLayer.active ? 150 : 110
+                    duration: menuLayer.active ? 120 : 90
 
                     easing.type: Easing.OutCubic
                 }
@@ -353,9 +325,9 @@ PanelWindow {
 
                                         text: entryLoader.modelData.icon ? entryLoader.modelData.icon : ""
 
-                                        font.family: Core.Theme.fontFamily
+                                        font.family: Core.Theme.iconFont
 
-                                        font.pixelSize: 13
+                                        font.pixelSize: Core.Theme.iconSizeSmall
 
                                         color: entryLoader.modelData.danger === true ? Core.Theme.danger : Core.Theme.foregroundMuted
                                     }

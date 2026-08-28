@@ -163,27 +163,12 @@ Components.PopupSurface {
                             duration: 160
                             easing.type: Easing.OutQuint
                         }
-
-                        NumberAnimation {
-                            property: "scale"
-                            from: 0.86
-                            to: 1
-                            duration: 180
-                            easing.type: Easing.OutQuint
-                        }
                     }
 
                     remove: Transition {
                         NumberAnimation {
                             property: "opacity"
                             to: 0
-                            duration: 160
-                            easing.type: Easing.InQuint
-                        }
-
-                        NumberAnimation {
-                            property: "scale"
-                            to: 0.8
                             duration: 160
                             easing.type: Easing.InQuint
                         }
@@ -378,8 +363,8 @@ Components.PopupSurface {
 
                         text: popup.svc.powered ? "\udb80\udcaf" : "\udb80\udcb2"
 
-                        font.family: Core.Theme.fontFamily
-                        font.pixelSize: 20
+                        font.family: Core.Theme.iconFont
+                        font.pixelSize: Core.Theme.iconSizeMedium
 
                         color: Core.Theme.foregroundFaint
                     }

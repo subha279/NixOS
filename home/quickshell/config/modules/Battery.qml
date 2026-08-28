@@ -86,7 +86,7 @@ Item {
 
             text: root.svc.icon
 
-            font.family: Core.Theme.fontFamily
+            font.family: Core.Theme.iconFont
             font.pixelSize: Core.Theme.iconSize
 
             color: root.svc.color
@@ -106,17 +106,17 @@ Item {
 
                 NumberAnimation {
                     target: icon
-                    property: "scale"
-                    to: 1.22
-                    duration: 110
+                    property: "opacity"
+                    to: 0.55
+                    duration: 90
                     easing.type: Easing.OutQuint
                 }
 
                 NumberAnimation {
                     target: icon
-                    property: "scale"
+                    property: "opacity"
                     to: 1.0
-                    duration: 160
+                    duration: 150
                     easing.type: Easing.OutQuint
                 }
             }

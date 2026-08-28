@@ -46,7 +46,7 @@ Item {
         // hand-written pairs here are exactly how a bus ended up in the bar.
         text: root.dnd ? Core.Icons.bellOff : root.count > 0 ? Core.Icons.bellRing : Core.Icons.bell
 
-        font.family: Core.Theme.fontFamily
+        font.family: Core.Theme.iconFont
         font.pixelSize: Core.Theme.iconSize
 
         color: root.dnd ? Core.Theme.foregroundFaint : root.count > 0 ? Core.Theme.accent : Core.Theme.foreground
@@ -65,17 +65,17 @@ Item {
 
             NumberAnimation {
                 target: icon
-                property: "scale"
-                to: 1.22
-                duration: 110
+                property: "opacity"
+                to: 0.55
+                duration: 90
                 easing.type: Easing.OutQuint
             }
 
             NumberAnimation {
                 target: icon
-                property: "scale"
+                property: "opacity"
                 to: 1.0
-                duration: 160
+                duration: 150
                 easing.type: Easing.OutQuint
             }
         }

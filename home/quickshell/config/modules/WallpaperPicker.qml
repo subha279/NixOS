@@ -15,7 +15,6 @@ Components.LauncherSurface {
     placeholder: "Search wallpapers"
 
     cardWidth: 760
-    cardHeight: 540
 
     columns: 3
 
@@ -216,8 +215,8 @@ Components.LauncherSurface {
 
                                 text: Core.Icons.checkCircle
 
-                                font.family: Core.Theme.fontFamily
-                                font.pixelSize: Core.Theme.fontSizeSmall + 2
+                                font.family: Core.Theme.iconFont
+                                font.pixelSize: Core.Theme.iconSizeSmall
 
                                 color: Core.Theme.accent
                             }

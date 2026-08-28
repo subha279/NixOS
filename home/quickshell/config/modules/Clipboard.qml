@@ -18,16 +18,11 @@ Components.LauncherSurface {
     headerActionVisible: Services.ClipboardService.items.length > 0
 
     cardWidth: 460
-    cardHeight: clipboardCardHeight
-
     columns: 1
 
-    readonly property int clipboardMinRows: 2
-    readonly property int clipboardMaxRows: 10
+    rowHeight: 52
 
-    readonly property int clipboardRows: Math.min(clipboardMaxRows, Math.max(clipboardMinRows, results.length))
-
-    readonly property int clipboardCardHeight: headerHeight + separatorHeight + clipboardRows * rowHeight
+    contentMargins: 24
 
     readonly property var results: {
         const q = clipboard.query.trim().toLowerCase();

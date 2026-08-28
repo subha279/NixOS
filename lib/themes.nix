@@ -18,7 +18,12 @@
       };
 
       terminal = {
-        name = "JetBrains Mono Nerd Font";
+        # "JetBrainsMono" is un-spaced on purpose: that is the real family name.
+        # Nerd Fonts names patched families "<FontName> Nerd Font [Mono]" from the
+        # font's own un-spaced name, so "JetBrains Mono Nerd Font" matches nothing
+        # and every consumer -- kitty, stylix, the shell -- silently fell back to
+        # whatever fontconfig picked. Mono keeps glyphs inside one cell.
+        name = "JetBrainsMono Nerd Font Mono";
         package = "nerd-fonts.jetbrains-mono";
       };
 

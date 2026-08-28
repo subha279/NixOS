@@ -15,7 +15,7 @@ Components.LauncherSurface {
     placeholder: "Search applications"
 
     cardWidth: 460
-    cardHeight: 460
+    rowHeight: 44
 
     columns: 1
 

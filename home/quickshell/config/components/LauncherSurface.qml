@@ -23,13 +23,21 @@ PanelWindow {
     signal clearAllRequested
 
     property int cardWidth: 620
-    property int cardHeight: 460
-    property int preferredCardHeight: 0
     property int itemCount: 0
 
     readonly property int headerHeight: 46
     readonly property int separatorHeight: 1
-    readonly property int rowHeight: 40
+
+    // Row height each launcher actually renders: delegate height plus the view's
+    // spacing, plus any margins the content view adds. The card is sized from
+    // these, so a wrong value leaves a half row showing at the bottom.
+    property int rowHeight: 40
+
+    property int contentMargins: 0
+
+    property int cellHeight: 0
+
+    readonly property int rowExtent: root.columns > 1 ? (root.cellHeight > 0 ? root.cellHeight : Math.round((root.cardWidth / root.columns) * 0.70)) : root.rowHeight
 
     readonly property int listMaxRows: 10
     readonly property int gridMaxRows: 4
@@ -47,9 +55,20 @@ PanelWindow {
     property int liveSelectDelay: 200
     property bool vimNavigation: false
 
-    readonly property int visibleRows: root.columns > 1 ? Math.min(root.gridMaxRows, Math.max(1, Math.ceil(root.itemCount / root.columns))) : Math.min(root.listMaxRows, Math.max(1, root.itemCount))
+    // Deliberately NOT a function of itemCount.
+    //
+    // Sizing the card to the number of results meant it resized on every
+    // keystroke as the list filtered, and again a moment after opening when an
+    // async source delivered its first batch. There is no Behavior on height, so
+    // each of those resizes snapped -- a card changing size under the entrance
+    // animation is most of what reads as instability.
+    //
+    // Constant height per launcher: as many rows as it will show, filled or not.
+    readonly property int fittableRows: Math.max(1, Math.floor((root.cardMaxHeight - root.headerHeight - root.separatorHeight - root.contentMargins) / root.rowExtent))
 
-    readonly property int targetCardHeight: root.preferredCardHeight > 0 ? root.preferredCardHeight : (root.columns > 1 ? root.headerHeight + root.separatorHeight + root.visibleRows * Math.round((root.cardWidth / root.columns) * 0.70) : root.headerHeight + root.separatorHeight + root.visibleRows * root.rowHeight)
+    readonly property int visibleRows: Math.min(root.columns > 1 ? root.gridMaxRows : root.listMaxRows, root.fittableRows)
+
+    readonly property int targetCardHeight: root.headerHeight + root.separatorHeight + root.contentMargins + root.visibleRows * root.rowExtent
 
     readonly property bool open: Core.PopupManager.isOpen(root.launcherId)
 
@@ -157,17 +176,8 @@ PanelWindow {
 
     exclusionMode: ExclusionMode.Ignore
 
-    property real reveal: root.open ? 1.0 : 0.0
 
-    Behavior on reveal {
-        NumberAnimation {
-            duration: root.open ? Core.Theme.durOpen : Core.Theme.durClose
-
-            easing.type: root.open ? Easing.OutQuint : Easing.InQuint
-        }
-    }
-
-    visible: root.reveal > 0.001
+    visible: root.open
 
     Rectangle {
         anchors.fill: parent
@@ -205,37 +215,10 @@ PanelWindow {
 
             anchors.fill: parent
 
-            transformOrigin: Item.Center
-
-            scale: root.reveal > 0.001 ? 1.0 : 0.97
-
-            y: root.reveal > 0.001 ? 0 : 10
-
-            opacity: root.reveal
-
-            Behavior on scale {
-                NumberAnimation {
-                    duration: root.open ? 260 : 180
-
-                    easing.type: Easing.OutCubic
-                }
-            }
-
-            Behavior on y {
-                NumberAnimation {
-                    duration: root.open ? 260 : 180
-
-                    easing.type: Easing.OutCubic
-                }
-            }
-
-            Behavior on opacity {
-                NumberAnimation {
-                    duration: root.open ? 190 : 130
-
-                    easing.type: Easing.OutCubic
-                }
-            }
+            // No transform animation, same reason as PopupSurface: Hyprland's
+            // layersIn already animates this layer surface on map, and scaling it
+            // from QML as well gave two competing scale animations.
+            opacity: root.open ? 1.0 : 0.0
 
             Rectangle {
                 anchors.fill: parent
@@ -294,7 +277,7 @@ PanelWindow {
 
                         font.family: Core.Theme.iconFont
 
-                        font.pixelSize: Core.Theme.fontSizeLarge
+                        font.pixelSize: Core.Theme.iconSize
                     }
 
                     Row {
@@ -350,7 +333,7 @@ PanelWindow {
 
                                 font.family: Core.Theme.iconFont
 
-                                font.pixelSize: 14
+                                font.pixelSize: Core.Theme.iconSizeSmall
                             }
 
                             MouseArea {

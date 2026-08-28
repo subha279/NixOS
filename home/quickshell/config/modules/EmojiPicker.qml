@@ -15,7 +15,9 @@ Components.LauncherSurface {
     placeholder: "Search emoji"
 
     cardWidth: 560
-    cardHeight: 520
+    cellHeight: 70
+
+    contentMargins: 24
 
     columns: 6
 
@@ -141,7 +143,7 @@ Components.LauncherSurface {
 
                         text: cell.modelData.emoji || ""
 
-                        font.family: "Noto Color Emoji"
+                        font.family: Core.Theme.emojiFont
 
                         font.pixelSize: 28
 

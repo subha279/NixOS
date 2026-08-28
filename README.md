@@ -58,7 +58,7 @@ A production-oriented, flake-based **NixOS laptop configuration** built around a
 | 🐧 OS | NixOS 26.05 · `x86_64-linux` |
 | 🖥️ Desktop | Hyprland · Lua |
 | 🐚 Shell | Quickshell · QML |
-| 🎨 Theme | Stylix · 21 themes |
+| 🎨 Theme | Stylix · 7 themes |
 | 💻 Terminal | Kitty · Zsh |
 | ✏️ Editor | Neovim · 17 LSPs |
 | 📦 Management | Home Manager · Flakes |
@@ -166,9 +166,13 @@ NixOS/
 │   ├── nvidia
 │   ├── audio
 │   ├── bluetooth
-│   ├── gaming
+│   ├── desktop
+│   ├── fonts
+│   ├── notifications
+│   ├── power
 │   ├── virtualisation
 │   ├── development
+│   ├── hardware/kreo-rgb
 │   └── stylix
 │
 ├── home/
@@ -222,6 +226,18 @@ home/hyprland/
     └── startup.lua
 ```
 
+#### Motion
+
+Animation lives in `home/hyprland/config/animation.lua`, and it is the compositor
+that animates Quickshell — the bar, popups, launchers and notifications are all
+Wayland layer surfaces, so `layersIn` / `layersOut` are what run when a popup
+opens. QML does not animate those surfaces as well; two animations on one window
+is what makes motion look unstable.
+
+Every bezier there is monotonic: no control point has `y > 1`, so nothing travels
+past its target and springs back. If you add a curve, keep that property —
+`easeOutBack`-style curves are what produce the bounce.
+
 Common bindings:
 
 | Key | Action |
@@ -232,6 +248,11 @@ Common bindings:
 | `SUPER + A` | App launcher |
 | `SUPER + C` | Theme picker |
 | `SUPER + P` | Wallpaper picker |
+| `SUPER + V` | Clipboard history |
+| `SUPER + I` | Emoji picker |
+| `SUPER + N` | Notes |
+| `SUPER + Z` | GUI editor |
+| `SUPER + F` | Toggle floating |
 | `SUPER + Q` | Close window |
 | `ALT + H/J/K/L` | Move focus |
 | `SUPER + 1…9/0` | Workspaces |
@@ -256,24 +277,35 @@ Useful IPC:
 qs ipc call launcher toggle
 qs ipc call theme toggle
 qs ipc call wallpaper toggle
+qs ipc call clipboard toggle
+qs ipc call emoji toggle
 ```
 
 ---
 
 ## 🎨 Theming
 
-**Stylix is the single theming layer** for the desktop.
+Theming has two halves.
 
-It covers GTK, Qt, Kitty, Neovim and Quickshell, with explicit NixOS and Home Manager targets.
+**Stylix** owns the toolkit layer — GTK, Qt and fontconfig — driven from
+`lib/themes.nix`. Those are the only three targets enabled; `autoEnable` is off
+so nothing else is themed behind your back.
 
-Available themes include:
+**The Aurora generator** in `home/theme` owns everything else. It reads the same
+`lib/themes.nix` and writes a Lua, JSON, Kitty and Starship file per theme, which
+Hyprland, Quickshell, Kitty, Neovim and the prompt then read at runtime. This is
+why switching theme does not need a rebuild.
+
+Available themes:
 
 ```text
-gruvbox · tokyo-night · monochrome
-catppuccin · nord · dracula · one-dark
-everforest · rose-pine · solarized
-kanagawa · github-dark · monokai-pro and more
+catppuccin-mocha · tokyo-night · gruvbox
+one-dark · everforest · rose-pine · kanagawa
 ```
+
+Each is defined once in `lib/themes.nix` and generated out to Lua, JSON, a Kitty
+conf and a Starship TOML, so Hyprland, Quickshell, Kitty, Neovim and the prompt
+all read the same palette.
 
 Runtime theme switching:
 
