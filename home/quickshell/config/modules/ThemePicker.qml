@@ -344,7 +344,7 @@ Components.LauncherSurface {
                     cursorShape: Qt.PointingHandCursor
 
                     onClicked: {
-                        launcher.selectedIndex = cell.index;
+                        launcher.selectedIndex = row.index;
                         launcher.accepted();
                     }
                 }

@@ -70,12 +70,17 @@
       # ==================================================
       # fzf-tab Keybindings
       # ==================================================
+      #
+      # Bound explicitly into viins rather than the current keymap. keybindings.nix
+      # runs `bindkey -v`, which relinks main to viins and discards anything bound
+      # to main beforehand -- so an unqualified `bindkey` here silently lost Tab
+      # whenever this fragment was emitted first.
 
       # Tab
-      bindkey '^I' fzf-tab-complete
+      bindkey -M viins '^I' fzf-tab-complete
 
       # Shift + Tab
-      bindkey '^[[Z' reverse-menu-complete
+      bindkey -M viins '^[[Z' reverse-menu-complete
 
       # ==================================================
       # Completion Behaviour

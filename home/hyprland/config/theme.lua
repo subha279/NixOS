@@ -6,7 +6,10 @@ local home = os.getenv("HOME")
 
 local activeThemePath = home .. "/.config/aurora/active-theme.lua"
 
-local auroraThemePath = home .. "/.config/aurora/themes/aurora.lua"
+-- Must name a theme that lib/themes.nix actually defines. This used to point at
+-- themes/aurora.lua, which is never generated, so the fallback missed too and the
+-- error() below took the whole Hyprland config down.
+local fallbackThemePath = home .. "/.config/aurora/themes/catppuccin-mocha.lua"
 
 -- Load Active Theme
 
@@ -23,10 +26,10 @@ if activeFile then
 	ok, theme = pcall(dofile, activeThemePath)
 end
 
--- Fallback to Aurora
+-- Fallback to the default theme
 
 if not ok or not theme then
-	ok, theme = pcall(dofile, auroraThemePath)
+	ok, theme = pcall(dofile, fallbackThemePath)
 end
 
 -- Fail clearly if no theme is available
@@ -38,7 +41,7 @@ if not ok or not theme then
 			.. activeThemePath
 			.. "\n"
 			.. "Fallback theme: "
-			.. auroraThemePath
+			.. fallbackThemePath
 	)
 end
 

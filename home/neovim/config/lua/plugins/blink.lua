@@ -4,35 +4,9 @@ local M = {}
 
 -- Theme
 
-local function get_theme()
-	local path = vim.fn.expand("~/.config/aurora/active-theme.lua")
+local aurora = require("aurora.theme")
 
-	local ok, theme = pcall(dofile, path)
-
-	if not ok then
-		return nil
-	end
-
-	if type(theme) ~= "table" then
-		return nil
-	end
-
-	if type(theme.colors) ~= "table" then
-		return nil
-	end
-
-	return theme
-end
-
-local function colors()
-	local theme = get_theme()
-
-	if theme and theme.colors then
-		return theme.colors
-	end
-
-	return {}
-end
+local colors = aurora.colors
 
 -- Aurora Highlights
 
@@ -78,7 +52,21 @@ local function apply_highlights()
 		bg = "NONE",
 	})
 
+	-- The matched substring of the label. Adopted from ui/theme.lua, which was the
+	-- only file setting it.
+	vim.api.nvim_set_hl(0, "BlinkCmpLabelMatch", {
+		fg = c.accent,
+		bold = true,
+	})
+
 	-- Kind Icons
+
+	-- Base group, the fallback for any kind missing from the table below. Also
+	-- adopted from ui/theme.lua.
+	vim.api.nvim_set_hl(0, "BlinkCmpKind", {
+		fg = c.info,
+		bg = "NONE",
+	})
 
 	local kinds = {
 		Text = c.textSecondary,
@@ -372,21 +360,13 @@ function M.setup()
 	return true
 end
 
--- Live Aurora Theme Refresh
-
-function M.refresh_theme()
-	apply_highlights()
-
-	vim.schedule(function()
-		vim.cmd("redraw!")
-	end)
-
-	return true
-end
-
 -- IMPORTANT
 
 M.setup()
+
+-- Live Aurora Theme Refresh
+
+aurora.on_change(apply_highlights)
 
 -- Return
 

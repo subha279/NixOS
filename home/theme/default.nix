@@ -903,6 +903,14 @@ in
 
     mkdir -p "$theme_dir"
 
+    # Runtime state directory for the shell.
+    #
+    # WallpaperService creates this itself before writing current-wallpaper, but
+    # AppsService does not: it writes ~/.cache/aurora/launcher-usage.json through a
+    # FileView, which fails silently if the directory is absent. On a fresh machine
+    # that meant launcher frecency never persisted.
+    mkdir -p "$HOME/.cache/aurora"
+
 
     # ========================================================
     # Create Default Theme
@@ -1145,12 +1153,6 @@ in
 
 
       # ========================================================
-      # Update Active Theme
-      # ========================================================
-
-      printf '%s\n' "$theme_id" > "$ACTIVE_THEME"
-
-      # ========================================================
       # Optional Kreo RGB Theme Sync
       # ========================================================
 
@@ -1200,6 +1202,21 @@ in
       ln -sfn \
         "$theme_starship" \
         "$ACTIVE_STARSHIP"
+
+
+      # ========================================================
+      # Update Active Theme
+      # ========================================================
+      #
+      # Written LAST, on purpose: this file is the commit point.
+      #
+      # Everything that watches for theme changes -- core/Theme.qml,
+      # ThemeService.qml, and neovim's ui/theme.lua poller -- keys off
+      # active-theme. Writing it first, as this script used to, meant a watcher
+      # could wake on the new id while active-theme.lua, active-kitty.conf and
+      # active-starship.toml still pointed at the previous theme.
+
+      printf '%s\n' "$theme_id" > "$ACTIVE_THEME"
 
 
       # ========================================================

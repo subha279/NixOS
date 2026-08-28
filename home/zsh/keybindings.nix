@@ -42,8 +42,11 @@
     bindkey -M viins '^p' history-substring-search-up
     bindkey -M viins '^n' history-substring-search-down
 
-    bindkey -M viins '^i' expand-or-complete
-    bindkey -M viins '^[[Z' reverse-menu-complete
+    # Tab / Shift-Tab are deliberately NOT bound here. completion.nix owns them
+    # (fzf-tab-complete and reverse-menu-complete), and binding them in both files
+    # meant the winner depended on whichever initContent fragment happened to be
+    # emitted last -- so Tab sometimes fell back to plain expand-or-complete
+    # instead of opening fzf-tab.
 
     bindkey -M viins '^l' clear-screen
     bindkey -M viins '^x^e' edit-command-line

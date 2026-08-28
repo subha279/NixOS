@@ -4,35 +4,9 @@ local M = {}
 
 -- Theme
 
-local function get_theme()
-	local path = vim.fn.expand("~/.config/aurora/active-theme.lua")
+local aurora = require("aurora.theme")
 
-	local ok, theme = pcall(dofile, path)
-
-	if not ok then
-		return nil
-	end
-
-	if type(theme) ~= "table" then
-		return nil
-	end
-
-	if type(theme.colors) ~= "table" then
-		return nil
-	end
-
-	return theme
-end
-
-local function colors()
-	local theme = get_theme()
-
-	if theme and theme.colors then
-		return theme.colors
-	end
-
-	return {}
-end
+local colors = aurora.colors
 
 -- Helper
 
@@ -277,6 +251,13 @@ local function apply_highlights()
 		bg = "NONE",
 	})
 
+	-- Modern name for @field. Adopted from ui/theme.lua, which was the only file
+	-- setting it; without it the capture falls back to whatever @property links to.
+	set("@variable.member", {
+		fg = c.info,
+		bg = "NONE",
+	})
+
 	-- Types
 
 	set("@type", {
@@ -491,21 +472,21 @@ function M.setup()
 	return true
 end
 
--- Live Aurora Theme Refresh
-
-function M.refresh_theme()
-	apply_highlights()
-
-	vim.schedule(function()
-		vim.cmd("redraw!")
-	end)
-
-	return true
-end
-
 -- IMPORTANT
 
 M.setup()
+
+-- Live Aurora Theme Refresh
+--
+-- This module owns the @* capture groups, and until now nothing re-applied them
+-- after a theme switch: ui/theme.lua's private refresh list covered only itself,
+-- devicons, nvimtree and lualine. Syntax therefore kept the old palette while
+-- the rest of the UI moved, which is the drift you could see on a switch.
+--
+-- The redraw that used to live in refresh_theme() is gone: aurora.refresh() does
+-- one redraw for the whole pass instead of each module scheduling its own.
+
+aurora.on_change(apply_highlights)
 
 -- Return
 

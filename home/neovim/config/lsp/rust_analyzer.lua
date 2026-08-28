@@ -30,8 +30,17 @@ return {
         closingBraceHints = {
           enable = true,
         },
+        closureCaptureHints = {
+          enable = true,
+        },
         closureReturnTypeHints = {
-          enable = "with_block",
+          enable = "always",
+        },
+        discriminantHints = {
+          enable = "always",
+        },
+        expressionAdjustmentHints = {
+          enable = "always",
         },
         lifetimeElisionHints = {
           enable = "skip_trivial",
@@ -39,6 +48,10 @@ return {
         parameterHints = {
           enable = true,
         },
+        reborrowHints = {
+          enable = "always",
+        },
+        renderColons = true,
         typeHints = {
           enable = true,
         },

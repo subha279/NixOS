@@ -83,19 +83,12 @@ function M.setup()
 	return true
 end
 
--- Live Aurora Refresh
-
-function M.refresh_theme()
-	vim.schedule(function()
-		vim.cmd("redraw!")
-		vim.cmd("redrawstatus!")
-	end)
-
-	return true
-end
-
 -- IMPORTANT
 
 M.setup()
+
+-- No theme subscriber: nvim-lint sets no highlights of its own (diagnostics are
+-- coloured by lsp/init.lua). Its refresh_theme() only scheduled a redraw, which
+-- aurora.refresh() now does once for the whole pass.
 
 return M

@@ -1,8 +1,12 @@
+-- Aurora Neovim
+
 -- Leader
+
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 
 -- Startup Timer
+
 vim.g.aurora_startup_time = vim.uv.hrtime()
 
 -- Core
@@ -94,7 +98,7 @@ require("plugins.nvimtree")
 
 -- Git
 
-require("plugins.gitsigns")
+require("plugins.gitsigns").setup()
 
 -- Formatting
 
@@ -123,3 +127,12 @@ require("plugins.alpha")
 -- Core Keymaps
 
 require("core.keymaps")
+
+-- Live Theme Watcher
+--
+-- Started last, once every module above has registered its aurora.theme
+-- subscriber, so a switch re-applies highlights in exactly this file's require
+-- order. Replaces the two independent 500ms uv timers that ui/theme.lua and
+-- plugins/alpha.lua each used to run against the same pointer file.
+
+require("aurora.theme").watch()

@@ -2,32 +2,9 @@
 
 local M = {}
 
--- Paths
+-- Theme
 
-local AURORA_DIR = vim.fn.expand("~/.config/aurora")
-
-local ACTIVE_THEME = AURORA_DIR .. "/active-theme"
-local ACTIVE_THEME_LUA = AURORA_DIR .. "/active-theme.lua"
-
--- Load Active Aurora Theme
-
-local function load_theme()
-	local ok, theme = pcall(dofile, ACTIVE_THEME_LUA)
-
-	if not ok then
-		return nil
-	end
-
-	if type(theme) ~= "table" then
-		return nil
-	end
-
-	if type(theme.colors) ~= "table" then
-		return nil
-	end
-
-	return theme
-end
+local aurora = require("aurora.theme")
 
 -- Highlight Helper
 
@@ -38,7 +15,7 @@ end
 -- Apply Aurora Theme
 
 function M.apply()
-	local theme = load_theme()
+	local theme = aurora.get()
 
 	if not theme then
 		return
@@ -410,236 +387,20 @@ function M.apply()
 		bold = true,
 	})
 
-	-- Treesitter
-
-	set("@comment", {
-		link = "Comment",
-	})
-
-	set("@comment.documentation", {
-		fg = c.textMuted,
-		italic = true,
-	})
-
-	set("@string", {
-		fg = c.terminalGreen,
-	})
-
-	set("@string.documentation", {
-		fg = c.terminalGreen,
-	})
-
-	set("@string.escape", {
-		fg = c.terminalCyan,
-	})
-
-	set("@string.special", {
-		fg = c.terminalCyan,
-	})
-
-	set("@constant", {
-		fg = c.terminalMagenta,
-	})
-
-	set("@constant.builtin", {
-		fg = c.terminalMagenta,
-		bold = true,
-	})
-
-	set("@constant.macro", {
-		fg = c.terminalBlue,
-	})
-
-	set("@number", {
-		fg = c.terminalYellow,
-	})
-
-	set("@float", {
-		fg = c.terminalYellow,
-	})
-
-	set("@boolean", {
-		fg = c.terminalYellow,
-		bold = true,
-	})
-
-	set("@variable", {
-		fg = c.text,
-	})
-
-	set("@variable.builtin", {
-		fg = c.accentHover,
-	})
-
-	set("@variable.parameter", {
-		fg = c.textSecondary,
-	})
-
-	set("@variable.member", {
-		fg = c.info,
-	})
-
-	set("@property", {
-		fg = c.info,
-	})
-
-	set("@field", {
-		fg = c.info,
-	})
-
-	set("@function", {
-		fg = c.accent,
-		bold = true,
-	})
-
-	set("@function.builtin", {
-		fg = c.accentHover,
-	})
-
-	set("@function.call", {
-		fg = c.accent,
-	})
-
-	set("@function.method", {
-		fg = c.accent,
-	})
-
-	set("@function.method.call", {
-		fg = c.accent,
-	})
-
-	set("@keyword", {
-		fg = c.accent,
-		bold = true,
-	})
-
-	set("@keyword.function", {
-		fg = c.accent,
-		bold = true,
-	})
-
-	set("@keyword.operator", {
-		fg = c.terminalCyan,
-	})
-
-	set("@keyword.return", {
-		fg = c.accent,
-		bold = true,
-	})
-
-	set("@conditional", {
-		fg = c.accent,
-		bold = true,
-	})
-
-	set("@repeat", {
-		fg = c.accent,
-		bold = true,
-	})
-
-	set("@type", {
-		fg = c.terminalBlue,
-	})
-
-	set("@type.builtin", {
-		fg = c.terminalBlue,
-		bold = true,
-	})
-
-	set("@type.definition", {
-		fg = c.terminalBlue,
-	})
-
-	set("@operator", {
-		fg = c.terminalCyan,
-	})
-
-	set("@punctuation.delimiter", {
-		fg = c.textSecondary,
-	})
-
-	set("@punctuation.bracket", {
-		fg = c.textSecondary,
-	})
-
-	set("@punctuation.special", {
-		fg = c.terminalCyan,
-	})
-
-	set("@tag", {
-		fg = c.accent,
-	})
-
-	set("@tag.attribute", {
-		fg = c.info,
-	})
-
-	set("@tag.delimiter", {
-		fg = c.textSecondary,
-	})
-
-	set("@module", {
-		fg = c.terminalBlue,
-	})
-
-	set("@namespace", {
-		fg = c.terminalBlue,
-	})
-
-	set("@constructor", {
-		fg = c.terminalBlue,
-	})
-
-	set("@exception", {
-		fg = c.error,
-		bold = true,
-	})
-
-	-- LSP Semantic Tokens
-
-	set("@lsp.type.class", {
-		fg = c.terminalBlue,
-	})
-
-	set("@lsp.type.struct", {
-		fg = c.terminalBlue,
-	})
-
-	set("@lsp.type.enum", {
-		fg = c.terminalBlue,
-	})
-
-	set("@lsp.type.interface", {
-		fg = c.terminalBlue,
-	})
-
-	set("@lsp.type.type", {
-		fg = c.terminalBlue,
-	})
-
-	set("@lsp.type.function", {
-		fg = c.accent,
-	})
-
-	set("@lsp.type.method", {
-		fg = c.accent,
-	})
-
-	set("@lsp.type.variable", {
-		fg = c.text,
-	})
-
-	set("@lsp.type.parameter", {
-		fg = c.textSecondary,
-	})
-
-	set("@lsp.type.property", {
-		fg = c.info,
-	})
-
-	set("@lsp.type.namespace", {
-		fg = c.terminalBlue,
-	})
+	-- Treesitter captures and LSP semantic tokens are NOT set here.
+	--
+	-- plugins/treesitter.lua owns every @* capture and lsp/init.lua owns
+	-- @lsp.type.*. Both load after this file, so their values already won at
+	-- startup and the ~50 assignments that used to sit here were dead on arrival --
+	-- and actively harmful on a theme switch, because this file was refreshed while
+	-- treesitter was not, so @* briefly took these colours instead.
+	--
+	-- @variable.member moved to plugins/treesitter.lua and @lsp.type.struct to
+	-- lsp/init.lua; they were the only groups here that no other file set. The
+	-- legacy captures @conditional, @repeat, @exception and @namespace are simply
+	-- gone: Neovim stopped emitting them in 0.9, and their replacements
+	-- (@keyword.conditional, @keyword.repeat, @keyword.exception, @module) are all
+	-- set by plugins/treesitter.lua.
 
 	-- Diagnostics
 
@@ -725,19 +486,10 @@ function M.apply()
 		bg = c.accentMuted,
 	})
 
-	-- GitSigns
-
-	set("GitSignsAdd", {
-		fg = c.success,
-	})
-
-	set("GitSignsChange", {
-		fg = c.warning,
-	})
-
-	set("GitSignsDelete", {
-		fg = c.error,
-	})
+	-- GitSigns groups are NOT set here.
+	--
+	-- plugins/gitsigns.lua owns them, loads later, and set the same three groups to
+	-- the same three colours, so this was a verbatim duplicate.
 
 	-- Telescope
 
@@ -825,46 +577,14 @@ function M.apply()
 		fg = c.textMuted,
 	})
 
-	-- Blink Completion
-
-	set("BlinkCmpMenu", {
-		fg = c.text,
-		bg = c.surface,
-	})
-
-	set("BlinkCmpMenuBorder", {
-		fg = c.borderFocus,
-		bg = c.surface,
-	})
-
-	set("BlinkCmpMenuSelection", {
-		fg = c.accentForeground,
-		bg = c.accentMuted,
-		bold = true,
-	})
-
-	set("BlinkCmpLabel", {
-		fg = c.text,
-	})
-
-	set("BlinkCmpLabelMatch", {
-		fg = c.accent,
-		bold = true,
-	})
-
-	set("BlinkCmpKind", {
-		fg = c.info,
-	})
-
-	set("BlinkCmpDoc", {
-		fg = c.text,
-		bg = c.surface,
-	})
-
-	set("BlinkCmpDocBorder", {
-		fg = c.borderFocus,
-		bg = c.surface,
-	})
+	-- BlinkCmp groups are NOT set here.
+	--
+	-- plugins/blink.lua owns them and loads earlier, but its values differ (menus
+	-- transparent rather than filled with c.surface), so these seven assignments
+	-- were silently reverting its choices whenever this file re-applied.
+	--
+	-- BlinkCmpLabelMatch and the base BlinkCmpKind moved to plugins/blink.lua; they
+	-- were the only groups here it did not already set.
 
 	-- Dashboard
 
@@ -908,110 +628,42 @@ function M.apply()
 	})
 end
 
--- Plugin Refresh
+-- Apply, and re-apply on theme switch
+--
+-- This file used to own the refresh for the whole config: a private
+-- refresh_plugins() that knew about exactly four things (itself, devicons,
+-- nvimtree, lualine), plus its own reader for the active-theme pointer and its
+-- own 500ms uv timer.
+--
+-- Two problems with that. It duplicated plugins/alpha.lua's identical timer on
+-- the same file, and the list was incomplete: treesitter, LSP, gitsigns and
+-- blink all colour themselves and none were refreshed, so their groups kept the
+-- previous theme's colours until Neovim restarted. Since treesitter owns most
+-- @* captures, that is why syntax colours drifted out of step after a switch.
+--
+-- Now every module registers itself with aurora.theme, which owns the single
+-- watcher and calls subscribers in registration order.
 
-local function refresh_plugins()
-	-- Core theme first.
-	M.apply()
+M.apply()
 
-	-- DevIcons
+aurora.on_change(M.apply)
 
+-- devicons-theme and nvimtree-theme are pure highlight modules with no setup of
+-- their own, so this file drives them: once at startup, and again on change.
+
+local function apply_icon_themes()
 	pcall(function()
 		require("ui.devicons-theme").setup()
 	end)
 
-	-- NvimTree
-
 	pcall(function()
 		require("ui.nvimtree-theme").setup()
 	end)
-
-	-- Lualine
-
-	pcall(function()
-		local lualine = require("plugins.lualine")
-
-		if type(lualine.refresh_theme) == "function" then
-			lualine.refresh_theme()
-		end
-	end)
-
-	-- Refresh visible NvimTree
-
-	pcall(function()
-		local api = require("nvim-tree.api")
-
-		if api.tree.is_visible() then
-			api.tree.reload()
-		end
-	end)
-
-	-- Final redraw
-
-	vim.cmd("redraw!")
-	vim.cmd("redrawstatus!")
 end
 
--- Active Theme Reader
+apply_icon_themes()
 
-local last_theme = nil
-
-local function get_active_theme()
-	local file = io.open(ACTIVE_THEME, "r")
-
-	if not file then
-		return nil
-	end
-
-	local value = file:read("*l")
-
-	file:close()
-
-	return value
-end
-
--- Live Theme Watcher
-
-local function check_for_theme_change()
-	local current = get_active_theme()
-
-	if not current or current == "" then
-		return
-	end
-
-	-- First observation.
-	if last_theme == nil then
-		last_theme = current
-		return
-	end
-
-	-- No change.
-	if current == last_theme then
-		return
-	end
-
-	-- Remember immediately so polling cannot trigger a loop.
-	last_theme = current
-
-	-- Aurora changes the regular theme file and the symlink.
-	vim.defer_fn(function()
-		refresh_plugins()
-	end, 100)
-end
-
--- Polling Timer
-
-local timer = vim.uv.new_timer()
-
-if timer then
-	timer:start(500, 500, vim.schedule_wrap(check_for_theme_change))
-end
-
--- Initial Apply
-
-vim.defer_fn(function()
-	refresh_plugins()
-end, 100)
+aurora.on_change(apply_icon_themes)
 
 -- Return
 

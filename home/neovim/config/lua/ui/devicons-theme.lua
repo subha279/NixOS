@@ -4,26 +4,12 @@ local M = {}
 
 -- Theme Loader
 
-local function get_theme()
-	local path = vim.fn.expand("~/.config/aurora/active-theme.lua")
-
-	local ok, theme = pcall(dofile, path)
-
-	if not ok or type(theme) ~= "table" then
-		return nil
-	end
-
-	if type(theme.colors) ~= "table" then
-		return nil
-	end
-
-	return theme
-end
+local aurora = require("aurora.theme")
 
 -- Apply
 
 function M.setup()
-	local theme = get_theme()
+	local theme = aurora.get()
 
 	if not theme then
 		return
@@ -31,49 +17,14 @@ function M.setup()
 
 	local c = theme.colors
 
-	-- NvimTree Folder Icons
-
-	vim.api.nvim_set_hl(0, "NvimTreeFolderIcon", {
-		fg = c.accent,
-	})
-
-	vim.api.nvim_set_hl(0, "NvimTreeOpenedFolderIcon", {
-		fg = c.accentHover,
-	})
-
-	vim.api.nvim_set_hl(0, "NvimTreeSymlinkIcon", {
-		fg = c.info,
-	})
-
-	-- NvimTree Git Icons
-
-	vim.api.nvim_set_hl(0, "NvimTreeGitNewIcon", {
-		fg = c.success,
-	})
-
-	vim.api.nvim_set_hl(0, "NvimTreeGitDirtyIcon", {
-		fg = c.warning,
-	})
-
-	vim.api.nvim_set_hl(0, "NvimTreeGitDeletedIcon", {
-		fg = c.error,
-	})
-
-	vim.api.nvim_set_hl(0, "NvimTreeGitStagedIcon", {
-		fg = c.success,
-	})
-
-	vim.api.nvim_set_hl(0, "NvimTreeGitRenamedIcon", {
-		fg = c.info,
-	})
-
-	vim.api.nvim_set_hl(0, "NvimTreeGitMergeIcon", {
-		fg = c.error,
-	})
-
-	vim.api.nvim_set_hl(0, "NvimTreeGitIgnoredIcon", {
-		fg = c.textMuted,
-	})
+	-- NvimTree groups are NOT set here.
+	--
+	-- ui/nvimtree-theme.lua owns them and already set all ten of the ones this
+	-- file used to touch. It also runs second, so it won -- and the two disagreed:
+	-- NvimTreeGitStagedIcon was c.success here and c.info there, so the value that
+	-- actually rendered was never the one this file asked for.
+	--
+	-- This module's job is the DevIcon* groups below.
 
 	-- nvim-web-devicons
 
@@ -104,8 +55,14 @@ function M.setup()
 	}
 
 	-- Apply colors to every registered icon
+	--
+	-- Collected and sorted before assigning, because the palette is handed out by
+	-- position: pairs() gives no order guarantee, so walking the icon table
+	-- directly dealt a different colour to each filetype on every launch. Sorting
+	-- by group name makes the result stable across restarts, and stable between
+	-- theme switches, without pinning a colour per filetype by hand.
 
-	local index = 1
+	local group_names = {}
 
 	for name, icon in pairs(icons) do
 		if type(icon) == "table" then
@@ -119,16 +76,24 @@ function M.setup()
 			end
 
 			if group_name then
-				vim.api.nvim_set_hl(0, group_name, {
-					fg = palette[index],
-				})
-
-				index = index + 1
-
-				if index > #palette then
-					index = 1
-				end
+				group_names[#group_names + 1] = group_name
 			end
+		end
+	end
+
+	table.sort(group_names)
+
+	local index = 1
+
+	for _, group_name in ipairs(group_names) do
+		vim.api.nvim_set_hl(0, group_name, {
+			fg = palette[index],
+		})
+
+		index = index + 1
+
+		if index > #palette then
+			index = 1
 		end
 	end
 

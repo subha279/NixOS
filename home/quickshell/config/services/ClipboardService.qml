@@ -87,12 +87,27 @@ Item {
     Process {
         id: watcher
 
-        command: ["sh", "-c", "wl-paste --type text --watch cliphist store"]
+        // No --type filter on purpose: cliphist stores images too, and pinning
+        // this to text meant image copies never reached the history.
+        command: ["sh", "-c", "wl-paste --watch cliphist store"]
 
         running: true
 
-        onExited: {
-            watcher.running = true;
+        // Restart via a timer instead of reassigning running here. The immediate
+        // version was an unbounded busy loop any time wl-paste could not start at
+        // all -- missing binary, or no Wayland display yet.
+        onExited: watcherRestart.start()
+    }
+
+    Timer {
+        id: watcherRestart
+
+        interval: 2000
+        repeat: false
+
+        onTriggered: {
+            if (!watcher.running)
+                watcher.running = true;
         }
     }
 

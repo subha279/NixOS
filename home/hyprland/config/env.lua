@@ -1,9 +1,16 @@
 -- Environment Variables
 
 -- Cursor
+--
+-- Must match global.cursor.size in lib/themes.nix, which is what stylix applies
+-- to GTK/Qt. These said 24 against a themed 30, so XWayland clients and anything
+-- reading the env var drew a different cursor size from native Wayland clients.
+--
+-- This file is copied verbatim rather than generated, so the value is duplicated
+-- by hand for now; generating env.lua from themes.nix would remove the second copy.
 
-hl.env("XCURSOR_SIZE", "24")
-hl.env("HYPRCURSOR_SIZE", "24")
+hl.env("XCURSOR_SIZE", "30")
+hl.env("HYPRCURSOR_SIZE", "30")
 
 -- Wayland
 
