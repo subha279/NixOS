@@ -266,7 +266,7 @@ QtObject {
 
     readonly property int fontSizeTitle: Math.round(fontSize * 2.0)
 
-    readonly property int fontSizeHeading: Math.round(fontSize * 1.45)
+    readonly property int iconSizeMedium: Math.round(iconSize * 1.25)
 
     readonly property int iconSizeLarge: Math.round(iconSize * 1.6)
 

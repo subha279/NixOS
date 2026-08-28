@@ -414,7 +414,7 @@ PanelWindow {
 
                                 font.family: Core.Theme.iconFont
 
-                                font.pixelSize: 19
+                                font.pixelSize: Core.Theme.iconSizeMedium
 
                                 color: Core.Theme.textMuted
 
@@ -530,7 +530,7 @@ PanelWindow {
 
                                 font.family: Core.Theme.iconFont
 
-                                font.pixelSize: 15
+                                font.pixelSize: Core.Theme.iconSizeSmall
 
                                 color: Core.Theme.textMuted
                             }

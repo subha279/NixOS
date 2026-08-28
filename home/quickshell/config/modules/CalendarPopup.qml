@@ -473,7 +473,7 @@ Components.PopupSurface {
 
                         text: "\udb80\udced  Today"
 
-                        font.family: Core.Theme.iconFont
+                        font.families: Core.Theme.textFamilies
                         font.pixelSize: Core.Theme.fontSizeSmall
 
                         color: Core.Theme.foreground

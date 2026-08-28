@@ -316,7 +316,7 @@ Components.PopupSurface {
                             text: "\udb80\udfba"
 
                             font.family: Core.Theme.iconFont
-                            font.pixelSize: 13
+                            font.pixelSize: Core.Theme.iconSizeSmall
 
                             color: Core.Theme.foregroundMuted
                         }
@@ -406,7 +406,7 @@ Components.PopupSurface {
                                 text: "\udb81\udc0c"
 
                                 font.family: Core.Theme.iconFont
-                                font.pixelSize: 13
+                                font.pixelSize: Core.Theme.iconSizeSmall
 
                                 color: passwordInput.text !== "" ? Core.Theme.accent : Core.Theme.foregroundFaint
                             }
@@ -695,7 +695,7 @@ Components.PopupSurface {
                         text: popup.svc.wifiEnabled ? "\udb82\udd2f" : "\udb82\udd2d"
 
                         font.family: Core.Theme.iconFont
-                        font.pixelSize: 20
+                        font.pixelSize: Core.Theme.iconSizeMedium
 
                         color: Core.Theme.foregroundFaint
                     }

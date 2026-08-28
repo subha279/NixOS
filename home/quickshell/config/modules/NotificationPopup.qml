@@ -455,7 +455,7 @@ Components.PopupSurface {
                                 text: Core.Icons.close
 
                                 font.family: Core.Theme.iconFont
-                                font.pixelSize: 12
+                                font.pixelSize: Core.Theme.iconSizeSmall
 
                                 color: Core.Theme.foregroundMuted
                             }
@@ -577,7 +577,7 @@ Components.PopupSurface {
                         text: "\udb80\udc9c"
 
                         font.family: Core.Theme.iconFont
-                        font.pixelSize: 20
+                        font.pixelSize: Core.Theme.iconSizeMedium
 
                         color: Core.Theme.foregroundFaint
                     }

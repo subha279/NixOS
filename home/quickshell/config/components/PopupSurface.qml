@@ -308,7 +308,7 @@ PanelWindow {
 
                                         font.family: Core.Theme.iconFont
 
-                                        font.pixelSize: 13
+                                        font.pixelSize: Core.Theme.iconSizeSmall
 
                                         color: entryLoader.modelData.danger === true ? Core.Theme.danger : Core.Theme.foregroundMuted
                                     }

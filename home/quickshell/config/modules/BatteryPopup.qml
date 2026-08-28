@@ -377,7 +377,7 @@ Components.PopupSurface {
 
                     elide: Text.ElideRight
 
-                    font.family: Core.Theme.iconFont
+                    font.families: Core.Theme.textFamilies
                     font.pixelSize: Core.Theme.fontSizeSmall
 
                     color: Core.Theme.warning
