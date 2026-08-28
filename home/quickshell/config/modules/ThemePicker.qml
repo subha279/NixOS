@@ -15,7 +15,7 @@ Components.LauncherSurface {
     placeholder: "Search colorschemes"
 
     cardWidth: 460
-    cardHeight: 460
+    rowHeight: 60
 
     columns: 1
 

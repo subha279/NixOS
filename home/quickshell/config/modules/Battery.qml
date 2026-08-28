@@ -105,19 +105,19 @@ Item {
                 id: popAnim
 
                 NumberAnimation {
-                    target: icon
-                    property: "scale"
-                    to: 1.22
-                    duration: 110
-                    easing.type: Easing.OutQuint
+                	target: icon
+                	property: "opacity"
+                	to: 0.55
+                	duration: 90
+                	easing.type: Easing.OutQuint
                 }
 
                 NumberAnimation {
-                    target: icon
-                    property: "scale"
-                    to: 1.0
-                    duration: 160
-                    easing.type: Easing.OutQuint
+                	target: icon
+                	property: "opacity"
+                	to: 1.0
+                	duration: 150
+                	easing.type: Easing.OutQuint
                 }
             }
         }

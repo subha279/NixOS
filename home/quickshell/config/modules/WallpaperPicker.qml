@@ -15,7 +15,6 @@ Components.LauncherSurface {
     placeholder: "Search wallpapers"
 
     cardWidth: 760
-    cardHeight: 540
 
     columns: 3
 

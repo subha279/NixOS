@@ -368,7 +368,6 @@ QtObject {
 
     readonly property int durClose: 150
 
-    readonly property real overshoot: 1.0
 
     // Collapsing Bar
 
