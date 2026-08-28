@@ -1,12 +1,8 @@
--- Aurora Neovim
-
 -- Leader
-
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 
 -- Startup Timer
-
 vim.g.aurora_startup_time = vim.uv.hrtime()
 
 -- Core
