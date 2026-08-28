@@ -11,26 +11,18 @@ hl.on("hyprland.start", function()
 			.. "&& systemctl --user start hyprland-session.target"
 	)
 
-	-- Network
+	-- nm-applet and blueman-applet used to be launched from here.
 	--
-	-- Guarded so a reload cannot stack a second copy.
+	-- They are systemd user services now, in home/hyprland/default.nix, pulled
+	-- in by desktop-services.target. The line above starts that target, so they
+	-- come up as part of the same session, just with systemd owning them.
 	--
-	-- `aurora-theme` ends with `hyprctl reload`, and depending on whether these
-	-- land as `exec` or `exec-once` a reload can re-run this whole block. A
-	-- second nm-applet means two secret agents registered against
-	-- NetworkManager for the same session, which is a good way to make a
-	-- perfectly healthy connection look like it is renegotiating every time the
-	-- theme changes.
-	--
-	-- pgrep -x matches the exact process name. If it ever fails to match, the
-	-- behaviour is simply the old behaviour, so this cannot stop the applet
-	-- starting in the first place.
-
-	hl.exec_cmd("pgrep -x nm-applet >/dev/null 2>&1 || nm-applet --indicator")
-
-	-- Bluetooth
-
-	hl.exec_cmd("pgrep -x blueman-applet >/dev/null 2>&1 || blueman-applet")
+	-- The reason is duplication. `aurora-theme` finishes with `hyprctl reload`,
+	-- and anything started from this hook can be started again by a reload. Two
+	-- nm-applets mean two secret agents registered against NetworkManager for
+	-- one session, which is enough to make a healthy connection look like it is
+	-- renegotiating every time the theme changes. systemd will only ever run one
+	-- copy of a service, so the problem cannot occur.
 
 	-- Wallpaper
 
