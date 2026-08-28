@@ -5,7 +5,6 @@ import Quickshell
 import "../core" as Core
 import "../services" as Services
 
-// Network bar module
 
 Item {
     id: root
@@ -19,7 +18,6 @@ Item {
 
     readonly property bool showEthernet: root.link === "ethernet"
 
-    // Signal tier, with a deadband
 
     property int tier: 3
 
@@ -41,7 +39,6 @@ Item {
         root.tier = t;
     }
 
-    // Hover / open background
 
     Rectangle {
         anchors.fill: parent
@@ -58,7 +55,6 @@ Item {
         }
     }
 
-    // Ethernet icon
 
     Text {
         anchors.centerIn: parent
@@ -89,7 +85,6 @@ Item {
         }
     }
 
-    // Wi-Fi icon
 
     Text {
         anchors.centerIn: parent
@@ -144,7 +139,6 @@ Item {
         }
     }
 
-    // Activity dot (connecting / scanning)
 
     Rectangle {
         anchors.top: parent.top
@@ -188,7 +182,6 @@ Item {
         }
     }
 
-    // Interaction
 
     MouseArea {
         id: mouse
@@ -212,10 +205,6 @@ Item {
                 return;
             }
 
-            // Screen-space anchor for the dropdown.
-            // The bar window spans the full width, so mapToItem(null)
-            // already gives us screen X; we only add the bar's top
-            // margin to get screen Y.
             const p = root.mapToItem(null, 0, root.height);
 
             Core.PopupManager.toggle("network", p.x + root.width / 2, p.y + Core.Theme.barMarginTop);
@@ -231,7 +220,6 @@ Item {
         }
     }
 
-    // Poll faster while the menu is open
     Binding {
         target: Services.NetworkService
         property: "fastPoll"

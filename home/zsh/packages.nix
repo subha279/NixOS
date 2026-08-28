@@ -3,7 +3,6 @@
 {
   home.packages = with pkgs; [
 
-    # Modern CLI
     bat
     eza
     fd
@@ -12,7 +11,6 @@
     ripgrep
     zoxide
 
-    # Shell Prompt
     starship
   ];
 }

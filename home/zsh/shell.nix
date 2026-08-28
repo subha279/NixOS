@@ -6,7 +6,6 @@
 
     dotDir = "${config.xdg.configHome}/zsh";
 
-    # Shell Options
 
     setOptions = [
       "AUTO_CD"
@@ -18,22 +17,16 @@
       "INTERACTIVE_COMMENTS"
     ];
 
-    # Environment
 
     envExtra = ''
-      # ==================================================
       # Aurora → Starship
-      # ==================================================
 
       export STARSHIP_CONFIG="$HOME/.config/aurora/active-starship.toml"
     '';
 
-    # Interactive Zsh Configuration
 
     initContent = ''
-      # ==================================================
       # Aurora Live Starship Refresh
-      # ==================================================
       #
       # Aurora changes active-starship.toml externally.
       #
@@ -48,7 +41,6 @@
       # No pkill.
       # No exec zsh after switching.
       #
-      # ==================================================
 
       if [[ -o interactive ]]; then
 
@@ -156,7 +148,6 @@
     '';
   };
 
-  # Starship
 
   programs.starship = {
     enable = true;

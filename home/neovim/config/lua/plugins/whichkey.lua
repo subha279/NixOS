@@ -1,11 +1,7 @@
--- Aurora Which-Key
-
 local wk = require("which-key")
 
--- Setup
 
 wk.setup({
-	-- Popup
 
 	preset = "modern",
 
@@ -29,7 +25,6 @@ wk.setup({
 		zindex = 1000,
 	},
 
-	-- Layout
 
 	layout = {
 		width = {
@@ -42,7 +37,6 @@ wk.setup({
 		align = "left",
 	},
 
-	-- Icons
 
 	icons = {
 		breadcrumb = "»",
@@ -52,7 +46,6 @@ wk.setup({
 		rules = false,
 	},
 
-	-- Sorting
 
 	sort = {
 		"local",
@@ -64,7 +57,6 @@ wk.setup({
 
 	expand = 1,
 
-	-- Built-in groups
 
 	plugins = {
 		marks = true,
@@ -88,11 +80,9 @@ wk.setup({
 	},
 })
 
--- Aurora Keymap Hierarchy
 
 wk.add({
 
-	-- FIND
 
 	{
 		"<leader>f",
@@ -140,7 +130,6 @@ wk.add({
 		desc = "Search buffer",
 	},
 
-	-- BUFFERS
 
 	{
 		"<leader>b",
@@ -168,7 +157,6 @@ wk.add({
 		desc = "Buffer picker",
 	},
 
-	-- WINDOWS
 
 	{
 		"<leader>w",
@@ -196,7 +184,6 @@ wk.add({
 		desc = "Equalize windows",
 	},
 
-	-- TABS / TERMINAL
 
 	{
 		"<leader>t",
@@ -229,7 +216,6 @@ wk.add({
 		desc = "Terminal",
 	},
 
-	-- EXPLORER
 
 	{
 		"<leader>e",
@@ -252,7 +238,6 @@ wk.add({
 		desc = "Refresh explorer",
 	},
 
-	-- GIT
 
 	{
 		"<leader>g",
@@ -306,7 +291,6 @@ wk.add({
 		icon = "󰊢",
 	},
 
-	-- LSP
 
 	{
 		"<leader>l",
@@ -334,7 +318,6 @@ wk.add({
 		desc = "Rename symbol",
 	},
 
-	-- DIAGNOSTICS
 
 	{
 		"<leader>x",
@@ -367,7 +350,6 @@ wk.add({
 		desc = "Quickfix list",
 	},
 
-	-- QUICKFIX
 
 	{
 		"<leader>c",
@@ -395,7 +377,6 @@ wk.add({
 		desc = "Previous quickfix",
 	},
 
-	-- FORMAT / LINT
 
 	{
 		"<leader>gf",
@@ -409,7 +390,6 @@ wk.add({
 		icon = "󰁨",
 	},
 
-	-- EDITING
 
 	{
 		"<leader>p",
@@ -423,7 +403,6 @@ wk.add({
 		icon = "󰆴",
 	},
 
-	-- HISTORY
 
 	{
 		"<leader>:",
@@ -435,7 +414,6 @@ wk.add({
 		desc = "Search history",
 	},
 
-	-- HELP
 
 	{
 		"<leader>h",

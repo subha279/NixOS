@@ -8,7 +8,6 @@ import "../components" as Components
 import "../core" as Core
 import "../services" as Services
 
-// Aurora Notifications — transient toast overlay
 
 PanelWindow {
     id: root
@@ -16,8 +15,6 @@ PanelWindow {
     anchors.top: true
     anchors.right: true
 
-    // Reduced by exactly toastGutter, because the gutter added below carries
-    // the shadow. The visible card therefore stays in the same place as before.
     margins.top: 40
     margins.right: 6
 
@@ -25,19 +22,13 @@ PanelWindow {
 
     readonly property int toastWidth: 356
 
-    // Transparent room around each card for its drop shadow. Both the wrapper
-    // and the card clip, so the shadow cannot be drawn past their edges.
     readonly property int toastGutter: 8
 
-    // Adjacent gutters already supply the visual gap between cards.
     readonly property int toastSpacing: 0
     readonly property int maxHeight: 640
 
     implicitWidth: root.toastWidth + root.toastGutter * 2 + 14
 
-    // Fixed on purpose. Binding this to the column made the layer-shell surface
-    // resize on every animation frame, which is what caused the tearing and
-    // jumping. The mask below already limits input to the actual cards.
     implicitHeight: root.maxHeight
 
     color: "transparent"
@@ -45,14 +36,12 @@ PanelWindow {
     WlrLayershell.namespace: "aurora-notifications"
     WlrLayershell.layer: WlrLayer.Overlay
 
-    // A toast must never steal keyboard focus from whatever you are typing in.
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
 
     exclusionMode: ExclusionMode.Ignore
 
     visible: root.toasts.length > 0 && !Core.PopupManager.dnd && !Core.PopupManager.isOpen("notifications")
 
-    // Only the actual toast stack receives input.
     mask: Region {
         item: column
     }
@@ -67,11 +56,6 @@ PanelWindow {
 
         spacing: root.toastSpacing
 
-        // Cards glide when the stack reflows instead of snapping to a new
-        // position, which is what looked broken when two arrived at once.
-        //
-        // Positioners support add/move/populate only. "displaced" belongs to
-        // ListView/GridView and is rejected here; move covers the reflow.
         move: Transition {
             NumberAnimation {
                 property: "y"
@@ -103,23 +87,14 @@ PanelWindow {
 
                 property bool dismissing: false
 
-                // Transform-driven animation.
-                //
-                // 0 = visible
-                // 1 = completely offscreen
                 property real slide: 1.0
 
-                // 1 = normal height
-                // 0 = collapsed
                 property real collapse: 1.0
 
-                // Animation-driven only. Binding opacity to slide while the exit
-                // animation also wrote to it broke the binding mid-flight.
                 property real fade: 0.0
 
                 width: root.toastWidth + root.toastGutter * 2
 
-                // Positioned by the parent Column, which measures every card rather than assuming a fixed height.
                 height: Math.max(0, (wrapper.cardHeight + root.toastGutter * 2) * wrapper.collapse)
 
                 opacity: wrapper.fade
@@ -130,7 +105,6 @@ PanelWindow {
                     enterAnim.start();
                 }
 
-                // Toast lifecycle
 
                 function hide() {
                     if (wrapper.dismissing)
@@ -171,13 +145,11 @@ PanelWindow {
                             }
                         }
                     } catch (e) {
-                        // No usable action.
                     }
 
                     wrapper.dismissFully();
                 }
 
-                // Entrance
 
                 ParallelAnimation {
                     id: enterAnim
@@ -209,7 +181,6 @@ PanelWindow {
                     }
                 }
 
-                // Exit
 
                 SequentialAnimation {
                     id: exitAnim
@@ -258,13 +229,6 @@ PanelWindow {
                     }
                 }
 
-                // Lifetime
-                //
-                // 250ms rather than 100ms: this only decrements a countdown that
-                // nothing displays, so the extra granularity bought nothing and
-                // cost three wakeups a second per visible toast. Default lifetime
-                // is 3500ms, so the worst-case error is a toast lasting 250ms
-                // longer than asked.
 
                 Timer {
                     id: tick
@@ -282,9 +246,6 @@ PanelWindow {
                     }
                 }
 
-                // Floating shadow. A sibling, because the card clips its own
-                // children; it slides with the card so the two never detach
-                // during the exit animation.
 
                 Item {
                     anchors.fill: card
@@ -304,7 +265,6 @@ PanelWindow {
                     }
                 }
 
-                // Card
 
                 Rectangle {
                     id: card
@@ -325,14 +285,10 @@ PanelWindow {
 
                     clip: true
 
-                    // Frosted, not filled. Hyprland blurs the
-                    // aurora-notifications layer (layerules.lua); Glass is what
-                    // lets that blur through.
                     color: "transparent"
 
                     border.width: Core.Theme.borderWidth
 
-                    // Critical is the only state that gets colour, and only as a border.
                     border.color: wrapper.critical ? Core.Theme.danger : Core.Theme.borderActive
 
                     transform: Translate {
@@ -345,7 +301,6 @@ PanelWindow {
                         radius: parent.radius
                     }
 
-                    // Hover
 
                     HoverHandler {
                         id: cardHover
@@ -356,7 +311,6 @@ PanelWindow {
                         }
                     }
 
-                    // Mouse interaction
 
                     MouseArea {
                         anchors.fill: parent
@@ -380,7 +334,6 @@ PanelWindow {
                         }
                     }
 
-                    // Content
 
                     RowLayout {
                         id: contentRow
@@ -395,7 +348,6 @@ PanelWindow {
 
                         spacing: 11
 
-                        // Application icon
                         Rectangle {
                             Layout.alignment: Qt.AlignTop
 
@@ -406,26 +358,22 @@ PanelWindow {
 
                             color: Core.Theme.surfaceGlass
 
-                            // Resolve the notification icon.
 
                             readonly property string resolvedIcon: {
                                 const n = wrapper.modelData;
 
-                                // 1. Explicit notification image
                                 try {
                                     if (n.image !== undefined && n.image !== null && String(n.image) !== "") {
                                         return String(n.image);
                                     }
                                 } catch (e) {}
 
-                                // 2. Explicit image path
                                 try {
                                     if (n.imagePath !== undefined && n.imagePath !== null && String(n.imagePath) !== "") {
                                         return String(n.imagePath);
                                     }
                                 } catch (e) {}
 
-                                // 3. Desktop/application icon
                                 try {
                                     if (n.appIcon !== undefined && n.appIcon !== null && String(n.appIcon) !== "") {
                                         return Quickshell.iconPath(String(n.appIcon), true);
@@ -456,7 +404,6 @@ PanelWindow {
                                 mipmap: true
                             }
 
-                            // Nerd Font fallback
 
                             Text {
                                 anchors.centerIn: parent
@@ -471,15 +418,9 @@ PanelWindow {
 
                                 color: Core.Theme.textMuted
 
-                                // Deliberately left on the default (QtRendering).
-                                // This glyph sits inside a card that slides in and
-                                // out on a Translate, and NativeRendering snaps to
-                                // integer pixel positions, so it visibly juddered
-                                // against the smoothly-moving card around it.
                             }
                         }
 
-                        // Text
 
                         ColumnLayout {
                             Layout.fillWidth: true
@@ -571,7 +512,6 @@ PanelWindow {
                             }
                         }
 
-                        // Close
 
                         Rectangle {
                             Layout.alignment: Qt.AlignTop

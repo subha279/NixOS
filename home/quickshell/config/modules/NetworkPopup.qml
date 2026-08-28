@@ -6,7 +6,6 @@ import "../core" as Core
 import "../services" as Services
 import "../components" as Components
 
-// NetworkPopup
 
 Components.PopupSurface {
     id: popup
@@ -18,11 +17,9 @@ Components.PopupSurface {
 
     readonly property var svc: Services.NetworkService
 
-    // SSID awaiting a password, "" when the field is hidden
     property string passwordFor: ""
     property string passwordError: ""
 
-    // The password field now lives inside contentComponent, so its id is out of scope here.
     property string passwordText: ""
     property int focusPulse: 0
 
@@ -64,9 +61,6 @@ Components.PopupSurface {
         popup.svc.connectWifi(ssid, "");
     }
 
-    // Content
-
-    // Content
 
     contentComponent: Component {
 
@@ -75,7 +69,6 @@ Components.PopupSurface {
 
             spacing: Core.Theme.spacing
 
-            // Header
 
             Components.PopupHeader {
                 width: parent.width
@@ -114,7 +107,6 @@ Components.PopupSurface {
                 color: Core.Theme.separator
             }
 
-            // Ethernet
 
             Item {
                 width: parent.width
@@ -177,7 +169,6 @@ Components.PopupSurface {
                         dimmed: popup.svc.ethState === "unavailable"
 
                         onActivated: {
-                            // Clicking one link drops the other
                             popup.svc.toggleEthernet();
                         }
 
@@ -222,7 +213,6 @@ Components.PopupSurface {
                 }
             }
 
-            // Wi-Fi section label
 
             Item {
                 width: parent.width
@@ -266,7 +256,6 @@ Components.PopupSurface {
                 }
             }
 
-            // Inline password field
 
             Item {
                 width: parent.width
@@ -356,7 +345,6 @@ Components.PopupSurface {
 
                             selectionColor: Core.Theme.accentSoft
 
-                            // Two-way bridge to popup.passwordText
                             onTextChanged: popup.passwordText = passwordInput.text
 
                             Component.onCompleted: passwordInput.text = popup.passwordText
@@ -460,7 +448,6 @@ Components.PopupSurface {
                 }
             }
 
-            // Network list
 
             Item {
                 width: parent.width
@@ -471,7 +458,6 @@ Components.PopupSurface {
 
                 clip: true
 
-                // Deliberately NO Behavior on height here. The card
 
                 ListView {
                     id: list
@@ -486,7 +472,6 @@ Components.PopupSurface {
 
                     model: popup.svc.networkModel
 
-                    // Per-row motion
 
                     add: Transition {
                         NumberAnimation {
@@ -549,7 +534,6 @@ Components.PopupSurface {
                     delegate: Components.ListRow {
                         id: netRow
 
-                        // `signal` is a reserved QML keyword, so the model role is called `strength`.
                         required property string ssid
                         required property int strength
                         required property string security
@@ -573,7 +557,6 @@ Components.PopupSurface {
 
                         busy: popup.svc.pendingSsid === netRow.ssid && popup.svc.busy
 
-                        // Left click
 
                         onActivated: {
                             if (netRow.inUse) {
@@ -584,7 +567,6 @@ Components.PopupSurface {
                             popup.requestConnect(netRow.ssid, netRow.secured, netRow.saved);
                         }
 
-                        // Right click
 
                         onContextRequested: function (mx, my) {
                             const items = [];
@@ -676,7 +658,6 @@ Components.PopupSurface {
                 }
             }
 
-            // Empty / disabled states
 
             Item {
                 width: parent.width

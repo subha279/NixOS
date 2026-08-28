@@ -1,5 +1,3 @@
--- Autocommands
-
 local group = vim.api.nvim_create_augroup("UserAutocmds", {
 	clear = true,
 })
@@ -10,25 +8,20 @@ vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter" }, {
 	callback = function(event)
 		local buf = event.buf
 
-		-- Only normal editable buffers.
 		if vim.bo[buf].buftype ~= "" then
 			return
 		end
 
-		-- Normal editing view.
 		vim.wo.number = true
 		vim.wo.relativenumber = true
 		vim.wo.signcolumn = "yes"
 	end,
 })
 
--- Highlight yanked text
 
 vim.api.nvim_create_autocmd("TextYankPost", {
 	group = group,
 	callback = function()
-		-- vim.hl replaced vim.highlight in 0.11; vim.highlight still works but is
-		-- deprecated and emits a warning. Prefer the new name where present.
 		local hl = vim.hl or vim.highlight
 
 		hl.on_yank({
@@ -37,15 +30,6 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 	end,
 })
 
--- Remove trailing whitespace
---
--- Skipped for filetypes where trailing space is meaningful or expected:
--- markdown treats two trailing spaces as a hard line break, so stripping them
--- silently reflowed documents on save.
---
--- Also skipped for very large buffers. The substitute walks the whole file on
--- every write, which is fine for source but not for a multi-megabyte log or
--- dump that snacks.bigfile has already put into a stripped-down mode.
 
 local keep_trailing_whitespace = {
 	markdown = true,
@@ -77,7 +61,6 @@ vim.api.nvim_create_autocmd("BufWritePre", {
 	end,
 })
 
--- Remember cursor position
 
 vim.api.nvim_create_autocmd("BufReadPost", {
 	group = group,
@@ -90,7 +73,6 @@ vim.api.nvim_create_autocmd("BufReadPost", {
 	end,
 })
 
--- Close temporary windows with q
 
 vim.api.nvim_create_autocmd("FileType", {
 	group = group,

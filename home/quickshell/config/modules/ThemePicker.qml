@@ -5,7 +5,6 @@ import "../components" as Components
 import "../core" as Core
 import "../services" as Services
 
-// Colorscheme Picker
 
 Components.LauncherSurface {
     id: launcher
@@ -18,13 +17,8 @@ Components.LauncherSurface {
 
     columns: 1
 
-    // 56px delegate + 4px ListView spacing. The card was being sized from the
-    // 40px default, leaving it 200px short at ten results.
     rowHeight: 60
 
-    // Selection only, same as the wallpaper picker: the wheel and h/j/k/l move
-    // the highlight, and Enter applies. Applying a colourscheme relinks symlinks
-    // and reloads Hyprland, so it is not something to fire off per row anyway.
     vimNavigation: true
 
     readonly property var results: Services.ThemeService.search(launcher.query)
@@ -40,7 +34,6 @@ Components.LauncherSurface {
 
         launcher.dismiss();
 
-        // Re-applying the active theme would relink five symlinks and trigger a hyprctl reload for no visible change.
         if (theme.id === Services.ThemeService.activeId)
             return;
 
@@ -96,17 +89,6 @@ Components.LauncherSurface {
                 required property var modelData
                 required property int index
 
-                // Inset from the list, which is the whole reason the zoom is
-                // safe: a full-bleed row has nowhere to grow into, so scaling it
-                // up ran it off both edges and the clip shaved it flat. 12px of
-                // gutter against the 6.5px the row gains at 1.03.
-                //
-                // The inset has to come from a transform, not from x. A vertical
-                // ListView positions its delegates itself and assigns x = 0 on
-                // every layout pass, which overwrites an x binding here and
-                // leaves the row narrow but still hugging the left edge, with
-                // its scaled edge and its accent bar clipped away. A Translate
-                // is applied on top of the view's positioning, so it survives.
                 width: list.width - 24
 
                 transform: Translate {
@@ -115,19 +97,13 @@ Components.LauncherSurface {
 
                 height: 56
 
-                // Always rounded now, like the rows in the battery popup.
                 radius: Core.Theme.radiusRow
 
                 readonly property bool selected: row.index === launcher.selectedIndex
                 readonly property bool isActive: row.modelData.id === Services.ThemeService.activeId
 
-                // The selected row grows past its slot, so it paints over its
-                // neighbours.
                 z: row.selected ? 2 : 0
 
-                // Zoom on selection, kept small on purpose: the row is nearly
-                // card-wide, so a few percent is already a lot of travel. The
-                // miniature below carries the rest of it.
                 scale: row.selected ? 1.03 : 1.0
 
                 Behavior on scale {
@@ -137,7 +113,6 @@ Components.LauncherSurface {
                     }
                 }
 
-                // A partially generated themes.json must not break layout, so every read has a fallback.
                 readonly property var palette: row.modelData.colors || ({})
 
                 function shade(key, fallback) {
@@ -145,10 +120,6 @@ Components.LauncherSurface {
                     return (value && String(value).length > 0) ? value : fallback;
                 }
 
-                // Battery-popup selection: a quiet raised surface rather than a
-                // solid accent fill. The accent moves to the bar on the left
-                // and into the text, so the row no longer has to invert
-                // everything sitting on it.
                 color: row.selected ? Core.Theme.surfaceGlass : "transparent"
 
                 Behavior on color {
@@ -158,8 +129,6 @@ Components.LauncherSurface {
                     }
                 }
 
-                // Selection marker, borrowed from ListRow: a short accent bar
-                // on the left edge that grows out of nothing.
                 Rectangle {
                     anchors.left: parent.left
                     anchors.leftMargin: 3
@@ -189,7 +158,6 @@ Components.LauncherSurface {
 
                     spacing: Core.Theme.padding
 
-                    // Miniature of the theme, in its own colours
 
                     Rectangle {
                         id: chip
@@ -200,10 +168,6 @@ Components.LauncherSurface {
                         height: 34
                         radius: Core.Theme.radiusSmall
 
-                        // The zoom you actually see in a list: the miniature
-                        // pushes forward while the row itself only lifts. It is
-                        // also the one part of the row that is a picture, which
-                        // is what makes scaling it read as focus.
                         scale: row.selected ? 1.18 : 1.0
 
                         Behavior on scale {
@@ -218,7 +182,6 @@ Components.LauncherSurface {
                         border.width: Core.Theme.borderWidth
                         border.color: row.shade("border", Core.Theme.border)
 
-                        // Fake bar
                         Rectangle {
                             anchors.left: parent.left
                             anchors.right: parent.right
@@ -243,7 +206,6 @@ Components.LauncherSurface {
                             }
                         }
 
-                        // Text weight samples
                         Column {
                             anchors.left: parent.left
                             anchors.leftMargin: 5
@@ -268,7 +230,6 @@ Components.LauncherSurface {
                         }
                     }
 
-                    // Name
 
                     Column {
                         anchors.verticalCenter: parent.verticalCenter
@@ -277,9 +238,6 @@ Components.LauncherSurface {
                         Text {
                             text: row.modelData.name
 
-                            // Not inverted any more: the row keeps its own
-                            // surface, so the label keeps its own colour and
-                            // just gains weight when selected.
                             color: Core.Theme.foreground
                             font.weight: row.selected ? Font.DemiBold : Font.Medium
 
@@ -290,9 +248,6 @@ Components.LauncherSurface {
                         Text {
                             text: row.isActive ? "active" : row.modelData.id
 
-                            // Accent for the theme actually applied, muted for
-                            // one merely selected -- the same split the battery
-                            // popup uses on its rows.
                             color: row.isActive ? Core.Theme.accent : (row.selected ? Core.Theme.foregroundMuted : Core.Theme.foregroundFaint)
                             font.family: Core.Theme.fontMono
                             font.pixelSize: Core.Theme.fontSizeSmall
@@ -300,7 +255,6 @@ Components.LauncherSurface {
                     }
                 }
 
-                // ANSI swatches
 
                 Row {
                     anchors.right: parent.right
@@ -309,8 +263,6 @@ Components.LauncherSurface {
 
                     spacing: 4
 
-                    // Applied-theme tick, the same idiom the battery popup uses
-                    // to mark the live power profile.
                     Text {
                         anchors.verticalCenter: parent.verticalCenter
 

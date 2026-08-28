@@ -18,9 +18,6 @@ Components.LauncherSurface {
 
     columns: 6
 
-    // The GridView pins cellHeight at 70 to fit the glyph plus its label, which
-    // does not match the 0.70 aspect derivation (65px at this width), so declare
-    // it. Plus 12px of margin top and bottom on the grid itself.
     cellHeight: 70
 
     contentMargins: 24
@@ -151,12 +148,8 @@ Components.LauncherSurface {
 
                         font.pixelSize: 28
 
-                        // NativeRendering is required here, not a preference:
-                        // QtRendering rasterises glyphs into a monochrome distance
-                        // field, which strips the colour out of a COLR/CBDT emoji
-                        // font. It does mean this Text will not scale as smoothly
-                        // as the rest, which is why the cell animates and the glyph
-                        // does not.
+                        // Required, not preferred: QtRendering rasterises to a
+                        // monochrome distance field and loses emoji colour.
                         renderType: Text.NativeRendering
                     }
 
@@ -177,9 +170,6 @@ Components.LauncherSurface {
 
                         font.family: Core.Theme.fontFamily
 
-                        // Was a hardcoded 8px, below the floor Theme puts on every
-                        // other size and genuinely hard to read. The cell has room:
-                        // 7 + 28 glyph + label + 6 bottom margin fits inside 70.
                         font.pixelSize: Core.Theme.fontSizeSmall
 
                         elide: Text.ElideRight

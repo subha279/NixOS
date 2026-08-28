@@ -5,7 +5,6 @@ import Quickshell
 import "../core" as Core
 import "../services" as Services
 
-// Battery bar module
 
 Item {
     id: root
@@ -17,7 +16,6 @@ Item {
 
     readonly property var svc: Services.BatteryService
 
-    // Hide the module entirely on desktops with no battery.
     visible: root.svc.available
 
     Rectangle {
@@ -35,7 +33,6 @@ Item {
         }
     }
 
-    // Critical-battery breathing glow
 
     Rectangle {
         anchors.fill: parent
@@ -98,15 +95,11 @@ Item {
                 }
             }
 
-            // Pop whenever the glyph changes (level crossed, charger plugged in, etc.)
             onTextChanged: popAnim.restart()
 
             SequentialAnimation {
                 id: popAnim
 
-                // Out fast, then settle back with a slight overshoot so it reads
-                // as a spring rather than a two-step bounce. 1.22 was distinctly
-                // rubbery on a 16px glyph.
                 NumberAnimation {
                     target: icon
                     property: "scale"
@@ -147,7 +140,6 @@ Item {
         }
     }
 
-    // Interaction
 
     MouseArea {
         id: mouse

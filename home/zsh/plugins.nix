@@ -1,7 +1,6 @@
 { pkgs, ... }:
 
 {
-  # fzf
 
   programs.fzf = {
     enable = true;
@@ -17,7 +16,6 @@
     ];
   };
 
-  # zoxide
 
   programs.zoxide = {
     enable = true;
@@ -29,7 +27,6 @@
     ];
   };
 
-  # fzf-tab
 
   programs.zsh.plugins = [
     {

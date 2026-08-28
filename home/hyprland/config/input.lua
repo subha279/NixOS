@@ -1,24 +1,17 @@
--- Input Configuration
-
--- Keyboard / Mouse
-
 hl.config({
 
 	input = {
 
-		-- Keyboard
 
 		kb_layout = "us",
         kb_options = "caps:swapescape",
 
-		-- Mouse
 
 		follow_mouse = 1,
 
 		sensitivity = 0,
 		accel_profile = "flat",
 
-		-- Touchpad
 
 		touchpad = {
 
@@ -38,7 +31,6 @@ hl.config({
 	},
 })
 
--- Gestures
 
 hl.gesture({
 
@@ -49,7 +41,6 @@ hl.gesture({
 	action = "workspace",
 })
 
--- Device Specific Configuration
 
 hl.device({
 

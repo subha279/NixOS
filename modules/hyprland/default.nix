@@ -8,20 +8,16 @@
 
   environment.systemPackages = with pkgs; [
 
-    # Cursor
     hyprcursor
 
-    # Clipboard
     wl-clipboard
     cliphist
     wtype
 
-    # Hardware / Media Controls
     brightnessctl
     playerctl
     libinput
 
-    # Wayland Utilities
     wayland-utils
   ];
 }

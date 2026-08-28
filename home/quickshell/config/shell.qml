@@ -17,7 +17,6 @@ Scope {
     NotificationPopup {}
     Notifications {}
 
-    // dmenu-style surfaces.
     AppLauncher {}
     WallpaperPicker {}
     ThemePicker {}

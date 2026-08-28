@@ -1,13 +1,11 @@
 { lib, ... }:
 
 let
-  # CENTRAL THEME DATABASE
 
   themeData = import ../../lib/themes.nix;
 
   themeNames = builtins.attrNames themeData.themes;
 
-  # LUA THEME GENERATOR
 
   themeToLua =
     themeId:
@@ -134,7 +132,6 @@ let
       }
     '';
 
-  # QUICKSHELL JSON THEME GENERATOR
 
   themeToJson =
     themeId:
@@ -156,7 +153,6 @@ let
       ui = themeData.global.ui;
     };
 
-  # KITTY THEME GENERATOR
 
   themeToKitty =
     themeId:
@@ -167,7 +163,6 @@ let
       ui = themeData.global.ui;
     in
     ''
-      # ========================================================
       # Aurora Kitty Theme
       # ${theme.name}
       #
@@ -177,7 +172,6 @@ let
       #
       # Source:
       #   ~/NixOS/lib/themes.nix
-      # ========================================================
 
       # --------------------------------------------------------
       # Typography
@@ -266,7 +260,6 @@ let
       # editor avoids it by setting those groups to NONE.
     '';
 
-  # STARSHIP THEME GENERATOR
 
   themeToStarship =
     themeId:
@@ -275,7 +268,6 @@ let
       colors = theme.colors;
     in
     ''
-      # ========================================================
       # Aurora Starship Theme
       # ${theme.name}
       #
@@ -285,7 +277,6 @@ let
       #
       # Source:
       #   ~/NixOS/lib/themes.nix
-      # ========================================================
 
 
       add_newline = false
@@ -300,9 +291,7 @@ let
       palette = "aurora"
 
 
-      # ========================================================
       # PROMPT
-      # ========================================================
 
       format = """
       $directory\
@@ -326,9 +315,7 @@ let
       $character"""
 
 
-      # ========================================================
       # AURORA PALETTE
-      # ========================================================
 
       [palettes.aurora]
 
@@ -395,9 +382,7 @@ let
       pink = "${colors.terminalMagenta}"
 
 
-      # ========================================================
       # OS
-      # ========================================================
 
       [os]
 
@@ -451,9 +436,7 @@ let
       Windows = "󰍲"
 
 
-      # ========================================================
       # DIRECTORY
-      # ========================================================
 
       [directory]
 
@@ -473,9 +456,7 @@ let
 
       read_only_style = "bold red"
 
-      # ========================================================
       # GIT REMOTE
-      # ========================================================
 
       [custom.giturl]
 
@@ -512,9 +493,7 @@ let
       ignore_timeout = true
 
 
-      # ========================================================
       # GIT BRANCH
-      # ========================================================
 
       [git_branch]
 
@@ -523,9 +502,7 @@ let
       format = "[](purple)[ $symbol$branch ](bold bg bg:purple)[](purple) "
 
 
-      # ========================================================
       # GIT WORKTREE
-      # ========================================================
 
       [custom.git_worktree]
 
@@ -553,9 +530,7 @@ let
       ignore_timeout = true
 
 
-      # ========================================================
       # GIT STATUS
-      # ========================================================
 
       [git_status]
 
@@ -590,9 +565,7 @@ let
       up_to_date = ""
 
 
-      # ========================================================
       # PACKAGE
-      # ========================================================
 
       [package]
 
@@ -605,9 +578,7 @@ let
       format = "[$symbol$version]($style) "
 
 
-      # ========================================================
       # NODE.JS
-      # ========================================================
 
       [nodejs]
 
@@ -618,9 +589,7 @@ let
       format = "[$symbol( $version)]($style) "
 
 
-      # ========================================================
       # BUN
-      # ========================================================
 
       [bun]
 
@@ -636,9 +605,7 @@ let
       ]
 
 
-      # ========================================================
       # C
-      # ========================================================
 
       [c]
 
@@ -649,9 +616,7 @@ let
       format = "[$symbol( $version)]($style) "
 
 
-      # ========================================================
       # RUST
-      # ========================================================
 
       [rust]
 
@@ -662,9 +627,7 @@ let
       format = "[$symbol( $version)]($style) "
 
 
-      # ========================================================
       # GO
-      # ========================================================
 
       [golang]
 
@@ -679,9 +642,7 @@ let
       ]
 
 
-      # ========================================================
       # PHP
-      # ========================================================
 
       [php]
 
@@ -692,9 +653,7 @@ let
       format = "[$symbol( $version)]($style) "
 
 
-      # ========================================================
       # JAVA
-      # ========================================================
 
       [java]
 
@@ -705,9 +664,7 @@ let
       format = "[$symbol( $version)]($style) "
 
 
-      # ========================================================
       # KOTLIN
-      # ========================================================
 
       [kotlin]
 
@@ -718,9 +675,7 @@ let
       format = "[$symbol( $version)]($style) "
 
 
-      # ========================================================
       # HASKELL
-      # ========================================================
 
       [haskell]
 
@@ -731,9 +686,7 @@ let
       format = "[$symbol( $version)]($style) "
 
 
-      # ========================================================
       # PYTHON
-      # ========================================================
 
       [python]
 
@@ -744,9 +697,7 @@ let
       format = "[$symbol( $version)]($style) "
 
 
-      # ========================================================
       # DOCKER
-      # ========================================================
 
       [docker_context]
 
@@ -757,9 +708,7 @@ let
       format = "[$symbol( $context)]($style) "
 
 
-      # ========================================================
       # TIME
-      # ========================================================
 
       [time]
 
@@ -772,9 +721,7 @@ let
       format = "[󰥔 $time]($style) "
 
 
-      # ========================================================
       # COMMAND DURATION
-      # ========================================================
 
       [cmd_duration]
 
@@ -785,9 +732,7 @@ let
       format = "󰔟 [$duration]($style) "
 
 
-      # ========================================================
       # PROMPT CHARACTER
-      # ========================================================
 
       [character]
 
@@ -804,31 +749,26 @@ let
       vimcmd_visual_symbol = "[➜](bold purple)"
     '';
 
-  # GENERATE LUA FILES
 
   luaThemeFiles = lib.genAttrs themeNames (themeId: {
     text = themeToLua themeId;
   });
 
-  # GENERATE JSON FILES
 
   jsonThemeFiles = lib.genAttrs themeNames (themeId: {
     text = themeToJson themeId;
   });
 
-  # GENERATE KITTY FILES
 
   kittyThemeFiles = lib.genAttrs themeNames (themeId: {
     text = themeToKitty themeId;
   });
 
-  # GENERATE STARSHIP FILES
 
   starshipThemeFiles = lib.genAttrs themeNames (themeId: {
     text = themeToStarship themeId;
   });
 
-  # THEME LIST
 
   themeList = builtins.concatStringsSep "\n" (
     map (
@@ -840,7 +780,6 @@ let
     ) themeNames
   );
 
-  # HOME MANAGER GENERATED FILES
 
   generatedLuaFiles = lib.mapAttrs' (
     themeId: file: lib.nameValuePair "aurora/themes/${themeId}.lua" file
@@ -860,7 +799,6 @@ let
 
 in
 {
-  # STYLIX DESKTOP INTEGRATION
 
   stylix.targets.gtk.enable = true;
 
@@ -868,37 +806,21 @@ in
 
   stylix.targets.fontconfig.enable = true;
 
-  # GTK FONT RENDERING
-  #
-  # GTK on Wayland does not read fontconfig's hinting and antialiasing settings.
-  # There is no X server, so there is no XSettings to carry them, and GTK falls
-  # back to these gsettings keys instead -- which means the rasterisation
-  # configured in modules/fonts applied to Qt and to the shell but not to GTK
-  # apps, and the two families of application were rendering text differently on
-  # the same screen.
-  #
-  # Kept in step with fonts.fontconfig in modules/fonts by hand; there is no
-  # shared option that feeds both.
   dconf.settings = {
     "org/gnome/desktop/interface" = {
       font-hinting = "slight";
 
-      # "rgba" is GTK's name for subpixel antialiasing.
       font-antialiasing = "rgba";
 
-      # Explicit so a stray value cannot silently scale every GTK font.
       text-scaling-factor = 1.0;
     };
   };
 
-  # GENERATED AURORA THEME DATABASE
 
   xdg.configFile = {
-    # Complete Aurora database
 
     "aurora/themes.json".text = builtins.toJSON themeData;
 
-    # Theme list, read by the Quickshell colorscheme picker
 
     "aurora/themes.list".text = themeList + "\n";
 
@@ -909,7 +831,6 @@ in
   // generatedKittyFiles
   // generatedStarshipFiles;
 
-  # RUNTIME THEME INITIALIZATION
 
   home.activation.initializeAuroraTheme = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     theme_dir="$HOME/.config/aurora"
@@ -935,25 +856,19 @@ in
     mkdir -p "$HOME/.cache/aurora"
 
 
-    # ========================================================
     # Create Default Theme
-    # ========================================================
 
     if [ ! -f "$theme_file" ]; then
         printf '%s\n' "catppuccin-mocha" > "$theme_file"
     fi
 
 
-    # ========================================================
     # Read Selected Theme
-    # ========================================================
 
     selected="$(cat "$theme_file")"
 
 
-    # ========================================================
     # Validate Selected Theme
-    # ========================================================
 
     if [[ ! -f "$theme_dir/themes/$selected.lua" ]]; then
         printf '%s\n' "catppuccin-mocha" > "$theme_file"
@@ -961,18 +876,14 @@ in
     fi
 
 
-    # ========================================================
     # Active Lua Theme
-    # ========================================================
 
     ln -sfn \
       "$theme_dir/themes/$selected.lua" \
       "$active_lua"
 
 
-    # ========================================================
     # Active Kitty Theme
-    # ========================================================
 
     if [[ -f "$theme_dir/themes/$selected.kitty.conf" ]]; then
 
@@ -989,9 +900,7 @@ in
     fi
 
 
-    # ========================================================
     # Active Starship Theme
-    # ========================================================
 
     if [[ -f "$theme_dir/themes/$selected.starship.toml" ]]; then
 
@@ -1006,7 +915,6 @@ in
     fi
   '';
 
-  # AURORA THEME SWITCHER
 
   home.file.".local/bin/aurora-theme" = {
     executable = true;
@@ -1017,9 +925,7 @@ in
       set -euo pipefail
 
 
-      # ========================================================
       # Paths
-      # ========================================================
 
       CONFIG_DIR="$HOME/.config/aurora"
 
@@ -1036,9 +942,7 @@ in
       THEME_DIR="$CONFIG_DIR/themes"
 
 
-      # ========================================================
       # Verify Aurora
-      # ========================================================
 
       if [[ ! -f "$THEMES_FILE" ]]; then
 
@@ -1049,9 +953,7 @@ in
       fi
 
 
-      # ========================================================
       # Select Theme
-      # ========================================================
 
       if [[ $# -gt 0 ]]; then
 
@@ -1068,16 +970,12 @@ in
       fi
 
 
-      # ========================================================
       # User Cancelled
-      # ========================================================
 
       [[ -z "$selected" ]] && exit 0
 
 
-      # ========================================================
       # Resolve Display Name -> Theme ID
-      # ========================================================
 
       theme_id="$(
         awk -F '\t' -v sel="$selected" '
@@ -1089,9 +987,7 @@ in
       )"
 
 
-      # ========================================================
       # Validate Theme
-      # ========================================================
 
       if [[ -z "$theme_id" ]]; then
 
@@ -1102,9 +998,7 @@ in
       fi
 
 
-      # ========================================================
       # Theme Files
-      # ========================================================
 
       theme_lua="$THEME_DIR/$theme_id.lua"
 
@@ -1115,9 +1009,7 @@ in
       theme_starship="$THEME_DIR/$theme_id.starship.toml"
 
 
-      # ========================================================
       # Verify Lua Theme
-      # ========================================================
 
       if [[ ! -f "$theme_lua" ]]; then
 
@@ -1130,9 +1022,7 @@ in
       fi
 
 
-      # ========================================================
       # Verify JSON Theme
-      # ========================================================
 
       if [[ ! -f "$theme_json" ]]; then
 
@@ -1145,9 +1035,7 @@ in
       fi
 
 
-      # ========================================================
       # Verify Kitty Theme
-      # ========================================================
 
       if [[ ! -f "$theme_kitty" ]]; then
 
@@ -1160,9 +1048,7 @@ in
       fi
 
 
-      # ========================================================
       # Verify Starship Theme
-      # ========================================================
 
       if [[ ! -f "$theme_starship" ]]; then
 
@@ -1175,9 +1061,7 @@ in
       fi
 
 
-      # ========================================================
       # Optional Kreo RGB Theme Sync
-      # ========================================================
 
       KREO_CONFIG="/etc/aurora/kreo-rgb.conf"
 
@@ -1200,36 +1084,28 @@ in
 
       fi
 
-      # ========================================================
       # Update Active Lua Theme
-      # ========================================================
 
       ln -sfn \
         "$theme_lua" \
         "$ACTIVE_LUA"
 
 
-      # ========================================================
       # Update Active Kitty Theme
-      # ========================================================
 
       ln -sfn \
         "$theme_kitty" \
         "$ACTIVE_KITTY"
 
 
-      # ========================================================
       # Update Active Starship Theme
-      # ========================================================
 
       ln -sfn \
         "$theme_starship" \
         "$ACTIVE_STARSHIP"
 
 
-      # ========================================================
       # Update Active Theme
-      # ========================================================
       #
       # Written LAST, on purpose: this file is the commit point.
       #
@@ -1242,9 +1118,7 @@ in
       printf '%s\n' "$theme_id" > "$ACTIVE_THEME"
 
 
-      # ========================================================
       # Reload Hyprland
-      # ========================================================
 
       if command -v hyprctl >/dev/null 2>&1; then
 
@@ -1254,16 +1128,13 @@ in
       fi
 
 
-      # ========================================================
       # Reload Running Kitty Instances
-      # ========================================================
       #
       # Kitty instances expose individual Unix sockets.
       #
       # Aurora discovers all active Kitty sockets and applies
       # the selected color palette to every running instance.
       #
-      # ========================================================
 
       if command -v kitten >/dev/null 2>&1; then
 
@@ -1300,14 +1171,11 @@ in
 
       fi
 
-      # ========================================================
       # Refresh Running Zsh Sessions
-      # ========================================================
       #
       # Notify all running interactive Zsh sessions through
       # their private ZLE refresh FIFO.
       #
-      # ========================================================
 
       AURORA_ZSH_REFRESH_DIR="''${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/aurora-zsh"
 
@@ -1324,9 +1192,7 @@ in
 
       fi
 
-      # ========================================================
       # Result
-      # ========================================================
 
       echo "Aurora theme: $selected"
     '';

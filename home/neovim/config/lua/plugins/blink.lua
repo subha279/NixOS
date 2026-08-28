@@ -1,19 +1,14 @@
--- Aurora Blink Completion
-
 local M = {}
 
--- Theme
 
 local aurora = require("aurora.theme")
 
 local colors = aurora.colors
 
--- Aurora Highlights
 
 local function apply_highlights()
 	local c = colors()
 
-	-- Completion Menu
 
 	vim.api.nvim_set_hl(0, "BlinkCmpMenu", {
 		fg = c.text,
@@ -52,17 +47,12 @@ local function apply_highlights()
 		bg = "NONE",
 	})
 
-	-- The matched substring of the label. Adopted from ui/theme.lua, which was the
-	-- only file setting it.
 	vim.api.nvim_set_hl(0, "BlinkCmpLabelMatch", {
 		fg = c.accent,
 		bold = true,
 	})
 
-	-- Kind Icons
 
-	-- Base group, the fallback for any kind missing from the table below. Also
-	-- adopted from ui/theme.lua.
 	vim.api.nvim_set_hl(0, "BlinkCmpKind", {
 		fg = c.info,
 		bg = "NONE",
@@ -105,7 +95,6 @@ local function apply_highlights()
 		end
 	end
 
-	-- Documentation
 
 	vim.api.nvim_set_hl(0, "BlinkCmpDoc", {
 		fg = c.text,
@@ -131,14 +120,12 @@ local function apply_highlights()
 		bg = "NONE",
 	})
 
-	-- Scrollbar
 
 	vim.api.nvim_set_hl(0, "BlinkCmpScrollBarThumb", {
 		fg = c.accent,
 		bg = c.surfaceHover,
 	})
 
-	-- Ghost Text
 
 	vim.api.nvim_set_hl(0, "BlinkCmpGhostText", {
 		fg = c.textMuted,
@@ -147,7 +134,6 @@ local function apply_highlights()
 	})
 end
 
--- Setup
 
 function M.setup()
 	local ok, blink = pcall(require, "blink.cmp")
@@ -159,7 +145,6 @@ function M.setup()
 	end
 
 	blink.setup({
-		-- Keymap
 
 		keymap = {
 			preset = "default",
@@ -208,7 +193,6 @@ function M.setup()
 			},
 		},
 
-		-- Appearance
 
 		appearance = {
 			nerd_font_variant = "mono",
@@ -244,10 +228,8 @@ function M.setup()
 			},
 		},
 
-		-- Completion
 
 		completion = {
-			-- Menu
 
 			menu = {
 				border = "rounded",
@@ -300,7 +282,6 @@ function M.setup()
 				},
 			},
 
-			-- Documentation
 
 			documentation = {
 				auto_show = true,
@@ -314,14 +295,12 @@ function M.setup()
 				},
 			},
 
-			-- Ghost Text
 
 			ghost_text = {
 				enabled = true,
 			},
 		},
 
-		-- Sources
 
 		sources = {
 			default = {
@@ -348,7 +327,6 @@ function M.setup()
 			},
 		},
 
-		-- Fuzzy Matching
 
 		fuzzy = {
 			implementation = "prefer_rust_with_warning",
@@ -360,14 +338,11 @@ function M.setup()
 	return true
 end
 
--- IMPORTANT
 
 M.setup()
 
--- Live Aurora Theme Refresh
 
 aurora.on_change(apply_highlights)
 
--- Return
 
 return M

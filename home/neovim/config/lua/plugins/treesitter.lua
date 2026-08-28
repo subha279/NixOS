@@ -1,25 +1,19 @@
--- Aurora Treesitter
-
 local M = {}
 
--- Theme
 
 local aurora = require("aurora.theme")
 
 local colors = aurora.colors
 
--- Helper
 
 local function set(name, opts)
 	vim.api.nvim_set_hl(0, name, opts)
 end
 
--- Treesitter Highlights
 
 local function apply_highlights()
 	local c = colors()
 
-	-- Comments
 
 	set("@comment", {
 		fg = c.textMuted,
@@ -57,7 +51,6 @@ local function apply_highlights()
 		bold = true,
 	})
 
-	-- Constants / Literals
 
 	set("@constant", {
 		fg = c.warning,
@@ -90,7 +83,6 @@ local function apply_highlights()
 		bold = true,
 	})
 
-	-- Strings
 
 	set("@string", {
 		fg = c.success,
@@ -128,7 +120,6 @@ local function apply_highlights()
 		bg = "NONE",
 	})
 
-	-- Keywords
 
 	set("@keyword", {
 		fg = c.accent,
@@ -182,7 +173,6 @@ local function apply_highlights()
 		bg = "NONE",
 	})
 
-	-- Functions
 
 	set("@function", {
 		fg = c.info,
@@ -217,7 +207,6 @@ local function apply_highlights()
 		bold = true,
 	})
 
-	-- Variables
 
 	set("@variable", {
 		fg = c.text,
@@ -239,7 +228,6 @@ local function apply_highlights()
 		bg = "NONE",
 	})
 
-	-- Properties / Fields
 
 	set("@property", {
 		fg = c.info,
@@ -251,14 +239,11 @@ local function apply_highlights()
 		bg = "NONE",
 	})
 
-	-- Modern name for @field. Adopted from ui/theme.lua, which was the only file
-	-- setting it; without it the capture falls back to whatever @property links to.
 	set("@variable.member", {
 		fg = c.info,
 		bg = "NONE",
 	})
 
-	-- Types
 
 	set("@type", {
 		fg = c.accent,
@@ -292,7 +277,6 @@ local function apply_highlights()
 		bg = "NONE",
 	})
 
-	-- Modules / Namespaces
 
 	set("@module", {
 		fg = c.info,
@@ -304,7 +288,6 @@ local function apply_highlights()
 		bg = "NONE",
 	})
 
-	-- Punctuation
 
 	set("@punctuation.delimiter", {
 		fg = c.textSecondary,
@@ -321,7 +304,6 @@ local function apply_highlights()
 		bg = "NONE",
 	})
 
-	-- Tags
 
 	set("@tag", {
 		fg = c.accent,
@@ -345,7 +327,6 @@ local function apply_highlights()
 		bg = "NONE",
 	})
 
-	-- Markup
 
 	set("@markup.heading", {
 		fg = c.accent,
@@ -411,14 +392,12 @@ local function apply_highlights()
 		bg = "NONE",
 	})
 
-	-- Labels
 
 	set("@label", {
 		fg = c.accent,
 		bg = "NONE",
 	})
 
-	-- Includes / Imports
 
 	set("@include", {
 		fg = c.info,
@@ -426,7 +405,6 @@ local function apply_highlights()
 		bold = true,
 	})
 
-	-- Diff
 
 	set("@diff.plus", {
 		fg = c.success,
@@ -444,7 +422,6 @@ local function apply_highlights()
 	})
 end
 
--- Treesitter Setup
 
 function M.setup()
 	local ok, treesitter = pcall(require, "nvim-treesitter")
@@ -455,31 +432,12 @@ function M.setup()
 		return false
 	end
 
-	-- nvim-treesitter main-branch API.
-	--
-	-- setup() here accepts install_dir and little else. It does NOT take the
-	-- highlight/indent tables the classic nvim-treesitter.configs API did, and it
-	-- ignores them silently rather than warning -- so passing them, as this used
-	-- to, enabled nothing at all. Highlighting has to be started per buffer.
-	--
-	-- Parsers come from pkgs.vimPlugins.nvim-treesitter.withAllGrammars in
-	-- home/neovim/default.nix, so they are already on the runtimepath and no
-	-- install_dir is needed.
 
 	treesitter.setup()
 
-	-- Start highlighting per buffer.
-	--
-	-- Without this, treesitter highlighting never runs: buffers fall back to Vim's
-	-- regex syntax engine, and every @* group defined in this file goes unused
-	-- (which also makes the theme's Treesitter colours invisible).
-	--
-	-- Guarded three ways so it is safe regardless of which nvim-treesitter API is
-	-- actually installed: it skips non-file buffers, skips buffers that already
-	-- have an active highlighter -- so it cannot double-attach if something else
-	-- started one -- and only starts when a parser for the language really exists,
-	-- leaving unsupported filetypes on regex syntax instead of erroring.
 
+	-- Required: main-branch setup() ignores a highlight table, so highlighting has
+	-- to be started per buffer or treesitter never runs at all.
 	vim.api.nvim_create_autocmd("FileType", {
 		group = vim.api.nvim_create_augroup("AuroraTreesitterStart", {
 			clear = true,
@@ -500,7 +458,6 @@ function M.setup()
 
 			local lang = vim.treesitter.language.get_lang(event.match) or event.match
 
-			-- language.add() throws when no parser is available.
 			if not pcall(vim.treesitter.language.add, lang) then
 				return
 			end
@@ -514,22 +471,11 @@ function M.setup()
 	return true
 end
 
--- IMPORTANT
 
 M.setup()
 
--- Live Aurora Theme Refresh
---
--- This module owns the @* capture groups, and until now nothing re-applied them
--- after a theme switch: ui/theme.lua's private refresh list covered only itself,
--- devicons, nvimtree and lualine. Syntax therefore kept the old palette while
--- the rest of the UI moved, which is the drift you could see on a switch.
---
--- The redraw that used to live in refresh_theme() is gone: aurora.refresh() does
--- one redraw for the whole pass instead of each module scheduling its own.
 
 aurora.on_change(apply_highlights)
 
--- Return
 
 return M

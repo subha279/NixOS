@@ -1,40 +1,28 @@
--- Aurora Neovim
-
--- Leader
-
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 
--- Startup Timer
 
 vim.g.aurora_startup_time = vim.uv.hrtime()
 
--- Core
 
 require("core.options")
 require("core.autocmds")
 
--- Aurora Theme Manager
 
 require("ui.theme")
 
--- Native LSP
 
 require("lsp")
 
--- Completion
 
 require("plugins.blink")
 
--- Search / Navigation
 
 require("plugins.telescope")
 
--- Syntax / Treesitter
 
 require("plugins.treesitter")
 
--- Color Preview
 
 local colorizer_ok, colorizer_error = pcall(function()
 	require("colorizer").setup({
@@ -92,47 +80,32 @@ if not colorizer_ok then
 	end)
 end
 
--- File Explorer
 
 require("plugins.nvimtree")
 
--- Git
 
 require("plugins.gitsigns").setup()
 
--- Formatting
 
 require("plugins.conform")
 
--- Linting
 
 require("plugins.lint")
 
--- Key Discovery
 
 require("plugins.whichkey")
 
--- Statusline
 
 require("plugins.lualine").setup()
 
--- Utility UI
 
 require("plugins.snacks")
 
--- Dashboard
 
 require("plugins.alpha")
 
--- Core Keymaps
 
 require("core.keymaps")
 
--- Live Theme Watcher
---
--- Started last, once every module above has registered its aurora.theme
--- subscriber, so a switch re-applies highlights in exactly this file's require
--- order. Replaces the two independent 500ms uv timers that ui/theme.lua and
--- plugins/alpha.lua each used to run against the same pointer file.
 
 require("aurora.theme").watch()

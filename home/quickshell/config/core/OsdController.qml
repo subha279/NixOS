@@ -2,24 +2,20 @@ pragma Singleton
 
 import QtQuick
 
-// OsdController
 
 QtObject {
     id: root
 
     property string kind: ""
 
-    // Always normalised 0..1.
     property real value: 0
 
     property bool muted: false
 
     readonly property bool active: root.kind !== ""
 
-    // How long the readout stays up after the last change.
     readonly property int holdDuration: 1600
 
-    // Startup guard
 
     property bool armed: false
 
@@ -32,7 +28,6 @@ QtObject {
         onTriggered: root.armed = true
     }
 
-    // Hold timer
 
     property Timer hideTimer: Timer {
         interval: root.holdDuration
@@ -42,9 +37,7 @@ QtObject {
         onTriggered: root.kind = ""
     }
 
-    // API
 
-    // Raise (or refresh) an OSD.
     function show(kind, value, muted) {
         if (!root.armed)
             return;

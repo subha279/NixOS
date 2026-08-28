@@ -6,7 +6,6 @@ import "../core" as Core
 import "../services" as Services
 import "../components" as Components
 
-// AudioPopup
 
 Components.PopupSurface {
     id: popup
@@ -18,7 +17,6 @@ Components.PopupSurface {
 
     readonly property var svc: Services.AudioService
 
-    // Collapsible sections, so the card stays short by default and springs open when you actually want to switch devices.
     property bool showOutputs: false
     property bool showInputs: false
 
@@ -27,7 +25,6 @@ Components.PopupSurface {
         popup.showInputs = false;
     }
 
-    // Right-click menu shared by every device row.
     function deviceMenu(node, mx, my) {
         const target = node;
         const svc = popup.svc;
@@ -74,7 +71,6 @@ Components.PopupSurface {
 
             spacing: Core.Theme.spacing
 
-            // Header
 
             Components.PopupHeader {
                 width: parent.width
@@ -101,7 +97,6 @@ Components.PopupSurface {
                 color: Core.Theme.separator
             }
 
-            // Output level
 
             Rectangle {
                 id: outputCard
@@ -193,7 +188,6 @@ Components.PopupSurface {
                 }
             }
 
-            // Output device picker
 
             Item {
                 width: parent.width
@@ -320,7 +314,6 @@ Components.PopupSurface {
                 }
             }
 
-            // Microphone level
 
             Rectangle {
                 width: parent.width
@@ -419,7 +412,6 @@ Components.PopupSurface {
                 }
             }
 
-            // Input device picker
 
             Item {
                 width: parent.width
@@ -464,7 +456,6 @@ Components.PopupSurface {
                     onClicked: function (event) {
                         if (event.button === Qt.RightButton) {
 
-                            // Monitor sources are hidden by default.
                             popup.svc.showMonitors = !popup.svc.showMonitors;
 
                             popup.showInputs = true;
@@ -556,7 +547,6 @@ Components.PopupSurface {
                 }
             }
 
-            // Per-application mixer
 
             Item {
                 width: parent.width
@@ -668,7 +658,6 @@ Components.PopupSurface {
                 }
             }
 
-            // Empty state
 
             Item {
                 width: parent.width

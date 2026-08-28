@@ -4,10 +4,6 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-// Aurora Apps Service
-//
-// Application list and ranking for the launcher.
-// State: ~/.cache/aurora/launcher-usage.json
 
 QtObject {
     id: root
@@ -17,7 +13,6 @@ QtObject {
 
     property var usage: ({})
 
-    // Frecency
 
     property FileView usageFile: FileView {
         path: root.usagePath
@@ -44,7 +39,6 @@ QtObject {
         if (!id || id.length === 0)
             return
 
-        // Copy, then mutate, then assign.
         const next = ({})
         const keys = Object.keys(root.usage)
 
@@ -57,7 +51,6 @@ QtObject {
         root.usageFile.setText(JSON.stringify(next))
     }
 
-    // Entries
 
     readonly property var entries: {
         const source = DesktopEntries.applications.values
@@ -68,7 +61,6 @@ QtObject {
             if (!entry)
                 continue
 
-            // NoDisplay entries are things like MIME handlers and settings panels that are not meant to be launched.
             if (entry.noDisplay === true)
                 continue
 
@@ -96,7 +88,6 @@ QtObject {
 
     readonly property int count: root.entries.length
 
-    // Matching
 
     function subsequence(haystack, needle) {
         let h = 0
@@ -120,7 +111,6 @@ QtObject {
         return true
     }
 
-    // Tiers, strongest first.
     function score(entry, q) {
         const name = entry.name ? entry.name.toLowerCase() : ""
 
@@ -174,7 +164,6 @@ QtObject {
             if (s < 0)
                 continue
 
-            // Frecency is a tie-breaker, capped so a heavily used app can never leapfrog a genuine prefix match.
             const hits = root.usage[entry.id] || 0
             s += Math.min(50, hits * 6)
 
@@ -195,7 +184,6 @@ QtObject {
         return out
     }
 
-    // Actions
 
     function launch(entry) {
         if (!entry)

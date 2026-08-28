@@ -5,7 +5,6 @@ import "../components" as Components
 import "../core" as Core
 import "../services" as Services
 
-// Wallpaper Picker
 
 Components.LauncherSurface {
     id: launcher
@@ -18,11 +17,7 @@ Components.LauncherSurface {
 
     columns: 3
 
-    // Derives correctly from cellAspect: the GridView computes its own cellHeight
-    // as round(cellWidth * 0.70), which is the same formula.
 
-    // The wheel and h/j/k/l move the selection only -- nothing is applied
-    // until Enter, so travelling through the grid is free.
     vimNavigation: true
 
     readonly property var results: Services.WallpaperService.search(launcher.query)
@@ -31,7 +26,6 @@ Components.LauncherSurface {
 
     counterText: Services.WallpaperService.scanning ? "scanning" : (launcher.query.length === 0 ? launcher.results.length + " wallpapers" : launcher.results.length + " of " + Services.WallpaperService.count)
 
-    // Wallpapers are dropped into ~/Wallpapers by hand, so rescan on every open rather than trusting a cached list.
     onDidOpen: Services.WallpaperService.refresh()
 
     onAccepted: {
@@ -99,8 +93,6 @@ Components.LauncherSurface {
                 readonly property bool selected: cell.index === launcher.selectedIndex
                 readonly property bool applied: Services.WallpaperService.current === cell.modelData.path
 
-                // The selected tile grows past its own cell, so it has to paint
-                // over its neighbours.
                 z: cell.selected ? 3 : (cell.applied ? 1 : 0)
 
                 Rectangle {
@@ -108,22 +100,13 @@ Components.LauncherSurface {
 
                     anchors.fill: parent
 
-                    // Headroom for the zoom. The selected tile grows past its
-                    // own cell and the grid clips, so without a wider gutter
-                    // the outer columns would get shaved flat as they scale.
                     anchors.margins: 8
 
-                    // Rounded to match the rows in the battery popup.
                     radius: Core.Theme.radiusRow
 
                     color: Core.Theme.surfaceGlass
                     clip: true
 
-                    // Zoom on selection, now sized so it actually fits. The
-                    // tile is 237px inside a 253px cell, so it can only gain
-                    // 8px per side before the grid's clip shaves it; 1.06 gains
-                    // 7.1. At 1.10 it wanted 11.9 and got cut off, which is the
-                    // same thing that was going wrong in the theme list.
                     scale: cell.selected ? 1.06 : 1.0
 
                     Behavior on scale {
@@ -133,9 +116,6 @@ Components.LauncherSurface {
                         }
                     }
 
-                    // Everything else sits back rather than merely losing its
-                    // border. Half the sense of depth comes from this, not from
-                    // the scale.
                     opacity: cell.selected ? 1.0 : 0.72
 
                     Behavior on opacity {
@@ -167,11 +147,6 @@ Components.LauncherSurface {
                         fillMode: Image.PreserveAspectCrop
                         source: "file://" + cell.modelData.path
 
-                        // A second, slower zoom inside the frame, and the one
-                        // doing most of the work now: the picture pushes well
-                        // past the edges of its own tile, so the crop opens up
-                        // as you land on it. Two speeds is what separates this
-                        // from a tile that simply got bigger.
                         scale: cell.selected ? 1.16 : 1.0
 
                         Behavior on scale {
@@ -191,7 +166,6 @@ Components.LauncherSurface {
                         }
                     }
 
-                    // Filename plate
                     Rectangle {
                         anchors.left: parent.left
                         anchors.right: parent.right
@@ -209,8 +183,6 @@ Components.LauncherSurface {
 
                             spacing: 6
 
-                            // Applied-wallpaper tick, matching the marker the
-                            // battery popup puts on the live power profile.
                             Text {
                                 anchors.verticalCenter: parent.verticalCenter
 

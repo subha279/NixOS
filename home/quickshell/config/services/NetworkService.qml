@@ -4,12 +4,10 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-// NetworkService
 
 Singleton {
     id: root
 
-    // Wi-Fi state
 
     property bool wifiEnabled: true
     property string wifiDevice: ""
@@ -19,7 +17,6 @@ Singleton {
 
     readonly property bool wifiConnected: root.wifiState === "connected"
 
-    // Ethernet state
 
     property string ethDevice: ""
     property string ethState: "unavailable"
@@ -29,7 +26,6 @@ Singleton {
 
     readonly property bool ethConnected: root.ethState === "connected"
 
-    // Unified link
 
     readonly property string primaryLink: root.ethConnected ? "ethernet" : root.wifiConnected ? "wifi" : "none"
 
@@ -37,7 +33,6 @@ Singleton {
 
     readonly property string linkLabel: root.ethConnected ? (root.ethConnection !== "" ? root.ethConnection : "Ethernet") : root.wifiConnected ? root.activeSsid : root.wifiEnabled ? "Not connected" : "Wi-Fi off"
 
-    // Scan results / saved profiles
 
     property var networks: []          // [{ ssid, strength, security, bssid, inUse, saved }]
     property var savedProfiles: []     // [ "HomeWifi", ... ]
@@ -47,18 +42,15 @@ Singleton {
     property string pendingSsid: ""    // ssid currently being connected
     property string lastError: ""
 
-    // Poll faster while a menu is open
     property bool fastPoll: false
 
     signal connectFailed(string ssid, string message)
     signal connectSucceeded(string ssid)
 
-    // Desktop notifications
 
     property string lastLink: ""
     property bool linkPrimed: false
 
-    // Fire and forget; a shared Process drops rapid back-to-back events.
     function notify(summary, body, icon, urgency) {
         Quickshell.execDetached(["notify-send", "-a", "Network", "-i", icon, "-u", urgency, summary, body]);
     }
@@ -86,7 +78,6 @@ Singleton {
 
         root.lastLink = now;
 
-        // The first evaluation lands while nmcli is still being polled for the first time.
         if (!root.linkPrimed) {
             root.linkPrimed = true;
             return;
@@ -126,15 +117,10 @@ Singleton {
     onEthConnectionChanged: root.syncLinkNotification()
     onWifiEnabledChanged: root.syncLinkNotification()
 
-    // ------------------------------------------------------------
-    // Live ListModel (stable rows => real add/remove animations)
-    // ------------------------------------------------------------
 
     property ListModel networkModel: ListModel {}
 
-    // Parsing helpers
 
-    // nmcli -t escapes literal ':' as '\:'
     function splitFields(line) {
         const out = [];
         let cur = "";
@@ -171,7 +157,6 @@ Singleton {
         return "\udb82\udd1f";
     }
 
-    // True when any field of the incoming row differs from the row already in the model.
     function rowsDiffer(current, incoming) {
         for (const k in incoming) {
             if (current[k] !== incoming[k])
@@ -181,7 +166,6 @@ Singleton {
         return false;
     }
 
-    // Keeps delegates alive so ListView add/remove/move transitions fire.
     function syncModel(model, items, key) {
         const freezeOrder = root.fastPoll;
 
@@ -227,7 +211,6 @@ Singleton {
         }
     }
 
-    // Readers
 
     property Process deviceProc: Process {
         command: ["nmcli", "-t", "-f", "DEVICE,TYPE,STATE,CONNECTION", "device", "status"]
@@ -329,7 +312,6 @@ Singleton {
                     const security = f[3].trim();
                     const bssid = f.length > 4 ? f[4] : "";
 
-                    // Hidden networks have an empty SSID
                     if (ssid === "")
                         continue;
                     if (inUse) {
@@ -337,7 +319,6 @@ Singleton {
                         activeSignal = strength;
                     }
 
-                    // Collapse multiple APs of the same SSID, keeping the strongest one.
                     if (seen[ssid] !== undefined) {
                         const prev = list[seen[ssid]];
 
@@ -365,7 +346,6 @@ Singleton {
                     });
                 }
 
-                // Connected first, then by signal strength Sort on BUCKETED strength, never the raw value.
                 list.sort(function (a, b) {
                     if (a.inUse !== b.inUse)
                         return a.inUse ? -1 : 1;
@@ -393,7 +373,6 @@ Singleton {
         }
     }
 
-    // Action runner (serialised queue)
 
     property var actionQueue: []
     property string currentTag: ""
@@ -463,7 +442,6 @@ Singleton {
         root.drainQueue();
     }
 
-    // Public API — Wi-Fi
 
     function toggleWifi() {
         root.run(["nmcli", "radio", "wifi", root.wifiEnabled ? "off" : "on"]);
@@ -522,14 +500,12 @@ Singleton {
         root.run(cmd, ssid);
     }
 
-    // Public API — Ethernet
 
     function connectEthernet(exclusive) {
         if (root.ethDevice === "")
             return;
         root.run(["nmcli", "device", "connect", root.ethDevice]);
 
-        // "Click one and the other disappears"
         if (exclusive && root.wifiConnected)
             root.disconnectWifi();
     }
@@ -547,15 +523,11 @@ Singleton {
             root.connectEthernet(true);
     }
 
-    // Misc
 
     function openEditor() {
         Quickshell.execDetached(["nm-connection-editor"]);
     }
 
-    // Full refresh: link state, radio state, saved profiles, scan results.
-    //
-    // Four nmcli processes. Called after every queued action, and by rescan().
     function refresh() {
         deviceProc.running = false;
         deviceProc.running = true;
@@ -570,16 +542,6 @@ Singleton {
         wifiListProc.running = true;
     }
 
-    // What the periodic poll actually needs.
-    //
-    // The bar module shows one glyph derived from link state, so with the popup
-    // closed only deviceProc is worth running. The other three exist for the
-    // popup's list: the scan (`nmcli device wifi list`) is by far the most
-    // expensive of the four, and saved profiles only change through actions this
-    // service performs itself -- which already call refresh() on completion.
-    //
-    // This was four spawns every 10s regardless, around 35k processes a day.
-    // Closed, it is now one.
     function refreshLink() {
         deviceProc.running = false;
         deviceProc.running = true;
@@ -597,7 +559,6 @@ Singleton {
         repeat: true
         triggeredOnStart: true
 
-        // fastPoll is bound to "the network popup is open" by Network.qml.
         onTriggered: {
             if (root.fastPoll)
                 root.refresh();

@@ -1,7 +1,3 @@
--- Aurora Alpha Dashboard
-
--- Load Alpha
-
 local ok_alpha, alpha = pcall(require, "alpha")
 
 if not ok_alpha then
@@ -14,7 +10,6 @@ if not ok_dashboard then
 	return
 end
 
--- Startup Timer
 
 local function startup_time()
 	if not vim.g.aurora_startup_time then
@@ -30,11 +25,9 @@ local function startup_time()
 	return string.format("󰅐  Ready in %.2f s", elapsed / 1000)
 end
 
--- Aurora Theme
 
 local aurora = require("aurora.theme")
 
--- Apply Aurora Colors
 
 local function apply_theme()
 	local theme = aurora.get()
@@ -64,7 +57,6 @@ local function apply_theme()
 	})
 end
 
--- NEOVIM ASCII ART
 
 dashboard.section.header.val = {
 
@@ -85,7 +77,6 @@ dashboard.section.header.val = {
 	[[                                                                       ]],
 }
 
--- Buttons
 
 dashboard.section.buttons.val = {
 
@@ -94,7 +85,6 @@ dashboard.section.buttons.val = {
 	dashboard.button("q", "    Quit NVIM", "<cmd>qa<CR>"),
 }
 
--- Footer
 
 dashboard.section.footer.val = {
 
@@ -103,7 +93,6 @@ dashboard.section.footer.val = {
 	startup_time(),
 }
 
--- Highlights
 
 dashboard.section.header.opts.hl = "AlphaHeader"
 
@@ -111,7 +100,6 @@ dashboard.section.buttons.opts.hl = "AlphaButtons"
 
 dashboard.section.footer.opts.hl = "AlphaFooter"
 
--- Layout
 
 dashboard.opts.layout = {
 
@@ -137,15 +125,12 @@ dashboard.opts.layout = {
 	dashboard.section.footer,
 }
 
--- Apply Theme
 
 apply_theme()
 
--- Initialize Alpha
 
 alpha.setup(dashboard.opts)
 
--- Alpha Buffer
 
 vim.api.nvim_create_autocmd("FileType", {
 	pattern = "alpha",
@@ -153,12 +138,10 @@ vim.api.nvim_create_autocmd("FileType", {
 	callback = function(args)
 		local win = vim.api.nvim_get_current_win()
 
-		-- Buffer
 
 		vim.bo[args.buf].buflisted = false
 		vim.bo[args.buf].modifiable = false
 
-		-- Window
 
 		vim.wo[win].number = false
 		vim.wo[win].relativenumber = false
@@ -179,15 +162,6 @@ vim.api.nvim_create_autocmd("FileType", {
 	end,
 })
 
--- Live Aurora Theme Refresh
---
--- Registered with the shared watcher rather than running a second 500ms uv timer
--- against the same file, which is what this used to do alongside ui/theme.lua's
--- identical one.
---
--- Dropping the timer also stops the footer drifting: it recomputes elapsed time
--- from vim.g.aurora_startup_time, so polling it twice a second made the
--- "Ready in Xms" figure climb for as long as the dashboard stayed open.
 
 aurora.on_change(function()
 	apply_theme()

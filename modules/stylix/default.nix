@@ -2,7 +2,6 @@
 
 let
 
-  # Aurora Theme Source
 
   themeData = import ../../lib/themes.nix;
 
@@ -12,21 +11,16 @@ let
 
   global = themeData.global;
 
-  # Helpers
 
-  # themes.nix stores colors as "#RRGGBB"; base16 wants them bare.
   hex = lib.removePrefix "#";
 
-  # Resolve DOTTED package paths such as "maple-mono.truetype".
   pkgFromPath = path: lib.getAttrFromPath (lib.splitString "." path) pkgs;
 
-  # Polarity Detection
 
   hexToInt = s: (builtins.fromTOML "v = 0x${s}").v;
 
   bgHex = hex colors.background;
 
-  # Perceived brightness, ITU-R BT.601.
   bgBrightness =
     (
       hexToInt (builtins.substring 0 2 bgHex) * 299
@@ -37,7 +31,6 @@ let
 
   isLight = bgBrightness > 127;
 
-  # Central Fonts
 
   interfaceFont = pkgFromPath global.fonts.interface.package;
 
@@ -45,15 +38,12 @@ let
 
   emojiFont = pkgFromPath global.fonts.emoji.package;
 
-  # Central Cursor
 
   cursorPackage = pkgFromPath global.cursor.package;
 
-  # Central Icons
 
   iconPackage = pkgFromPath global.icons.package;
 
-  # Colloid-Dark -> Colloid-Light for light polarity.
   iconNameLight = lib.replaceStrings [ "-Dark" ] [ "-Light" ] global.icons.name;
 
   iconNameDark = global.icons.name;
@@ -62,24 +52,19 @@ in
 {
   stylix = {
 
-    # Core
 
     enable = true;
 
-    # Aurora explicitly owns application-specific theming.
     autoEnable = false;
 
-    # Derived, not hardcoded. See Polarity Detection above.
     polarity = if isLight then "light" else "dark";
 
-    # STATIC AURORA COLOR SOURCE
 
     base16Scheme = {
 
       scheme = activeTheme.name;
       author = "Aurora (lib/themes.nix)";
 
-      # Base ramp
 
       base00 = hex colors.background;
       base01 = hex colors.surface;
@@ -88,11 +73,9 @@ in
 
       base04 = hex colors.textSecondary; # was textMuted -> ramp was shifted
       base05 = hex colors.text;
-      # base06/base07 are the bright end of the foreground ramp.
       base06 = hex colors.terminalWhite;
       base07 = hex colors.terminalBrightWhite;
 
-      # Semantic
 
       base08 = hex colors.error;
       base09 = hex colors.warning;
@@ -104,7 +87,6 @@ in
       base0F = hex colors.terminalMagenta; # was accentMuted -> near-background
     };
 
-    # FONTS
 
     fonts = {
 
@@ -136,7 +118,6 @@ in
       };
     };
 
-    # CURSOR
 
     cursor = {
       package = cursorPackage;
@@ -144,7 +125,6 @@ in
       size = global.cursor.size;
     };
 
-    # ICON THEME
 
     icons = {
       enable = true;
@@ -155,31 +135,6 @@ in
       light = iconNameLight;
     };
 
-    # ========================================================================
-    # DESKTOP TARGETS
-    # ========================================================================
-    #
-    # autoEnable = false means targets must be explicitly enabled.
-    #
-    # We intentionally keep GTK, Qt and Fontconfig under Stylix.
-    #
-    # Neovim is deliberately NOT a Stylix target: enabling it would
-    # generate a base16 colorscheme and override the real plugin
-    # colorschemes. Transparency is handled in the Neovim config with a
-    # ColorScheme autocmd instead. If you ever want Stylix to own nvim:
-    #
-    #   targets.neovim = {
-    #     enable = true;
-    #     transparentBackground = {
-    #       main = true;
-    #       signColumn = true;
-    #     };
-    #   };
-    #
-    # Both lines are required -- transparentBackground alone is a no-op
-    # while the target is disabled.
-    #
-    # ========================================================================
 
     targets.gtk.enable = true;
 

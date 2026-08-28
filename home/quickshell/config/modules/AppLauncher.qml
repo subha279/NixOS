@@ -5,7 +5,6 @@ import "../components" as Components
 import "../core" as Core
 import "../services" as Services
 
-// Application Launcher
 
 Components.LauncherSurface {
     id: launcher
@@ -18,7 +17,6 @@ Components.LauncherSurface {
 
     columns: 1
 
-    // 40px delegate + 4px ListView spacing.
     rowHeight: 44
 
     readonly property var results: Services.AppsService.search(launcher.query)
@@ -32,7 +30,6 @@ Components.LauncherSurface {
         if (!entry)
             return;
 
-        // Dismiss first: otherwise the closing surface and the new window race for keyboard focus.
         launcher.dismiss();
         Services.AppsService.launch(entry);
     }
@@ -67,7 +64,6 @@ Components.LauncherSurface {
 
             interactive: false
 
-            // Keep the selection off the very edge while scrolling.
             highlightRangeMode: ListView.ApplyRange
             preferredHighlightBegin: 40
             preferredHighlightEnd: height - 40
@@ -98,18 +94,12 @@ Components.LauncherSurface {
 
                 height: 40
 
-                // Rounded and quietly filled, like the rows in the battery
-                // popup, instead of inverting to a solid accent bar.
                 radius: Core.Theme.radiusRow
 
                 color: row.selected ? Core.Theme.surfaceGlass : "transparent"
 
-                // The selected row grows past its slot, so it paints over its
-                // neighbours.
                 z: row.selected ? 2 : 0
 
-                // Zoom on selection: 12px of gutter against 6.5px of growth at
-                // 1.03, so it never reaches the edge.
                 scale: row.selected ? 1.03 : 1.0
 
                 Behavior on scale {
@@ -126,8 +116,6 @@ Components.LauncherSurface {
                     }
                 }
 
-                // Selection marker, borrowed from ListRow: a short accent bar
-                // on the left edge that grows out of nothing.
                 Rectangle {
                     anchors.left: parent.left
                     anchors.leftMargin: 3
@@ -177,9 +165,6 @@ Components.LauncherSurface {
                         Text {
                             text: row.modelData.name
 
-                            // Not inverted any more: the row keeps its own
-                            // surface, so the label keeps its own colour and
-                            // just gains weight when selected.
                             color: Core.Theme.foreground
                             font.weight: row.selected ? Font.DemiBold : Font.Medium
 
@@ -193,8 +178,6 @@ Components.LauncherSurface {
                             visible: subtitle.length > 0
 
                             text: subtitle
-                            // The row is no longer accent-filled, so the muted
-                            // greys read fine in both states.
                             color: row.selected ? Core.Theme.foregroundMuted : Core.Theme.foregroundFaint
                             font.family: Core.Theme.fontMono
                             font.pixelSize: Core.Theme.fontSizeSmall
@@ -205,11 +188,6 @@ Components.LauncherSurface {
                     }
                 }
                 MouseArea {
-                    // Fills the row. The 36px rightMargin that used to be here was
-                    // copied from Clipboard, where it keeps the row's click target
-                    // clear of a per-row delete button. There is no such button
-                    // here, so it only made the right-hand 36px of every app row
-                    // silently unclickable.
                     anchors.fill: parent
 
                     cursorShape: Qt.PointingHandCursor

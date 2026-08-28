@@ -6,7 +6,6 @@ import "../core" as Core
 import "../services" as Services
 import "../components" as Components
 
-// BatteryPopup
 
 Components.PopupSurface {
     id: popup
@@ -18,7 +17,6 @@ Components.PopupSurface {
 
     readonly property var svc: Services.BatteryService
 
-    // Whether the peripheral section is expanded
     property bool showPeripherals: true
 
     contentComponent: Component {
@@ -28,7 +26,6 @@ Components.PopupSurface {
 
             spacing: Core.Theme.spacing
 
-            // Header
 
             Components.PopupHeader {
                 width: body.width
@@ -64,7 +61,6 @@ Components.PopupSurface {
                 ]
             }
 
-            // Big charge gauge
 
             Rectangle {
                 id: gauge
@@ -80,7 +76,6 @@ Components.PopupSurface {
                 border.width: Core.Theme.borderWidth
                 border.color: Core.Theme.border
 
-                // Percentage + state
 
                 Text {
                     id: bigIcon
@@ -134,7 +129,6 @@ Components.PopupSurface {
                     color: Core.Theme.foregroundMuted
                 }
 
-                // Springy fill bar
 
                 Rectangle {
                     id: barTrack
@@ -181,7 +175,6 @@ Components.PopupSurface {
                         }
                     }
 
-                    // Charging shimmer
                     Rectangle {
                         anchors.top: parent.top
                         anchors.bottom: parent.bottom
@@ -216,7 +209,6 @@ Components.PopupSurface {
                     }
                 }
 
-                // Footnote: health
 
                 Text {
                     anchors.left: parent.left
@@ -246,7 +238,6 @@ Components.PopupSurface {
                     color: Core.Theme.accent
                 }
 
-                // Right-click the gauge
 
                 MouseArea {
                     anchors.fill: parent
@@ -280,7 +271,6 @@ Components.PopupSurface {
                 }
             }
 
-            // Power profiles
 
             Text {
                 width: body.width
@@ -364,7 +354,6 @@ Components.PopupSurface {
                 }
             }
 
-            // Degradation warning
 
             Rectangle {
                 width: body.width
@@ -395,7 +384,6 @@ Components.PopupSurface {
                 }
             }
 
-            // Peripherals
 
             Item {
                 width: body.width
@@ -441,7 +429,6 @@ Components.PopupSurface {
                 }
             }
 
-            // The clipped, spring-sized list container.
             Item {
                 id: listBox
 
@@ -530,7 +517,6 @@ Components.PopupSurface {
                         }
                     }
 
-                    // Rubbery list transitions
 
                     add: Transition {
                         NumberAnimation {
@@ -592,7 +578,6 @@ Components.PopupSurface {
                 }
             }
 
-            // Empty state
 
             Text {
                 width: body.width
@@ -614,13 +599,11 @@ Components.PopupSurface {
         }
     }
 
-    // Clipboard helper, kept on the popup so delegates can reach it.
 
     function copyText(text) {
         try {
             Quickshell.clipboardText = text;
         } catch (e) {
-            // Silently ignore — clipboard is a nice-to-have.
         }
     }
 }

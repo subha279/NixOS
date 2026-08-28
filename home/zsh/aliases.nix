@@ -3,7 +3,6 @@
 {
   programs.zsh.shellAliases = {
 
-    # Listing
 
     ls = "eza --icons --group-directories-first";
 
@@ -15,7 +14,6 @@
 
     tree = "eza --tree --icons --group-directories-first";
 
-    # Navigation
 
     ".." = "cd ..";
 
@@ -23,7 +21,6 @@
 
     "...." = "cd ../../..";
 
-    # Editors
 
     v = "nvim";
 
@@ -33,7 +30,6 @@
 
     sv = "sudo -E nvim";
 
-    # Utilities
 
     c = "clear";
 
@@ -43,7 +39,6 @@
 
     diff = "diff --color=auto";
 
-    # Git
 
     gs = "git status";
 

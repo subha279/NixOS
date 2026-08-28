@@ -6,7 +6,6 @@ import "../core" as Core
 import "../services" as Services
 import "../components" as Components
 
-// BluetoothPopup
 
 Components.PopupSurface {
     id: popup
@@ -18,7 +17,6 @@ Components.PopupSurface {
 
     readonly property var svc: Services.BluetoothService
 
-    // Start discovering as soon as the menu opens
     onDidOpen: {
         if (popup.svc.powered)
             popup.svc.setDiscovering(true);
@@ -29,7 +27,6 @@ Components.PopupSurface {
             popup.svc.setDiscovering(false);
     }
 
-    // Content
 
     contentComponent: Component {
 
@@ -38,7 +35,6 @@ Components.PopupSurface {
 
             spacing: Core.Theme.spacing
 
-            // Header
 
             Components.PopupHeader {
                 width: parent.width
@@ -80,7 +76,6 @@ Components.PopupSurface {
                 color: Core.Theme.separator
             }
 
-            // Section label
 
             Item {
                 width: parent.width
@@ -124,7 +119,6 @@ Components.PopupSurface {
                 }
             }
 
-            // Device list
 
             Item {
                 width: parent.width
@@ -216,7 +210,6 @@ Components.PopupSurface {
                     delegate: Components.ListRow {
                         id: devRow
 
-                        // These roles are prefixed because `name`, `icon` and `state` collide with ListRow's own properties, which produces a self-referential
                         required property string address
                         required property string deviceName
                         required property string deviceIcon
@@ -247,7 +240,6 @@ Components.PopupSurface {
 
                         busy: popup.svc.pendingAddress === devRow.address
 
-                        // Left click: connect / disconnect
 
                         onActivated: {
                             if (!devRow.paired && !devRow.connected) {
@@ -258,7 +250,6 @@ Components.PopupSurface {
                             popup.svc.toggleDevice(devRow.address);
                         }
 
-                        // Right click: full device menu
 
                         onContextRequested: function (mx, my) {
                             const items = [];
@@ -341,7 +332,6 @@ Components.PopupSurface {
                 }
             }
 
-            // Empty / off state
 
             Item {
                 width: parent.width

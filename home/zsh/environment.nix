@@ -1,17 +1,14 @@
 { ... }:
 
 {
-  # Shell / Developer Environment
 
   home.sessionVariables = {
 
-    # Editor
 
     EDITOR = "nvim";
 
     VISUAL = "nvim";
 
-    # Pager
 
     PAGER = "less";
 
@@ -19,22 +16,18 @@
 
     MANPAGER = "less -R";
 
-    # Applications
 
     BROWSER = "zen";
 
     TERMINAL = "kitty";
 
-    # Package Managers
 
     PNPM_HOME = "$HOME/.local/share/pnpm";
 
-    # Virtualization
 
     LIBVIRT_DEFAULT_URI = "qemu:///system";
   };
 
-  # User PATH
 
   home.sessionPath = [
     "$HOME/.local/bin"

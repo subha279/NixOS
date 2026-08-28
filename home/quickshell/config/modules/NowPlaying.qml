@@ -7,13 +7,10 @@ import "../services" as Services
 Item {
     id: root
 
-    // Set by the host module. Clock.qml gates this on "audio is playing AND the
-    // bar is narrow", so the indicator is absent the rest of the time.
     property bool active: false
 
     readonly property var svc: Services.MprisService
 
-    // The real playback state, which drives the motion.
     readonly property bool playing: root.svc.playing
 
     readonly property bool shown: root.active && root.svc.available
@@ -77,7 +74,6 @@ Item {
         }
     ]
 
-    // Geometry
 
     readonly property int barWidth: 2
 
@@ -87,16 +83,10 @@ Item {
 
     readonly property int barCount: root.bars.length
 
-    // 11 bars of 2px plus 10 gutters of 1px = 32px.
     width: (root.barCount * root.barWidth) + ((root.barCount - 1) * root.barSpacing)
 
     height: root.eqHeight
 
-    // Colour sweep
-    //
-    // Interpolates the two theme accents from one end of the strip to the
-    // other. Reading Theme inside the function still registers the dependency,
-    // so the whole strip recolours when you switch themes.
     function barColor(i) {
         const t = root.barCount > 1 ? i / (root.barCount - 1) : 0;
 
@@ -106,7 +96,6 @@ Item {
         return Qt.rgba(a.r + (b.r - a.r) * t, a.g + (b.g - a.g) * t, a.b + (b.b - a.b) * t, 1.0);
     }
 
-    // Reveal
 
     opacity: root.shown ? 1.0 : 0.0
 
@@ -119,9 +108,6 @@ Item {
         }
     }
 
-    // Rises into place instead of blinking on. Pausing and resuming reads as a
-    // soft pulse rather than a flicker, which also covers the players that dip
-    // to Paused for a moment while loading the next track.
     transform: Translate {
         y: root.shown ? 0 : -3
 
@@ -149,11 +135,8 @@ Item {
 
             height: bar.modelData.min
 
-            // Bars grow upward off a shared baseline.
             y: root.eqHeight - bar.height
 
-            // Square tops on purpose. Rounding a 2px bar turns the cap into a
-            // semicircle and loses the spectrum-analyser read entirely.
             radius: 0
 
             color: root.playing ? root.barColor(bar.index) : Core.Theme.foregroundFaint
@@ -165,7 +148,6 @@ Item {
                 }
             }
 
-            // Runs only while audio is actually playing.
             SequentialAnimation {
                 running: root.playing
 
@@ -188,8 +170,6 @@ Item {
                 }
             }
 
-            // Paused: settle into a flat, dim line rather than freezing
-            // mid-bounce, so the fade-out never catches it at full height.
             NumberAnimation {
                 running: !root.playing
 

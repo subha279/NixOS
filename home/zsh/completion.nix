@@ -2,23 +2,18 @@
 
 {
   programs.zsh = {
-    # Completion
 
     enableCompletion = true;
 
-    # Autosuggestions
 
     autosuggestion.enable = true;
 
-    # Syntax Highlighting
 
     syntaxHighlighting.enable = true;
 
-    # History Substring Search
 
     historySubstringSearch.enable = true;
 
-    # Completion Configuration
 
     initContent = ''
       # --------------------------------------------------
@@ -55,9 +50,7 @@
 
       zstyle ':completion:*' menu no
 
-      # ==================================================
       # fzf-tab
-      # ==================================================
 
       zstyle ':fzf-tab:*' use-fzf-default-opts yes
 
@@ -79,9 +72,7 @@
           bat --color=always --style=numbers,changes --line-range=:300 $realpath
         fi'
 
-      # ==================================================
       # fzf-tab Keybindings
-      # ==================================================
       #
       # Bound explicitly into viins rather than the current keymap. keybindings.nix
       # runs `bindkey -v`, which relinks main to viins and discards anything bound
@@ -89,14 +80,14 @@
       # whenever this fragment was emitted first.
 
       # Tab
+      # This file owns Tab. Binding it in keybindings.nix too made the winner
+      # depend on which initContent fragment was emitted last.
       bindkey -M viins '^I' fzf-tab-complete
 
       # Shift + Tab
       bindkey -M viins '^[[Z' reverse-menu-complete
 
-      # ==================================================
       # Completion Behaviour
-      # ==================================================
 
       setopt AUTO_MENU
       setopt COMPLETE_IN_WORD

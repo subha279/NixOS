@@ -5,7 +5,6 @@ import Quickshell
 import "../core" as Core
 import "../services" as Services
 
-// Volume (bar module)
 
 Item {
     id: root
@@ -56,15 +55,11 @@ Item {
                 }
             }
 
-            // Springy pop whenever the icon changes.
             onTextChanged: popAnim.restart()
 
             SequentialAnimation {
                 id: popAnim
 
-                // Out fast, then settle back with a slight overshoot so it reads
-                // as a spring rather than a two-step bounce. 1.22 was distinctly
-                // rubbery on a 16px glyph.
                 NumberAnimation {
                     target: icon
                     property: "scale"
@@ -100,7 +95,6 @@ Item {
         }
     }
 
-    // Small badge in the corner while the microphone is muted, so you can tell at a glance without opening anything.
     Rectangle {
         id: micBadge
 
@@ -150,8 +144,6 @@ Item {
                 return;
             }
 
-            // Bar coordinates -> screen coordinates. Only x is
-            // used; the popup derives its own y from the theme.
             const p = root.mapToItem(null, 0, root.height);
 
             Core.PopupManager.toggle("audio", p.x + root.width / 2, p.y + Core.Theme.barMarginTop);

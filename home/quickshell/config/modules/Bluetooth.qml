@@ -5,7 +5,6 @@ import Quickshell
 import "../core" as Core
 import "../services" as Services
 
-// Bluetooth bar module
 
 Item {
     id: root
@@ -53,15 +52,11 @@ Item {
             }
         }
 
-        // Little pop whenever the icon changes
         onTextChanged: popAnim.restart()
 
         SequentialAnimation {
             id: popAnim
 
-            // Out fast, then settle back with a slight overshoot so it reads as a
-            // spring rather than a two-step bounce. 1.22 was distinctly rubbery on
-            // a 16px glyph.
             NumberAnimation {
                 target: icon
                 property: "scale"
@@ -82,7 +77,6 @@ Item {
         }
     }
 
-    // Scanning pulse
 
     Rectangle {
         anchors.top: parent.top
@@ -165,7 +159,6 @@ Item {
         value: root.menuOpen
     }
 
-    // Stop scanning when the menu closes — saves battery
     onMenuOpenChanged: {
         if (!root.menuOpen && Services.BluetoothService.discovering)
             Services.BluetoothService.setDiscovering(false);

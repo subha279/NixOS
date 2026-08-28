@@ -4,7 +4,6 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-// Aurora Wallpaper Service
 
 QtObject {
     id: root
@@ -17,7 +16,6 @@ QtObject {
     property string error: ""
     property var wallpapers: []
 
-    // Applied wallpaper
 
     property FileView stateFile: FileView {
         path: root.statePath
@@ -35,7 +33,6 @@ QtObject {
         return raw.trim()
     }
 
-    // Scanning
 
     property Process scanProcess: Process {
         command: [
@@ -100,7 +97,6 @@ QtObject {
 
     readonly property int count: root.wallpapers.length
 
-    // Search
 
     function search(query) {
         const all = root.wallpapers
@@ -119,7 +115,6 @@ QtObject {
         return out
     }
 
-    // Actions
 
     function apply(path) {
         if (!path || path.length === 0)

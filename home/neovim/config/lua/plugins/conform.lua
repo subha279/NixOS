@@ -1,8 +1,5 @@
--- Aurora Conform
-
 local M = {}
 
--- Setup
 
 function M.setup()
 	local ok, conform = pcall(require, "conform")
@@ -14,7 +11,6 @@ function M.setup()
 	end
 
 	conform.setup({
-		-- Formatters
 
 		formatters_by_ft = {
 			lua = {
@@ -94,7 +90,6 @@ function M.setup()
 			},
 		},
 
-		-- Formatting behavior
 
 		format_on_save = false,
 
@@ -105,7 +100,6 @@ function M.setup()
 		log_level = vim.log.levels.WARN,
 	})
 
-	-- Manual formatting
 
 	vim.keymap.set({ "n", "v" }, "<leader>gf", function()
 		conform.format({
@@ -120,11 +114,8 @@ function M.setup()
 	return true
 end
 
--- IMPORTANT
 
 M.setup()
 
--- No theme subscriber: conform sets no highlights. Its refresh_theme() only
--- scheduled a redraw!, which aurora.refresh() now does once for the whole pass.
 
 return M

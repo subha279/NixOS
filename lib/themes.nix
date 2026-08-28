@@ -1,15 +1,9 @@
 {
   global = {
 
-    # ----------------------------------------------------------
-    # Active theme
-    # ----------------------------------------------------------
 
     activeTheme = "catppuccin-mocha";
 
-    # ----------------------------------------------------------
-    # Fonts
-    # ----------------------------------------------------------
 
     fonts = {
       interface = {
@@ -17,21 +11,8 @@
         package = "inter";
       };
 
-      # NOTE the un-spaced "JetBrainsMono".
-      #
-      # Nerd Fonts name patched families "<FontName> Nerd Font [Mono|Propo]" using
-      # the font's own un-spaced name, so this family is "JetBrainsMono Nerd Font
-      # Mono". "JetBrains Mono Nerd Font", which is what this said, is not a real
-      # family at all: every consumer -- kitty's font_family, stylix's monospace,
-      # Theme.fontMono in the shell -- was handing that string to fontconfig and
-      # getting whatever approximate match it decided on, which is silent and not
-      # guaranteed to be this font.
-      #
-      # The Mono ("NFM") variant is the one to use here: its glyphs are confined to
-      # a single cell, which is what a terminal needs and what makes icon widths
-      # predictable in the shell. The plain "Nerd Font" variant draws them 1.3-1.8
-      # cells wide.
       terminal = {
+        # "JetBrainsMono" is un-spaced on purpose: that is the real family name.
         name = "JetBrainsMono Nerd Font Mono";
         package = "nerd-fonts.jetbrains-mono";
       };
@@ -42,18 +23,12 @@
       };
     };
 
-    # ----------------------------------------------------------
-    # Icons
-    # ----------------------------------------------------------
 
     icons = {
       name = "Colloid-Dark";
       package = "colloid-icon-theme";
     };
 
-    # ----------------------------------------------------------
-    # Cursor
-    # ----------------------------------------------------------
 
     cursor = {
       name = "phinger-cursors-dark";
@@ -61,9 +36,6 @@
       size = 30;
     };
 
-    # ----------------------------------------------------------
-    # UI
-    # ----------------------------------------------------------
 
     ui = {
 
@@ -79,9 +51,6 @@
       fontSizeSmall = 10;
       fontSizeLarge = 15;
 
-      # ========================================================
-      # LIQUID GLASS
-      # ========================================================
 
       glassOpacity = 0.50;
       surfaceOpacity = 0.18;
@@ -89,16 +58,12 @@
       glassGradientOpacity = 0.055;
       glassGrainOpacity = 0.0;
 
-      # Flat glass.
       glassSpecularOpacity = 0.0;
       glassLensOpacity = 0.0;
       glassDepthOpacity = 0.0;
       glassRimOpacity = 0.0;
       glassClarity = 0.14;
 
-      # ========================================================
-      # SHADOWS / WINDOWS
-      # ========================================================
 
       shadowOpacity = 0.24;
 
@@ -108,9 +73,6 @@
 
       editorFloatBlend = 12;
 
-      # ========================================================
-      # CLOCK
-      # ========================================================
 
       clock = {
         hour = "foreground";
@@ -121,15 +83,9 @@
     };
   };
 
-  # ============================================================
-  # THEMES
-  # ============================================================
 
   themes = {
 
-    # ==========================================================
-    # CATPPUCCIN MOCHA
-    # ==========================================================
 
     catppuccin-mocha = {
 
@@ -139,39 +95,32 @@
 
       colors = {
 
-        # Base
         background = "#1E1E2E";
         backgroundDark = "#181825";
 
-        # Surfaces
         surface = "#313244";
         surfaceHover = "#45475A";
         surfaceActive = "#585B70";
 
-        # Borders
         border = "#45475A";
         borderFocus = "#CBA6F7";
         separator = "#3B3D52";
 
-        # Text
         text = "#CDD6F4";
         textSecondary = "#BAC2DE";
         textMuted = "#9399B2";
 
-        # Accent
         accent = "#CBA6F7";
         accentHover = "#B4BEFE";
         accentActive = "#F5C2E7";
         accentMuted = "#585B70";
         accentForeground = "#1E1E2E";
 
-        # Semantic
         success = "#A6E3A1";
         warning = "#F9E2AF";
         error = "#F38BA8";
         info = "#89B4FA";
 
-        # ANSI
         terminalBlack = "#45475A";
         terminalRed = "#F38BA8";
         terminalGreen = "#A6E3A1";
@@ -192,9 +141,6 @@
       };
     };
 
-    # ==========================================================
-    # TOKYO NIGHT
-    # ==========================================================
 
     tokyo-night = {
 
@@ -204,39 +150,32 @@
 
       colors = {
 
-        # Base
         background = "#1A1B26";
         backgroundDark = "#16161E";
 
-        # Surfaces
         surface = "#24283B";
         surfaceHover = "#292E42";
         surfaceActive = "#3B4261";
 
-        # Borders
         border = "#3B4261";
         borderFocus = "#7AA2F7";
         separator = "#292E42";
 
-        # Text
         text = "#C0CAF5";
         textSecondary = "#A9B1D6";
         textMuted = "#7982A9";
 
-        # Accent
         accent = "#7AA2F7";
         accentHover = "#8DB0FF";
         accentActive = "#BB9AF7";
         accentMuted = "#414868";
         accentForeground = "#1A1B26";
 
-        # Semantic
         success = "#9ECE6A";
         warning = "#E0AF68";
         error = "#F7768E";
         info = "#7DCFFF";
 
-        # ANSI
         terminalBlack = "#414868";
         terminalRed = "#F7768E";
         terminalGreen = "#9ECE6A";
@@ -257,9 +196,6 @@
       };
     };
 
-    # ==========================================================
-    # GRUVBOX DARK
-    # ==========================================================
 
     gruvbox = {
 
@@ -269,39 +205,32 @@
 
       colors = {
 
-        # Base
         background = "#282828";
         backgroundDark = "#1D2021";
 
-        # Surfaces
         surface = "#3C3836";
         surfaceHover = "#504945";
         surfaceActive = "#665C54";
 
-        # Borders
         border = "#504945";
         borderFocus = "#D79921";
         separator = "#45403D";
 
-        # Text
         text = "#EBDBB2";
         textSecondary = "#D5C4A1";
         textMuted = "#A89984";
 
-        # Accent
         accent = "#D79921";
         accentHover = "#FABD2F";
         accentActive = "#FE8019";
         accentMuted = "#665C54";
         accentForeground = "#282828";
 
-        # Semantic
         success = "#B8BB26";
         warning = "#FABD2F";
         error = "#FB4934";
         info = "#83A598";
 
-        # ANSI
         terminalBlack = "#282828";
         terminalRed = "#CC241D";
         terminalGreen = "#98971A";
@@ -322,9 +251,6 @@
       };
     };
 
-    # ==========================================================
-    # ONE DARK
-    # ==========================================================
 
     one-dark = {
 
@@ -334,39 +260,32 @@
 
       colors = {
 
-        # Base
         background = "#282C34";
         backgroundDark = "#21252B";
 
-        # Surfaces
         surface = "#31353F";
         surfaceHover = "#393F4A";
         surfaceActive = "#4B5263";
 
-        # Borders
         border = "#3E4451";
         borderFocus = "#61AFEF";
         separator = "#353B45";
 
-        # Text
         text = "#ABB2BF";
         textSecondary = "#9DA5B4";
         textMuted = "#7F848E";
 
-        # Accent
         accent = "#61AFEF";
         accentHover = "#56B6C2";
         accentActive = "#C678DD";
         accentMuted = "#3E4451";
         accentForeground = "#282C34";
 
-        # Semantic
         success = "#98C379";
         warning = "#E5C07B";
         error = "#E06C75";
         info = "#61AFEF";
 
-        # ANSI
         terminalBlack = "#282C34";
         terminalRed = "#E06C75";
         terminalGreen = "#98C379";
@@ -387,9 +306,6 @@
       };
     };
 
-    # ==========================================================
-    # EVERFOREST
-    # ==========================================================
 
     everforest = {
 
@@ -399,39 +315,32 @@
 
       colors = {
 
-        # Base
         background = "#2D353B";
         backgroundDark = "#232A2E";
 
-        # Surfaces
         surface = "#343F44";
         surfaceHover = "#3D484D";
         surfaceActive = "#475258";
 
-        # Borders
         border = "#4A575D";
         borderFocus = "#A7C080";
         separator = "#414B50";
 
-        # Text
         text = "#D3C6AA";
         textSecondary = "#9DA9A0";
         textMuted = "#859289";
 
-        # Accent
         accent = "#A7C080";
         accentHover = "#83C092";
         accentActive = "#D699B6";
         accentMuted = "#475258";
         accentForeground = "#2D353B";
 
-        # Semantic
         success = "#A7C080";
         warning = "#DBBC7F";
         error = "#E67E80";
         info = "#7FBBB3";
 
-        # ANSI
         terminalBlack = "#4B565C";
         terminalRed = "#E67E80";
         terminalGreen = "#A7C080";
@@ -452,9 +361,6 @@
       };
     };
 
-    # ==========================================================
-    # ROSÉ PINE
-    # ==========================================================
 
     rose-pine = {
 
@@ -464,39 +370,32 @@
 
       colors = {
 
-        # Base
         background = "#191724";
         backgroundDark = "#13111C";
 
-        # Surfaces
         surface = "#1F1D2E";
         surfaceHover = "#26233A";
         surfaceActive = "#403D52";
 
-        # Borders
         border = "#403D52";
         borderFocus = "#C4A7E7";
         separator = "#2A2739";
 
-        # Text
         text = "#E0DEF4";
         textSecondary = "#908CAA";
         textMuted = "#6E6A86";
 
-        # Accent
         accent = "#C4A7E7";
         accentHover = "#D5BFF2";
         accentActive = "#EBBCBA";
         accentMuted = "#403D52";
         accentForeground = "#191724";
 
-        # Semantic
         success = "#9CCFD8";
         warning = "#F6C177";
         error = "#EB6F92";
         info = "#31748F";
 
-        # ANSI
         terminalBlack = "#26233A";
         terminalRed = "#EB6F92";
         terminalGreen = "#9CCFD8";
@@ -517,9 +416,6 @@
       };
     };
 
-    # ==========================================================
-    # KANAGAWA
-    # ==========================================================
 
     kanagawa = {
 
@@ -529,39 +425,32 @@
 
       colors = {
 
-        # Base
         background = "#1F1F28";
         backgroundDark = "#16161D";
 
-        # Surfaces
         surface = "#2A2A37";
         surfaceHover = "#363646";
         surfaceActive = "#54546D";
 
-        # Borders
         border = "#424257";
         borderFocus = "#7E9CD8";
         separator = "#363646";
 
-        # Text
         text = "#DCD7BA";
         textSecondary = "#C8C093";
         textMuted = "#727169";
 
-        # Accent
         accent = "#7E9CD8";
         accentHover = "#7FB4CA";
         accentActive = "#957FB8";
         accentMuted = "#54546D";
         accentForeground = "#1F1F28";
 
-        # Semantic
         success = "#98BB6C";
         warning = "#E6C384";
         error = "#E82424";
         info = "#7FB4CA";
 
-        # ANSI
         terminalBlack = "#16161D";
         terminalRed = "#C34043";
         terminalGreen = "#76946A";

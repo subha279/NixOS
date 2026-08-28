@@ -1,8 +1,5 @@
--- Aurora Lualine
-
 local M = {}
 
--- Theme
 
 local aurora = require("aurora.theme")
 
@@ -17,7 +14,6 @@ local function transparent(foreground)
 	}
 end
 
--- Responsive helpers
 
 local function columns()
 	return vim.o.columns
@@ -41,7 +37,6 @@ local function truncate(text, maximum)
 	return vim.fn.strcharpart(text, 0, math.max(maximum - 1, 1)) .. "…"
 end
 
--- Mode capsule
 
 local mode_labels = {
 	normal = { short = "N", long = "NORMAL" },
@@ -113,7 +108,6 @@ local function mode_color()
 	}
 end
 
--- Context components
 
 local function project_name()
 	local directory = vim.fn.getcwd()
@@ -242,7 +236,6 @@ local function has_diagnostics()
 	return #vim.diagnostic.get(0) > 0
 end
 
--- Dynamic Aurora theme
 
 local function build_theme()
 	local c = colors()
@@ -275,7 +268,6 @@ local function build_theme()
 	}
 end
 
--- Configuration
 
 local function build_config()
 	local c = colors()
@@ -503,7 +495,6 @@ local function build_config()
 	}
 end
 
--- Setup and live theme refresh
 
 function M.setup()
 	local ok, lualine = pcall(require, "lualine")
@@ -521,11 +512,6 @@ function M.setup()
 	return true
 end
 
--- Live Aurora Theme Refresh
---
--- Registered at module level, not inside setup(): the subscriber calls setup()
--- again to rebuild the config against the new palette, so registering from
--- within it would add a fresh subscriber on every switch.
 
 aurora.on_change(function()
 	M.setup()

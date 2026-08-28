@@ -1,8 +1,5 @@
--- Aurora Native LSP
-
 local M = {}
 
--- Aurora Theme
 
 local aurora = require("aurora.theme")
 
@@ -14,12 +11,10 @@ local function set_hl(name, opts)
 	vim.api.nvim_set_hl(0, name, opts)
 end
 
--- LSP Highlights
 
 local function apply_highlights()
 	local c = colors()
 
-	-- Floating UI
 
 	set_hl("LspFloatNormal", {
 		fg = c.text,
@@ -37,7 +32,6 @@ local function apply_highlights()
 		bold = true,
 	})
 
-	-- Signature Help
 
 	set_hl("LspSignatureActiveParameter", {
 		fg = c.accent,
@@ -45,7 +39,6 @@ local function apply_highlights()
 		bold = true,
 	})
 
-	-- Inlay Hints
 
 	set_hl("LspInlayHint", {
 		fg = c.textMuted,
@@ -53,7 +46,6 @@ local function apply_highlights()
 		italic = true,
 	})
 
-	-- Code Lens
 
 	set_hl("LspCodeLens", {
 		fg = c.textMuted,
@@ -66,7 +58,6 @@ local function apply_highlights()
 		bg = "NONE",
 	})
 
-	-- References
 
 	set_hl("LspReferenceText", {
 		bg = c.surfaceHover,
@@ -86,7 +77,6 @@ local function apply_highlights()
 		underline = true,
 	})
 
-	-- Semantic Tokens
 
 	set_hl("@lsp.type.namespace", {
 		fg = c.info,
@@ -101,11 +91,6 @@ local function apply_highlights()
 		bold = true,
 	})
 
-	-- Adopted from ui/theme.lua, which was the only file setting it. Recoloured
-	-- from terminalBlue to accent to match the type-ish groups around it: accent
-	-- is what @lsp.type.class/.type and treesitter's @type actually render as,
-	-- terminalBlue was ui/theme.lua's own type colour from a block that was
-	-- already being overridden.
 	set_hl("@lsp.type.struct", {
 		fg = c.accent,
 	})
@@ -162,7 +147,6 @@ local function apply_highlights()
 	})
 end
 
--- LSP Hover
 
 local function hover()
 	vim.lsp.buf.hover({
@@ -178,7 +162,6 @@ local function hover()
 	})
 end
 
--- LSP Signature Help
 
 local function signature_help()
 	vim.lsp.buf.signature_help({
@@ -194,7 +177,6 @@ local function signature_help()
 	})
 end
 
--- Diagnostics
 
 local function configure_diagnostics()
 	local sign_text = {}
@@ -204,16 +186,11 @@ local function configure_diagnostics()
 	end
 
 	vim.diagnostic.config({
-		-- Virtual text with a marker and some air. Bare `true` butts the message
-		-- straight against the end of the code with a single space.
 		virtual_text = {
 			spacing = 2,
 			prefix = "●",
 		},
 
-		-- Glyphs, not Neovim's default E/W/I/H letters. `signs = true` left the
-		-- sign column showing letters while lualine and nvim-tree both showed
-		-- glyphs for the same severities.
 		signs = {
 			text = sign_text,
 		},
@@ -222,15 +199,10 @@ local function configure_diagnostics()
 		update_in_insert = false,
 		severity_sort = true,
 
-		-- Every other float in this config is rounded -- hover, signature help,
-		-- blink's menu and docs, gitsigns previews, which-key. open_float was the
-		-- one that wasn't, because it was never configured.
 		float = {
 			border = "rounded",
 			header = "",
 
-			-- Name the server only when more than one is reporting, otherwise it
-			-- is noise on every message.
 			source = "if_many",
 		},
 	})
@@ -286,7 +258,6 @@ local function configure_diagnostic_lists()
 	end, "Quickfix")
 end
 
--- Completion Capabilities
 
 local function configure_capabilities()
 	local ok, blink = pcall(require, "blink.cmp")
@@ -295,7 +266,6 @@ local function configure_capabilities()
 		return
 	end
 
-	-- Apply Blink's completion capabilities to every native LSP config, including local configs under config/lsp/.
 	vim.lsp.config("*", {
 		capabilities = blink.get_lsp_capabilities(),
 	})
@@ -303,23 +273,6 @@ end
 
 configure_capabilities()
 
--- Server Configuration
---
--- Per-server settings live in config/lsp/<name>.lua, which Neovim picks up off
--- the runtime path automatically. There are deliberately no vim.lsp.config()
--- calls for individual servers here.
---
--- lua_ls, rust_analyzer and qmlls used to be configured in BOTH places. Since the
--- runtime files are merged first and these calls overrode them, the files were
--- misleading: qmlls was a byte-identical copy, and rust_analyzer genuinely
--- disagreed (closureReturnTypeHints "with_block" in the file vs "always" here,
--- plus five hint categories that only existed here). Those inline values have
--- been folded into config/lsp/ so current behaviour is preserved with one source.
---
--- The one exception is the "*" config in configure_capabilities() above, which is
--- a cross-server default rather than per-server settings.
-
--- Enable Servers
 
 vim.lsp.enable({
 	"lua_ls",
@@ -341,7 +294,6 @@ vim.lsp.enable({
 	"qmlls",
 })
 
--- LSP Attach
 
 vim.api.nvim_create_autocmd("LspAttach", {
 	callback = function(event)
@@ -363,7 +315,6 @@ vim.api.nvim_create_autocmd("LspAttach", {
 			})
 		end
 
-		-- Navigation
 
 		map("n", "gd", vim.lsp.buf.definition, "LSP: Definition")
 
@@ -375,22 +326,16 @@ vim.api.nvim_create_autocmd("LspAttach", {
 
 		map("n", "gt", vim.lsp.buf.type_definition, "LSP: Type definition")
 
-		-- Documentation
 
 		map("n", "K", hover, "LSP: Hover")
 
-		-- gK, not <C-k>: core/keymaps.lua maps <C-k> to <C-w>k globally, and a
-		-- buffer-local mapping wins, so binding it here silently broke
-		-- "move to the window above" in every buffer with a language server.
 		map("n", "gK", signature_help, "LSP: Signature help")
 
-		-- Refactoring
 
 		map("n", "<leader>lr", vim.lsp.buf.rename, "LSP: Rename")
 
 		map({ "n", "v" }, "<leader>la", vim.lsp.buf.code_action, "LSP: Code action")
 
-		-- Diagnostics
 
 		map("n", "<leader>ld", vim.diagnostic.open_float, "LSP: Line diagnostics")
 
@@ -406,7 +351,6 @@ vim.api.nvim_create_autocmd("LspAttach", {
 			})
 		end, "Diagnostics: Next")
 
-		-- Inlay Hints
 
 		if vim.lsp.inlay_hint and client:supports_method("textDocument/inlayHint") then
 			map("n", "<leader>lh", function()
@@ -422,7 +366,6 @@ vim.api.nvim_create_autocmd("LspAttach", {
 	end,
 })
 
--- Initialize
 
 configure_diagnostic_lists()
 
@@ -430,7 +373,6 @@ configure_diagnostics()
 
 apply_highlights()
 
--- Live Aurora Theme Refresh
 
 aurora.on_change(function()
 	apply_highlights()

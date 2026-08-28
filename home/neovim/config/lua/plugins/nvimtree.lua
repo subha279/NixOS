@@ -1,5 +1,3 @@
--- Aurora NvimTree
-
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
 
@@ -7,7 +5,6 @@ local api = require("nvim-tree.api")
 
 local icons = require("aurora.icons")
 
--- NvimTree Buffer Keymaps
 
 local function on_attach(bufnr)
 	local function opts(desc)
@@ -20,10 +17,8 @@ local function on_attach(bufnr)
 		}
 	end
 
-	-- Keep NvimTree defaults.
 	api.config.mappings.default_on_attach(bufnr)
 
-	-- Navigation
 
 	vim.keymap.set("n", "l", api.node.open.edit, opts("Open"))
 
@@ -31,17 +26,14 @@ local function on_attach(bufnr)
 
 	vim.keymap.set("n", "h", api.node.navigate.parent_close, opts("Close folder"))
 
-	-- Preview
 
 	vim.keymap.set("n", "P", api.node.open.preview, opts("Preview"))
 
-	-- Splits
 
 	vim.keymap.set("n", "s", api.node.open.vertical, opts("Open vertical split"))
 
 	vim.keymap.set("n", "i", api.node.open.horizontal, opts("Open horizontal split"))
 
-	-- Files
 
 	vim.keymap.set("n", "a", api.fs.create, opts("Create"))
 
@@ -49,7 +41,6 @@ local function on_attach(bufnr)
 
 	vim.keymap.set("n", "d", api.fs.remove, opts("Delete"))
 
-	-- Clipboard
 
 	vim.keymap.set("n", "c", api.fs.copy.node, opts("Copy"))
 
@@ -57,7 +48,6 @@ local function on_attach(bufnr)
 
 	vim.keymap.set("n", "p", api.fs.paste, opts("Paste"))
 
-	-- Tree
 
 	vim.keymap.set("n", "R", api.tree.reload, opts("Refresh"))
 
@@ -68,11 +58,9 @@ local function on_attach(bufnr)
 	vim.keymap.set("n", "g?", api.tree.toggle_help, opts("Help"))
 end
 
--- Setup
 
 require("nvim-tree").setup({
 
-	-- View
 
 	view = {
 		side = "left",
@@ -92,7 +80,6 @@ require("nvim-tree").setup({
 		},
 	},
 
-	-- Renderer
 
 	renderer = {
 		group_empty = true,
@@ -103,7 +90,6 @@ require("nvim-tree").setup({
 
 		root_folder_label = false,
 
-		-- Indent markers
 
 		indent_markers = {
 			enable = true,
@@ -119,7 +105,6 @@ require("nvim-tree").setup({
 			},
 		},
 
-		-- Icons
 
 		icons = {
 			show = {
@@ -160,7 +145,6 @@ require("nvim-tree").setup({
 		},
 	},
 
-	-- Sorting
 
 	sort = {
 		sorter = "case_sensitive",
@@ -168,7 +152,6 @@ require("nvim-tree").setup({
 		folders_first = true,
 	},
 
-	-- Filters
 
 	filters = {
 		dotfiles = false,
@@ -187,7 +170,6 @@ require("nvim-tree").setup({
 		},
 	},
 
-	-- Git
 
 	git = {
 		enable = true,
@@ -197,7 +179,6 @@ require("nvim-tree").setup({
 		timeout = 400,
 	},
 
-	-- Actions
 
 	actions = {
 		use_system_clipboard = true,
@@ -223,7 +204,6 @@ require("nvim-tree").setup({
 		},
 	},
 
-	-- Diagnostics
 
 	diagnostics = {
 		enable = true,
@@ -234,8 +214,6 @@ require("nvim-tree").setup({
 
 		debounce_delay = 50,
 
-		-- Shared with the sign column and the statusline. This block used to spell
-		-- them out, and its info glyph (󰋼) differed from lualine's (󰋽).
 		icons = {
 			hint = icons.diagnostics.hint,
 			info = icons.diagnostics.info,
@@ -244,7 +222,6 @@ require("nvim-tree").setup({
 		},
 	},
 
-	-- Current File Tracking
 
 	update_focused_file = {
 		enable = true,
@@ -254,7 +231,6 @@ require("nvim-tree").setup({
 		ignore_list = {},
 	},
 
-	-- Cursor / Root
 
 	hijack_cursor = false,
 
@@ -264,36 +240,29 @@ require("nvim-tree").setup({
 
 	prefer_startup_root = true,
 
-	-- Attach
 
 	on_attach = on_attach,
 })
 
--- Global Keymaps
 
 local map = vim.keymap.set
 
--- Toggle
 map("n", "<leader>e", api.tree.toggle, {
 	desc = "Explorer: Toggle",
 })
 
--- Focus
 map("n", "<leader>E", api.tree.focus, {
 	desc = "Explorer: Focus",
 })
 
--- Find current file
 map("n", "<leader>ef", api.tree.find_file, {
 	desc = "Explorer: Find current file",
 })
 
--- Collapse
 map("n", "<leader>ec", api.tree.collapse_all, {
 	desc = "Explorer: Collapse all",
 })
 
--- Refresh
 map("n", "<leader>er", api.tree.reload, {
 	desc = "Explorer: Refresh",
 })

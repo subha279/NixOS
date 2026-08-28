@@ -2,16 +2,12 @@
 
 {
   programs.zsh.initContent = ''
-    # ==================================================
     # Zsh Vim Mode
-    # ==================================================
 
     bindkey -v
     export KEYTIMEOUT=1
 
-    # ==================================================
     # Vim Normal Mode
-    # ==================================================
 
     bindkey -M vicmd 'h' backward-char
     bindkey -M vicmd 'j' down-line-or-history
@@ -25,9 +21,7 @@
     bindkey -M vicmd '0' beginning-of-line
     bindkey -M vicmd '$' end-of-line
 
-    # ==================================================
     # Keep your existing insert-mode shortcuts
-    # ==================================================
 
     bindkey -M viins '^a' beginning-of-line
     bindkey -M viins '^e' end-of-line
@@ -52,9 +46,7 @@
     bindkey -M viins '^x^e' edit-command-line
     bindkey -M viins '^c' send-break
 
-    # ==================================================
     # fzf
-    # ==================================================
 
     # Ctrl-R → fzf history
     # Ctrl-T → fzf files

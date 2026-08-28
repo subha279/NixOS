@@ -2,10 +2,8 @@ pragma Singleton
 
 import QtQuick
 
-// Icons
 
 QtObject {
-    // Network — Wi-Fi strength ramp
 
     readonly property string wifi0: "\udb82\udd1f"        // F091F
     readonly property string wifi1: "\udb82\udd22"        // F0922
@@ -16,13 +14,11 @@ QtObject {
 
     readonly property string ethernet: "\udb80\ude00"     // F0200
 
-    // Bluetooth
 
     readonly property string bluetooth: "\udb80\udcaf"    // F00AF
     readonly property string btConnected: "\udb80\udcb1"  // F00B1
     readonly property string btOff: "\udb80\udcb2"        // F00B2
 
-    // Audio
 
     readonly property string volumeHigh: "\udb81\udd7e"   // F057E
     readonly property string volumeLow: "\udb81\udd7f"    // F057F
@@ -35,7 +31,6 @@ QtObject {
     readonly property string speaker: "\udb81\udd8f"      // F058F
     readonly property string headset: "\udb81\udcd0"      // F04D0
 
-    // Battery — discharging ramp, 0% .. 100%
 
     readonly property var batteryRamp: ["\udb80\udc8e"  // F008E  empty
         , "\udb80\udc7a"  // F007A  10
@@ -74,10 +69,8 @@ QtObject {
 
     readonly property string brightness: "\udb80\udce0"     // F00E0
 
-    // Brightness ramp, dim -> bright (mdi-brightness-4..7).
     readonly property var brightnessRamp: ["\udb80\udcde", "\udb80\udcdf", "\udb80\udce0", "\udb80\udce1"]
 
-    // fraction is 0..1.
     function forBrightness(fraction) {
         const f = Math.max(0, Math.min(1, fraction));
 
@@ -92,10 +85,8 @@ QtObject {
     readonly property string bellRing: "\udb80\udc9e"        // F009E  bell-ring
     readonly property string bellRingOutline: "\udb80\udc9f" // F009F  bell-ring-outline
 
-    // Alias kept so existing call sites keep resolving.
     readonly property string bellBadge: bellRing
 
-    // App-class glyphs.
     readonly property string alert: "\udb80\udc26"        // F0026
     readonly property string alertCircle: "\udb80\udc28"  // F0028
     readonly property string email: "\udb80\uddee"        // F01EE
@@ -109,7 +100,6 @@ QtObject {
     readonly property string web: "\udb81\udd9f"          // F059F
     readonly property string timer: "\udb81\udd1b"        // F051B
 
-    // Best-effort app-name -> glyph mapping.
     function forApp(appName) {
         const n = String(appName === undefined ? "" : appName).toLowerCase();
 
@@ -167,7 +157,6 @@ QtObject {
         return bell;
     }
 
-    // Generic UI
 
     readonly property string check: "\udb80\udc93"
 
@@ -199,7 +188,6 @@ QtObject {
     readonly property string trash: "\udb80\uddb4"
     readonly property string emoji: "\uf118"
 
-    // Device classes (Bluetooth / battery peripherals)
 
     readonly property string phone: "\udb80\udcb6"
     readonly property string camera: "\udb80\udd00"

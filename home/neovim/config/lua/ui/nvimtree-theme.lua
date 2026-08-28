@@ -1,12 +1,8 @@
--- Aurora NvimTree Theme
-
 local M = {}
 
--- Theme Loader
 
 local aurora = require("aurora.theme")
 
--- Apply NvimTree Theme
 
 function M.setup()
 	local theme = aurora.get()
@@ -17,7 +13,6 @@ function M.setup()
 
 	local c = theme.colors
 
-	-- Transparent Background
 
 	vim.api.nvim_set_hl(0, "NvimTreeNormal", {
 		fg = c.text,
@@ -39,7 +34,6 @@ function M.setup()
 		bg = "NONE",
 	})
 
-	-- Cursor / Selection
 
 	vim.api.nvim_set_hl(0, "NvimTreeCursorLine", {
 		bg = c.surfaceHover,
@@ -49,7 +43,6 @@ function M.setup()
 		fg = c.accent,
 	})
 
-	-- Files
 
 	vim.api.nvim_set_hl(0, "NvimTreeFileName", {
 		fg = c.text,
@@ -67,7 +60,6 @@ function M.setup()
 		bg = "NONE",
 	})
 
-	-- Folder Names
 
 	vim.api.nvim_set_hl(0, "NvimTreeFolderName", {
 		fg = c.text,
@@ -80,7 +72,6 @@ function M.setup()
 		bold = true,
 	})
 
-	-- Folder Icons
 
 	vim.api.nvim_set_hl(0, "NvimTreeFolderIcon", {
 		fg = c.accent,
@@ -97,7 +88,6 @@ function M.setup()
 		bg = "NONE",
 	})
 
-	-- Root Folder
 
 	vim.api.nvim_set_hl(0, "NvimTreeRootFolder", {
 		fg = c.accent,
@@ -105,7 +95,6 @@ function M.setup()
 		bold = true,
 	})
 
-	-- Git
 
 	vim.api.nvim_set_hl(0, "NvimTreeGitNew", {
 		fg = c.success,
@@ -177,7 +166,6 @@ function M.setup()
 		bg = "NONE",
 	})
 
-	-- Diagnostics
 
 	vim.api.nvim_set_hl(0, "NvimTreeLspDiagnosticsError", {
 		fg = c.error,
@@ -200,6 +188,5 @@ function M.setup()
 	})
 end
 
--- Return
 
 return M

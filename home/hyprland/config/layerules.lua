@@ -1,7 +1,3 @@
--- Layer Rules
-
--- Wallpaper
-
 hl.layer_rule({
 	name = "wallpaper",
 
@@ -14,7 +10,6 @@ hl.layer_rule({
 	order = 1,
 })
 
--- Aurora Bar
 
 hl.layer_rule({
 	name = "aurora-bar",
@@ -32,7 +27,6 @@ hl.layer_rule({
 	order = 5,
 })
 
--- Aurora Popups
 
 hl.layer_rule({
 	name = "aurora-popup",
@@ -50,7 +44,6 @@ hl.layer_rule({
 	order = 6,
 })
 
--- Aurora Notifications
 
 hl.layer_rule({
 	name = "aurora-notifications",
@@ -68,7 +61,6 @@ hl.layer_rule({
 	order = 8,
 })
 
--- Aurora Launcher
 
 hl.layer_rule({
 	name = "aurora-launcher",
@@ -83,11 +75,9 @@ hl.layer_rule({
 
 	ignore_alpha = 0.20,
 
-	-- Launcher must sit above the rest of the shell.
 	order = 10,
 })
 
--- Screen Capture and Colour Picking
 
 hl.layer_rule({
 	name = "screen-capture",

@@ -1,18 +1,13 @@
--- Aurora Telescope
-
 local telescope = require("telescope")
 local actions = require("telescope.actions")
 local builtin = require("telescope.builtin")
 
--- Telescope Setup
 
 telescope.setup({
 
-	-- Defaults
 
 	defaults = {
 
-		-- Layout
 
 		layout_strategy = "horizontal",
 
@@ -27,13 +22,9 @@ telescope.setup({
 			},
 		},
 
-		-- Telescope sets winblend on the windows it creates, so the global
-		-- opt.winblend in core/options.lua never reaches it. Matches
-		-- global.ui.editorFloatBlend, like every other float.
 
 		winblend = 12,
 
-		-- Borders
 
 		border = true,
 
@@ -73,11 +64,9 @@ telescope.setup({
 			},
 		},
 
-		-- Sorting
 
 		sorting_strategy = "ascending",
 
-		-- Prompt
 
 		prompt_prefix = " 󰍉  ",
 
@@ -87,13 +76,11 @@ telescope.setup({
 
 		initial_mode = "insert",
 
-		-- Paths
 
 		path_display = {
 			"truncate",
 		},
 
-		-- Ignore noisy directories
 
 		file_ignore_patterns = {
 			"%.git/",
@@ -104,11 +91,9 @@ telescope.setup({
 			"result/",
 		},
 
-		-- Mappings
 
 		mappings = {
 
-			-- Insert Mode
 
 			i = {
 
@@ -125,7 +110,6 @@ telescope.setup({
 					actions.close,
 			},
 
-			-- Normal Mode
 
 			n = {
 
@@ -147,11 +131,9 @@ telescope.setup({
 		},
 	},
 
-	-- Pickers
 
 	pickers = {
 
-		-- Find Files
 
 		find_files = {
 			hidden = false,
@@ -159,7 +141,6 @@ telescope.setup({
 			follow = true,
 		},
 
-		-- Buffers
 
 		buffers = {
 			sort_lastused = true,
@@ -167,26 +148,22 @@ telescope.setup({
 			theme = "dropdown",
 		},
 
-		-- Help
 
 		help_tags = {
 			theme = "dropdown",
 		},
 
-		-- Commands
 
 		commands = {
 			theme = "dropdown",
 		},
 
-		-- Diagnostics
 
 		diagnostics = {
 			theme = "ivy",
 		},
 	},
 
-	-- Extensions
 
 	extensions = {
 		fzf = {
@@ -195,20 +172,13 @@ telescope.setup({
 			override_generic_sorter = true,
 			override_file_sorter = true,
 
-			-- Matches the ignorecase + smartcase pair in core/options.lua.
 			case_mode = "smart_case",
 		},
 	},
 })
 
--- Compiled sorter.
---
--- Replaces Telescope's pure-Lua sorter, which is what makes typing in a picker
--- feel heavy once the list is large. pcall'd so a missing or unbuilt extension
--- degrades to the built-in sorter rather than breaking every picker.
 pcall(telescope.load_extension, "fzf")
 
--- Keymaps
 
 local map = vim.keymap.set
 
@@ -217,7 +187,6 @@ local opts = {
 	silent = true,
 }
 
--- Find Files
 
 map(
 	"n",
@@ -228,7 +197,6 @@ map(
 	})
 )
 
--- Live Grep
 
 map(
 	"n",
@@ -239,7 +207,6 @@ map(
 	})
 )
 
--- Buffers
 
 map(
 	"n",
@@ -250,7 +217,6 @@ map(
 	})
 )
 
--- Recent Files
 
 map(
 	"n",
@@ -261,7 +227,6 @@ map(
 	})
 )
 
--- Diagnostics
 
 map(
 	"n",
@@ -272,7 +237,6 @@ map(
 	})
 )
 
--- Help
 
 map(
 	"n",
@@ -283,7 +247,6 @@ map(
 	})
 )
 
--- Commands
 
 map(
 	"n",
@@ -294,7 +257,6 @@ map(
 	})
 )
 
--- Current Buffer Search
 
 map(
 	"n",
@@ -305,7 +267,6 @@ map(
 	})
 )
 
--- Telescope Prompt
 
 vim.api.nvim_create_autocmd("FileType", {
 	pattern = "TelescopePrompt",

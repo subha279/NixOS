@@ -5,7 +5,6 @@ import Quickshell
 import "../core" as Core
 import "../services" as Services
 
-// Clock (bar module)
 
 Item {
     id: root
@@ -15,25 +14,13 @@ Item {
 
     property bool showSeconds: false
 
-    // Mirrors the bar's reveal: 0 while narrow, 1 while wide. Set by Bar.qml.
     property real reveal: 0
 
     readonly property bool menuOpen: Core.PopupManager.isOpen("calendar")
 
-    // Now playing
-    //
-    // The equalizer tucks in underneath the time, inside the pill, and exists
-    // only while audio is playing AND the bar is narrow -- so it is absent
-    // almost all of the time, and never once the bar expands.
-    //
-    // The pill is not made taller and the clock is not made wider to fit it.
-    // The time lifts a few pixels instead and the indicator uses the slack,
-    // which keeps the bar exactly the size it has always been.
 
     readonly property bool nowPlayingShown: Services.MprisService.playing && root.reveal <= 0.012
 
-    // Half the vertical space the indicator occupies, so the time and the bars
-    // stay optically centred in the module as a pair.
     property real timeLift: root.nowPlayingShown ? -5 : 0
 
     Behavior on timeLift {
@@ -165,11 +152,6 @@ Item {
         }
     }
 
-    // Now playing equalizer, tucked under the time.
-    //
-    // Deliberately has no MouseArea of its own: the clock's existing click
-    // target still covers this strip, so clicking here opens the calendar
-    // exactly as it did before.
 
     NowPlaying {
         anchors.top: timeRow.bottom

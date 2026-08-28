@@ -21,12 +21,6 @@ Components.LauncherSurface {
 
     columns: 1
 
-    // 48px delegate + 4px ListView spacing, plus 12px of margin top and bottom.
-    //
-    // This used to compute its own clipboardCardHeight from these numbers and
-    // assign it to cardHeight -- which LauncherSurface never read, so the careful
-    // arithmetic was discarded and the card was sized from the generic 40px row
-    // instead. The base component now does the same job for every launcher.
     rowHeight: 52
 
     contentMargins: 24

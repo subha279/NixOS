@@ -1,8 +1,5 @@
--- Aurora Snacks
-
 local M = {}
 
--- Setup
 
 function M.setup()
 	local ok, snacks = pcall(require, "snacks")
@@ -13,11 +10,9 @@ function M.setup()
 		return false
 	end
 
-	-- Snacks LazyGit writes its generated theme here.
 	vim.fn.mkdir(vim.fn.stdpath("cache"), "p")
 
 	snacks.setup({
-		-- Large Files
 
 		bigfile = {
 			enabled = true,
@@ -27,20 +22,16 @@ function M.setup()
 			size = 1024 * 1024,
 		},
 
-		-- Notifications
 
 		notifier = {
-			-- Keep vim.notify on Neovim's default UI.
 			enabled = false,
 		},
 
-		-- Fast File Opening
 
 		quickfile = {
 			enabled = true,
 		},
 
-		-- Scope
 
 		scope = {
 			enabled = true,
@@ -64,7 +55,6 @@ function M.setup()
 			},
 		},
 
-		-- Words
 
 		words = {
 			enabled = true,
@@ -74,7 +64,6 @@ function M.setup()
 			focus = true,
 		},
 
-		-- Indent
 
 		indent = {
 			enabled = true,
@@ -99,7 +88,6 @@ function M.setup()
 		},
 	})
 
-	-- LazyGit
 
 	vim.keymap.set("n", "<leader>lg", function()
 		snacks.lazygit()
@@ -110,12 +98,8 @@ function M.setup()
 	return true
 end
 
--- Initialize
 
 M.setup()
 
--- No theme subscriber: snacks draws with its own linked highlight groups and
--- needs no recolouring here. Its refresh_theme() only scheduled a redraw, which
--- aurora.refresh() now does once for the whole pass.
 
 return M

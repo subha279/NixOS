@@ -1,14 +1,10 @@
--- Aurora Gitsigns
-
 local M = {}
 
--- Theme
 
 local aurora = require("aurora.theme")
 
 local colors = aurora.colors
 
--- Highlights
 
 local function apply_highlights()
 	local c = colors()
@@ -33,17 +29,6 @@ local function apply_highlights()
 		fg = c.warning,
 	})
 
-	-- No GitSigns*Ln / *LnInline groups here.
-	--
-	-- They used to be set from c.successMuted / c.warningMuted / c.errorMuted,
-	-- which lib/themes.nix does not define -- accentMuted is the only *Muted
-	-- colour there. Every one of them therefore resolved to bg = nil and cleared
-	-- the highlight instead of setting it.
-	--
-	-- They are also unreachable as configured: gitsigns only uses them when
-	-- `linehl` is on, and setup() below leaves it off. If you turn linehl on, add
-	-- real muted variants to themes.nix (all seven themes, plus the colour list in
-	-- home/theme/default.nix's themeToLua) and set them from there.
 
 	vim.api.nvim_set_hl(0, "GitSignsAddPreview", {
 		fg = c.success,
@@ -62,7 +47,6 @@ local function apply_highlights()
 	})
 end
 
--- Setup
 
 function M.setup()
 	local ok, gitsigns = pcall(require, "gitsigns")
@@ -150,12 +134,10 @@ function M.setup()
 				})
 			end
 
-			-- Hunk navigation
 
 			map("n", "]g", gs.next_hunk, "Git: Next hunk")
 			map("n", "[g", gs.prev_hunk, "Git: Previous hunk")
 
-			-- Hunk actions
 
 			map("n", "<leader>gh", gs.preview_hunk, "Git: Preview hunk")
 
@@ -167,7 +149,6 @@ function M.setup()
 
 			map("n", "<leader>gS", gs.stage_hunk, "Git: Stage hunk")
 
-			-- Visual stage
 
 			map("v", "<leader>gS", function()
 				local start = vim.fn.line("v")
@@ -183,7 +164,6 @@ function M.setup()
 				})
 			end, "Git: Stage selection")
 
-			-- Buffer actions
 
 			map("n", "<leader>gR", gs.reset_buffer, "Git: Reset buffer")
 
@@ -198,7 +178,6 @@ function M.setup()
 	return true
 end
 
--- Live Aurora Theme Refresh
 
 aurora.on_change(function()
 	apply_highlights()
@@ -212,6 +191,5 @@ aurora.on_change(function()
 	end
 end)
 
--- Return
 
 return M

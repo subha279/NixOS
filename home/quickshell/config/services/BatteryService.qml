@@ -7,24 +7,19 @@ import Quickshell.Io
 import Quickshell.Services.UPower
 import "../core" as Core
 
-// BatteryService
 
 Singleton {
     id: root
 
-    // Main battery
 
     readonly property var device: (typeof UPower !== "undefined" && UPower.displayDevice) ? UPower.displayDevice : null
 
-    // True when this machine actually has a battery worth showing.
     readonly property bool available: root.device !== null && root.device.isPresent === true && root.device.isLaptopBattery !== false
 
-    // 0..100, always.
     readonly property real percent: root.device ? root.normalise(root.device.percentage) : 0
 
     readonly property int percentInt: Math.round(root.percent)
 
-    // UPowerDeviceState numeric values: 0 Unknown 1 Charging 2 Discharging 3 Empty 4 FullyCharged 5 PendingCharge 6 PendingDischarge
     readonly property int state: root.device ? root.device.state : 0
 
     readonly property bool charging: root.state === 1 || root.state === 5
@@ -33,19 +28,16 @@ Singleton {
 
     readonly property bool discharging: root.state === 2 || root.state === 6
 
-    // AC connected (either explicitly charging, full, or UPower says we are not running on battery).
     readonly property bool onAc: root.charging || root.full || (typeof UPower !== "undefined" && UPower.onBattery === false)
 
     readonly property int secondsToEmpty: root.device && root.device.timeToEmpty ? root.device.timeToEmpty : 0
 
     readonly property int secondsToFull: root.device && root.device.timeToFull ? root.device.timeToFull : 0
 
-    // Watts. Negative means draining in some builds — take abs.
     readonly property real changeRate: root.device && root.device.changeRate ? Math.abs(root.device.changeRate) : 0
 
     readonly property real health: (root.device && root.device.healthSupported && root.device.healthPercentage) ? root.normalise(root.device.healthPercentage) : -1
 
-    // Warning levels
 
     readonly property int lowThreshold: 20
     readonly property int criticalThreshold: 10
@@ -54,7 +46,6 @@ Singleton {
 
     readonly property bool critical: root.available && !root.onAc && root.percentInt <= root.criticalThreshold
 
-    // Peripherals (mouse, keyboard, headset, controller...)
 
     property ListModel peripheralModel: ListModel {}
 
@@ -62,9 +53,7 @@ Singleton {
 
     onAllDevicesChanged: root.rebuildPeripherals()
 
-    // Power profiles
 
-    // 0 = power-saver, 1 = balanced, 2 = performance
     readonly property bool profilesAvailable: typeof PowerProfiles !== "undefined"
 
     readonly property int profile: root.profilesAvailable ? PowerProfiles.profile : 1
@@ -85,7 +74,6 @@ Singleton {
 
     property string lastError: ""
 
-    // Derived labels
 
     readonly property string stateLabel: {
         if (!root.available)
@@ -120,7 +108,6 @@ Singleton {
         }
     }
 
-    // Icons (Nerd Font, Material Design set)
 
     readonly property var dischargeIcons: ["\udb80\udc8e" // 0%   battery-outline
         , "\udb80\udc7a" // 10%
@@ -157,7 +144,6 @@ Singleton {
     readonly property string performanceIcon: "\udb81\udcc5"
     readonly property string healthIcon: "\udb81\uddf6"
 
-    // The single glyph the bar shows.
     readonly property string icon: {
         if (!root.available)
             return root.plugIcon;
@@ -170,7 +156,6 @@ Singleton {
         return root.charging || root.full ? root.chargeIcons[idx] : root.dischargeIcons[idx];
     }
 
-    // These are semantic states that already exist in the theme.
 
     readonly property color color: {
         if (!root.available)
@@ -199,9 +184,7 @@ Singleton {
         }
     }
 
-    // Helpers
 
-    // UPower gives 0..1 in most builds, 0..100 in a few.
     function normalise(value) {
         if (value === undefined || value === null)
             return 0;
@@ -238,7 +221,6 @@ Singleton {
         if (!dev)
             return generic;
 
-        // Prefer the UPower type enum when the build exposes it.
         try {
             const t = dev.type;
 
@@ -263,10 +245,8 @@ Singleton {
             if (t === UPowerDeviceType.Tablet)
                 return "\udb81\udd71";
         } catch (e) {
-            // enum not available in this build — fall through
         }
 
-        // Fall back to the freedesktop icon name string.
         const name = String(dev.iconName || "").toLowerCase();
 
         if (name.indexOf("mouse") >= 0)
@@ -300,7 +280,6 @@ Singleton {
         return "Device";
     }
 
-    // Peripheral list building
 
     function rebuildPeripherals() {
         const items = [];
@@ -313,7 +292,6 @@ Singleton {
             if (!dev)
                 continue;
 
-            // Skip the laptop battery + the synthetic display device + AC adapters — they have no useful percent.
             if (dev === root.device)
                 continue;
             if (dev.isLaptopBattery === true)
@@ -339,7 +317,6 @@ Singleton {
         root.syncModel(root.peripheralModel, items, "label");
     }
 
-    // Reconcile a ListModel in place so ListView add/remove transitions actually run instead of everything flashing.
     function syncModel(model, items, key) {
         for (let i = model.count - 1; i >= 0; i--) {
             const existing = model.get(i);
@@ -380,7 +357,6 @@ Singleton {
         }
     }
 
-    // External helpers
 
     Process {
         id: launcher
@@ -393,7 +369,6 @@ Singleton {
     }
 
     function openPowerSettings() {
-        // Try the usual suspects; the first one installed wins.
         root.launch(["sh", "-c", "command -v gnome-control-center >/dev/null " + "&& gnome-control-center power " + "|| command -v xfce4-power-manager-settings " + ">/dev/null && xfce4-power-manager-settings " + "|| command -v powerprofilesctl >/dev/null " + "&& powerprofilesctl list"]);
     }
 
@@ -407,11 +382,9 @@ Singleton {
         }
     }
 
-    // Lifecycle
 
     Component.onCompleted: root.rebuildPeripherals()
 
-    // UPower is event driven, but peripheral percentages update lazily — a slow tick keeps them honest without any cost.
     Timer {
         interval: 30000
         running: true

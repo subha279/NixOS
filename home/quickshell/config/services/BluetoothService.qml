@@ -5,7 +5,6 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Bluetooth
 
-// BluetoothService
 
 Singleton {
     id: root
@@ -22,7 +21,6 @@ Singleton {
 
     property string lastError: ""
 
-    // Desktop notifications
 
     property var lastConnected: []
     property bool btPrimed: false
@@ -30,8 +28,6 @@ Singleton {
     property bool lastPowered: false
     property bool poweredPrimed: false
 
-    // Fire and forget. One shared Process dropped the second notification
-    // whenever two devices changed state in the same instant.
     function notify(summary, body, icon, urgency) {
         Quickshell.execDetached(["notify-send", "-a", "Bluetooth", "-i", icon, "-u", urgency, summary, body]);
     }
@@ -52,7 +48,6 @@ Singleton {
 
         root.lastConnected = now;
 
-        // Devices arrive asynchronously after the adapter appears, so the first pass is bookkeeping only.
         if (!root.btPrimed) {
             root.btPrimed = true;
             return;
@@ -87,12 +82,10 @@ Singleton {
             root.notify("Bluetooth off", "Adapter powered off", "bluetooth-disabled", "low");
     }
 
-    // Address of a device with an operation in flight
     property string pendingAddress: ""
 
     property ListModel deviceModel: ListModel {}
 
-    // Raw device list from the binding
 
     readonly property var allDevices: {
         if (!Bluetooth.devices)
@@ -124,7 +117,6 @@ Singleton {
         return "Not connected";
     }
 
-    // Helpers
 
     function displayName(dev) {
         if (!dev)
@@ -211,9 +203,6 @@ Singleton {
         return 2;
     }
 
-    // ------------------------------------------------------------
-    // Model sync (keeps delegates stable => real animations)
-    // ------------------------------------------------------------
 
     function rebuildModel() {
         const list = [];
@@ -247,7 +236,6 @@ Singleton {
             return a.deviceName.localeCompare(b.deviceName);
         });
 
-        // Remove vanished
         for (let i = root.deviceModel.count - 1; i >= 0; i--) {
             const addr = root.deviceModel.get(i).address;
             let keep = false;
@@ -263,7 +251,6 @@ Singleton {
                 root.deviceModel.remove(i);
         }
 
-        // Insert / update / move
         for (let j = 0; j < list.length; j++) {
             const item = list[j];
             let found = -1;
@@ -286,16 +273,11 @@ Singleton {
         }
     }
 
-    // Rebuild first so deviceByAddress() can resolve names for anything that just appeared, then diff for notifications.
     onAllDevicesChanged: {
         root.rebuildModel();
         root.syncDeviceNotifications();
     }
 
-    // Connecting a paired device neither adds nor removes it, so allDevices
-    // never changes and its handler never ran -- that is why connect and
-    // disconnect were silent. Reading every device's connected flag here makes
-    // QML re-evaluate this string on any state change.
     readonly property string connectedKey: {
         const parts = [];
 
@@ -311,18 +293,6 @@ Singleton {
         root.syncDeviceNotifications();
     }
 
-    // Safety-net rebuild.
-    //
-    // The real triggers are reactive: onAllDevicesChanged covers devices
-    // appearing and disappearing, and onConnectedKeyChanged covers connect and
-    // disconnect. This timer exists only for values those two cannot observe,
-    // chiefly a peripheral's battery percentage ticking down.
-    //
-    // It used to run every 3s even with the popup shut, rebuilding and re-sorting
-    // the whole ListModel to update a list nothing was looking at. fastPoll is
-    // bound to "the bluetooth popup is open" by Bluetooth.qml, so closed now
-    // means 30s -- ten times fewer rebuilds for information that is not on
-    // screen, with no loss of responsiveness when it is.
     property Timer syncTimer: Timer {
         interval: root.fastPoll ? 800 : 30000
         running: true
@@ -331,7 +301,6 @@ Singleton {
         onTriggered: root.rebuildModel()
     }
 
-    // bluetoothctl fallback
 
     property Process ctlProc: Process {
         stdout: StdioCollector {}
@@ -344,7 +313,6 @@ Singleton {
         ctlProc.running = true;
     }
 
-    // Public API
 
     function setPowered(on) {
         if (root.adapter) {

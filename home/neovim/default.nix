@@ -8,64 +8,48 @@
     viAlias = true;
     vimAlias = true;
 
-    # Keep Neovim itself lightweight.
     withNodeJs = false;
     withPython3 = false;
 
     plugins = with pkgs.vimPlugins; [
-      # Completion
 
       blink-cmp
 
-      # LSP / Code intelligence
 
       nvim-lspconfig
 
-      # Syntax / Treesitter
 
       nvim-treesitter.withAllGrammars
       nvim-colorizer-lua
 
-      # Search / Navigation
 
       telescope-nvim
 
-      # Compiled sorter. Telescope's default sorter is pure Lua and is the
-      # bottleneck once a picker holds more than a few thousand entries, which
-      # find_files and live_grep hit easily in a large repo.
       telescope-fzf-native-nvim
 
       plenary-nvim
       nvim-web-devicons
 
-      # Git
 
       gitsigns-nvim
 
-      # Formatting / Linting
 
       conform-nvim
       nvim-lint
 
-      # UI
 
       which-key-nvim
       lualine-nvim
       snacks-nvim
 
-      # File Manager
       nvim-tree-lua
 
-      # Dashboard
       alpha-nvim
     ];
 
-    # Tools available directly to Neovim.
     extraPackages = with pkgs; [
 
-      # LSP
 
-      # QML language server, formatter, and linter.
       qt6.qtdeclarative
 
       lua-language-server
@@ -82,7 +66,6 @@
       dockerfile-language-server
       taplo
 
-      # Formatters
 
       stylua
       prettier
@@ -93,14 +76,12 @@
       shellcheck
       rustfmt
 
-      # C / C++ development
 
       gcc
       gdb
       cmake
       pkg-config
 
-      # Git / VCS
 
       lazygit
     ];

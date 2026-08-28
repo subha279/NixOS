@@ -4,7 +4,6 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-// Aurora Theme Service
 
 QtObject {
     id: root
@@ -13,7 +12,6 @@ QtObject {
     readonly property string auroraDirectory: root.home + "/.config/aurora"
     readonly property string switcherPath: root.home + "/.local/bin/aurora-theme"
 
-    // Sources
 
     property FileView listFile: FileView {
         path: root.auroraDirectory + "/themes.list"
@@ -39,11 +37,7 @@ QtObject {
         onFileChanged: this.reload()
     }
 
-    // Derived state
 
-    // Has to match a theme id that lib/themes.nix actually defines, and the
-    // default core/Theme.qml falls back to. This was "aurora", which is not a
-    // real theme, so with no active-theme file the picker marked nothing active.
     readonly property string defaultId: "catppuccin-mocha"
 
     readonly property string activeId: {
@@ -67,7 +61,6 @@ QtObject {
         }
     }
 
-    // themes.list is the ordering authority.
     readonly property var themes: {
         const raw = root.listFile.text()
         if (!raw)
@@ -106,7 +99,6 @@ QtObject {
 
     readonly property int count: root.themes.length
 
-    // Search
 
     function search(query) {
         const all = root.themes
@@ -140,7 +132,6 @@ QtObject {
             scored.push({ "theme": theme, "score": score, "index": i })
         }
 
-        // Stable: equal scores keep themes.list ordering.
         scored.sort(function (a, b) {
             if (b.score !== a.score)
                 return b.score - a.score
@@ -155,7 +146,6 @@ QtObject {
         return out
     }
 
-    // Actions
 
     function apply(themeId) {
         if (!themeId || themeId.length === 0)

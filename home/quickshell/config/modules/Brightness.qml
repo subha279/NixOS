@@ -6,7 +6,6 @@ import Quickshell
 import "../core" as Core
 import "../services" as Services
 
-// Brightness (bar module)
 
 Item {
     id: root
@@ -37,7 +36,6 @@ Item {
         spacing: 5
 
         Text {
-            // Ramps with the level instead of showing the same sun at 5% and at 100%.
             text: Core.Icons.forBrightness(Services.BrightnessService.fraction)
 
             font.family: Core.Theme.iconFont

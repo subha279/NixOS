@@ -5,7 +5,6 @@ import Quickshell
 import "../core" as Core
 import "../services" as Services
 
-// Notification center bar module (leftmost slot)
 
 Item {
     id: root
@@ -19,7 +18,6 @@ Item {
 
     readonly property int count: (root.list && root.list.values) ? root.list.values.length : 0
 
-    // Do-not-disturb is shared with the panel through PopupManager.
     readonly property bool dnd: Core.PopupManager.dnd
 
     Rectangle {
@@ -42,8 +40,6 @@ Item {
 
         anchors.centerIn: parent
 
-        // Resolved through Core.Icons rather than inlined surrogate pairs --
-        // hand-written pairs here are exactly how a bus ended up in the bar.
         text: root.dnd ? Core.Icons.bellOff : root.count > 0 ? Core.Icons.bellRing : Core.Icons.bell
 
         font.family: Core.Theme.iconFont
@@ -63,9 +59,6 @@ Item {
         SequentialAnimation {
             id: popAnim
 
-            // Out fast, then settle back with a slight overshoot so it reads as a
-            // spring rather than a two-step bounce. 1.22 was distinctly rubbery on
-            // a 16px glyph.
             NumberAnimation {
                 target: icon
                 property: "scale"
@@ -86,7 +79,6 @@ Item {
         }
     }
 
-    // Unread count badge
 
     Rectangle {
         anchors.top: parent.top
@@ -160,7 +152,6 @@ Item {
         if (!n)
             return;
 
-        // Prefer dismiss(); fall back to expire() on older builds.
         if (typeof n.dismiss === "function")
             n.dismiss();
         else if (typeof n.expire === "function")
@@ -171,7 +162,6 @@ Item {
         if (!root.list || !root.list.values)
             return;
 
-        // Copy first — dismissing mutates the live model.
         const snapshot = root.list.values.slice();
 
         for (let i = 0; i < snapshot.length; i++)

@@ -7,7 +7,6 @@ import "../core" as Core
 import "../services" as Services
 import "../components" as Components
 
-// NotificationPopup
 
 Components.PopupSurface {
     id: popup
@@ -52,7 +51,6 @@ Components.PopupSurface {
             if (typeof action.invoke === "function")
                 action.invoke();
         } catch (e) {
-            // Some senders drop off the bus before we get here.
         }
 
         popup.dismiss(n);
@@ -86,7 +84,6 @@ Components.PopupSurface {
         if (!n)
             return false;
 
-        // Urgency is an enum; 2 == Critical in the freedesktop spec.
         try {
             return Number(n.urgency) === 2;
         } catch (e) {
@@ -100,7 +97,6 @@ Components.PopupSurface {
         running: false
     }
 
-    // Content
 
     contentComponent: Component {
 
@@ -109,7 +105,6 @@ Components.PopupSurface {
 
             spacing: Core.Theme.spacing
 
-            // Header
 
             Components.PopupHeader {
                 width: body.width
@@ -120,7 +115,6 @@ Components.PopupSurface {
 
                 showToggle: true
 
-                // The toggle drives do-not-disturb; on means "allowed".
                 toggled: !popup.dnd
 
                 onToggleRequested: popup.setDnd(!popup.dnd)
@@ -136,7 +130,6 @@ Components.PopupSurface {
                 ]
             }
 
-            // Do-not-disturb banner
 
             Rectangle {
                 width: body.width
@@ -172,7 +165,6 @@ Components.PopupSurface {
                 }
             }
 
-            // The list
 
             Item {
                 id: listBox
@@ -293,7 +285,6 @@ Components.PopupSurface {
                             }
                         }
 
-                        // Urgency stripe
                         Rectangle {
                             anchors.left: parent.left
                             anchors.top: parent.top
@@ -371,7 +362,6 @@ Components.PopupSurface {
                                 color: Core.Theme.foregroundMuted
                             }
 
-                            // Inline action buttons
                             Row {
                                 spacing: 6
 
@@ -434,7 +424,6 @@ Components.PopupSurface {
                             }
                         }
 
-                        // Per-notification close button
                         Rectangle {
                             id: closeBtn
 
@@ -503,7 +492,6 @@ Components.PopupSurface {
                                     return;
                                 }
 
-                                // Capture values now — the delegate is recycled and modelData can change before the menu action runs.
                                 const note = noteRow.modelData;
 
                                 const summary = note.summary ? String(note.summary) : "";
@@ -561,7 +549,6 @@ Components.PopupSurface {
                 }
             }
 
-            // Empty state
 
             Item {
                 width: body.width
