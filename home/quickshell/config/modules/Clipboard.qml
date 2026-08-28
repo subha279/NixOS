@@ -6,7 +6,7 @@ import "../components" as Components
 import "../core" as Core
 import "../services" as Services
 
-Components.LauncherSurface {
+Components.LauncherView {
     id: clipboard
 
     launcherId: "clipboard"

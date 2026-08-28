@@ -15,6 +15,11 @@ hl.layer_rule({
 })
 
 -- Aurora Bar
+--
+-- This layer now carries the launcher popups too: Bar.qml owns the only panel
+-- window for the pill and the dmenu-style surfaces, so there is no separate
+-- `aurora-launcher` namespace any more. The order is the one the launcher used
+-- to have, because an open launcher still has to sit above the notifications.
 
 hl.layer_rule({
 	name = "aurora-bar",
@@ -29,7 +34,7 @@ hl.layer_rule({
 
 	ignore_alpha = 0.20,
 
-	order = 5,
+	order = 10,
 })
 
 -- Aurora Popups
@@ -66,25 +71,6 @@ hl.layer_rule({
 	ignore_alpha = 0.20,
 
 	order = 8,
-})
-
--- Aurora Launcher
-
-hl.layer_rule({
-	name = "aurora-launcher",
-
-	match = {
-		namespace = "^aurora-launcher$",
-	},
-
-	blur = true,
-
-	blur_popups = true,
-
-	ignore_alpha = 0.20,
-
-	-- Launcher must sit above the rest of the shell.
-	order = 10,
 })
 
 -- Screen Capture and Colour Picking

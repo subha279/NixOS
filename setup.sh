@@ -1697,7 +1697,7 @@ fi
 
 launcher_surfaces=(
 
-    "home/quickshell/config/components/LauncherSurface.qml"
+    "home/quickshell/config/components/LauncherView.qml"
 
     "home/quickshell/config/modules/AppLauncher.qml"
     "home/quickshell/config/modules/WallpaperPicker.qml"

@@ -7,7 +7,7 @@ import "../services" as Services
 
 // Application Launcher
 
-Components.LauncherSurface {
+Components.LauncherView {
     id: launcher
 
     launcherId: "launcher"
