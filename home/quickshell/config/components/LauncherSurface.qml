@@ -60,9 +60,18 @@ PanelWindow {
 
     readonly property int fittableRows: Math.max(1, Math.floor((root.cardMaxHeight - root.headerHeight - root.separatorHeight - root.contentMargins) / root.rowExtent))
 
-    readonly property int wantedRows: root.columns > 1 ? Math.max(1, Math.ceil(root.itemCount / root.columns)) : Math.max(1, root.itemCount)
-
-    readonly property int visibleRows: Math.min(root.columns > 1 ? root.gridMaxRows : root.listMaxRows, root.fittableRows, root.wantedRows)
+    // Deliberately NOT a function of itemCount.
+    //
+    // This used to shrink to the number of results, which meant the card resized
+    // on every keystroke as the list filtered -- and again a moment after opening,
+    // when an async source (the wallpaper scan, cliphist, the emoji database)
+    // delivered its first batch. With no Behavior on height those resizes snapped,
+    // and that is the shaking.
+    //
+    // The height is now constant for a given launcher: as many rows as it is
+    // willing to show, whether or not they are all filled. Stable geometry while
+    // typing is worth more than a card that hugs a short result list.
+    readonly property int visibleRows: Math.min(root.columns > 1 ? root.gridMaxRows : root.listMaxRows, root.fittableRows)
 
     readonly property int targetCardHeight: root.headerHeight + root.separatorHeight + root.contentMargins + root.visibleRows * root.rowExtent
 
@@ -172,18 +181,7 @@ PanelWindow {
 
     exclusionMode: ExclusionMode.Ignore
 
-    property real reveal: root.open ? 1.0 : 0.0
-
-    Behavior on reveal {
-        NumberAnimation {
-            duration: root.open ? Core.Theme.durShort : Core.Theme.durExitShort
-
-            easing.type: Easing.BezierSpline
-            easing.bezierCurve: Core.Theme.easeStandard
-        }
-    }
-
-    visible: root.reveal > 0.001
+    visible: root.open
 
     Rectangle {
         anchors.fill: parent
@@ -223,38 +221,9 @@ PanelWindow {
 
             transformOrigin: Item.Center
 
-            scale: root.reveal > 0.001 ? 1.0 : 0.98
-
-            y: root.reveal > 0.001 ? 0 : 6
-
-            opacity: root.reveal
-
-            Behavior on scale {
-                NumberAnimation {
-                    duration: root.open ? Core.Theme.durShort : Core.Theme.durExitShort
-
-                    easing.type: Easing.BezierSpline
-                    easing.bezierCurve: Core.Theme.easeStandard
-                }
-            }
-
-            Behavior on y {
-                NumberAnimation {
-                    duration: root.open ? Core.Theme.durShort : Core.Theme.durExitShort
-
-                    easing.type: Easing.BezierSpline
-                    easing.bezierCurve: Core.Theme.easeStandard
-                }
-            }
-
-            Behavior on opacity {
-                NumberAnimation {
-                    duration: root.open ? Core.Theme.durInstant : Core.Theme.durExitShort
-
-                    easing.type: Easing.BezierSpline
-                    easing.bezierCurve: Core.Theme.easeStandard
-                }
-            }
+            // No open/close transform, same reason as PopupSurface: the card
+            // appears at its final size and position.
+            opacity: root.open ? 1.0 : 0.0
 
             Rectangle {
                 anchors.fill: parent

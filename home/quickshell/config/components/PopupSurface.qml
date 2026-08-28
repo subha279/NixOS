@@ -39,8 +39,8 @@ PanelWindow {
     exclusionMode: ExclusionMode.Ignore
 
     // Only mapped while on screen; six always-mapped overlays get blurred by the
-    // compositor for nothing. Tracks opacity so the close animation still plays.
-    visible: root.open || visual.opacity > 0.01
+    // compositor for nothing. No close animation to wait for any more.
+    visible: root.open
 
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.namespace: "aurora-popup"
@@ -119,40 +119,14 @@ PanelWindow {
 
             anchors.fill: parent
 
-            transformOrigin: Item.Top
-
-            scale: root.open ? 1.0 : 0.98
-
-            y: root.open ? 0 : -4
-
+            // No open/close transform.
+            //
+            // Animating scale while the card's own height was still settling is
+            // what made popups appear to shake: height comes from
+            // contentHost.implicitHeight, and the services behind these popups
+            // populate asynchronously after onDidOpen, so the card resized
+            // mid-animation. The card now simply appears at its final size.
             opacity: root.open ? 1.0 : 0.0
-
-            Behavior on scale {
-                NumberAnimation {
-                    duration: root.open ? Core.Theme.durShort : Core.Theme.durExitShort
-
-                    easing.type: Easing.BezierSpline
-                    easing.bezierCurve: Core.Theme.easeStandard
-                }
-            }
-
-            Behavior on y {
-                NumberAnimation {
-                    duration: root.open ? Core.Theme.durShort : Core.Theme.durExitShort
-
-                    easing.type: Easing.BezierSpline
-                    easing.bezierCurve: Core.Theme.easeStandard
-                }
-            }
-
-            Behavior on opacity {
-                NumberAnimation {
-                    duration: root.open ? Core.Theme.durInstant : Core.Theme.durExitShort
-
-                    easing.type: Easing.BezierSpline
-                    easing.bezierCurve: Core.Theme.easeStandard
-                }
-            }
 
             Rectangle {
                 anchors.fill: parent
@@ -187,17 +161,6 @@ PanelWindow {
                 implicitHeight: contentLoader.item ? contentLoader.item.implicitHeight : 0
 
                 height: implicitHeight
-
-                opacity: root.open ? 1.0 : 0.0
-
-                Behavior on opacity {
-                    NumberAnimation {
-                        duration: root.open ? Core.Theme.durInstant : Core.Theme.durExitShort
-
-                        easing.type: Easing.BezierSpline
-                        easing.bezierCurve: Core.Theme.easeStandard
-                    }
-                }
 
                 Loader {
                     id: contentLoader
@@ -239,7 +202,7 @@ PanelWindow {
             Core.PopupManager.contextMenuOpen = false;
         }
 
-        visible: menuLayer.active || menuBox.opacity > 0.01
+        visible: menuLayer.active
 
         Rectangle {
             id: menuBox
@@ -261,29 +224,7 @@ PanelWindow {
 
             antialiasing: true
 
-            transformOrigin: Item.TopLeft
-
-            scale: menuLayer.active ? 1.0 : 0.96
-
             opacity: menuLayer.active ? 1.0 : 0.0
-
-            Behavior on scale {
-                NumberAnimation {
-                    duration: menuLayer.active ? Core.Theme.durInstant : Core.Theme.durExitShort
-
-                    easing.type: Easing.BezierSpline
-                    easing.bezierCurve: Core.Theme.easeStandard
-                }
-            }
-
-            Behavior on opacity {
-                NumberAnimation {
-                    duration: menuLayer.active ? Core.Theme.durInstant : Core.Theme.durExitShort
-
-                    easing.type: Easing.BezierSpline
-                    easing.bezierCurve: Core.Theme.easeStandard
-                }
-            }
 
             Glass {
                 anchors.fill: parent
