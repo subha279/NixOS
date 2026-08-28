@@ -26,7 +26,14 @@ PanelWindow {
     readonly property int toastGutter: 8
 
     readonly property int toastSpacing: 0
-    readonly property int maxHeight: 640
+
+    // Headroom for maxVisible cards at their tallest. A card carrying action
+    // buttons and an open reply field is roughly twice the height of a bare one,
+    // and at 640 the fourth card in a full stack was clipped off the bottom.
+    //
+    // Costs nothing: the window is transparent and its input is masked to the
+    // card stack, so the unused area is neither drawn nor clickable.
+    readonly property int maxHeight: 900
 
     implicitWidth: root.toastWidth + root.toastGutter * 2 + 14
 
@@ -38,11 +45,18 @@ PanelWindow {
     WlrLayershell.layer: WlrLayer.Overlay
 
     // A toast must never steal keyboard focus from whatever you are typing in.
-    WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
+    //
+    // The one exception is a reply field the user explicitly opened, and even then
+    // it is OnDemand rather than Exclusive: focus moves when the field is clicked,
+    // never because a notification arrived.
+    WlrLayershell.keyboardFocus: Services.NotificationServer.replyTarget !== null ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
     exclusionMode: ExclusionMode.Ignore
 
-    visible: root.toasts.length > 0 && !Core.PopupManager.dnd && !Core.PopupManager.isOpen("notifications")
+    // Deliberately not gated on do-not-disturb. Suppression happens in
+    // NotificationServer.showToast, which lets critical alerts through, and
+    // hiding the whole layer here would override that and silence them.
+    visible: root.toasts.length > 0 && !Core.PopupManager.isOpen("notifications")
 
     // Only the actual toast stack receives input.
     mask: Region {
@@ -84,6 +98,8 @@ PanelWindow {
                 readonly property int lifetime: Services.NotificationServer.lifetimeFor(wrapper.modelData)
 
                 readonly property real cardHeight: Math.max(72, card.implicitHeight)
+
+                readonly property bool replying: Services.NotificationServer.isReplying(wrapper.modelData)
 
                 property real remaining: wrapper.lifetime
 
@@ -133,8 +149,17 @@ PanelWindow {
                     Services.NotificationServer.dismiss(wrapper.modelData);
                 }
 
+                // Clicking the card body triggers the sender's "default" action,
+                // which is the convention for "open the thing this is about".
+                //
+                // If there is no default action the card is only dismissed. It is
+                // NOT destroyed: any named actions it carries are rendered as
+                // buttons below, and throwing the entry away would take those with
+                // it before they could be used from the centre.
                 function activate() {
                     const n = wrapper.modelData;
+
+                    var invoked = false;
 
                     try {
                         const acts = n.actions;
@@ -151,7 +176,10 @@ PanelWindow {
                                 }
 
                                 if (actionId === "default") {
-                                    acts[i].invoke();
+                                    // invokeAction handles closing; a second
+                                    // dismiss here would hit a destroyed object.
+                                    Services.NotificationServer.invokeAction(n, acts[i]);
+                                    invoked = true;
                                     break;
                                 }
                             }
@@ -160,7 +188,8 @@ PanelWindow {
                         // No usable action.
                     }
 
-                    wrapper.dismissFully();
+                    if (!invoked)
+                        wrapper.hide();
                 }
 
                 // Entrance
@@ -235,7 +264,10 @@ PanelWindow {
                     }
 
                     ScriptAction {
-                        script: Services.NotificationServer.hideToast(wrapper.modelData)
+                        // expireToast, not hideToast: a notification the sender
+                        // marked transient is discarded here instead of being
+                        // filed in the centre, which is what transient means.
+                        script: Services.NotificationServer.expireToast(wrapper.modelData)
                     }
                 }
 
@@ -245,7 +277,12 @@ PanelWindow {
                     interval: 250
                     repeat: true
 
-                    running: wrapper.lifetime > 0 && !cardHover.hovered && !wrapper.dismissing
+                    // Also paused while a reply is being typed into this card, and
+                    // while the notification centre is up. In the latter case the
+                    // whole overlay is hidden, so a running timer would burn the
+                    // card's lifetime somewhere the user cannot see it and it would
+                    // be gone by the time they closed the panel.
+                    running: wrapper.lifetime > 0 && !cardHover.hovered && !wrapper.dismissing && !wrapper.replying && !Core.PopupManager.isOpen("notifications")
 
                     onTriggered: {
                         wrapper.remaining -= interval;
@@ -372,34 +409,15 @@ PanelWindow {
 
                             color: Core.Theme.surfaceGlass
 
-                            // Resolve the notification icon.
-
-                            readonly property string resolvedIcon: {
-                                const n = wrapper.modelData;
-
-                                // 1. Explicit notification image
-                                try {
-                                    if (n.image !== undefined && n.image !== null && String(n.image) !== "") {
-                                        return String(n.image);
-                                    }
-                                } catch (e) {}
-
-                                // 2. Explicit image path
-                                try {
-                                    if (n.imagePath !== undefined && n.imagePath !== null && String(n.imagePath) !== "") {
-                                        return String(n.imagePath);
-                                    }
-                                } catch (e) {}
-
-                                // 3. Desktop/application icon
-                                try {
-                                    if (n.appIcon !== undefined && n.appIcon !== null && String(n.appIcon) !== "") {
-                                        return Quickshell.iconPath(String(n.appIcon), true);
-                                    }
-                                } catch (e) {}
-
-                                return "";
-                            }
+                            // Shared with the notification centre so both surfaces
+                            // resolve icons identically.
+                            //
+                            // This used to also check `n.imagePath`, which is not a
+                            // property Quickshell exposes, so that branch could
+                            // never fire. It was not needed: `image` already
+                            // resolves image-data, image_data, icon_data AND
+                            // image-path/image_path into one value.
+                            readonly property string resolvedIcon: Services.NotificationServer.iconFor(wrapper.modelData)
 
                             Image {
                                 id: notificationIcon
@@ -424,12 +442,18 @@ PanelWindow {
 
                             // Nerd Font fallback
 
+                            // Nerd Font fallback, picked from the app name.
+                            //
+                            // Was a hardcoded F007F, which is the 60%-battery
+                            // glyph rather than a bell. Icons.forApp already maps
+                            // senders to a sensible glyph, so a mail client gets an
+                            // envelope instead of every app getting the same mark.
                             Text {
                                 anchors.centerIn: parent
 
                                 visible: !notificationIcon.visible
 
-                                text: "\udb80\udc7f"
+                                text: Core.Icons.forApp(Services.NotificationServer.appLabel(wrapper.modelData))
 
                                 font.family: Core.Theme.iconFont
 
@@ -451,21 +475,7 @@ PanelWindow {
                             Text {
                                 Layout.fillWidth: true
 
-                                text: {
-                                    const n = wrapper.modelData;
-
-                                    try {
-                                        if (n.appName && n.appName !== "")
-                                            return n.appName;
-                                    } catch (e) {}
-
-                                    try {
-                                        if (n.desktopEntry && n.desktopEntry !== "")
-                                            return n.desktopEntry;
-                                    } catch (e) {}
-
-                                    return "Notification";
-                                }
+                                text: Services.NotificationServer.appLabel(wrapper.modelData)
 
                                 font.family: Core.Theme.fontFamily
 
@@ -505,6 +515,8 @@ PanelWindow {
                             }
 
                             Text {
+                                id: bodyText
+
                                 Layout.fillWidth: true
 
                                 visible: text !== ""
@@ -530,6 +542,32 @@ PanelWindow {
                                 maximumLineCount: 3
 
                                 elide: Text.ElideRight
+
+                                // The server advertises body-markup and
+                                // body-hyperlinks, so senders are entitled to send
+                                // <b>, <i> and <a href>. StyledText renders exactly
+                                // the subset the spec allows; RichText would also
+                                // accept remote <img> and is not worth the exposure.
+                                textFormat: Text.StyledText
+
+                                linkColor: Core.Theme.accent
+
+                                onLinkActivated: function (link) {
+                                    Quickshell.execDetached(["xdg-open", link]);
+                                }
+                            }
+
+                            // Named actions and the reply field.
+                            //
+                            // Previously the toast rendered none of these and only
+                            // the "default" action was reachable, by clicking the
+                            // card. Anything else had to be found in the centre.
+                            Components.NotificationActions {
+                                Layout.fillWidth: true
+
+                                Layout.topMargin: visible ? 4 : 0
+
+                                notification: wrapper.modelData
                             }
                         }
 

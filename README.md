@@ -181,6 +181,7 @@ NixOS/
 │   ├── neovim
 │   ├── zsh
 │   ├── kitty
+│   ├── tmux
 │   ├── git
 │   ├── ssh
 │   └── theme
@@ -292,9 +293,14 @@ Theming has two halves.
 so nothing else is themed behind your back.
 
 **The Aurora generator** in `home/theme` owns everything else. It reads the same
-`lib/themes.nix` and writes a Lua, JSON, Kitty and Starship file per theme, which
-Hyprland, Quickshell, Kitty, Neovim and the prompt then read at runtime. This is
-why switching theme does not need a rebuild.
+`lib/themes.nix` and writes a Lua, JSON, Kitty, Tmux and Starship file per theme,
+which Hyprland, Quickshell, Kitty, Neovim, tmux and the prompt then read at
+runtime. This is why switching theme does not need a rebuild.
+
+Each target is generated as appearance only, so switching theme re-sources
+colours into a running program without disturbing its keybindings — `aurora-theme`
+reloads Hyprland, repaints every live Kitty socket, re-sources tmux and nudges
+open Zsh sessions.
 
 Available themes:
 
@@ -304,8 +310,8 @@ one-dark · everforest · rose-pine · kanagawa
 ```
 
 Each is defined once in `lib/themes.nix` and generated out to Lua, JSON, a Kitty
-conf and a Starship TOML, so Hyprland, Quickshell, Kitty, Neovim and the prompt
-all read the same palette.
+conf, a Tmux conf and a Starship TOML, so Hyprland, Quickshell, Kitty, Neovim,
+tmux and the prompt all read the same palette.
 
 Runtime theme switching:
 

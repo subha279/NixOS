@@ -9,6 +9,7 @@ in
     ./git
     ./zsh
     ./kitty
+    ./tmux
     ./fastfetch
     ./ssh
     ./xdg
