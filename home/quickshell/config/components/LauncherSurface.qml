@@ -55,18 +55,16 @@ PanelWindow {
     property int liveSelectDelay: 200
     property bool vimNavigation: false
 
-    // Deliberately NOT a function of itemCount.
-    //
-    // Sizing the card to the number of results meant it resized on every
-    // keystroke as the list filtered, and again a moment after opening when an
-    // async source delivered its first batch. There is no Behavior on height, so
-    // each of those resizes snapped -- a card changing size under the entrance
-    // animation is most of what reads as instability.
-    //
-    // Constant height per launcher: as many rows as it will show, filled or not.
+    // How many rows fit inside cardMaxHeight.
     readonly property int fittableRows: Math.max(1, Math.floor((root.cardMaxHeight - root.headerHeight - root.separatorHeight - root.contentMargins) / root.rowExtent))
 
-    readonly property int visibleRows: Math.min(root.columns > 1 ? root.gridMaxRows : root.listMaxRows, root.fittableRows)
+    // Rows the results actually need, so the card shrinks to a short result list
+    // and grows back as you delete characters.
+    readonly property int wantedRows: root.columns > 1 ? Math.max(1, Math.ceil(root.itemCount / root.columns)) : Math.max(1, root.itemCount)
+
+    // Capped by the per-mode row limit and by what fits in cardMaxHeight, so the
+    // card still ends on a row boundary rather than cutting one in half.
+    readonly property int visibleRows: Math.min(root.columns > 1 ? root.gridMaxRows : root.listMaxRows, root.fittableRows, root.wantedRows)
 
     readonly property int targetCardHeight: root.headerHeight + root.separatorHeight + root.contentMargins + root.visibleRows * root.rowExtent
 
@@ -201,6 +199,20 @@ PanelWindow {
         width: root.cardWidth
 
         height: Math.max(root.cardMinHeight, Math.min(root.cardMaxHeight, root.targetCardHeight))
+
+        // The height re-targets on every keystroke as results filter, so it has to
+        // be animated: an un-animated binding snaps, and snapping on each
+        // character is what the shaking was.
+        //
+        // Short and monotonic on purpose. Because each keystroke retargets a
+        // running animation, a long duration would lag behind typing and an
+        // overshooting curve would compound into a wobble.
+        Behavior on height {
+            NumberAnimation {
+                duration: 130
+                easing.type: Easing.OutCubic
+            }
+        }
 
         x: Math.round((parent.width - width) / 2)
 
