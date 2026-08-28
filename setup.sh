@@ -597,6 +597,23 @@ detect_nvidia() {
 }
 
 install_flow() {
+  # This flow ends in `nixos-rebuild switch`, which needs a running NixOS.
+  # From the installer ISO it would do a lot of work and then fail at the last
+  # step, so it redirects instead.
+  if ci_is_live_installer; then
+    section "Wrong flow for this environment"
+    warning "This is the NixOS installer, and this option configures a system"
+    warning "that is already running NixOS. It ends in nixos-rebuild switch,"
+    warning "which cannot work from here."
+    echo
+    info "For a fresh machine you want the clean installer:"
+    info "  ./setup.sh clean-install --dry-run    review the plan"
+    info "  ./setup.sh clean-install              do it"
+    echo
+    confirm "Run the clean installer now?" && { clean_install; return; }
+    return
+  fi
+
   need_cmd nix
   need_cmd python3
   need_cmd git
@@ -777,6 +794,11 @@ menu() {
     echo
     panel "NixOS Configuration Manager" "v$VERSION" "$(overview_facts)"
     echo
+
+    if ci_is_live_installer; then
+      printf '  %b%b>> Installer environment detected. For a fresh machine use 17.%b\n\n' \
+        "$YELLOW" "$BOLD" "$RESET"
+    fi
 
     printf '  %b%bCONFIGURATION%b\n' "$CYAN" "$BOLD" "$RESET"
     menu_item 1 "Install / Setup" "configure a running system"
@@ -2766,31 +2788,44 @@ ci_place_repo() {
   success "Repository at $CI_DEST"
 }
 
-ci_configure_variables() {
-  section "Identity"
-  info "Written to the repository's own lib/variables.nix, not a second config system."
+# Identity is collected and applied in two separate steps, on purpose.
+#
+# Collecting happens before anything on disk is touched, so every question is
+# answered before the destructive part begins. Applying happens after the
+# repository has been placed, because the file that must be edited is the copy
+# inside the target, not the one on the USB.
+#
+# They were one step before, which was a bug: the destination path is derived
+# from the username, so changing the username at the prompt left the
+# repository under the old name while ownership was fixed on the new one.
 
-  local vars="$CI_DEST/lib/variables.nix"
-  [[ "$CI_DRY_RUN" -eq 1 ]] && vars="$VARS"
+CI_ID_KEYS=(username fullName hostname gitUser email timezone locale)
+declare -A CI_ID=()
+
+ci_collect_identity() {
+  section "Identity"
+  info "Asked now, before anything on disk is touched."
 
   local cur ans k
-  local -a keys=(username fullName hostname gitUser email timezone locale)
-
-  for k in "${keys[@]}"; do
-    cur="$(sed -nE "s/^[[:space:]]*${k}[[:space:]]*=[[:space:]]*\"([^\"]*)\";.*/\1/p" "$vars" | head -n1)"
+  for k in "${CI_ID_KEYS[@]}"; do
+    cur="$(sed -nE "s/^[[:space:]]*${k}[[:space:]]*=[[:space:]]*\"([^\"]*)\";.*/\1/p" "$VARS" | head -n1)"
     read -r -p "  $k [$cur]: " ans
     ans="${ans:-$cur}"
 
-    if [[ "$k" == "username" && ! "$ans" =~ ^[a-z_][a-z0-9_-]*$ ]]; then
-      die "Invalid Linux username: $ans"
-    fi
-    if [[ "$k" == "hostname" && ! "$ans" =~ ^[a-zA-Z0-9][a-zA-Z0-9.-]*$ ]]; then
-      die "Invalid hostname: $ans"
-    fi
+    case "$k" in
+      username)
+        [[ "$ans" =~ ^[a-z_][a-z0-9_-]*$ ]] || die "Invalid Linux username: $ans"
+        ;;
+      hostname)
+        [[ "$ans" =~ ^[a-zA-Z0-9][a-zA-Z0-9.-]*$ ]] || die "Invalid hostname: $ans"
+        ;;
+    esac
 
-    [[ "$CI_DRY_RUN" -eq 0 ]] && set_var_in "$vars" "$k" "$ans"
-    [[ "$k" == "username" ]] && CI_USER="$ans"
+    CI_ID["$k"]="$ans"
   done
+
+  CI_USER="${CI_ID[username]}"
+  CI_DEST="$CI_TARGET/home/$CI_USER/NixOS"
 
   if detect_nvidia; then
     info "NVIDIA GPU detected; the nvidia module stays enabled."
@@ -2799,7 +2834,28 @@ ci_configure_variables() {
     info "Review lib/variables.nix if this machine has no NVIDIA card."
   fi
 
-  success "Identity configured."
+  info "Repository will be installed to /home/$CI_USER/NixOS"
+}
+
+ci_apply_identity() {
+  section "Applying identity"
+
+  local vars="$CI_DEST/lib/variables.nix" k
+
+  if [[ "$CI_DRY_RUN" -eq 1 ]]; then
+    for k in "${CI_ID_KEYS[@]}"; do
+      run_cmd "$k = \"${CI_ID[$k]}\"  in ${vars#"$CI_TARGET"}"
+    done
+    return 0
+  fi
+
+  [[ -f "$vars" ]] || { error "Missing $vars"; return 1; }
+
+  for k in "${CI_ID_KEYS[@]}"; do
+    set_var_in "$vars" "$k" "${CI_ID[$k]}"
+  done
+
+  success "Identity written to ${vars#"$CI_TARGET"}"
 }
 
 ci_generate_hardware() {
@@ -2820,8 +2876,13 @@ ci_generate_hardware() {
   # A flake built from a git tree ignores untracked files. Staging this
   # guarantees the build sees the freshly generated version rather than
   # whatever UUIDs happen to be committed.
+  #
+  # safe.directory is set because the clone on the USB may have been made by a
+  # non-root user while this runs as root, and git would otherwise refuse the
+  # repository as "dubious ownership" and skip the staging silently.
   if [[ -d "$CI_DEST/.git" ]] && command -v git >/dev/null 2>&1; then
-    git -C "$CI_DEST" add -- hosts/laptop/hardware-configuration.nix 2>/dev/null || true
+    git -C "$CI_DEST" -c safe.directory='*' \
+      add -- hosts/laptop/hardware-configuration.nix 2>/dev/null || true
   fi
 
   success "Generated against $CI_TARGET."
@@ -3207,9 +3268,12 @@ clean_install() {
     trap 'ci_on_error $LINENO' ERR
   fi
 
-  CI_USER="$(get_var username || printf '')"
-  [[ -n "$CI_USER" ]] || die "Could not read username from $VARS"
-  CI_DEST="$CI_TARGET/home/$CI_USER/NixOS"
+  # The installer ISO does not enable flakes, and nixos-install shells out to
+  # nix itself, so passing a flag to our own nix calls is not enough. NIX_CONFIG
+  # reaches every nix invocation in this process tree, including that one.
+  export NIX_CONFIG="experimental-features = nix-command flakes"
+
+  ci_collect_identity
 
   ci_show_disks
   ci_select_target_disk || return 1
@@ -3226,7 +3290,7 @@ clean_install() {
     info "Would place the repository at $CI_DEST."
   fi
 
-  ci_configure_variables
+  ci_apply_identity || return 1
   ci_generate_hardware || return 1
 
   if [[ "$CI_DRY_RUN" -eq 1 ]]; then
