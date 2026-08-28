@@ -52,21 +52,15 @@ PanelWindow {
     property alias query: input.text
 
     property bool liveSelect: false
+
     property int liveSelectDelay: 200
     property bool vimNavigation: false
 
-    // Deliberately NOT a function of itemCount.
-    //
-    // Sizing the card to the number of results meant it resized on every
-    // keystroke as the list filtered, and again a moment after opening when an
-    // async source delivered its first batch. There is no Behavior on height, so
-    // each of those resizes snapped -- a card changing size under the entrance
-    // animation is most of what reads as instability.
-    //
-    // Constant height per launcher: as many rows as it will show, filled or not.
     readonly property int fittableRows: Math.max(1, Math.floor((root.cardMaxHeight - root.headerHeight - root.separatorHeight - root.contentMargins) / root.rowExtent))
 
-    readonly property int visibleRows: Math.min(root.columns > 1 ? root.gridMaxRows : root.listMaxRows, root.fittableRows)
+    readonly property int wantedRows: root.columns > 1 ? Math.max(1, Math.ceil(root.itemCount / root.columns)) : Math.max(1, root.itemCount)
+
+    readonly property int visibleRows: Math.min(root.columns > 1 ? root.gridMaxRows : root.listMaxRows, root.fittableRows, root.wantedRows)
 
     readonly property int targetCardHeight: root.headerHeight + root.separatorHeight + root.contentMargins + root.visibleRows * root.rowExtent
 
@@ -176,7 +170,6 @@ PanelWindow {
 
     exclusionMode: ExclusionMode.Ignore
 
-
     visible: root.open
 
     Rectangle {
@@ -201,6 +194,12 @@ PanelWindow {
         width: root.cardWidth
 
         height: Math.max(root.cardMinHeight, Math.min(root.cardMaxHeight, root.targetCardHeight))
+        Behavior on height {
+            NumberAnimation {
+                duration: 130
+                easing.type: Easing.OutCubic
+            }
+        }
 
         x: Math.round((parent.width - width) / 2)
 
