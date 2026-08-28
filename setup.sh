@@ -2076,6 +2076,7 @@ generated_files=(
     "$HOME/.config/aurora/active-theme"
     "$HOME/.config/aurora/active-theme.lua"
     "$HOME/.config/aurora/active-kitty.conf"
+    "$HOME/.config/aurora/active-tmux.conf"
     "$HOME/.config/aurora/active-starship.toml"
 
     "$HOME/.config/quickshell/shell.qml"
@@ -2103,6 +2104,7 @@ section "Generated theme sanity"
 
 ACTIVE_THEME_LUA="$HOME/.config/aurora/active-theme.lua"
 ACTIVE_KITTY="$HOME/.config/aurora/active-kitty.conf"
+ACTIVE_TMUX="$HOME/.config/aurora/active-tmux.conf"
 ACTIVE_STARSHIP="$HOME/.config/aurora/active-starship.toml"
 
 # active-theme.lua
@@ -2143,6 +2145,27 @@ if [[ -f "$ACTIVE_KITTY" ]]; then
 else
 
     v_info "Kitty theme not generated yet"
+
+fi
+
+# Tmux theme
+
+if [[ -f "$ACTIVE_TMUX" ]]; then
+
+    if grep -q '^set -g status-style ' "$ACTIVE_TMUX" &&
+        grep -q '^set -g window-status-current-format ' "$ACTIVE_TMUX"; then
+
+        v_ok "Generated Tmux theme contains core styles"
+
+    else
+
+        v_fail "Generated Tmux theme is incomplete"
+
+    fi
+
+else
+
+    v_info "Tmux theme not generated yet"
 
 fi
 
