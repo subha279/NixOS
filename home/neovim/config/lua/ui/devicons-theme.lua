@@ -17,15 +17,6 @@ function M.setup()
 
 	local c = theme.colors
 
-	-- NvimTree groups are NOT set here.
-	--
-	-- ui/nvimtree-theme.lua owns them and already set all ten of the ones this
-	-- file used to touch. It also runs second, so it won -- and the two disagreed:
-	-- NvimTreeGitStagedIcon was c.success here and c.info there, so the value that
-	-- actually rendered was never the one this file asked for.
-	--
-	-- This module's job is the DevIcon* groups below.
-
 	-- nvim-web-devicons
 
 	local ok, devicons = pcall(require, "nvim-web-devicons")
@@ -53,14 +44,6 @@ function M.setup()
 		c.terminalGreen,
 		c.terminalYellow,
 	}
-
-	-- Apply colors to every registered icon
-	--
-	-- Collected and sorted before assigning, because the palette is handed out by
-	-- position: pairs() gives no order guarantee, so walking the icon table
-	-- directly dealt a different colour to each filetype on every launch. Sorting
-	-- by group name makes the result stable across restarts, and stable between
-	-- theme switches, without pinning a colour per filetype by hand.
 
 	local group_names = {}
 

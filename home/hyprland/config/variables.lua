@@ -22,6 +22,7 @@ M.guieditor = "zeditor"
 M.note = "obsidian"
 
 -- Quickshell owns the launcher, wallpaper picker, clipboard, emoji picker and the colorscheme picker.
+
 M.menu = "qs ipc call launcher toggle"
 
 M.colorscheme = "qs ipc call theme toggle"
@@ -67,7 +68,5 @@ M.mediaPlay = "playerctl play-pause"
 M.mediaNext = "playerctl next"
 
 M.mediaPrev = "playerctl previous"
-
--- Return Module
 
 return M

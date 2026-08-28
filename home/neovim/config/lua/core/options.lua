@@ -105,20 +105,6 @@ opt.fillchars = {
 	foldsep = " ",
 }
 
--- Glass
---
--- ui/theme.lua leaves Normal unpainted when the terminal is translucent but
--- keeps floats tinted, so these soften what would be a solid slab on a
--- transparent buffer into thicker glass over thinner glass.
---
--- With Normal.bg unset, neovim has no colour of its own to blend against, so it
--- blends towards the TERMINAL's default background -- which kitty draws at
--- global.ui.terminalOpacity. That chain is kitty-specific, not a guarantee every
--- terminal makes.
---
--- 12 mirrors global.ui.editorFloatBlend. Hardcoded rather than read from
--- active-theme.lua because neovim must open on a machine where aurora has not
--- generated anything yet. Telescope sets its own -- see plugins/telescope.lua.
 
 opt.winblend = 12
 opt.pumblend = 12

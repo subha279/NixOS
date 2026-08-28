@@ -1,15 +1,11 @@
 {
   global = {
 
-    # ----------------------------------------------------------
     # Active theme
-    # ----------------------------------------------------------
 
     activeTheme = "catppuccin-mocha";
 
-    # ----------------------------------------------------------
     # Fonts
-    # ----------------------------------------------------------
 
     fonts = {
       interface = {
@@ -18,11 +14,6 @@
       };
 
       terminal = {
-        # "JetBrainsMono" is un-spaced on purpose: that is the real family name.
-        # Nerd Fonts names patched families "<FontName> Nerd Font [Mono]" from the
-        # font's own un-spaced name, so "JetBrains Mono Nerd Font" matches nothing
-        # and every consumer -- kitty, stylix, the shell -- silently fell back to
-        # whatever fontconfig picked. Mono keeps glyphs inside one cell.
         name = "JetBrainsMono Nerd Font Mono";
         package = "nerd-fonts.jetbrains-mono";
       };
@@ -33,18 +24,14 @@
       };
     };
 
-    # ----------------------------------------------------------
     # Icons
-    # ----------------------------------------------------------
 
     icons = {
       name = "Colloid-Dark";
       package = "colloid-icon-theme";
     };
 
-    # ----------------------------------------------------------
     # Cursor
-    # ----------------------------------------------------------
 
     cursor = {
       name = "phinger-cursors-dark";
@@ -52,9 +39,7 @@
       size = 30;
     };
 
-    # ----------------------------------------------------------
     # UI
-    # ----------------------------------------------------------
 
     ui = {
 
@@ -70,9 +55,7 @@
       fontSizeSmall = 10;
       fontSizeLarge = 15;
 
-      # ========================================================
       # LIQUID GLASS
-      # ========================================================
 
       glassOpacity = 0.50;
       surfaceOpacity = 0.18;
@@ -87,9 +70,7 @@
       glassRimOpacity = 0.0;
       glassClarity = 0.14;
 
-      # ========================================================
       # SHADOWS / WINDOWS
-      # ========================================================
 
       shadowOpacity = 0.24;
 
@@ -99,9 +80,7 @@
 
       editorFloatBlend = 12;
 
-      # ========================================================
       # CLOCK
-      # ========================================================
 
       clock = {
         hour = "foreground";
@@ -112,9 +91,7 @@
     };
   };
 
-  # ============================================================
   # THEMES
-  # ============================================================
 
   themes = {
 

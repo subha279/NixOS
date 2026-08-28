@@ -6,9 +6,6 @@ local home = os.getenv("HOME")
 
 local activeThemePath = home .. "/.config/aurora/active-theme.lua"
 
--- Must name a theme that lib/themes.nix actually defines. This used to point at
--- themes/aurora.lua, which is never generated, so the fallback missed too and the
--- error() below took the whole Hyprland config down.
 local fallbackThemePath = home .. "/.config/aurora/themes/catppuccin-mocha.lua"
 
 -- Load Active Theme

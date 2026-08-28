@@ -23,14 +23,4 @@ hl.on("hyprland.start", function()
 
 	hl.exec_cmd("sleep 1 && ~/.config/hypr/scripts/restore-wallpaper.sh")
 
-	-- Clipboard
-	--
-	-- Deliberately NOT started here. Quickshell owns the clipboard now
-	-- (services/ClipboardService.qml runs the wl-paste watcher), and running one
-	-- here as well meant every copy was handed to `cliphist store` twice, which
-	-- is what produced duplicate rows in the picker.
-
-	-- Future Startup Programs
-
-	-- hl.exec_cmd("hypridle") hl.exec_cmd("fcitx5")
 end)

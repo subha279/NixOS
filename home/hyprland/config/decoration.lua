@@ -9,9 +9,6 @@ local themePath = home .. "/.config/aurora/active-theme.lua"
 local ok, theme = pcall(dofile, themePath)
 
 if not ok or not theme then
-	-- Must name a theme that lib/themes.nix actually defines. This used to point
-	-- at themes/aurora.lua, which is never generated, so the fallback missed too
-	-- and the error() below took the whole Hyprland config down.
 	local fallback = home .. "/.config/aurora/themes/catppuccin-mocha.lua"
 
 	ok, theme = pcall(dofile, fallback)
@@ -23,8 +20,6 @@ end
 
 local ui = theme.ui
 
--- themes.nix declares shadowOpacity as 0-1; Hyprland wants an 8-digit rgba()
--- literal. Convert once rather than hardcoding a hex pair that drifts from it.
 local shadowAlpha = string.format("%02x", math.floor((ui.shadowOpacity or 0.20) * 255 + 0.5))
 
 hl.config({

@@ -4,11 +4,6 @@ hl.config({
 	},
 })
 
--- Every curve here is monotonic: no control point has y > 1, so nothing travels
--- past its target and comes back. The previous softBack (0.34, 1.30, 0.64, 1) and
--- hardBack (0.20, 1.45, 0.55, 1) were easeOutBack variants that overshot to 103%
--- and 107%, which is the bounce/wobble on anything entering.
-
 hl.curve("standard", { type = "bezier", points = { { 0.20, 0 }, { 0, 1 } } })
 hl.curve("easeOutQuint", { type = "bezier", points = { { 0.23, 1 }, { 0.32, 1 } } })
 hl.curve("easeOutExpo", { type = "bezier", points = { { 0.16, 1 }, { 0.30, 1 } } })
@@ -32,10 +27,6 @@ hl.animation({ leaf = "fadeShadow", enabled = true, speed = 1.5, bezier = "almos
 hl.animation({ leaf = "fadeDim", enabled = true, speed = 2.0, bezier = "almostLinear" })
 hl.animation({ leaf = "fadePopups", enabled = true, speed = 1.5, bezier = "almostLinear" })
 
--- Quickshell's bar, popups, launchers and notifications are all layer surfaces,
--- so these are the animations that run when a popup opens. 96% keeps the scale
--- small enough to read as a settle rather than a pop toward the viewer, and the
--- fade below carries most of the transition.
 hl.animation({ leaf = "layers", enabled = true, speed = 2.0, bezier = "standard" })
 hl.animation({ leaf = "layersIn", enabled = true, speed = 1.8, bezier = "standard", style = "popin 96%" })
 hl.animation({ leaf = "layersOut", enabled = true, speed = 1.2, bezier = "easeInQuint", style = "popin 96%" })

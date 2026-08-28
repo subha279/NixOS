@@ -99,11 +99,6 @@ local function apply_highlights()
 		bold = true,
 	})
 
-	-- Adopted from ui/theme.lua, which was the only file setting it. Recoloured
-	-- from terminalBlue to accent to match the type-ish groups around it: accent
-	-- is what @lsp.type.class/.type and treesitter's @type actually render as,
-	-- terminalBlue was ui/theme.lua's own type colour from a block that was
-	-- already being overridden.
 	set_hl("@lsp.type.struct", {
 		fg = c.accent,
 	})
@@ -272,24 +267,6 @@ end
 
 configure_capabilities()
 
--- Server Configuration
---
--- Per-server settings live in config/lsp/<name>.lua, which Neovim picks up off
--- the runtime path automatically. There are deliberately no vim.lsp.config()
--- calls for individual servers here.
---
--- lua_ls, rust_analyzer and qmlls used to be configured in BOTH places. Since the
--- runtime files are merged first and these calls overrode them, the files were
--- misleading: qmlls was a byte-identical copy, and rust_analyzer genuinely
--- disagreed (closureReturnTypeHints "with_block" in the file vs "always" here,
--- plus five hint categories that only existed here). Those inline values have
--- been folded into config/lsp/ so current behaviour is preserved with one source.
---
--- The one exception is the "*" config in configure_capabilities() above, which is
--- a cross-server default rather than per-server settings.
-
--- Enable Servers
-
 vim.lsp.enable({
 	"lua_ls",
 	"rust_analyzer",
@@ -348,9 +325,6 @@ vim.api.nvim_create_autocmd("LspAttach", {
 
 		map("n", "K", hover, "LSP: Hover")
 
-		-- gK, not <C-k>: core/keymaps.lua maps <C-k> to <C-w>k globally, and a
-		-- buffer-local mapping wins, so binding it here silently broke
-		-- "move to the window above" in every buffer with a language server.
 		map("n", "gK", signature_help, "LSP: Signature help")
 
 		-- Refactoring

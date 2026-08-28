@@ -18,15 +18,10 @@
 
   xdg.configFile."hypr/config".source = ./config;
 
-  # Wallpaper Scripts
-
-  # Wallpaper selection itself now lives in Quickshell, in home/quickshell/config/modules/WallpaperPicker.qml.
-
   xdg.configFile."hypr/scripts/restore-wallpaper.sh".source = ./scripts/restore-wallpaper.sh;
 
   # Aurora Desktop Services
 
-  # This repo configures Hyprland by writing config files directly rather than through the home-manager Hyprland module, so nothing was
   systemd.user.targets.hyprland-session = {
     Unit = {
       Description = "Hyprland compositor session";
@@ -58,7 +53,6 @@
       ];
     };
 
-    # Previously missing, so the target was only reachable through the explicit `systemctl --user start` in startup.lua and raced the shell.
     Install = {
       WantedBy = [ "graphical-session.target" ];
     };

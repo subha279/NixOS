@@ -1,18 +1,4 @@
 -- Aurora theme access
---
--- One loader, one watcher, one fan-out point.
---
--- Nine files used to carry their own copy of
---
---   local path = vim.fn.expand("~/.config/aurora/active-theme.lua")
---   local ok, theme = pcall(dofile, path)
---   if not ok then return nil end
---   if type(theme) ~= "table" then return nil end
---   if type(theme.colors) ~= "table" then return nil end
---
--- which meant the same generated file was read and executed nine times on every
--- theme switch, and adding a guard meant editing nine call sites. This module
--- owns that read, caches it, and invalidates the cache when the theme changes.
 
 local M = {}
 
@@ -20,9 +6,6 @@ local M = {}
 
 local AURORA_DIR = vim.fn.expand("~/.config/aurora")
 
--- Plain-text pointer holding the active theme id. aurora-theme writes this
--- LAST, after relinking active-theme.lua, so observing a new value here means
--- the generated Lua is already in place.
 M.id_path = AURORA_DIR .. "/active-theme"
 
 -- Symlink to the generated theme for the active id.
@@ -51,8 +34,6 @@ local function load()
 	return theme
 end
 
--- The whole theme table, or nil when Aurora has not generated one yet (a fresh
--- machine, or a Neovim started before the first home-manager activation).
 function M.get()
 	if not cache_valid then
 		cached = load()
@@ -62,9 +43,6 @@ function M.get()
 	return cached
 end
 
--- Always a table, so callers can index it without guarding first. Absent keys
--- come back nil, which nvim_set_hl treats as "no colour" -- matching how the
--- per-file copies behaved.
 function M.colors()
 	local theme = M.get()
 
@@ -82,9 +60,6 @@ function M.invalidate()
 	cached = nil
 end
 
--- Active theme id, read from the pointer file. Deliberately not from the
--- generated Lua: the watcher polls this every 500ms and should not execute a
--- file to do it.
 function M.id()
 	local file = io.open(M.id_path, "r")
 
@@ -107,13 +82,6 @@ end
 
 local subscribers = {}
 
--- Register a function to re-apply highlights after a theme switch.
---
--- Subscribers run in registration order, which follows init.lua's require
--- order, so a refresh reproduces exactly the same sequence of nvim_set_hl calls
--- as startup does. That equivalence is the point: refresh_plugins() previously
--- re-applied only a subset, so groups owned by an unrefreshed module kept the
--- old theme's colours until the next restart.
 function M.on_change(fn)
 	if type(fn) ~= "function" then
 		return
@@ -146,8 +114,6 @@ function M.refresh()
 		end
 	end)
 
-	-- One redraw for the whole pass. Several modules used to each schedule their
-	-- own redraw!/redrawstatus! from a refresh_theme() that did nothing else.
 	vim.cmd("redraw!")
 	vim.cmd("redrawstatus!")
 end
@@ -156,11 +122,6 @@ end
 
 local watching = false
 
--- Poll the pointer file for a change of id.
---
--- Only ever started once. ui/theme.lua and plugins/alpha.lua each used to run
--- their own 500ms uv timer against this same file, so a theme switch woke two
--- independent pollers that refreshed overlapping sets of highlights.
 function M.watch()
 	if watching then
 		return
@@ -186,9 +147,6 @@ function M.watch()
 				return
 			end
 
-			-- First observation on a machine where the pointer appeared after
-			-- startup: adopt it without refreshing, since nothing was applied
-			-- from an older theme.
 			if last_id == nil then
 				last_id = current
 				return
@@ -198,7 +156,6 @@ function M.watch()
 				return
 			end
 
-			-- Recorded before refreshing so a slow refresh cannot re-trigger.
 			last_id = current
 
 			M.refresh()

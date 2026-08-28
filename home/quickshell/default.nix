@@ -128,9 +128,6 @@ in
 
       ConditionEnvironment = "WAYLAND_DISPLAY";
 
-      # Rate limiting belongs in [Unit], not [Service]. StartLimitBurst was
-      # previously set below, where systemd ignores it, leaving Restart=on-failure
-      # to retry forever every 2s if the shell could not start at all.
       StartLimitBurst = 8;
 
       StartLimitIntervalSec = 60;
