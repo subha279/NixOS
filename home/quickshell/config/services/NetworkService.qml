@@ -63,12 +63,22 @@ Singleton {
         Quickshell.execDetached(["notify-send", "-a", "Network", "-i", icon, "-u", urgency, summary, body]);
     }
 
+    // Returns "" when the link cannot be described yet, which is not the same
+    // thing as being offline.
     function linkFingerprint() {
         if (root.ethConnected)
             return "eth:" + (root.ethConnection !== "" ? root.ethConnection : "Ethernet");
 
-        if (root.wifiConnected)
+        if (root.wifiConnected) {
+            // Still associated, but nmcli has momentarily stopped marking any
+            // row IN-USE, which happens while a scan is in flight. Treating that
+            // as a real change is what produced the spurious "Wi-Fi
+            // disconnected" immediately followed by "Wi-Fi connected".
+            if (root.activeSsid === "")
+                return "";
+
             return "wifi:" + root.activeSsid;
+        }
 
         if (!root.wifiEnabled)
             return "off";
@@ -76,8 +86,30 @@ Singleton {
         return "none";
     }
 
+    // Notifications are debounced rather than fired from the property change.
+    //
+    // nmcli walks through intermediate device states, and a scan or a reconnect
+    // makes several of these properties change within a few hundred
+    // milliseconds. Notifying on each one turned a single event into a burst
+    // that read like the network had been reset.
+    property Timer linkSettleTimer: Timer {
+        interval: 2500
+        repeat: false
+
+        onTriggered: root.syncLinkNotification()
+    }
+
+    function queueLinkNotification() {
+        root.linkSettleTimer.restart();
+    }
+
     function syncLinkNotification() {
         const now = root.linkFingerprint();
+
+        // Indeterminate. Leave lastLink alone and wait for the next update
+        // rather than inventing a transition.
+        if (now === "")
+            return;
 
         if (now === root.lastLink)
             return;
@@ -120,11 +152,11 @@ Singleton {
         root.notify("Disconnected", "No network connection", "network-offline", "normal");
     }
 
-    onWifiStateChanged: root.syncLinkNotification()
-    onEthStateChanged: root.syncLinkNotification()
-    onActiveSsidChanged: root.syncLinkNotification()
-    onEthConnectionChanged: root.syncLinkNotification()
-    onWifiEnabledChanged: root.syncLinkNotification()
+    onWifiStateChanged: root.queueLinkNotification()
+    onEthStateChanged: root.queueLinkNotification()
+    onActiveSsidChanged: root.queueLinkNotification()
+    onEthConnectionChanged: root.queueLinkNotification()
+    onWifiEnabledChanged: root.queueLinkNotification()
 
     // ------------------------------------------------------------
     // Live ListModel (stable rows => real add/remove animations)
@@ -305,8 +337,20 @@ Singleton {
         }
     }
 
+    // `--rescan no` is the important part.
+    //
+    // `nmcli device wifi list` defaults to `--rescan auto`, which quietly kicks
+    // off a real scan whenever NetworkManager's cached list has gone stale. This
+    // reader runs on every poll, every 3 seconds while the popup is open, and
+    // after every queued action, so the default meant the shell was triggering
+    // active scans on an associated interface over and over. On plenty of Wi-Fi
+    // drivers that stalls throughput and can drop the link outright, which is
+    // exactly the "opening the Wi-Fi menu resets my connection" symptom.
+    //
+    // Reading is now purely a read. The only thing that scans is rescan(), which
+    // is an explicit user action.
     property Process wifiListProc: Process {
-        command: ["nmcli", "-t", "-f", "IN-USE,SSID,SIGNAL,SECURITY,BSSID", "device", "wifi", "list"]
+        command: ["nmcli", "-t", "-f", "IN-USE,SSID,SIGNAL,SECURITY,BSSID", "device", "wifi", "list", "--rescan", "no"]
 
         stdout: StdioCollector {
             onStreamFinished: {
