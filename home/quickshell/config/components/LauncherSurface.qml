@@ -277,7 +277,7 @@ PanelWindow {
 
                         font.family: Core.Theme.iconFont
 
-                        font.pixelSize: Core.Theme.fontSizeLarge
+                        font.pixelSize: Core.Theme.iconSize
                     }
 
                     Row {
@@ -333,7 +333,7 @@ PanelWindow {
 
                                 font.family: Core.Theme.iconFont
 
-                                font.pixelSize: 14
+                                font.pixelSize: Core.Theme.iconSizeSmall
                             }
 
                             MouseArea {

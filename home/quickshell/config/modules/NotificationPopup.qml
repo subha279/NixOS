@@ -165,7 +165,7 @@ Components.PopupSurface {
 
                     text: Core.Icons.bellOff + "  New alerts are being silenced"
 
-                    font.family: Core.Theme.fontFamily
+                    font.families: Core.Theme.textFamilies
                     font.pixelSize: Core.Theme.fontSizeSmall
 
                     color: Core.Theme.warning
@@ -450,8 +450,8 @@ Components.PopupSurface {
 
                                 text: Core.Icons.close
 
-                                font.family: Core.Theme.fontFamily
-                                font.pixelSize: 12
+                                font.family: Core.Theme.iconFont
+                                font.pixelSize: Core.Theme.iconSizeSmall
 
                                 color: Core.Theme.foregroundMuted
                             }
@@ -574,8 +574,8 @@ Components.PopupSurface {
 
                         text: "\udb80\udc9c"
 
-                        font.family: Core.Theme.fontFamily
-                        font.pixelSize: 20
+                        font.family: Core.Theme.iconFont
+                        font.pixelSize: Core.Theme.iconSizeMedium
 
                         color: Core.Theme.foregroundFaint
                     }

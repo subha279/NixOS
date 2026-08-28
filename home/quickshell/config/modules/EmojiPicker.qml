@@ -143,7 +143,7 @@ Components.LauncherSurface {
 
                         text: cell.modelData.emoji || ""
 
-                        font.family: "Noto Color Emoji"
+                        font.family: Core.Theme.emojiFont
 
                         font.pixelSize: 28
 

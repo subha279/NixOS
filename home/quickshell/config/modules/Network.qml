@@ -65,7 +65,7 @@ Item {
 
         text: "\udb80\ude00"
 
-        font.family: Core.Theme.fontFamily
+        font.family: Core.Theme.iconFont
         font.pixelSize: Core.Theme.iconSize
 
         color: Core.Theme.foreground
@@ -113,7 +113,7 @@ Item {
             return Core.Icons.wifi0;
         }
 
-        font.family: Core.Theme.fontFamily
+        font.family: Core.Theme.iconFont
         font.pixelSize: Core.Theme.iconSize
 
         color: Services.NetworkService.wifiConnected ? Core.Theme.foreground : Core.Theme.foregroundMuted

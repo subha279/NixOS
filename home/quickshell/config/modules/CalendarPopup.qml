@@ -189,8 +189,8 @@ Components.PopupSurface {
 
                         text: "\udb80\udd41"
 
-                        font.family: Core.Theme.fontFamily
-                        font.pixelSize: 14
+                        font.family: Core.Theme.iconFont
+                        font.pixelSize: Core.Theme.iconSizeSmall
 
                         color: Core.Theme.foregroundMuted
                     }
@@ -291,8 +291,8 @@ Components.PopupSurface {
 
                         text: "\udb80\udd42"
 
-                        font.family: Core.Theme.fontFamily
-                        font.pixelSize: 14
+                        font.family: Core.Theme.iconFont
+                        font.pixelSize: Core.Theme.iconSizeSmall
 
                         color: Core.Theme.foregroundMuted
                     }
@@ -491,7 +491,7 @@ Components.PopupSurface {
 
                         text: "\udb80\udced  Today"
 
-                        font.family: Core.Theme.fontFamily
+                        font.families: Core.Theme.textFamilies
                         font.pixelSize: Core.Theme.fontSizeSmall
 
                         color: Core.Theme.foreground

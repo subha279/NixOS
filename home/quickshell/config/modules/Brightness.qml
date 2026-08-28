@@ -40,7 +40,7 @@ Item {
             // Ramps with the level instead of showing the same sun at 5% and at 100%.
             text: Core.Icons.forBrightness(Services.BrightnessService.fraction)
 
-            font.family: Core.Theme.fontFamily
+            font.family: Core.Theme.iconFont
 
             font.pixelSize: Core.Theme.iconSize
 
