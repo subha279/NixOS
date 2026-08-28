@@ -7,7 +7,7 @@ import "../services" as Services
 
 // Wallpaper Picker
 
-Components.LauncherSurface {
+Components.LauncherView {
     id: launcher
 
     launcherId: "wallpaper"

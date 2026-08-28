@@ -16,11 +16,4 @@ Scope {
     CalendarPopup {}
     NotificationPopup {}
     Notifications {}
-
-    // dmenu-style surfaces.
-    AppLauncher {}
-    WallpaperPicker {}
-    ThemePicker {}
-    Clipboard {}
-    EmojiPicker {}
 }

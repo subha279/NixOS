@@ -7,7 +7,7 @@ import "../services" as Services
 
 // Colorscheme Picker
 
-Components.LauncherSurface {
+Components.LauncherView {
     id: launcher
 
     launcherId: "theme"

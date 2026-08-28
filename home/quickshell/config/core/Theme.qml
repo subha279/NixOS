@@ -367,6 +367,11 @@ QtObject {
     // Visible detachment from the bar pill. At 2 the cards looked welded to it.
     readonly property int popupGap: 10
 
+    // Tallest a launcher popup may grow. Bar sizes its PanelWindow from this,
+    // and LauncherView clamps itself to it, so the window is always big enough
+    // to contain the popup it has to host.
+    readonly property int launcherMaxHeight: 620
+
     readonly property int rowHeight: 42
 
     // Animation
