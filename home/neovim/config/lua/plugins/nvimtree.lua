@@ -132,23 +132,23 @@ require("nvim-tree").setup({
 				symlink = "",
 
 				folder = {
-					arrow_closed = "󰅂",
-					arrow_open = "󰅀",
+					arrow_closed = "",
+					arrow_open = "",
 
-					default = "󰉋",
-					open = "󰝰",
+					default = "",
+					open = "",
 
-					empty = "󰉖",
-					empty_open = "󰷏",
+					empty = "",
+					empty_open = "",
 
 					symlink = "",
 					symlink_open = "",
 				},
 
 				git = {
-					unstaged = "●",
+					unstaged = "",
 					staged = "✓",
-					unmerged = "",
+					unmerged = "",
 					renamed = "➜",
 					untracked = "★",
 					deleted = "",
