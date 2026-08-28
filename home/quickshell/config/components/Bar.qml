@@ -79,7 +79,31 @@ PanelWindow {
 
     // Reveal state
 
-    readonly property bool wantExpanded: !root.launcherOpen && (surfaceHover.hovered || Core.PopupManager.current !== "")
+    // Only the module popups (network, bluetooth, battery, audio, calendar,
+    // notifications) hold the bar open. Their cards are anchored under the icon
+    // that spawned them, so that icon has to stay on screen.
+    //
+    // Launcher ids are filtered out here rather than leaning on `launcherOpen`.
+    // That value is derived through the launcher items, so it settles one pass
+    // later than `PopupManager.current` - long enough for the bar to start
+    // expanding before the popup takes the surface over.
+    readonly property bool modulePopupOpen: {
+        const id = Core.PopupManager.current;
+
+        if (id === "")
+            return false;
+
+        const list = root.launchers;
+
+        for (let i = 0; i < list.length; i++) {
+            if (list[i] && list[i].launcherId === id)
+                return false;
+        }
+
+        return true;
+    }
+
+    readonly property bool wantExpanded: !root.launcherOpen && (surfaceHover.hovered || root.modulePopupOpen)
 
     property bool expanded: false
 
@@ -107,9 +131,60 @@ PanelWindow {
 
     Behavior on reveal {
         NumberAnimation {
-            duration: root.expanded ? Core.Theme.barRevealDuration : Core.Theme.barHideDuration
+            // Instant while a launcher is up. `onLauncherOpenChanged` clears
+            // `expanded` the moment a popup appears, and that drop must not be
+            // visible: an expanded bar shrinking underneath the growing card is
+            // exactly the intermediate state we never want.
+            duration: root.launcherOpen ? 0 : (root.expanded ? Core.Theme.barRevealDuration : Core.Theme.barHideDuration)
             easing.type: Easing.OutQuint
         }
+    }
+
+    // Popup takeover
+    //
+    // A popup always grows out of the normal pill, never out of the expanded bar.
+
+    // True for one pass of the event loop when a launcher opens. While it is set
+    // the surface is snapped back to pill geometry unanimated, so the morph has
+    // the pill as its starting point even if the bar happened to be hovered open
+    // a moment earlier.
+    property bool fromPill: false
+
+    // The surface has to keep animating for a moment after `launcherOpen` goes
+    // false, otherwise the card would snap to the pill instead of shrinking into
+    // it.
+    property bool closing: false
+
+    function releasePill() {
+        root.fromPill = false;
+    }
+
+    onLauncherOpenChanged: {
+        // No collapse delay and no collapse animation: the expanded bar is gone
+        // before the popup draws a single frame.
+        collapseTimer.stop();
+        root.expanded = false;
+
+        if (root.launcherOpen) {
+            closeTimer.stop();
+            root.closing = false;
+
+            root.fromPill = true;
+            Qt.callLater(root.releasePill);
+            return;
+        }
+
+        root.fromPill = false;
+        root.closing = true;
+        closeTimer.restart();
+    }
+
+    Timer {
+        id: closeTimer
+
+        interval: Core.Theme.barRevealDuration
+
+        onTriggered: root.closing = false
     }
 
     readonly property bool modulesVisible: root.reveal > 0.012 && !root.launcherOpen
@@ -122,7 +197,9 @@ PanelWindow {
 
     Behavior on osdMix {
         NumberAnimation {
-            duration: Core.Theme.barRevealDuration
+            // Snapped for the same reason as `reveal`: the pill a popup grows out
+            // of has to be the normal pill, not a half-faded OSD readout.
+            duration: root.launcherOpen ? 0 : Core.Theme.barRevealDuration
             easing.type: Easing.OutQuint
         }
     }
@@ -134,11 +211,27 @@ PanelWindow {
     // One target per dimension, so there is exactly one animation on each and
     // nothing competes.
 
-    readonly property real targetWidth: root.launcherOpen ? root.activeLauncher.cardWidth : root.barContentWidth + 24
+    // Bar shape until the pill snap has been released, so opening a launcher
+    // reads pill -> card and never bar -> card.
+    readonly property bool popupShape: root.launcherOpen && !root.fromPill
 
-    readonly property real targetHeight: root.launcherOpen ? root.activeLauncher.viewHeight : Core.Theme.pillHeight
+    readonly property real targetWidth: root.popupShape ? root.activeLauncher.cardWidth : root.barContentWidth + 24
 
-    readonly property real targetRadius: root.launcherOpen ? Core.Theme.radiusLarge : Core.Theme.pillHeight / 2
+    readonly property real targetHeight: root.popupShape ? root.activeLauncher.viewHeight : Core.Theme.pillHeight
+
+    readonly property real targetRadius: root.popupShape ? Core.Theme.radiusLarge : Core.Theme.pillHeight / 2
+
+    // Zero while the surface is a bar.
+    //
+    // In bar state the width comes from `content.implicitWidth`, which `reveal`
+    // is already animating. Animating the surface on top of that was a second
+    // animation on the same dimension: the surface trailed its own content, and
+    // because it clips, the modules were sliced against its edge while expanding
+    // and then popped into view. That is the hover jitter.
+    //
+    // So `reveal` owns hover motion, and the Behaviors below own only the
+    // pill <-> card morph and the launcher's live resize as results filter.
+    readonly property int morphDuration: root.fromPill ? 0 : ((root.launcherOpen || root.closing) ? Core.Theme.barRevealDuration : 0)
 
     // OUTER BORDER RING
 
@@ -182,27 +275,28 @@ PanelWindow {
 
         antialiasing: true
 
-        // Keeps popup content inside the rounded shape while the surface is
-        // still growing into it.
-        clip: true
+        // Only needed to hold popup content inside the rounded card while it is
+        // still growing into it. Left on in bar state it clipped the modules
+        // against the surface edge during hover expansion.
+        clip: root.launcherOpen
 
         Behavior on width {
             NumberAnimation {
-                duration: Core.Theme.barRevealDuration
+                duration: root.morphDuration
                 easing.type: Easing.OutCubic
             }
         }
 
         Behavior on height {
             NumberAnimation {
-                duration: Core.Theme.barRevealDuration
+                duration: root.morphDuration
                 easing.type: Easing.OutCubic
             }
         }
 
         Behavior on radius {
             NumberAnimation {
-                duration: Core.Theme.barRevealDuration
+                duration: root.morphDuration
                 easing.type: Easing.OutCubic
             }
         }
