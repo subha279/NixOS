@@ -57,18 +57,10 @@
 
       # LIQUID GLASS
 
-      glassOpacity = 0.50;
+      glassOpacity = 0.88;
       surfaceOpacity = 0.18;
-      glassLuminosity = 0.20;
+      glassLuminosity = 0.04;
       glassGradientOpacity = 0.055;
-      glassGrainOpacity = 0.0;
-
-      # Flat glass.
-      glassSpecularOpacity = 0.0;
-      glassLensOpacity = 0.0;
-      glassDepthOpacity = 0.0;
-      glassRimOpacity = 0.0;
-      glassClarity = 0.14;
 
       # SHADOWS / WINDOWS
 

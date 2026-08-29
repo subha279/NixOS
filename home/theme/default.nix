@@ -90,13 +90,6 @@ let
           glassOpacity = ${toString ui.glassOpacity},
           glassLuminosity = ${toString ui.glassLuminosity},
           glassGradientOpacity = ${toString ui.glassGradientOpacity},
-          glassGrainOpacity = ${toString ui.glassGrainOpacity},
-          glassRimOpacity = ${toString ui.glassRimOpacity},
-
-          glassSpecularOpacity = ${toString ui.glassSpecularOpacity},
-          glassLensOpacity = ${toString ui.glassLensOpacity},
-          glassDepthOpacity = ${toString ui.glassDepthOpacity},
-          glassClarity = ${toString ui.glassClarity},
 
           terminalOpacity = ${toString ui.terminalOpacity},
           editorFloatBlend = ${toString ui.editorFloatBlend},

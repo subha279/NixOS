@@ -502,14 +502,23 @@ Item {
             }
         }
 
-        Loader {
+        Item {
             width: parent.width
 
             height: Math.max(0, parent.height - header.height - root.separatorHeight)
 
-            active: root.open
+            Loader {
+                anchors.fill: parent
 
-            sourceComponent: root.contentComponent
+                anchors.leftMargin: Core.Theme.space2
+                anchors.rightMargin: Core.Theme.space2
+                anchors.topMargin: Core.Theme.space2
+                anchors.bottomMargin: Core.Theme.space2
+
+                active: root.open
+
+                sourceComponent: root.contentComponent
+            }
         }
     }
 }

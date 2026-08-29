@@ -119,8 +119,6 @@ QtObject {
 
     readonly property color info: colors.info || "#8FB8FF"
 
-    // Palette
-
     readonly property color red: colors.terminalRed || "#FF7F96"
 
     readonly property color green: colors.terminalGreen || "#8FE3A5"
@@ -133,23 +131,21 @@ QtObject {
 
     readonly property color cyan: colors.terminalCyan || "#94E2D5"
 
-    // Module Hues
+    readonly property color hueNetwork: info
 
-    readonly property color hueNetwork: blue
-
-    readonly property color hueBluetooth: cyan
+    readonly property color hueBluetooth: accentActive
 
     readonly property color hueAudio: accent
 
-    readonly property color hueBattery: green
+    readonly property color hueBattery: success
 
-    readonly property color hueBrightness: yellow
+    readonly property color hueBrightness: warning
 
     readonly property color hueCalendar: magenta
 
-    readonly property color hueNotify: accent
+    readonly property color hueNotify: warning
 
-    readonly property color hueClipboard: cyan
+    readonly property color hueClipboard: info
 
     readonly property color hueTheme: magenta
 
@@ -157,9 +153,7 @@ QtObject {
 
     readonly property color hueWallpaper: green
 
-    readonly property color hueEmoji: yellow
-
-    // Tinting
+    readonly property color hueEmoji: accentHover
 
     function tinted(base, amount) {
         return Qt.rgba(base.r, base.g, base.b, amount);
@@ -232,11 +226,11 @@ QtObject {
 
     // Liquid Glass
 
-    readonly property real glassOpacity: ui.glassOpacity !== undefined ? ui.glassOpacity : 0.51
+    readonly property real glassOpacity: ui.glassOpacity !== undefined ? ui.glassOpacity : 0.88
 
     readonly property real surfaceOpacity: ui.surfaceOpacity !== undefined ? ui.surfaceOpacity : 0.38
 
-    readonly property real glassLuminosity: ui.glassLuminosity !== undefined ? ui.glassLuminosity : 0.20
+    readonly property real glassLuminosity: ui.glassLuminosity !== undefined ? ui.glassLuminosity : 0.04
 
     readonly property real glassGradientOpacity: ui.glassGradientOpacity !== undefined ? ui.glassGradientOpacity : 0.055
 
@@ -317,9 +311,9 @@ QtObject {
 
     readonly property real shadowOpacity: ui.shadowOpacity !== undefined ? ui.shadowOpacity : 0.20
 
-    readonly property real shellShadowOpacity: shadowOpacity
+    readonly property real shellShadowOpacity: 0.0
 
-    readonly property int shellShadowSpread: 10
+    readonly property int shellShadowSpread: 7
 
     // Existing QuickShell Geometry
 
@@ -338,8 +332,6 @@ QtObject {
     readonly property int padding: 10
 
     readonly property int spacing: 6
-
-    // Spacing Scale
 
     readonly property int space1: 4
 

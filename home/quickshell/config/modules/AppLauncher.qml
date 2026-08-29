@@ -90,11 +90,7 @@ Components.LauncherView {
 
                 readonly property bool selected: row.index === launcher.selectedIndex
 
-                width: list.width - Core.Theme.space3 * 2
-
-                transform: Translate {
-                    x: Core.Theme.space3
-                }
+                width: list.width
 
                 height: 44
 

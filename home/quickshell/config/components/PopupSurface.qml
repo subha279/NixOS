@@ -113,23 +113,6 @@ PanelWindow {
 
         antialiasing: true
 
-        Elevation {
-            anchors.fill: parent
-
-            radius: Core.Theme.radiusMenu
-
-            level: 1.7
-
-            opacity: root.open ? 1.0 : 0.0
-
-            Behavior on opacity {
-                NumberAnimation {
-                    duration: Core.Theme.durOpen
-                    easing.type: Easing.OutCubic
-                }
-            }
-        }
-
         Item {
             id: visual
 
@@ -153,8 +136,6 @@ PanelWindow {
                     anchors.fill: parent
 
                     radius: parent.radius
-
-                    strength: 0.72
 
                     tint: root.tint
 
@@ -254,14 +235,6 @@ PanelWindow {
 
                     easing.type: Easing.OutCubic
                 }
-            }
-
-            Elevation {
-                anchors.fill: parent
-
-                radius: parent.radius
-
-                level: 2.0
             }
 
             Glass {
