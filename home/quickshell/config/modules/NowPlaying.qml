@@ -18,65 +18,6 @@ Item {
 
     readonly property bool shown: root.active && root.svc.available
 
-
-    readonly property var bars: [
-        {
-            "min": 3,
-            "max": 6,
-            "dur": 620
-        },
-        {
-            "min": 4,
-            "max": 7,
-            "dur": 540
-        },
-        {
-            "min": 2,
-            "max": 6,
-            "dur": 710
-        },
-        {
-            "min": 3,
-            "max": 5,
-            "dur": 460
-        },
-        {
-            "min": 1,
-            "max": 5,
-            "dur": 660
-        },
-        {
-            "min": 2,
-            "max": 4,
-            "dur": 580
-        },
-        {
-            "min": 1,
-            "max": 4,
-            "dur": 500
-        },
-        {
-            "min": 1,
-            "max": 3,
-            "dur": 690
-        },
-        {
-            "min": 2,
-            "max": 3,
-            "dur": 430
-        },
-        {
-            "min": 1,
-            "max": 2,
-            "dur": 610
-        },
-        {
-            "min": 1,
-            "max": 2,
-            "dur": 530
-        }
-    ]
-
     // Geometry
 
     readonly property int barWidth: 2
@@ -85,7 +26,11 @@ Item {
 
     readonly property int eqHeight: 7
 
-    readonly property int barCount: root.bars.length
+    // Idle size. Equal to barWidth so a silent bar is a dot rather than a
+    // sliver, which is what keeps the rounded cap reading as a cap.
+    readonly property int barMin: root.barWidth
+
+    readonly property int barCount: Services.CavaService.barCount
 
     // 11 bars of 2px plus 10 gutters of 1px = 32px.
     width: (root.barCount * root.barWidth) + ((root.barCount - 1) * root.barSpacing)
@@ -104,6 +49,13 @@ Item {
         const b = Core.Theme.accentActive;
 
         return Qt.rgba(a.r + (b.r - a.r) * t, a.g + (b.g - a.g) * t, a.b + (b.b - a.b) * t, 1.0);
+    }
+
+    // cava only decodes while the strip is on screen.
+    Binding {
+        target: Services.CavaService
+        property: "enabled"
+        value: root.shown
     }
 
     // Reveal
@@ -134,27 +86,32 @@ Item {
     }
 
     Repeater {
-        model: root.bars
+        model: root.barCount
 
         delegate: Rectangle {
             id: bar
 
             required property int index
 
-            required property var modelData
+            // Paused collapses to silence rather than freezing mid-frame, so
+            // the fade-out never catches the strip at full height.
+            readonly property real level: root.playing ? Services.CavaService.level(bar.index) : 0.0
 
             x: bar.index * (root.barWidth + root.barSpacing)
 
             width: root.barWidth
 
-            height: bar.modelData.min
+            height: root.barMin + ((root.eqHeight - root.barMin) * bar.level)
 
-            // Bars grow upward off a shared baseline.
-            y: root.eqHeight - bar.height
+            // Grows from the centre line in both directions instead of off a
+            // baseline, so the strip is mirrored top to bottom.
+            y: (root.eqHeight - bar.height) / 2
 
-            // Square tops on purpose. Rounding a 2px bar turns the cap into a
-            // semicircle and loses the spectrum-analyser read entirely.
-            radius: 0
+            // Full pill caps. At 2px wide the radius is 1, which is the whole
+            // width, so both ends are semicircles.
+            radius: root.barWidth / 2
+
+            antialiasing: true
 
             color: root.playing ? root.barColor(bar.index) : Core.Theme.foregroundFaint
 
@@ -165,39 +122,17 @@ Item {
                 }
             }
 
-            // Runs only while audio is actually playing.
-            SequentialAnimation {
-                running: root.playing
-
-                loops: Animation.Infinite
-
-                NumberAnimation {
-                    target: bar
-                    property: "height"
-                    to: bar.modelData.max
-                    duration: bar.modelData.dur
-                    easing.type: Easing.InOutSine
-                }
+            // Settling to silence is animated; rising is not. cava's own
+            // noise_reduction already smooths the incoming frames, and a
+            // Behavior on the way up would queue an animation per frame at
+            // 60fps and lag behind the audio.
+            Behavior on height {
+                enabled: !root.playing
 
                 NumberAnimation {
-                    target: bar
-                    property: "height"
-                    to: bar.modelData.min
-                    duration: bar.modelData.dur
-                    easing.type: Easing.InOutSine
+                    duration: 260
+                    easing.type: Easing.OutQuint
                 }
-            }
-
-            // Paused: settle into a flat, dim line rather than freezing
-            // mid-bounce, so the fade-out never catches it at full height.
-            NumberAnimation {
-                running: !root.playing
-
-                target: bar
-                property: "height"
-                to: 1
-                duration: 260
-                easing.type: Easing.OutQuint
             }
         }
     }
