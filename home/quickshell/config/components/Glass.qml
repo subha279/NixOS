@@ -14,6 +14,10 @@ Item {
         return Qt.rgba(base.r + (glass.tint.r - base.r) * amount, base.g + (glass.tint.g - base.g) * amount, base.b + (glass.tint.b - base.b) * amount, base.a);
     }
 
+    layer.enabled: true
+    layer.smooth: true
+    layer.textureSize: Qt.size(Math.max(1, Math.round(glass.width * 2)), Math.max(1, Math.round(glass.height * 2)))
+
     Rectangle {
         anchors.fill: parent
 

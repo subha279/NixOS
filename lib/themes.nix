@@ -47,7 +47,7 @@
 
       radius = 15;
       radiusSmall = 10;
-      radiusLarge = 18;
+      radiusLarge = 22;
 
       iconSize = 16;
 
@@ -57,7 +57,7 @@
 
       # LIQUID GLASS
 
-      glassOpacity = 0.55;
+      glassOpacity = 0.50;
       surfaceOpacity = 0.18;
       glassLuminosity = 0.0;
       glassGradientOpacity = 0.055;

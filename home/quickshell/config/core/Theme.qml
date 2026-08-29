@@ -226,7 +226,7 @@ QtObject {
 
     // Liquid Glass
 
-    readonly property real glassOpacity: ui.glassOpacity !== undefined ? ui.glassOpacity : 0.55
+    readonly property real glassOpacity: ui.glassOpacity !== undefined ? ui.glassOpacity : 0.50
 
     readonly property real surfaceOpacity: ui.surfaceOpacity !== undefined ? ui.surfaceOpacity : 0.38
 
@@ -290,7 +290,7 @@ QtObject {
 
     readonly property int radiusSmall: ui.radiusSmall !== undefined ? ui.radiusSmall : 6
 
-    readonly property int radiusLarge: ui.radiusLarge !== undefined ? ui.radiusLarge : 18
+    readonly property int radiusLarge: ui.radiusLarge !== undefined ? ui.radiusLarge : 22
 
     readonly property int iconSize: Math.max(8, ui.iconSize !== undefined ? ui.iconSize : 16)
 
