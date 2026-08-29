@@ -12,6 +12,7 @@ Components.PopupSurface {
     id: popup
 
     popupId: "network"
+    tint: Core.Theme.hueNetwork
 
     cardWidth: 340
     maxCardHeight: 470
@@ -79,6 +80,9 @@ Components.PopupSurface {
 
             Components.PopupHeader {
                 width: parent.width
+
+                icon: Core.Icons.wifi3
+                tint: popup.tint
 
                 title: "Network"
 
@@ -160,6 +164,8 @@ Components.PopupSurface {
                     }
 
                     Components.ListRow {
+                        tint: popup.tint
+
                         width: parent.width
 
                         icon: "\udb80\ude00"
@@ -532,6 +538,8 @@ Components.PopupSurface {
                     }
 
                     delegate: Components.ListRow {
+                        tint: popup.tint
+
                         id: netRow
 
                         // `signal` is a reserved QML keyword, so the model role is called `strength`.

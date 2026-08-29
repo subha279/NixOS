@@ -19,6 +19,8 @@ Item {
     property string placeholder: "Search"
     property string counterText: ""
 
+    property color tint: Core.Theme.accent
+
     property string headerActionIcon: ""
     property bool headerActionVisible: false
 
@@ -203,22 +205,35 @@ Item {
             width: parent.width
             height: root.headerHeight
 
-            Text {
+            Rectangle {
                 id: prompt
 
                 anchors.left: parent.left
 
-                anchors.leftMargin: Core.Theme.padding + 2
+                anchors.leftMargin: Core.Theme.padCard
 
                 anchors.verticalCenter: parent.verticalCenter
 
-                text: root.promptIcon
+                width: Core.Theme.chipSize
+                height: Core.Theme.chipSize
 
-                color: Core.Theme.accent
+                radius: Core.Theme.chipRadius
 
-                font.family: Core.Theme.iconFont
+                color: Core.Theme.tinted(root.tint, Core.Theme.chipAlpha)
 
-                font.pixelSize: Core.Theme.iconSize
+                Text {
+                    anchors.centerIn: parent
+
+                    text: root.promptIcon
+
+                    color: root.tint
+
+                    font.family: Core.Theme.iconFont
+
+                    font.pixelSize: Core.Theme.iconSize
+
+                    renderType: Core.Theme.textRender
+                }
             }
 
             Row {
@@ -226,41 +241,52 @@ Item {
 
                 anchors.right: parent.right
 
-                anchors.rightMargin: Core.Theme.padding + 2
+                anchors.rightMargin: Core.Theme.padCard
 
                 anchors.verticalCenter: parent.verticalCenter
 
-                spacing: 8
+                spacing: Core.Theme.space2
 
                 Text {
+                    anchors.verticalCenter: parent.verticalCenter
+
                     text: root.counterText
 
                     color: Core.Theme.foregroundFaint
 
-                    font.family: Core.Theme.fontMono
+                    font.families: Core.Theme.monoFamilies
 
                     font.pixelSize: Core.Theme.fontSizeSmall
+
+                    renderType: Core.Theme.textRender
                 }
 
                 Rectangle {
                     id: headerAction
 
-                    width: 28
-                    height: 28
+                    anchors.verticalCenter: parent.verticalCenter
 
-                    radius: width / 2
+                    width: Core.Theme.chipSize
+                    height: Core.Theme.chipSize
+
+                    radius: Core.Theme.chipRadius
 
                     visible: root.headerActionVisible && root.headerActionIcon !== ""
 
-                    color: headerActionMouse.containsMouse ? Core.Theme.surfaceGlassHover : "transparent"
-
-                    border.width: headerActionMouse.containsMouse ? Core.Theme.borderWidth : 0
-
-                    border.color: Core.Theme.borderActive
+                    color: headerActionMouse.containsMouse ? Core.Theme.tinted(Core.Theme.danger, Core.Theme.chipAlphaHover) : Core.Theme.tinted(Core.Theme.danger, 0.0)
 
                     Behavior on color {
                         ColorAnimation {
-                            duration: 120
+                            duration: Core.Theme.durFast
+                            easing.type: Easing.OutQuint
+                        }
+                    }
+
+                    scale: headerActionMouse.pressed ? 0.9 : 1.0
+
+                    Behavior on scale {
+                        NumberAnimation {
+                            duration: Core.Theme.durFast
                             easing.type: Easing.OutQuint
                         }
                     }
@@ -275,6 +301,15 @@ Item {
                         font.family: Core.Theme.iconFont
 
                         font.pixelSize: Core.Theme.iconSizeSmall
+
+                        renderType: Core.Theme.textRender
+
+                        Behavior on color {
+                            ColorAnimation {
+                                duration: Core.Theme.durFast
+                                easing.type: Easing.OutQuint
+                            }
+                        }
                     }
 
                     MouseArea {
@@ -298,11 +333,11 @@ Item {
 
                 anchors.left: prompt.right
 
-                anchors.leftMargin: Core.Theme.padding
+                anchors.leftMargin: Core.Theme.space3
 
                 anchors.right: counter.left
 
-                anchors.rightMargin: Core.Theme.padding
+                anchors.rightMargin: Core.Theme.space3
 
                 anchors.verticalCenter: parent.verticalCenter
 
@@ -310,13 +345,17 @@ Item {
 
                 selectByMouse: true
 
-                selectionColor: Core.Theme.accentMuted
+                selectionColor: Core.Theme.tinted(root.tint, 0.35)
+
+                selectedTextColor: Core.Theme.foreground
 
                 color: Core.Theme.foreground
 
-                font.family: Core.Theme.fontMono
+                font.families: Core.Theme.textFamilies
 
                 font.pixelSize: Core.Theme.fontSizeLarge
+
+                renderType: Core.Theme.textRender
 
                 onTextChanged: {
                     root.selectedIndex = 0;
@@ -334,9 +373,11 @@ Item {
 
                     color: Core.Theme.foregroundFaint
 
-                    font.family: Core.Theme.fontMono
+                    font.families: Core.Theme.textFamilies
 
                     font.pixelSize: Core.Theme.fontSizeLarge
+
+                    renderType: Core.Theme.textRender
                 }
 
                 Keys.onPressed: function (event) {
@@ -433,11 +474,32 @@ Item {
             }
         }
 
-        Rectangle {
+        Item {
             width: parent.width
             height: root.separatorHeight
 
-            color: Core.Theme.separator
+            Rectangle {
+                anchors.fill: parent
+
+                gradient: Gradient {
+                    orientation: Gradient.Horizontal
+
+                    GradientStop {
+                        position: 0.0
+                        color: Core.Theme.tinted(root.tint, 0.0)
+                    }
+
+                    GradientStop {
+                        position: 0.5
+                        color: Core.Theme.tinted(root.tint, 0.45)
+                    }
+
+                    GradientStop {
+                        position: 1.0
+                        color: Core.Theme.tinted(root.tint, 0.0)
+                    }
+                }
+            }
         }
 
         Loader {

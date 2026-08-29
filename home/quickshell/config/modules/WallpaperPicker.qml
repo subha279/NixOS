@@ -11,6 +11,7 @@ Components.LauncherView {
     id: launcher
 
     launcherId: "wallpaper"
+    tint: Core.Theme.hueWallpaper
     promptIcon: Core.Icons.image
     placeholder: "Search wallpapers"
 
@@ -143,7 +144,7 @@ Components.LauncherView {
                     }
 
                     border.width: cell.selected ? Core.Theme.borderWidth * 2 : Core.Theme.borderWidth
-                    border.color: cell.selected ? Core.Theme.accent : (cell.applied ? Core.Theme.accentMuted : Core.Theme.border)
+                    border.color: cell.selected ? launcher.tint : (cell.applied ? Core.Theme.accentMuted : Core.Theme.border)
 
                     Behavior on border.color {
                         ColorAnimation {

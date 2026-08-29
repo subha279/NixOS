@@ -10,6 +10,7 @@ Components.LauncherView {
     id: clipboard
 
     launcherId: "clipboard"
+    tint: Core.Theme.hueClipboard
 
     promptIcon: Core.Icons.clipboard
     placeholder: "Search clipboard"
@@ -176,7 +177,7 @@ Components.LauncherView {
 
                     radius: Core.Theme.radiusRow
 
-                    color: row.selected ? Core.Theme.surfaceGlass : "transparent"
+                    color: row.selected ? Core.Theme.tinted(clipboard.tint, Core.Theme.chipAlpha) : "transparent"
 
                     scale: row.selected ? 1.02 : 1.0
 
@@ -203,11 +204,11 @@ Components.LauncherView {
                         anchors.verticalCenter: parent.verticalCenter
 
                         width: 3
-                        height: row.selected ? parent.height * 0.5 : 0
+                        height: row.selected ? parent.height * 0.44 : 0
 
                         radius: 2
 
-                        color: Core.Theme.accent
+                        color: clipboard.tint
 
                         Behavior on height {
                             NumberAnimation {

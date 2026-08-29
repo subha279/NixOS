@@ -2,8 +2,6 @@ import QtQuick
 
 import "../core" as Core
 
-// ListRow
-
 Rectangle {
     id: root
 
@@ -12,27 +10,30 @@ Rectangle {
     property string subtitle: ""
     property string trailing: ""
 
-    property color iconColor: Core.Theme.foreground
+    property color iconColor: Core.Theme.foregroundMuted
     property color trailingColor: Core.Theme.foregroundMuted
+    property color tint: Core.Theme.accent
 
     property bool active: false
     property bool glassActive: false
     property bool busy: false
     property bool dimmed: false
+    property bool chip: true
 
-    // Right-click gives window-space coordinates for the menu
     signal activated
     signal contextRequested(real mx, real my)
 
-    implicitHeight: root.subtitle !== "" ? Core.Theme.rowHeight : 34
+    readonly property color effectiveTint: root.active ? root.tint : root.iconColor
+
+    implicitHeight: root.subtitle !== "" ? Core.Theme.rowHeight + 6 : Core.Theme.rowHeightCompact
 
     radius: Core.Theme.radiusRow
 
-    color: root.active ? Core.Theme.surfaceGlass : mouse.containsMouse ? Core.Theme.surfaceGlassHover : "transparent"
+    color: root.active ? Core.Theme.tinted(root.tint, Core.Theme.chipAlpha) : mouse.containsMouse ? Core.Theme.surfaceGlassHover : "transparent"
 
     Behavior on color {
         ColorAnimation {
-            duration: 110
+            duration: Core.Theme.durFast
             easing.type: Easing.OutQuint
         }
     }
@@ -46,106 +47,120 @@ Rectangle {
         }
     }
 
-    // Active indicator bar
-
     Rectangle {
         anchors.left: parent.left
         anchors.verticalCenter: parent.verticalCenter
 
-        anchors.leftMargin: 3
-
         width: 3
-        height: root.active ? parent.height * 0.5 : 0
+        height: root.active ? parent.height * 0.44 : 0
 
         radius: 2
 
-        color: Core.Theme.accent
+        color: root.tint
 
         Behavior on height {
             NumberAnimation {
-                duration: 150
+                duration: Core.Theme.durBase
                 easing.type: Easing.OutQuint
             }
         }
     }
 
-    // Leading icon
-
-    Text {
-        id: iconText
+    Rectangle {
+        id: iconChip
 
         anchors.left: parent.left
-        anchors.leftMargin: 12
+        anchors.leftMargin: Core.Theme.space2
         anchors.verticalCenter: parent.verticalCenter
 
-        width: 20
+        width: root.icon !== "" ? Core.Theme.chipSize : 0
+        height: Core.Theme.chipSize
 
-        text: root.icon
+        radius: Core.Theme.chipRadius
 
-        font.family: Core.Theme.iconFont
-        font.pixelSize: Core.Theme.iconSize
+        visible: root.icon !== ""
 
-        color: root.active ? Core.Theme.accent : root.iconColor
+        color: !root.chip ? "transparent" : root.active ? Core.Theme.tinted(root.tint, Core.Theme.chipAlphaActive) : mouse.containsMouse ? Core.Theme.tinted(root.effectiveTint, Core.Theme.chipAlphaHover) : Core.Theme.tinted(root.effectiveTint, Core.Theme.chipAlpha)
 
         Behavior on color {
             ColorAnimation {
-                duration: 150
+                duration: Core.Theme.durFast
                 easing.type: Easing.OutQuint
             }
         }
 
-        opacity: root.busy ? 0.0 : 1.0
+        Text {
+            id: iconText
 
-        Behavior on opacity {
-            NumberAnimation {
-                duration: 120
-                easing.type: Easing.OutQuint
+            anchors.centerIn: parent
+
+            text: root.icon
+
+            font.family: Core.Theme.iconFont
+            font.pixelSize: Core.Theme.iconSize
+
+            renderType: Core.Theme.textRender
+
+            color: root.effectiveTint
+
+            opacity: root.busy ? 0.0 : 1.0
+
+            Behavior on color {
+                ColorAnimation {
+                    duration: Core.Theme.durBase
+                    easing.type: Easing.OutQuint
+                }
+            }
+
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: Core.Theme.durFast
+                    easing.type: Easing.OutQuint
+                }
+            }
+        }
+
+        Text {
+            anchors.centerIn: parent
+
+            text: "\udb81\udd1e"
+
+            font.family: Core.Theme.iconFont
+            font.pixelSize: Core.Theme.iconSize
+
+            renderType: Core.Theme.textRender
+
+            color: root.tint
+
+            opacity: root.busy ? 1.0 : 0.0
+
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: Core.Theme.durFast
+                    easing.type: Easing.OutQuint
+                }
+            }
+
+            RotationAnimator on rotation {
+                running: root.busy
+                loops: Animation.Infinite
+
+                from: 0
+                to: 360
+
+                duration: 900
             }
         }
     }
-
-    // Busy spinner (replaces the icon)
-
-    Text {
-        anchors.centerIn: iconText
-
-        text: "\udb81\udd1e"
-
-        font.family: Core.Theme.iconFont
-        font.pixelSize: Core.Theme.iconSize
-
-        color: Core.Theme.accent
-
-        opacity: root.busy ? 1.0 : 0.0
-
-        Behavior on opacity {
-            NumberAnimation {
-                duration: 120
-                easing.type: Easing.OutQuint
-            }
-        }
-
-        RotationAnimator on rotation {
-            running: root.busy
-            loops: Animation.Infinite
-
-            from: 0
-            to: 360
-
-            duration: 900
-        }
-    }
-
-    // Title + subtitle
 
     Column {
-        anchors.left: iconText.right
-        anchors.leftMargin: 10
+        anchors.left: iconChip.right
+        anchors.leftMargin: root.icon !== "" ? Core.Theme.space3 : Core.Theme.padRow
         anchors.right: trailingText.left
-        anchors.rightMargin: 8
+        anchors.rightMargin: Core.Theme.space2
         anchors.verticalCenter: parent.verticalCenter
 
-        spacing: 1
+        spacing: Core.Theme.gapTight
 
         Text {
             width: parent.width
@@ -154,10 +169,11 @@ Rectangle {
 
             elide: Text.ElideRight
 
-            font.family: Core.Theme.fontFamily
+            font.families: Core.Theme.textFamilies
             font.pixelSize: Core.Theme.fontSize
-
             font.weight: root.active ? Font.DemiBold : Font.Medium
+
+            renderType: Core.Theme.textRender
 
             color: Core.Theme.foreground
         }
@@ -171,31 +187,38 @@ Rectangle {
 
             elide: Text.ElideRight
 
-            font.family: Core.Theme.fontFamily
+            font.families: Core.Theme.textFamilies
             font.pixelSize: Core.Theme.fontSizeSmall
 
-            color: root.active ? Core.Theme.accent : Core.Theme.foregroundMuted
+            renderType: Core.Theme.textRender
+
+            color: root.active ? root.tint : Core.Theme.foregroundMuted
+
+            Behavior on color {
+                ColorAnimation {
+                    duration: Core.Theme.durBase
+                    easing.type: Easing.OutQuint
+                }
+            }
         }
     }
-
-    // Trailing badge
 
     Text {
         id: trailingText
 
         anchors.right: parent.right
-        anchors.rightMargin: 12
+        anchors.rightMargin: Core.Theme.padRow
         anchors.verticalCenter: parent.verticalCenter
 
         text: root.trailing
 
-        font.family: Core.Theme.fontFamily
+        font.families: Core.Theme.monoFamilies
         font.pixelSize: Core.Theme.fontSizeSmall
+
+        renderType: Core.Theme.textRender
 
         color: root.trailingColor
     }
-
-    // Interaction
 
     MouseArea {
         id: mouse
@@ -220,13 +243,11 @@ Rectangle {
         }
     }
 
-    // Press feedback
-
-    scale: mouse.pressed ? 0.97 : 1.0
+    scale: mouse.pressed ? 0.985 : 1.0
 
     Behavior on scale {
         NumberAnimation {
-            duration: 110
+            duration: Core.Theme.durFast
             easing.type: Easing.OutQuint
         }
     }

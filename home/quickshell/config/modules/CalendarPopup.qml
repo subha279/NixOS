@@ -11,6 +11,7 @@ Components.PopupSurface {
     id: popup
 
     popupId: "calendar"
+    tint: Core.Theme.hueCalendar
 
     cardWidth: 320
     maxCardHeight: 420

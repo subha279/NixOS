@@ -11,6 +11,7 @@ PanelWindow {
     property int cardWidth: Core.Theme.popupWidth
     property int maxCardHeight: Core.Theme.popupMaxHeight
     property Component contentComponent: null
+    property color tint: Core.Theme.accent
 
     readonly property bool open: Core.PopupManager.isOpen(root.popupId)
     readonly property bool menuOpen: menuLayer.active
@@ -63,7 +64,7 @@ PanelWindow {
 
     readonly property real barBottomY: Core.Theme.barMarginTop + 10 + Core.Theme.pillHeight + Core.Theme.borderWidth
 
-    readonly property real naturalHeight: contentHost.implicitHeight + Core.Theme.padding * 2
+    readonly property real naturalHeight: contentHost.implicitHeight + Core.Theme.padCard * 2
 
     readonly property real targetHeight: Math.min(root.naturalHeight, root.maxCardHeight)
 
@@ -112,19 +113,28 @@ PanelWindow {
 
         antialiasing: true
 
+        Elevation {
+            anchors.fill: parent
+
+            radius: Core.Theme.radiusMenu
+
+            level: 1.7
+
+            opacity: root.open ? 1.0 : 0.0
+
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: Core.Theme.durOpen
+                    easing.type: Easing.OutCubic
+                }
+            }
+        }
+
         Item {
             id: visual
 
             anchors.fill: parent
 
-            // No transform animation here on purpose.
-            //
-            // This is a layer surface, so Hyprland already animates it on map via
-            // layersIn + fadeLayersIn (see hyprland/config/animation.lua). Scaling
-            // it again from QML meant two independent scale animations running on
-            // the same window with different durations and curves, which is what
-            // made the motion read as unstable. The compositor owns the entrance;
-            // the card just draws itself at its final size.
             opacity: root.open ? 1.0 : 0.0
 
             Rectangle {
@@ -135,7 +145,7 @@ PanelWindow {
                 color: "transparent"
 
                 border.width: Core.Theme.borderWidth
-                border.color: Core.Theme.borderActive
+                border.color: Core.Theme.tinted(root.tint, 0.45)
 
                 antialiasing: true
 
@@ -144,7 +154,11 @@ PanelWindow {
 
                     radius: parent.radius
 
-                    strength: 0.68
+                    strength: 0.72
+
+                    tint: root.tint
+
+                    tintAmount: Core.Theme.glassGradientOpacity * 1.6
                 }
             }
 
@@ -155,7 +169,7 @@ PanelWindow {
                 anchors.right: parent.right
                 anchors.top: parent.top
 
-                anchors.margins: Core.Theme.padding
+                anchors.margins: Core.Theme.padCard
 
                 implicitHeight: contentLoader.item ? contentLoader.item.implicitHeight : 0
 
@@ -215,26 +229,23 @@ PanelWindow {
         Rectangle {
             id: menuBox
 
-            width: 200
+            width: 216
 
-            height: menuColumn.implicitHeight + 10
+            height: menuColumn.implicitHeight + Core.Theme.space2
 
-            x: Math.round(Math.max(6, Math.min(menuLayer.width - width - 6, menuLayer.targetX)))
+            x: Math.round(Math.max(Core.Theme.space2, Math.min(menuLayer.width - width - Core.Theme.space2, menuLayer.targetX)))
 
-            y: Math.round(Math.max(6, Math.min(menuLayer.height - height - 6, menuLayer.targetY)))
+            y: Math.round(Math.max(Core.Theme.space2, Math.min(menuLayer.height - height - Core.Theme.space2, menuLayer.targetY)))
 
-            radius: 14
+            radius: Core.Theme.radius + 4
 
             color: "transparent"
 
             border.width: Core.Theme.borderWidth
-            border.color: Core.Theme.border
+            border.color: Core.Theme.tinted(root.tint, 0.35)
 
             antialiasing: true
 
-            // The context menu is drawn inside this window rather than being its
-            // own surface, so Hyprland does not animate it. A plain fade, with no
-            // scale, so it does not pop toward the viewer either.
             opacity: menuLayer.active ? 1.0 : 0.0
 
             Behavior on opacity {
@@ -245,10 +256,22 @@ PanelWindow {
                 }
             }
 
+            Elevation {
+                anchors.fill: parent
+
+                radius: parent.radius
+
+                level: 2.0
+            }
+
             Glass {
                 anchors.fill: parent
 
                 radius: parent.radius
+
+                tint: root.tint
+
+                tintAmount: Core.Theme.glassGradientOpacity
             }
 
             Column {
@@ -258,7 +281,7 @@ PanelWindow {
                 anchors.right: parent.right
                 anchors.top: parent.top
 
-                anchors.margins: 5
+                anchors.margins: Core.Theme.space1
 
                 spacing: 1
 
@@ -295,15 +318,17 @@ PanelWindow {
                             id: entryComp
 
                             Rectangle {
-                                height: 30
+                                height: 32
 
-                                radius: 9
+                                radius: Core.Theme.radius
 
-                                color: entryMouse.containsMouse ? Core.Theme.surfaceHover : "transparent"
+                                readonly property color entryTint: entryLoader.modelData.danger === true ? Core.Theme.danger : root.tint
+
+                                color: entryMouse.containsMouse ? Core.Theme.tinted(entryTint, Core.Theme.chipAlpha) : "transparent"
 
                                 Behavior on color {
                                     ColorAnimation {
-                                        duration: 90
+                                        duration: Core.Theme.durFast
                                         easing.type: Easing.OutQuint
                                     }
                                 }
@@ -313,10 +338,10 @@ PanelWindow {
                                     anchors.right: parent.right
                                     anchors.verticalCenter: parent.verticalCenter
 
-                                    anchors.leftMargin: 10
-                                    anchors.rightMargin: 10
+                                    anchors.leftMargin: Core.Theme.space3
+                                    anchors.rightMargin: Core.Theme.space3
 
-                                    spacing: 9
+                                    spacing: Core.Theme.space3
 
                                     Text {
                                         anchors.verticalCenter: parent.verticalCenter
@@ -329,7 +354,16 @@ PanelWindow {
 
                                         font.pixelSize: Core.Theme.iconSizeSmall
 
-                                        color: entryLoader.modelData.danger === true ? Core.Theme.danger : Core.Theme.foregroundMuted
+                                        renderType: Core.Theme.textRender
+
+                                        color: entryLoader.modelData.danger === true ? Core.Theme.danger : entryMouse.containsMouse ? root.tint : Core.Theme.foregroundMuted
+
+                                        Behavior on color {
+                                            ColorAnimation {
+                                                duration: Core.Theme.durFast
+                                                easing.type: Easing.OutQuint
+                                            }
+                                        }
                                     }
 
                                     Text {
@@ -337,9 +371,11 @@ PanelWindow {
 
                                         text: entryLoader.modelData.label
 
-                                        font.family: Core.Theme.fontFamily
+                                        font.families: Core.Theme.textFamilies
 
                                         font.pixelSize: Core.Theme.fontSize
+
+                                        renderType: Core.Theme.textRender
 
                                         color: entryLoader.modelData.danger === true ? Core.Theme.danger : Core.Theme.foreground
                                     }

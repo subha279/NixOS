@@ -119,6 +119,60 @@ QtObject {
 
     readonly property color info: colors.info || "#8FB8FF"
 
+    // Palette
+
+    readonly property color red: colors.terminalRed || "#FF7F96"
+
+    readonly property color green: colors.terminalGreen || "#8FE3A5"
+
+    readonly property color yellow: colors.terminalYellow || "#FFD479"
+
+    readonly property color blue: colors.terminalBlue || "#8FB8FF"
+
+    readonly property color magenta: colors.terminalMagenta || "#F5C2E7"
+
+    readonly property color cyan: colors.terminalCyan || "#94E2D5"
+
+    // Module Hues
+
+    readonly property color hueNetwork: blue
+
+    readonly property color hueBluetooth: cyan
+
+    readonly property color hueAudio: accent
+
+    readonly property color hueBattery: green
+
+    readonly property color hueBrightness: yellow
+
+    readonly property color hueCalendar: magenta
+
+    readonly property color hueNotify: accent
+
+    readonly property color hueClipboard: cyan
+
+    readonly property color hueTheme: magenta
+
+    readonly property color hueApps: accent
+
+    readonly property color hueWallpaper: green
+
+    readonly property color hueEmoji: yellow
+
+    // Tinting
+
+    function tinted(base, amount) {
+        return Qt.rgba(base.r, base.g, base.b, amount);
+    }
+
+    readonly property real chipAlpha: 0.15
+
+    readonly property real chipAlphaHover: 0.24
+
+    readonly property real chipAlphaActive: 0.30
+
+    readonly property color scrim: Qt.rgba(0, 0, 0, 0.30)
+
     // Compatibility Aliases
 
     readonly property color foreground: text
@@ -186,22 +240,6 @@ QtObject {
 
     readonly property real glassGradientOpacity: ui.glassGradientOpacity !== undefined ? ui.glassGradientOpacity : 0.055
 
-    readonly property real glassGrainOpacity: ui.glassGrainOpacity !== undefined ? ui.glassGrainOpacity : 0.010
-
-    readonly property real glassRimOpacity: ui.glassRimOpacity !== undefined ? ui.glassRimOpacity : 0.10
-
-    // The gloss: a bright catch along the top, a darker shade along the bottom,
-    // inner shading for thickness, and a middle thinner than either end. Zero
-    // the first three and every surface falls back to flat frost.
-
-    readonly property real glassSpecularOpacity: ui.glassSpecularOpacity !== undefined ? ui.glassSpecularOpacity : 0.14
-
-    readonly property real glassLensOpacity: ui.glassLensOpacity !== undefined ? ui.glassLensOpacity : 0.10
-
-    readonly property real glassDepthOpacity: ui.glassDepthOpacity !== undefined ? ui.glassDepthOpacity : 0.07
-
-    readonly property real glassClarity: ui.glassClarity !== undefined ? ui.glassClarity : 0.06
-
     readonly property color glassBody: {
         if (glassOnLight) {
             return Qt.rgba(background.r * (1.0 - glassLuminosity), background.g * (1.0 - glassLuminosity), background.b * (1.0 - glassLuminosity), 1.0);
@@ -212,6 +250,10 @@ QtObject {
 
     readonly property color surfaceGlass: Qt.alpha(surface, surfaceOpacity)
     readonly property color surfaceGlassHover: Qt.alpha(surfaceHover, 0.55)
+
+    readonly property color surfaceRaised: Qt.alpha(surfaceHover, Math.min(1.0, surfaceOpacity + 0.14))
+
+    readonly property color surfaceSunken: Qt.alpha(backgroundDark, 0.42)
 
     readonly property color glassTintTop: {
         const mixed = Qt.tint(glassBody, Qt.rgba(accent.r, accent.g, accent.b, 0.10));
@@ -225,63 +267,21 @@ QtObject {
         return Qt.rgba(mixed.r, mixed.g, mixed.b, glassOpacity);
     }
 
-    // The middle of the ramp, thinned by glassClarity -- real glass is clearest
-    // where it is thinnest. Its colour is the exact midpoint of the two
-    // endpoints, so glassClarity = 0 renders byte-identical to a two-stop ramp.
-
     readonly property color glassTintMid: {
         const top = Qt.tint(glassBody, Qt.rgba(accent.r, accent.g, accent.b, 0.10));
 
         const bottom = Qt.tint(glassBody, Qt.rgba(backgroundDark.r, backgroundDark.g, backgroundDark.b, 0.60));
 
-        return Qt.rgba((top.r + bottom.r) / 2, (top.g + bottom.g) / 2, (top.b + bottom.b) / 2, glassOpacity * (1.0 - glassClarity));
+        return Qt.rgba((top.r + bottom.r) / 2, (top.g + bottom.g) / 2, (top.b + bottom.b) / 2, glassOpacity);
     }
-
-    // Horizontal accent wash. Stacked over the vertical ramp, the pair reads as
-    // one diagonal gradient -- a Qt6 Gradient is only vertical or horizontal.
 
     readonly property color glassWash: Qt.rgba(accent.r, accent.g, accent.b, glassGradientOpacity)
 
     readonly property color glassWashEnd: Qt.rgba(accent.r, accent.g, accent.b, 0.0)
 
-    // Whether this theme's background is pale. Every polarity decision below
-    // hangs off this: a highlight that works on charcoal vanishes on cream.
-
     readonly property bool glassOnLight: background.hslLightness > 0.5
 
-    // Inner edge, so the glass reads as having thickness. Lifts on dark themes
-    // and darkens on light ones -- a white rim on solarized-light would look
-    // like a scratch.
-
-    readonly property color glassRim: glassOnLight ? Qt.rgba(0, 0, 0, glassRimOpacity) : Qt.rgba(1, 1, 1, glassRimOpacity)
-
-    // Specular catch-light, top edge. Stays white on every theme -- tinting a
-    // highlight to the accent reads as coloured plastic; what a pale background
-    // changes is its strength, not its hue. Both ends are declared because a Qt6
-    // gradient stop needs a real colour, and transparent white and transparent
-    // black interpolate differently.
-
-    readonly property color glassSpecular: Qt.rgba(1, 1, 1, glassSpecularOpacity * (glassOnLight ? 0.45 : 1.0))
-
-    readonly property color glassSpecularEnd: Qt.rgba(1, 1, 1, 0.0)
-
-    // Refractive shade, bottom edge. The other half of the convex read, and the
-    // half that carries it on light themes.
-
-    readonly property color glassLensShade: Qt.rgba(0, 0, 0, glassLensOpacity * (glassOnLight ? 1.60 : 1.0))
-
-    readonly property color glassLensShadeEnd: Qt.rgba(0, 0, 0, 0.0)
-
-    // Inner shading. Gives the slab thickness -- without it the specular and
-    // shade read as painted on a flat sheet rather than wrapping an edge.
-
-    readonly property color glassDepth: Qt.rgba(0, 0, 0, glassDepthOpacity * (glassOnLight ? 1.30 : 1.0))
-
-    // The noise tile. Resolved against this file, so it points at
-    // quickshell/config/assets/grain.png. Kept at a trace opacity to stop wide
-    // gradients banding -- it is no longer a texture you are meant to see.
-
-    readonly property url glassGrainSource: Qt.resolvedUrl("../assets/grain.png")
+    readonly property color glassEdge: glassOnLight ? Qt.rgba(0, 0, 0, 0.10) : Qt.rgba(1, 1, 1, 0.07)
 
     readonly property color backgroundGlass: Qt.rgba(background.r, background.g, background.b, glassOpacity)
 
@@ -317,10 +317,9 @@ QtObject {
 
     readonly property real shadowOpacity: ui.shadowOpacity !== undefined ? ui.shadowOpacity : 0.20
 
-    readonly property real shellShadowOpacity: 0.0
+    readonly property real shellShadowOpacity: shadowOpacity
 
-    // How far the stacked shadow bleeds past a floating surface.
-    readonly property int shellShadowSpread: 7
+    readonly property int shellShadowSpread: 10
 
     // Existing QuickShell Geometry
 
@@ -340,23 +339,60 @@ QtObject {
 
     readonly property int spacing: 6
 
+    // Spacing Scale
+
+    readonly property int space1: 4
+
+    readonly property int space2: 8
+
+    readonly property int space3: 12
+
+    readonly property int space4: 16
+
+    readonly property int space5: 20
+
+    readonly property int space6: 28
+
+    readonly property int padCard: 14
+
+    readonly property int padRow: 12
+
+    readonly property int gapTight: 2
+
+    readonly property int gapRow: 4
+
+    readonly property int gapSection: 12
+
+    readonly property int rowHeightCompact: 36
+
+    readonly property int chipSize: 30
+
+    readonly property int chipRadius: 10
+
     // Typography
 
     readonly property string fontFamily: fonts.interface || "Inter"
     readonly property string fontMono: fonts.terminal || "JetBrainsMono Nerd Font Mono"
 
-    // The family that actually contains the Nerd Font glyphs. Derived from the
-    // theme so it cannot drift from fonts.terminal the way the hardcoded string
-    // here had already drifted from lib/themes.nix.
     readonly property string iconFont: fonts.terminal || "JetBrainsMono Nerd Font Mono"
 
-    // Colour font. Only NativeRendering draws its glyphs in colour.
     readonly property string emojiFont: fonts.emoji || "Noto Color Emoji"
 
-    // For labels mixing prose and glyphs in one string: Qt resolves per character
-    // down this list, so words come from Inter and glyphs from the Nerd Font,
-    // instead of leaving fontconfig to guess a fallback.
     readonly property var textFamilies: [fontFamily, iconFont]
+
+    readonly property var monoFamilies: [fontMono, iconFont]
+
+    readonly property int textRender: Text.QtRendering
+
+    readonly property int emojiRender: Text.NativeRendering
+
+    readonly property int fontSizeTiny: Math.max(8, fontSizeSmall - 1)
+
+    readonly property int fontSizeHeading: fontSizeLarge + 1
+
+    readonly property real trackingWide: 0.8
+
+    readonly property real trackingTight: -0.2
 
     // Popup Geometry
 

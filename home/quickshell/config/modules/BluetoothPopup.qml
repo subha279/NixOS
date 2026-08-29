@@ -12,6 +12,7 @@ Components.PopupSurface {
     id: popup
 
     popupId: "bluetooth"
+    tint: Core.Theme.hueBluetooth
 
     cardWidth: 340
     maxCardHeight: 470
@@ -42,6 +43,9 @@ Components.PopupSurface {
 
             Components.PopupHeader {
                 width: parent.width
+
+                icon: Core.Icons.bluetooth
+                tint: popup.tint
 
                 title: "Bluetooth"
 
@@ -199,6 +203,8 @@ Components.PopupSurface {
                     }
 
                     delegate: Components.ListRow {
+                        tint: popup.tint
+
                         id: devRow
 
                         // These roles are prefixed because `name`, `icon` and `state` collide with ListRow's own properties, which produces a self-referential

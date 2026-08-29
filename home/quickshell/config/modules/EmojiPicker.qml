@@ -10,6 +10,7 @@ Components.LauncherView {
     id: picker
 
     launcherId: "emoji"
+    tint: Core.Theme.hueEmoji
 
     promptIcon: Core.Icons.emoji
     placeholder: "Search emoji"
@@ -114,9 +115,9 @@ Components.LauncherView {
 
                     radius: Core.Theme.radiusRow
 
-                    color: cell.selected ? Core.Theme.surfaceGlass : "transparent"
+                    color: cell.selected ? Core.Theme.tinted(picker.tint, Core.Theme.chipAlphaActive) : "transparent"
 
-                    scale: cell.selected ? 1.05 : 1.0
+                    scale: cell.selected ? 1.04 : 1.0
 
                     z: cell.selected ? 2 : 0
 

@@ -11,6 +11,7 @@ Components.LauncherView {
     id: launcher
 
     launcherId: "launcher"
+    tint: Core.Theme.hueApps
     promptIcon: Core.Icons.search
     placeholder: "Search applications"
 
@@ -76,8 +77,9 @@ Components.LauncherView {
 
                 text: "No matching applications"
                 color: Core.Theme.foregroundFaint
-                font.family: Core.Theme.fontMono
+                font.families: Core.Theme.textFamilies
                 font.pixelSize: Core.Theme.fontSize
+                renderType: Core.Theme.textRender
             }
 
             delegate: Rectangle {
@@ -88,34 +90,17 @@ Components.LauncherView {
 
                 readonly property bool selected: row.index === launcher.selectedIndex
 
-                width: list.width - 24
+                width: list.width - Core.Theme.space3 * 2
 
                 transform: Translate {
-                    x: 12
+                    x: Core.Theme.space3
                 }
 
-                height: 40
+                height: 44
 
-                // Rounded and quietly filled, like the rows in the battery
-                // popup, instead of inverting to a solid accent bar.
                 radius: Core.Theme.radiusRow
 
-                color: row.selected ? Core.Theme.surfaceGlass : "transparent"
-
-                // The selected row grows past its slot, so it paints over its
-                // neighbours.
-                z: row.selected ? 2 : 0
-
-                // Zoom on selection: 12px of gutter against 6.5px of growth at
-                // 1.03, so it never reaches the edge.
-                scale: row.selected ? 1.03 : 1.0
-
-                Behavior on scale {
-                    NumberAnimation {
-                        duration: 240
-                        easing.type: Easing.OutQuint
-                    }
-                }
+                color: row.selected ? Core.Theme.tinted(launcher.tint, Core.Theme.chipAlpha) : rowMouse.containsMouse ? Core.Theme.surfaceGlassHover : "transparent"
 
                 Behavior on color {
                     ColorAnimation {
@@ -124,88 +109,123 @@ Components.LauncherView {
                     }
                 }
 
-                // Selection marker, borrowed from ListRow: a short accent bar
-                // on the left edge that grows out of nothing.
                 Rectangle {
                     anchors.left: parent.left
-                    anchors.leftMargin: 3
                     anchors.verticalCenter: parent.verticalCenter
 
                     width: 3
-                    height: row.selected ? parent.height * 0.5 : 0
+                    height: row.selected ? parent.height * 0.44 : 0
 
                     radius: 2
 
-                    color: Core.Theme.accent
+                    color: launcher.tint
 
                     Behavior on height {
                         NumberAnimation {
-                            duration: 150
+                            duration: Core.Theme.durBase
                             easing.type: Easing.OutQuint
                         }
                     }
                 }
 
-                Row {
+                Rectangle {
+                    id: appChip
+
                     anchors.left: parent.left
-                    anchors.leftMargin: Core.Theme.padding
-                    anchors.right: parent.right
-                    anchors.rightMargin: Core.Theme.padding
+                    anchors.leftMargin: Core.Theme.space2
                     anchors.verticalCenter: parent.verticalCenter
 
-                    spacing: Core.Theme.padding
+                    width: Core.Theme.chipSize
+                    height: Core.Theme.chipSize
+
+                    radius: Core.Theme.chipRadius
+
+                    color: row.selected ? Core.Theme.tinted(launcher.tint, Core.Theme.chipAlphaActive) : Core.Theme.surfaceSunken
+
+                    Behavior on color {
+                        ColorAnimation {
+                            duration: Core.Theme.durFast
+                            easing.type: Easing.OutQuint
+                        }
+                    }
 
                     Image {
-                        anchors.verticalCenter: parent.verticalCenter
+                        anchors.centerIn: parent
 
-                        width: 22
-                        height: 22
+                        width: Core.Theme.iconSizeMedium
+                        height: Core.Theme.iconSizeMedium
 
                         asynchronous: true
-                        sourceSize.width: 44
-                        sourceSize.height: 44
+                        sourceSize.width: Core.Theme.iconSizeMedium * 2
+                        sourceSize.height: Core.Theme.iconSizeMedium * 2
+
+                        smooth: true
+                        mipmap: true
+
+                        fillMode: Image.PreserveAspectFit
 
                         source: Quickshell.iconPath(row.modelData.icon, "application-x-executable")
                     }
+                }
 
-                    Column {
-                        anchors.verticalCenter: parent.verticalCenter
-                        spacing: 1
+                Column {
+                    anchors.left: appChip.right
+                    anchors.leftMargin: Core.Theme.space3
+                    anchors.right: parent.right
+                    anchors.rightMargin: Core.Theme.padRow
+                    anchors.verticalCenter: parent.verticalCenter
 
-                        Text {
-                            text: row.modelData.name
+                    spacing: Core.Theme.gapTight
 
-                            // Not inverted any more: the row keeps its own
-                            // surface, so the label keeps its own colour and
-                            // just gains weight when selected.
-                            color: Core.Theme.foreground
-                            font.weight: row.selected ? Font.DemiBold : Font.Medium
+                    Text {
+                        width: parent.width
 
-                            font.family: Core.Theme.fontMono
-                            font.pixelSize: Core.Theme.fontSize
-                        }
+                        text: row.modelData.name
 
-                        Text {
-                            readonly property string subtitle: row.modelData.genericName && row.modelData.genericName.length > 0 ? row.modelData.genericName : (row.modelData.comment || "")
+                        color: Core.Theme.foreground
+                        font.weight: row.selected ? Font.DemiBold : Font.Medium
 
-                            visible: subtitle.length > 0
+                        font.families: Core.Theme.textFamilies
+                        font.pixelSize: Core.Theme.fontSize
 
-                            text: subtitle
-                            // The row is no longer accent-filled, so the muted
-                            // greys read fine in both states.
-                            color: row.selected ? Core.Theme.foregroundMuted : Core.Theme.foregroundFaint
-                            font.family: Core.Theme.fontMono
-                            font.pixelSize: Core.Theme.fontSizeSmall
+                        renderType: Core.Theme.textRender
 
-                            width: row.width - 22 - Core.Theme.padding * 3
-                            elide: Text.ElideRight
+                        elide: Text.ElideRight
+                    }
+
+                    Text {
+                        readonly property string subtitle: row.modelData.genericName && row.modelData.genericName.length > 0 ? row.modelData.genericName : (row.modelData.comment || "")
+
+                        width: parent.width
+
+                        visible: subtitle.length > 0
+
+                        text: subtitle
+
+                        color: row.selected ? launcher.tint : Core.Theme.foregroundFaint
+
+                        font.families: Core.Theme.textFamilies
+                        font.pixelSize: Core.Theme.fontSizeSmall
+
+                        renderType: Core.Theme.textRender
+
+                        elide: Text.ElideRight
+
+                        Behavior on color {
+                            ColorAnimation {
+                                duration: Core.Theme.durBase
+                                easing.type: Easing.OutQuint
+                            }
                         }
                     }
                 }
+
                 MouseArea {
+                    id: rowMouse
+
                     anchors.fill: parent
 
-                    anchors.rightMargin: 36
+                    hoverEnabled: true
 
                     cursorShape: Qt.PointingHandCursor
 

@@ -2,33 +2,61 @@ import QtQuick
 
 import "../core" as Core
 
-// PopupHeader
-
 Item {
     id: root
 
     property string title: ""
     property string subtitle: ""
+    property string icon: ""
 
-    // Toggle switch
+    property color tint: Core.Theme.accent
+
     property bool showToggle: false
     property bool toggled: false
 
     signal toggleRequested
 
-    // Action buttons: [{ icon, tooltip, spinning, action }]
     property var actions: []
 
-    implicitHeight: 40
+    implicitHeight: 46
 
-    Column {
+    Rectangle {
+        id: chip
+
         anchors.left: parent.left
-        anchors.leftMargin: 6
-        anchors.right: actionRow.left
-        anchors.rightMargin: 8
         anchors.verticalCenter: parent.verticalCenter
 
-        spacing: 1
+        width: root.icon !== "" ? Core.Theme.chipSize : 0
+        height: Core.Theme.chipSize
+
+        radius: Core.Theme.chipRadius
+
+        visible: root.icon !== ""
+
+        color: Core.Theme.tinted(root.tint, Core.Theme.chipAlpha)
+
+        Text {
+            anchors.centerIn: parent
+
+            text: root.icon
+
+            font.family: Core.Theme.iconFont
+            font.pixelSize: Core.Theme.iconSize
+
+            renderType: Core.Theme.textRender
+
+            color: root.tint
+        }
+    }
+
+    Column {
+        anchors.left: chip.right
+        anchors.leftMargin: root.icon !== "" ? Core.Theme.space3 : 0
+        anchors.right: actionRow.left
+        anchors.rightMargin: Core.Theme.space2
+        anchors.verticalCenter: parent.verticalCenter
+
+        spacing: Core.Theme.gapTight
 
         Text {
             width: parent.width
@@ -37,9 +65,12 @@ Item {
 
             elide: Text.ElideRight
 
-            font.family: Core.Theme.fontFamily
-            font.pixelSize: Core.Theme.fontSizeLarge
+            font.families: Core.Theme.textFamilies
+            font.pixelSize: Core.Theme.fontSizeHeading
             font.weight: Font.DemiBold
+            font.letterSpacing: Core.Theme.trackingTight
+
+            renderType: Core.Theme.textRender
 
             color: Core.Theme.foreground
         }
@@ -53,8 +84,10 @@ Item {
 
             elide: Text.ElideRight
 
-            font.family: Core.Theme.fontFamily
+            font.families: Core.Theme.textFamilies
             font.pixelSize: Core.Theme.fontSizeSmall
+
+            renderType: Core.Theme.textRender
 
             color: Core.Theme.foregroundMuted
         }
@@ -64,60 +97,68 @@ Item {
         id: actionRow
 
         anchors.right: parent.right
-        anchors.rightMargin: 4
         anchors.verticalCenter: parent.verticalCenter
 
-        spacing: 2
+        spacing: Core.Theme.space1
 
         Repeater {
             model: root.actions
 
             delegate: Rectangle {
+                id: actionButton
+
                 required property var modelData
 
-                width: 28
-                height: 28
+                width: Core.Theme.chipSize
+                height: Core.Theme.chipSize
 
-                radius: 14
+                radius: Core.Theme.chipRadius
 
-                color: btnMouse.containsMouse ? Core.Theme.surfaceHover : "transparent"
+                color: btnMouse.containsMouse ? Core.Theme.tinted(root.tint, Core.Theme.chipAlphaHover) : Core.Theme.tinted(root.tint, 0.0)
 
                 Behavior on color {
                     ColorAnimation {
-                        duration: 100
+                        duration: Core.Theme.durFast
+                        easing.type: Easing.OutQuint
+                    }
+                }
+
+                scale: btnMouse.pressed ? 0.9 : 1.0
+
+                Behavior on scale {
+                    NumberAnimation {
+                        duration: Core.Theme.durFast
                         easing.type: Easing.OutQuint
                     }
                 }
 
                 Text {
-                    id: btnIcon
-
                     anchors.centerIn: parent
 
-                    text: modelData.icon
+                    text: actionButton.modelData.icon
 
                     font.family: Core.Theme.iconFont
                     font.pixelSize: Core.Theme.iconSizeSmall
 
-                    color: Core.Theme.foregroundMuted
+                    renderType: Core.Theme.textRender
+
+                    color: btnMouse.containsMouse ? root.tint : Core.Theme.foregroundMuted
+
+                    Behavior on color {
+                        ColorAnimation {
+                            duration: Core.Theme.durFast
+                            easing.type: Easing.OutQuint
+                        }
+                    }
 
                     RotationAnimator on rotation {
-                        running: modelData.spinning === true
+                        running: actionButton.modelData.spinning === true
                         loops: Animation.Infinite
 
                         from: 0
                         to: 360
 
                         duration: 1000
-                    }
-                }
-
-                scale: btnMouse.pressed ? 0.88 : 1.0
-
-                Behavior on scale {
-                    NumberAnimation {
-                        duration: 110
-                        easing.type: Easing.OutQuint
                     }
                 }
 
@@ -131,67 +172,88 @@ Item {
                     cursorShape: Qt.PointingHandCursor
 
                     onClicked: {
-                        if (typeof modelData.action === "function")
-                            modelData.action();
+                        if (typeof actionButton.modelData.action === "function")
+                            actionButton.modelData.action();
                     }
                 }
             }
         }
 
-        // Toggle switch
-
         Item {
             visible: root.showToggle
 
-            width: root.showToggle ? 44 : 0
-            height: 28
+            width: root.showToggle ? 42 : 0
+            height: Core.Theme.chipSize
 
             Rectangle {
                 id: track
 
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.right: parent.right
-                anchors.rightMargin: 2
 
-                width: 38
-                height: 20
+                width: 40
+                height: 22
 
-                radius: 10
+                radius: height / 2
 
-                color: root.toggled ? Core.Theme.accent : Core.Theme.surface
+                color: Core.Theme.surfaceSunken
 
-                border.width: Core.Theme.borderWidth;
-                border.color: root.toggled ? Core.Theme.accent : Core.Theme.border
+                border.width: root.toggled ? 0 : 1
+                border.color: Core.Theme.border
 
-                Behavior on color {
-                    ColorAnimation {
-                        duration: 180
-                        easing.type: Easing.OutQuint
+                Rectangle {
+                    anchors.fill: parent
+
+                    radius: parent.radius
+
+                    antialiasing: true
+
+                    opacity: root.toggled ? 1.0 : 0.0
+
+                    Behavior on opacity {
+                        NumberAnimation {
+                            duration: Core.Theme.durBase
+                            easing.type: Easing.OutQuint
+                        }
+                    }
+
+                    gradient: Gradient {
+                        orientation: Gradient.Horizontal
+
+                        GradientStop {
+                            position: 0.0
+                            color: root.tint
+                        }
+
+                        GradientStop {
+                            position: 1.0
+                            color: Core.Theme.accentActive
+                        }
                     }
                 }
 
                 Rectangle {
-                    width: 14
-                    height: 14
+                    width: 16
+                    height: 16
 
-                    radius: 7
+                    radius: width / 2
 
                     anchors.verticalCenter: parent.verticalCenter
 
                     x: root.toggled ? track.width - width - 3 : 3
 
-                    color: root.toggled ? Core.Theme.accentForeground : Core.Theme.foregroundMuted
+                    color: root.toggled ? Core.Theme.accentForeground : Core.Theme.foregroundFaint
 
                     Behavior on x {
                         NumberAnimation {
-                            duration: 160
+                            duration: Core.Theme.durBase
                             easing.type: Easing.OutQuint
                         }
                     }
 
                     Behavior on color {
                         ColorAnimation {
-                            duration: 180
+                            duration: Core.Theme.durBase
                             easing.type: Easing.OutQuint
                         }
                     }

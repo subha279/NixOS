@@ -11,6 +11,7 @@ Components.LauncherView {
     id: launcher
 
     launcherId: "theme"
+    tint: Core.Theme.hueTheme
     promptIcon: Core.Icons.brightness
     placeholder: "Search colorschemes"
 
@@ -146,7 +147,7 @@ Components.LauncherView {
                 // solid accent fill. The accent moves to the bar on the left
                 // and into the text, so the row no longer has to invert
                 // everything sitting on it.
-                color: row.selected ? Core.Theme.surfaceGlass : "transparent"
+                color: row.selected ? Core.Theme.tinted(launcher.tint, Core.Theme.chipAlpha) : "transparent"
 
                 Behavior on color {
                     ColorAnimation {
@@ -163,11 +164,11 @@ Components.LauncherView {
                     anchors.verticalCenter: parent.verticalCenter
 
                     width: 3
-                    height: row.selected ? parent.height * 0.5 : 0
+                    height: row.selected ? parent.height * 0.44 : 0
 
                     radius: 2
 
-                    color: Core.Theme.accent
+                    color: launcher.tint
 
                     Behavior on height {
                         NumberAnimation {

@@ -12,6 +12,7 @@ Components.PopupSurface {
     id: popup
 
     popupId: "audio"
+    tint: Core.Theme.hueAudio
 
     cardWidth: 350
     maxCardHeight: 520
@@ -78,6 +79,9 @@ Components.PopupSurface {
 
             Components.PopupHeader {
                 width: parent.width
+
+                icon: Core.Icons.volumeHigh
+                tint: popup.tint
 
                 title: "Audio"
 
@@ -288,6 +292,8 @@ Components.PopupSurface {
                         model: popup.svc.sinks
 
                         delegate: Components.ListRow {
+                            tint: popup.tint
+
                             id: sinkRow
 
                             required property var modelData
@@ -524,6 +530,8 @@ Components.PopupSurface {
                         model: popup.svc.sources
 
                         delegate: Components.ListRow {
+                            tint: popup.tint
+
                             id: sourceRow
 
                             required property var modelData

@@ -13,6 +13,7 @@ Components.PopupSurface {
     id: popup
 
     popupId: "notifications"
+    tint: Core.Theme.hueNotify
 
     cardWidth: 360
     maxCardHeight: 480
@@ -93,6 +94,9 @@ Components.PopupSurface {
 
             Components.PopupHeader {
                 width: body.width
+
+                icon: Core.Icons.bell
+                tint: popup.tint
 
                 title: "Notifications"
 

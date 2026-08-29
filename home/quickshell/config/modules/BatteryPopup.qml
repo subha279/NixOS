@@ -12,6 +12,7 @@ Components.PopupSurface {
     id: popup
 
     popupId: "battery"
+    tint: Core.Theme.hueBattery
 
     cardWidth: 340
     maxCardHeight: 460
@@ -32,6 +33,9 @@ Components.PopupSurface {
 
             Components.PopupHeader {
                 width: body.width
+
+                icon: Core.Icons.batteryAlert
+                tint: popup.tint
 
                 title: "Battery"
 
@@ -313,6 +317,8 @@ Components.PopupSurface {
                     model: popup.svc.hasPerformance ? [0, 1, 2] : [0, 1]
 
                     delegate: Components.ListRow {
+                        tint: popup.tint
+
                         id: profileRow
 
                         required property var modelData
@@ -483,6 +489,8 @@ Components.PopupSurface {
                     model: popup.svc.peripheralModel
 
                     delegate: Components.ListRow {
+                        tint: popup.tint
+
                         id: devRow
 
                         required property string label
