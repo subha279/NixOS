@@ -181,8 +181,6 @@ Components.PopupSurface {
                     }
 
                     Components.VolumeSlider {
-                        fillColor: popup.tint
-
                         width: parent.width
 
                         value: popup.svc.volume
@@ -190,7 +188,7 @@ Components.PopupSurface {
 
                         enabled: popup.svc.sink !== null
 
-                        fillColor: Core.Theme.accent
+                        fillColor: popup.tint
 
                         onMoved: function (v) {
                             popup.svc.setVolume(popup.svc.sink, v);
@@ -411,8 +409,6 @@ Components.PopupSurface {
                     }
 
                     Components.VolumeSlider {
-                        fillColor: popup.tint
-
                         width: parent.width
 
                         value: popup.svc.micVolume
@@ -660,8 +656,6 @@ Components.PopupSurface {
                         }
 
                         Components.VolumeSlider {
-                            fillColor: popup.tint
-
                             anchors.left: parent.left
                             anchors.right: parent.right
                             anchors.leftMargin: 6
