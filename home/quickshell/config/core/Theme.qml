@@ -378,14 +378,6 @@ QtObject {
 
     readonly property string emojiFont: fonts.emoji || "Noto Color Emoji"
 
-    readonly property var textFamilies: [fontFamily, iconFont]
-
-    readonly property var monoFamilies: [fontMono, iconFont]
-
-    readonly property int textRender: Text.QtRendering
-
-    readonly property int emojiRender: Text.NativeRendering
-
     readonly property int fontSizeTiny: Math.max(8, fontSizeSmall - 1)
 
     readonly property int fontSizeHeading: fontSizeLarge + 1

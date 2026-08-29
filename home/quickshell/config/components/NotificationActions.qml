@@ -162,12 +162,12 @@ Item {
 
                         text: chip.label
 
-                        font.families: Core.Theme.textFamilies
+                        font.family: Core.Theme.fontFamily
 
                         font.pixelSize: Core.Theme.fontSizeSmall
 
 
-                        renderType: Core.Theme.textRender
+                        renderType: Text.QtRendering
 
 
                         color: Core.Theme.foreground
@@ -219,7 +219,7 @@ Item {
                     font.pixelSize: Core.Theme.fontSizeSmall
 
 
-                    renderType: Core.Theme.textRender
+                    renderType: Text.QtRendering
 
 
                     color: root.tint
@@ -279,7 +279,7 @@ Item {
 
                 color: Core.Theme.foreground
 
-                font.families: Core.Theme.textFamilies
+                font.family: Core.Theme.fontFamily
 
                 font.pixelSize: Core.Theme.fontSizeSmall
 
@@ -291,12 +291,12 @@ Item {
 
                     text: Services.NotificationServer.replyPlaceholder(root.notification)
 
-                    font.families: Core.Theme.textFamilies
+                    font.family: Core.Theme.fontFamily
 
                     font.pixelSize: Core.Theme.fontSizeSmall
 
 
-                    renderType: Core.Theme.textRender
+                    renderType: Text.QtRendering
 
 
                     color: Core.Theme.foregroundFaint

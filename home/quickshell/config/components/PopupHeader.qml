@@ -43,7 +43,7 @@ Item {
             font.family: Core.Theme.iconFont
             font.pixelSize: Core.Theme.iconSize
 
-            renderType: Core.Theme.textRender
+            renderType: Text.QtRendering
 
             color: root.tint
         }
@@ -65,12 +65,12 @@ Item {
 
             elide: Text.ElideRight
 
-            font.families: Core.Theme.textFamilies
+            font.family: Core.Theme.fontFamily
             font.pixelSize: Core.Theme.fontSizeHeading
             font.weight: Font.DemiBold
             font.letterSpacing: Core.Theme.trackingTight
 
-            renderType: Core.Theme.textRender
+            renderType: Text.QtRendering
 
             color: Core.Theme.foreground
         }
@@ -84,10 +84,10 @@ Item {
 
             elide: Text.ElideRight
 
-            font.families: Core.Theme.textFamilies
+            font.family: Core.Theme.fontFamily
             font.pixelSize: Core.Theme.fontSizeSmall
 
-            renderType: Core.Theme.textRender
+            renderType: Text.QtRendering
 
             color: Core.Theme.foregroundMuted
         }
@@ -140,7 +140,7 @@ Item {
                     font.family: Core.Theme.iconFont
                     font.pixelSize: Core.Theme.iconSizeSmall
 
-                    renderType: Core.Theme.textRender
+                    renderType: Text.QtRendering
 
                     color: btnMouse.containsMouse ? root.tint : Core.Theme.foregroundMuted
 

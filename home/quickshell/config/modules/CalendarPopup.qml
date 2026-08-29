@@ -104,14 +104,14 @@ Components.PopupSurface {
 
                         text: Qt.formatDateTime(popup.now, "HH:mm")
 
-                        font.families: Core.Theme.textFamilies
+                        font.family: Core.Theme.fontFamily
                         font.pixelSize: 34
                         font.letterSpacing: Core.Theme.trackingTight
                         font.weight: Font.DemiBold
 
                         color: Core.Theme.foreground
 
-                        renderType: Core.Theme.textRender
+                        renderType: Text.QtRendering
                     }
 
                     Text {
@@ -119,10 +119,10 @@ Components.PopupSurface {
 
                         text: Qt.formatDate(popup.now, "dddd, d MMMM yyyy")
 
-                        font.families: Core.Theme.textFamilies
+                        font.family: Core.Theme.fontFamily
                         font.pixelSize: Core.Theme.fontSizeSmall
 
-                        renderType: Core.Theme.textRender
+                        renderType: Text.QtRendering
 
                         color: Core.Theme.foregroundMuted
                     }
@@ -144,10 +144,10 @@ Components.PopupSurface {
 
                         text: Qt.formatDateTime(popup.now, "ss")
 
-                        font.families: Core.Theme.monoFamilies
+                        font.family: Core.Theme.fontMono
                         font.pixelSize: Core.Theme.fontSizeTiny
 
-                        renderType: Core.Theme.textRender
+                        renderType: Text.QtRendering
 
                         color: popup.tint
                     }
@@ -226,7 +226,7 @@ Components.PopupSurface {
 
                         color: prevMouse.containsMouse ? popup.tint : Core.Theme.foregroundMuted
 
-                        renderType: Core.Theme.textRender
+                        renderType: Text.QtRendering
                     }
 
                     MouseArea {
@@ -249,7 +249,7 @@ Components.PopupSurface {
 
                     text: popup.monthLabel
 
-                    font.families: Core.Theme.textFamilies
+                    font.family: Core.Theme.fontFamily
                     font.pixelSize: Core.Theme.fontSizeLarge
                     font.weight: Font.DemiBold
 
@@ -306,7 +306,7 @@ Components.PopupSurface {
 
                         color: nextMouse.containsMouse ? popup.tint : Core.Theme.foregroundMuted
 
-                        renderType: Core.Theme.textRender
+                        renderType: Text.QtRendering
                     }
 
                     MouseArea {
@@ -361,7 +361,7 @@ Components.PopupSurface {
 
                             text: parent.modelData
 
-                            font.families: Core.Theme.textFamilies
+                            font.family: Core.Theme.fontFamily
                             font.pixelSize: Core.Theme.fontSizeSmall
                             font.weight: Font.DemiBold
 
@@ -429,12 +429,12 @@ Components.PopupSurface {
 
                             text: dayCell.filled ? dayCell.day : ""
 
-                            font.families: Core.Theme.textFamilies
+                            font.family: Core.Theme.fontFamily
                             font.pixelSize: Core.Theme.fontSize
 
                             font.weight: dayCell.today ? Font.DemiBold : Font.Normal
 
-                            renderType: Core.Theme.textRender
+                            renderType: Text.QtRendering
 
                             color: dayCell.today ? Core.Theme.accentForeground : (popup.isWeekend(dayCell.index) ? Core.Theme.foregroundMuted : Core.Theme.foreground)
                         }
@@ -491,10 +491,10 @@ Components.PopupSurface {
 
                         text: "\udb80\udced  Today"
 
-                        font.families: Core.Theme.textFamilies
+                        font.family: Core.Theme.fontFamily
                         font.pixelSize: Core.Theme.fontSizeSmall
 
-                        renderType: Core.Theme.textRender
+                        renderType: Text.QtRendering
 
                         color: todayMouse.containsMouse ? popup.tint : Core.Theme.foreground
 

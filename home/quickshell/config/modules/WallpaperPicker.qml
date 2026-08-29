@@ -81,7 +81,7 @@ Components.LauncherView {
                 text: Services.WallpaperService.error.length > 0 ? Services.WallpaperService.error : "No wallpapers in ~/Wallpapers"
 
                 color: Core.Theme.foregroundFaint
-                font.families: Core.Theme.monoFamilies
+                font.family: Core.Theme.fontMono
                 font.pixelSize: Core.Theme.fontSize
             }
 
@@ -219,7 +219,7 @@ Components.LauncherView {
                                 font.family: Core.Theme.iconFont
                                 font.pixelSize: Core.Theme.iconSizeSmall
 
-                                renderType: Core.Theme.textRender
+                                renderType: Text.QtRendering
 
                                 color: launcher.tint
                             }
@@ -231,9 +231,9 @@ Components.LauncherView {
 
                                 text: cell.modelData.label
                                 color: Core.Theme.foreground
-                                font.families: Core.Theme.textFamilies
+                                font.family: Core.Theme.fontFamily
                                 font.pixelSize: Core.Theme.fontSizeSmall
-                                renderType: Core.Theme.textRender
+                                renderType: Text.QtRendering
                                 elide: Text.ElideMiddle
                             }
                         }

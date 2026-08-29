@@ -461,7 +461,7 @@ PanelWindow {
 
                                 color: Core.Theme.textMuted
 
-                                renderType: Core.Theme.textRender
+                                renderType: Text.QtRendering
                             }
                         }
 

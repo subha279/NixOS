@@ -99,7 +99,7 @@ Rectangle {
             font.family: Core.Theme.iconFont
             font.pixelSize: Core.Theme.iconSize
 
-            renderType: Core.Theme.textRender
+            renderType: Text.QtRendering
 
             color: root.effectiveTint
 
@@ -128,7 +128,7 @@ Rectangle {
             font.family: Core.Theme.iconFont
             font.pixelSize: Core.Theme.iconSize
 
-            renderType: Core.Theme.textRender
+            renderType: Text.QtRendering
 
             color: root.tint
 
@@ -169,11 +169,11 @@ Rectangle {
 
             elide: Text.ElideRight
 
-            font.families: Core.Theme.textFamilies
+            font.family: Core.Theme.fontFamily
             font.pixelSize: Core.Theme.fontSize
             font.weight: root.active ? Font.DemiBold : Font.Medium
 
-            renderType: Core.Theme.textRender
+            renderType: Text.QtRendering
 
             color: Core.Theme.foreground
         }
@@ -187,10 +187,10 @@ Rectangle {
 
             elide: Text.ElideRight
 
-            font.families: Core.Theme.textFamilies
+            font.family: Core.Theme.fontFamily
             font.pixelSize: Core.Theme.fontSizeSmall
 
-            renderType: Core.Theme.textRender
+            renderType: Text.QtRendering
 
             color: root.active ? root.tint : Core.Theme.foregroundMuted
 
@@ -212,10 +212,10 @@ Rectangle {
 
         text: root.trailing
 
-        font.families: Core.Theme.monoFamilies
+        font.family: Core.Theme.fontMono
         font.pixelSize: Core.Theme.fontSizeSmall
 
-        renderType: Core.Theme.textRender
+        renderType: Text.QtRendering
 
         color: root.trailingColor
     }

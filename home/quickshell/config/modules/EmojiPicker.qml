@@ -148,7 +148,7 @@ Components.LauncherView {
 
                         font.pixelSize: 28
 
-                        renderType: Core.Theme.emojiRender
+                        renderType: Text.NativeRendering
                     }
 
                     Text {

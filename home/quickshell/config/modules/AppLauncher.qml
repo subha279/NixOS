@@ -77,9 +77,9 @@ Components.LauncherView {
 
                 text: "No matching applications"
                 color: Core.Theme.foregroundFaint
-                font.families: Core.Theme.textFamilies
+                font.family: Core.Theme.fontFamily
                 font.pixelSize: Core.Theme.fontSize
-                renderType: Core.Theme.textRender
+                renderType: Text.QtRendering
             }
 
             delegate: Rectangle {
@@ -185,10 +185,10 @@ Components.LauncherView {
                         color: Core.Theme.foreground
                         font.weight: row.selected ? Font.DemiBold : Font.Medium
 
-                        font.families: Core.Theme.textFamilies
+                        font.family: Core.Theme.fontFamily
                         font.pixelSize: Core.Theme.fontSize
 
-                        renderType: Core.Theme.textRender
+                        renderType: Text.QtRendering
 
                         elide: Text.ElideRight
                     }
@@ -204,10 +204,10 @@ Components.LauncherView {
 
                         color: row.selected ? launcher.tint : Core.Theme.foregroundFaint
 
-                        font.families: Core.Theme.textFamilies
+                        font.family: Core.Theme.fontFamily
                         font.pixelSize: Core.Theme.fontSizeSmall
 
-                        renderType: Core.Theme.textRender
+                        renderType: Text.QtRendering
 
                         elide: Text.ElideRight
 

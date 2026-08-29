@@ -232,7 +232,7 @@ Item {
 
                     font.pixelSize: Core.Theme.iconSize
 
-                    renderType: Core.Theme.textRender
+                    renderType: Text.QtRendering
                 }
             }
 
@@ -254,11 +254,11 @@ Item {
 
                     color: Core.Theme.foregroundFaint
 
-                    font.families: Core.Theme.monoFamilies
+                    font.family: Core.Theme.fontMono
 
                     font.pixelSize: Core.Theme.fontSizeSmall
 
-                    renderType: Core.Theme.textRender
+                    renderType: Text.QtRendering
                 }
 
                 Rectangle {
@@ -302,7 +302,7 @@ Item {
 
                         font.pixelSize: Core.Theme.iconSizeSmall
 
-                        renderType: Core.Theme.textRender
+                        renderType: Text.QtRendering
 
                         Behavior on color {
                             ColorAnimation {
@@ -351,11 +351,11 @@ Item {
 
                 color: Core.Theme.foreground
 
-                font.families: Core.Theme.textFamilies
+                font.family: Core.Theme.fontFamily
 
                 font.pixelSize: Core.Theme.fontSizeLarge
 
-                renderType: Core.Theme.textRender
+                renderType: Text.QtRendering
 
                 onTextChanged: {
                     root.selectedIndex = 0;
@@ -373,11 +373,11 @@ Item {
 
                     color: Core.Theme.foregroundFaint
 
-                    font.families: Core.Theme.textFamilies
+                    font.family: Core.Theme.fontFamily
 
                     font.pixelSize: Core.Theme.fontSizeLarge
 
-                    renderType: Core.Theme.textRender
+                    renderType: Text.QtRendering
                 }
 
                 Keys.onPressed: function (event) {

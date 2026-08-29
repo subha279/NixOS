@@ -354,7 +354,7 @@ PanelWindow {
 
                                         font.pixelSize: Core.Theme.iconSizeSmall
 
-                                        renderType: Core.Theme.textRender
+                                        renderType: Text.QtRendering
 
                                         color: entryLoader.modelData.danger === true ? Core.Theme.danger : entryMouse.containsMouse ? root.tint : Core.Theme.foregroundMuted
 
@@ -371,11 +371,11 @@ PanelWindow {
 
                                         text: entryLoader.modelData.label
 
-                                        font.families: Core.Theme.textFamilies
+                                        font.family: Core.Theme.fontFamily
 
                                         font.pixelSize: Core.Theme.fontSize
 
-                                        renderType: Core.Theme.textRender
+                                        renderType: Text.QtRendering
 
                                         color: entryLoader.modelData.danger === true ? Core.Theme.danger : Core.Theme.foreground
                                     }
