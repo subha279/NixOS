@@ -89,6 +89,7 @@ in
     libnotify
     wtype
     wl-clipboard
+    cava
   ];
 
   xdg.configFile."quickshell".source = quickshellConfig;
