@@ -323,7 +323,7 @@ PanelWindow {
                     anchors.rightMargin: root.toastGutter
                     anchors.topMargin: root.toastGutter
 
-                    implicitHeight: Math.max(72, contentRow.implicitHeight + 24)
+                    implicitHeight: Math.round(Math.max(72, contentRow.implicitHeight + 24))
 
                     height: implicitHeight
 

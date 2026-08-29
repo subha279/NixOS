@@ -226,7 +226,7 @@ QtObject {
 
     // Liquid Glass
 
-    readonly property real glassOpacity: ui.glassOpacity !== undefined ? ui.glassOpacity : 0.88
+    readonly property real glassOpacity: ui.glassOpacity !== undefined ? ui.glassOpacity : 0.60
 
     readonly property real surfaceOpacity: ui.surfaceOpacity !== undefined ? ui.surfaceOpacity : 0.38
 
@@ -382,7 +382,7 @@ QtObject {
 
     readonly property int popupWidth: 340
 
-    readonly property int popupMaxHeight: 460
+    readonly property int popupMaxHeight: 620
 
     // Visible detachment from the bar pill. At 2 the cards looked welded to it.
     readonly property int popupGap: 10

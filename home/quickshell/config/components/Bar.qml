@@ -215,9 +215,9 @@ PanelWindow {
     // reads pill -> card and never bar -> card.
     readonly property bool popupShape: root.launcherOpen && !root.fromPill
 
-    readonly property real targetWidth: root.popupShape ? root.activeLauncher.cardWidth : root.barContentWidth + 24
+    readonly property real targetWidth: Math.round(root.popupShape ? root.activeLauncher.cardWidth : root.barContentWidth + 24)
 
-    readonly property real targetHeight: root.popupShape ? root.activeLauncher.viewHeight : Core.Theme.pillHeight
+    readonly property real targetHeight: Math.round(root.popupShape ? root.activeLauncher.viewHeight : Core.Theme.pillHeight)
 
     readonly property real targetRadius: root.popupShape ? Core.Theme.radiusLarge : Core.Theme.pillHeight / 2
 
@@ -238,7 +238,7 @@ PanelWindow {
     Rectangle {
         id: surfaceBorder
 
-        anchors.horizontalCenter: parent.horizontalCenter
+        x: Math.round((root.width - surfaceBorder.width) / 2)
 
         y: root.surfaceTop - Core.Theme.borderWidth
 
@@ -261,7 +261,7 @@ PanelWindow {
     Rectangle {
         id: surface
 
-        anchors.horizontalCenter: parent.horizontalCenter
+        x: Math.round((root.width - surface.width) / 2)
 
         y: root.surfaceTop
 

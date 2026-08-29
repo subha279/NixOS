@@ -64,9 +64,9 @@ PanelWindow {
 
     readonly property real barBottomY: Core.Theme.barMarginTop + 10 + Core.Theme.pillHeight + Core.Theme.borderWidth
 
-    readonly property real naturalHeight: contentHost.implicitHeight + Core.Theme.padCard * 2
+    readonly property real naturalHeight: Math.round(contentHost.implicitHeight) + Core.Theme.padCard * 2
 
-    readonly property real targetHeight: Math.min(root.naturalHeight, root.maxCardHeight)
+    readonly property real targetHeight: Math.round(Math.min(root.naturalHeight, root.maxCardHeight))
 
     MouseArea {
         anchors.fill: parent
@@ -118,31 +118,20 @@ PanelWindow {
 
             anchors.fill: parent
 
+            clip: true
+
             opacity: root.open ? 1.0 : 0.0
 
-            Rectangle {
+            Glass {
                 anchors.fill: parent
 
                 radius: Core.Theme.radiusMenu
 
-                color: "transparent"
+                tint: root.tint
 
-                border.width: Core.Theme.borderWidth
-                border.color: Core.Theme.tinted(root.tint, 0.45)
+                tintAmount: Core.Theme.glassGradientOpacity * 1.6
 
-                antialiasing: true
-
-                Glass {
-                    anchors.fill: parent
-
-                    radius: parent.radius
-
-                    tint: root.tint
-
-                    tintAmount: Core.Theme.glassGradientOpacity * 1.6
-
-                    edgeColor: Core.Theme.tinted(root.tint, 0.22)
-                }
+                edgeColor: Core.Theme.tinted(root.tint, 0.22)
             }
 
             Item {
@@ -265,7 +254,7 @@ PanelWindow {
 
             width: Math.round(Math.max(184, Math.min(card.width - Core.Theme.space2 * 2, menuLayer.labelWidth + menuLayer.chromeWidth + Core.Theme.space2)))
 
-            height: menuColumn.implicitHeight + Core.Theme.space2
+            height: Math.round(menuColumn.implicitHeight) + Core.Theme.space2
 
             readonly property real minX: card.x + Core.Theme.space2
             readonly property real maxX: card.x + card.width - menuBox.width - Core.Theme.space2
