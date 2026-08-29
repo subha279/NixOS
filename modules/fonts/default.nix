@@ -7,6 +7,7 @@
 
     packages = with pkgs; [
       nerd-fonts.jetbrains-mono
+      nerd-fonts.iosevka
       nerd-fonts.caskaydia-cove
       nerd-fonts.fira-code
       sf-mono-nerd
