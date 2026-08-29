@@ -269,7 +269,7 @@ let
       palette = "aurora"
 
       # PROMPT
-      format = """
+      format = """\
 
       $directory\
 
