@@ -226,7 +226,7 @@ QtObject {
 
     // Liquid Glass
 
-    readonly property real glassOpacity: ui.glassOpacity !== undefined ? ui.glassOpacity : 0.50
+    readonly property real glassOpacity: ui.glassOpacity !== undefined ? ui.glassOpacity : 0.62
 
     readonly property real surfaceOpacity: ui.surfaceOpacity !== undefined ? ui.surfaceOpacity : 0.38
 
@@ -236,10 +236,10 @@ QtObject {
 
     readonly property color glassBody: {
         if (glassOnLight) {
-            return Qt.rgba(backgroundDark.r * (1.0 - glassLuminosity), backgroundDark.g * (1.0 - glassLuminosity), backgroundDark.b * (1.0 - glassLuminosity), 1.0);
+            return Qt.rgba(background.r * (1.0 - glassLuminosity), background.g * (1.0 - glassLuminosity), background.b * (1.0 - glassLuminosity), 1.0);
         }
 
-        return Qt.rgba(backgroundDark.r + (1.0 - backgroundDark.r) * glassLuminosity, backgroundDark.g + (1.0 - backgroundDark.g) * glassLuminosity, backgroundDark.b + (1.0 - backgroundDark.b) * glassLuminosity, 1.0);
+        return Qt.rgba(background.r + (1.0 - background.r) * glassLuminosity, background.g + (1.0 - background.g) * glassLuminosity, background.b + (1.0 - background.b) * glassLuminosity, 1.0);
     }
 
     readonly property color surfaceGlass: Qt.alpha(surface, surfaceOpacity)

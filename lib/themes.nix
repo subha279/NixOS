@@ -57,7 +57,7 @@
 
       # LIQUID GLASS
 
-      glassOpacity = 0.50;
+      glassOpacity = 0.62;
       surfaceOpacity = 0.18;
       glassLuminosity = 0.0;
       glassGradientOpacity = 0.055;

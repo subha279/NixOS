@@ -22,6 +22,8 @@ local ui = theme.ui
 
 local shadowAlpha = string.format("%02x", math.floor((ui.shadowOpacity or 0.20) * 255 + 0.5))
 
+local BLUR_VARIANT_FROST = 1
+
 hl.config({
 
 	decoration = {
@@ -58,15 +60,16 @@ hl.config({
 
 		blur = {
 			enabled = true,
-			size = 16,
+			variant = BLUR_VARIANT_FROST,
+			size = 24,
 			passes = 4,
-			vibrancy = 0.45,
-			vibrancy_darkness = 0.50,
-			brightness = 0.60,
+			vibrancy = 0.80,
+			vibrancy_darkness = 0.90,
+			brightness = 0.70,
 			contrast = 1.0,
 			noise = 0.015,
 			popups = true,
-			special = 0,
+			special = false,
 			new_optimizations = true,
 			ignore_opacity = true,
 			xray = true,
