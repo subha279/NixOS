@@ -9,7 +9,6 @@ Item {
     property real strength: 1.0
     property color tint: Core.Theme.accent
     property real tintAmount: Core.Theme.glassGradientOpacity
-    property color edgeColor: Core.Theme.glassEdge
 
     function washed(base, amount) {
         return Qt.rgba(base.r + (glass.tint.r - base.r) * amount, base.g + (glass.tint.g - base.g) * amount, base.b + (glass.tint.b - base.b) * amount, base.a);
@@ -23,9 +22,6 @@ Item {
         antialiasing: true
 
         opacity: glass.strength
-
-        border.width: 1
-        border.color: glass.edgeColor
 
         gradient: Gradient {
             GradientStop {

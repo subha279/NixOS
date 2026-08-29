@@ -59,7 +59,7 @@
 
       glassOpacity = 0.55;
       surfaceOpacity = 0.18;
-      glassLuminosity = 0.04;
+      glassLuminosity = 0.0;
       glassGradientOpacity = 0.055;
 
       # SHADOWS / WINDOWS

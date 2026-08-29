@@ -230,16 +230,16 @@ QtObject {
 
     readonly property real surfaceOpacity: ui.surfaceOpacity !== undefined ? ui.surfaceOpacity : 0.38
 
-    readonly property real glassLuminosity: ui.glassLuminosity !== undefined ? ui.glassLuminosity : 0.04
+    readonly property real glassLuminosity: ui.glassLuminosity !== undefined ? ui.glassLuminosity : 0.0
 
     readonly property real glassGradientOpacity: ui.glassGradientOpacity !== undefined ? ui.glassGradientOpacity : 0.055
 
     readonly property color glassBody: {
         if (glassOnLight) {
-            return Qt.rgba(background.r * (1.0 - glassLuminosity), background.g * (1.0 - glassLuminosity), background.b * (1.0 - glassLuminosity), 1.0);
+            return Qt.rgba(backgroundDark.r * (1.0 - glassLuminosity), backgroundDark.g * (1.0 - glassLuminosity), backgroundDark.b * (1.0 - glassLuminosity), 1.0);
         }
 
-        return Qt.rgba(background.r + (1.0 - background.r) * glassLuminosity, background.g + (1.0 - background.g) * glassLuminosity, background.b + (1.0 - background.b) * glassLuminosity, 1.0);
+        return Qt.rgba(backgroundDark.r + (1.0 - backgroundDark.r) * glassLuminosity, backgroundDark.g + (1.0 - backgroundDark.g) * glassLuminosity, backgroundDark.b + (1.0 - backgroundDark.b) * glassLuminosity, 1.0);
     }
 
     readonly property color surfaceGlass: Qt.alpha(surface, surfaceOpacity)
@@ -274,8 +274,6 @@ QtObject {
     readonly property color glassWashEnd: Qt.rgba(accent.r, accent.g, accent.b, 0.0)
 
     readonly property bool glassOnLight: background.hslLightness > 0.5
-
-    readonly property color glassEdge: glassOnLight ? Qt.rgba(0, 0, 0, 0.10) : Qt.rgba(1, 1, 1, 0.07)
 
     readonly property color backgroundGlass: Qt.rgba(background.r, background.g, background.b, glassOpacity)
 

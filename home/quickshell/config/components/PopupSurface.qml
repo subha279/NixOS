@@ -128,8 +128,6 @@ PanelWindow {
                 tint: root.tint
 
                 tintAmount: Core.Theme.glassGradientOpacity * 1.6
-
-                edgeColor: Core.Theme.tinted(root.tint, 0.22)
             }
 
             Item {
@@ -290,8 +288,6 @@ PanelWindow {
                 tint: root.tint
 
                 tintAmount: Core.Theme.glassGradientOpacity
-
-                edgeColor: Core.Theme.tinted(root.tint, 0.30)
             }
 
             Column {
