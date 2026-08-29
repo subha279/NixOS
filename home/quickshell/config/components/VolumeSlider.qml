@@ -47,11 +47,13 @@ Item {
 
         radius: height / 2
 
-        color: Core.Theme.surfaceGlass
+        color: Core.Theme.surfaceSunken
+
+        antialiasing: true
 
         Behavior on height {
             NumberAnimation {
-                duration: 140
+                duration: Core.Theme.durFast
                 easing.type: Easing.OutQuint
             }
         }
@@ -67,6 +69,8 @@ Item {
 
             radius: parent.radius
 
+            antialiasing: true
+
             color: root.muted ? Core.Theme.foregroundFaint : root.fillColor
 
             Behavior on color {
@@ -76,13 +80,36 @@ Item {
                 }
             }
 
-            // Only spring the width when the change came from somewhere else.
             Behavior on width {
                 enabled: !root.dragging
 
                 NumberAnimation {
                     duration: Core.Theme.durBase
                     easing.type: Easing.OutQuint
+                }
+            }
+
+            Rectangle {
+                anchors.fill: parent
+
+                radius: parent.radius
+
+                antialiasing: true
+
+                visible: !root.muted
+
+                gradient: Gradient {
+                    orientation: Gradient.Horizontal
+
+                    GradientStop {
+                        position: 0.0
+                        color: Qt.rgba(root.fillColor.r, root.fillColor.g, root.fillColor.b, 0.0)
+                    }
+
+                    GradientStop {
+                        position: 1.0
+                        color: Core.Theme.accentActive
+                    }
                 }
             }
         }
@@ -95,18 +122,24 @@ Item {
 
             radius: width / 2
 
+            antialiasing: true
+
             anchors.verticalCenter: parent.verticalCenter
 
             x: Math.max(0, Math.min(track.width - width, fill.width - width / 2))
 
             color: root.muted ? Core.Theme.foregroundMuted : Core.Theme.foreground
 
-            border.width: Core.Theme.borderWidth
-            border.color: Core.Theme.accentForeground
-
             Behavior on width {
                 NumberAnimation {
-                    duration: 150
+                    duration: Core.Theme.durFast
+                    easing.type: Easing.OutQuint
+                }
+            }
+
+            Behavior on color {
+                ColorAnimation {
+                    duration: Core.Theme.durFast
                     easing.type: Easing.OutQuint
                 }
             }

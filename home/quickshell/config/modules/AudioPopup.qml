@@ -181,6 +181,8 @@ Components.PopupSurface {
                     }
 
                     Components.VolumeSlider {
+                        fillColor: popup.tint
+
                         width: parent.width
 
                         value: popup.svc.volume
@@ -409,6 +411,8 @@ Components.PopupSurface {
                     }
 
                     Components.VolumeSlider {
+                        fillColor: popup.tint
+
                         width: parent.width
 
                         value: popup.svc.micVolume
@@ -656,6 +660,8 @@ Components.PopupSurface {
                         }
 
                         Components.VolumeSlider {
+                            fillColor: popup.tint
+
                             anchors.left: parent.left
                             anchors.right: parent.right
                             anchors.leftMargin: 6

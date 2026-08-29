@@ -81,7 +81,7 @@ Components.LauncherView {
                 text: Services.WallpaperService.error.length > 0 ? Services.WallpaperService.error : "No wallpapers in ~/Wallpapers"
 
                 color: Core.Theme.foregroundFaint
-                font.family: Core.Theme.fontMono
+                font.families: Core.Theme.monoFamilies
                 font.pixelSize: Core.Theme.fontSize
             }
 
@@ -114,7 +114,7 @@ Components.LauncherView {
                     // Rounded to match the rows in the battery popup.
                     radius: Core.Theme.radiusRow
 
-                    color: Core.Theme.surfaceGlass
+                    color: Core.Theme.surfaceSunken
                     clip: true
 
                     // Zoom on selection, now sized so it actually fits. The
@@ -122,7 +122,7 @@ Components.LauncherView {
                     // 8px per side before the grid's clip shaves it; 1.06 gains
                     // 7.1. At 1.10 it wanted 11.9 and got cut off, which is the
                     // same thing that was going wrong in the theme list.
-                    scale: cell.selected ? 1.06 : 1.0
+                    scale: cell.selected ? 1.04 : 1.0
 
                     Behavior on scale {
                         NumberAnimation {
@@ -195,17 +195,17 @@ Components.LauncherView {
                         anchors.right: parent.right
                         anchors.bottom: parent.bottom
 
-                        height: 26
-                        color: Core.Theme.surfaceGlass
+                        height: 28
+                        color: Core.Theme.scrim
 
                         Row {
                             anchors.left: parent.left
-                            anchors.leftMargin: 8
+                            anchors.leftMargin: Core.Theme.space2
                             anchors.right: parent.right
-                            anchors.rightMargin: 8
+                            anchors.rightMargin: Core.Theme.space2
                             anchors.verticalCenter: parent.verticalCenter
 
-                            spacing: 6
+                            spacing: Core.Theme.gapRow
 
                             // Applied-wallpaper tick, matching the marker the
                             // battery popup puts on the live power profile.
@@ -219,7 +219,9 @@ Components.LauncherView {
                                 font.family: Core.Theme.iconFont
                                 font.pixelSize: Core.Theme.iconSizeSmall
 
-                                color: Core.Theme.accent
+                                renderType: Core.Theme.textRender
+
+                                color: launcher.tint
                             }
 
                             Text {
@@ -229,8 +231,9 @@ Components.LauncherView {
 
                                 text: cell.modelData.label
                                 color: Core.Theme.foreground
-                                font.family: Core.Theme.fontMono
+                                font.families: Core.Theme.textFamilies
                                 font.pixelSize: Core.Theme.fontSizeSmall
+                                renderType: Core.Theme.textRender
                                 elide: Text.ElideMiddle
                             }
                         }

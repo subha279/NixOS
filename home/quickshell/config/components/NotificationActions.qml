@@ -19,7 +19,9 @@ Item {
 
     property var notification: null
 
-    property int chipHeight: 24
+    property int chipHeight: 26
+
+    property color tint: Core.Theme.accent
 
     readonly property var actionList: {
         try {
@@ -78,14 +80,14 @@ Item {
 
         width: parent.width
 
-        spacing: 6
+        spacing: Core.Theme.gapRow
 
         // ACTION CHIPS
 
         Flow {
             width: parent.width
 
-            spacing: 6
+            spacing: Core.Theme.gapRow
 
             Repeater {
                 model: root.actionList
@@ -122,7 +124,7 @@ Item {
 
                     radius: height / 2
 
-                    color: chipMouse.containsMouse ? Core.Theme.surfaceGlassHover : Core.Theme.surfaceGlass
+                    color: chipMouse.containsMouse ? Core.Theme.tinted(root.tint, Core.Theme.chipAlphaHover) : Core.Theme.tinted(root.tint, Core.Theme.chipAlpha)
 
                     Behavior on color {
                         ColorAnimation {
@@ -160,9 +162,13 @@ Item {
 
                         text: chip.label
 
-                        font.family: Core.Theme.fontFamily
+                        font.families: Core.Theme.textFamilies
 
                         font.pixelSize: Core.Theme.fontSizeSmall
+
+
+                        renderType: Core.Theme.textRender
+
 
                         color: Core.Theme.foreground
                     }
@@ -192,7 +198,7 @@ Item {
 
                 radius: height / 2
 
-                color: replyChipMouse.containsMouse ? Core.Theme.surfaceGlassHover : Core.Theme.surfaceGlass
+                color: replyChipMouse.containsMouse ? Core.Theme.tinted(root.tint, Core.Theme.chipAlphaHover) : Core.Theme.tinted(root.tint, Core.Theme.chipAlpha)
 
                 Behavior on color {
                     ColorAnimation {
@@ -212,7 +218,11 @@ Item {
 
                     font.pixelSize: Core.Theme.fontSizeSmall
 
-                    color: Core.Theme.accent
+
+                    renderType: Core.Theme.textRender
+
+
+                    color: root.tint
                 }
 
                 MouseArea {
@@ -240,14 +250,14 @@ Item {
 
             visible: root.replying
 
-            radius: 9
+            radius: Core.Theme.radius
 
             clip: true
 
             color: Core.Theme.surfaceGlass
 
             border.width: Core.Theme.borderWidth
-            border.color: Core.Theme.borderActive
+            border.color: Core.Theme.tinted(root.tint, 0.55)
 
             TextInput {
                 id: replyInput
@@ -263,11 +273,13 @@ Item {
 
                 selectByMouse: true
 
-                selectionColor: Core.Theme.accentMuted
+                selectionColor: Core.Theme.tinted(root.tint, 0.35)
+
+                selectedTextColor: Core.Theme.foreground
 
                 color: Core.Theme.foreground
 
-                font.family: Core.Theme.fontFamily
+                font.families: Core.Theme.textFamilies
 
                 font.pixelSize: Core.Theme.fontSizeSmall
 
@@ -279,9 +291,13 @@ Item {
 
                     text: Services.NotificationServer.replyPlaceholder(root.notification)
 
-                    font.family: Core.Theme.fontFamily
+                    font.families: Core.Theme.textFamilies
 
                     font.pixelSize: Core.Theme.fontSizeSmall
+
+
+                    renderType: Core.Theme.textRender
+
 
                     color: Core.Theme.foregroundFaint
                 }
@@ -324,7 +340,7 @@ Item {
 
                     font.pixelSize: Core.Theme.iconSizeSmall
 
-                    color: replyInput.text.length > 0 ? Core.Theme.accent : Core.Theme.foregroundFaint
+                    color: replyInput.text.length > 0 ? root.tint : Core.Theme.foregroundFaint
                 }
 
                 MouseArea {

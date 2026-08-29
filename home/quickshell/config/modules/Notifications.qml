@@ -461,7 +461,7 @@ PanelWindow {
 
                                 color: Core.Theme.textMuted
 
-                                renderType: Text.NativeRendering
+                                renderType: Core.Theme.textRender
                             }
                         }
 
@@ -565,7 +565,9 @@ PanelWindow {
                             Components.NotificationActions {
                                 Layout.fillWidth: true
 
-                                Layout.topMargin: visible ? 4 : 0
+                                tint: Core.Theme.hueNotify
+
+                                Layout.topMargin: visible ? Core.Theme.gapRow : 0
 
                                 notification: wrapper.modelData
                             }

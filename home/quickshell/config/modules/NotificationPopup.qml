@@ -454,7 +454,9 @@ Components.PopupSurface {
                             Components.NotificationActions {
                                 width: parent.width
 
-                                chipHeight: 22
+                                tint: popup.tint
+
+                                chipHeight: 24
 
                                 notification: noteRow.modelData
                             }

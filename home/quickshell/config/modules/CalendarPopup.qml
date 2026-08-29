@@ -104,13 +104,14 @@ Components.PopupSurface {
 
                         text: Qt.formatDateTime(popup.now, "HH:mm")
 
-                        font.family: Core.Theme.fontFamily
+                        font.families: Core.Theme.textFamilies
                         font.pixelSize: 34
+                        font.letterSpacing: Core.Theme.trackingTight
                         font.weight: Font.DemiBold
 
                         color: Core.Theme.foreground
 
-                        renderType: Text.NativeRendering
+                        renderType: Core.Theme.textRender
                     }
 
                     Text {
@@ -118,34 +119,64 @@ Components.PopupSurface {
 
                         text: Qt.formatDate(popup.now, "dddd, d MMMM yyyy")
 
-                        font.family: Core.Theme.fontFamily
+                        font.families: Core.Theme.textFamilies
                         font.pixelSize: Core.Theme.fontSizeSmall
+
+                        renderType: Core.Theme.textRender
 
                         color: Core.Theme.foregroundMuted
                     }
                 }
 
-                // Seconds ring in the corner, purely decorative.
-                Text {
+                Rectangle {
                     anchors.right: parent.right
-                    anchors.rightMargin: 4
                     anchors.top: parent.top
-                    anchors.topMargin: 4
 
-                    text: Qt.formatDateTime(popup.now, "ss")
+                    width: 30
+                    height: 20
 
-                    font.family: Core.Theme.fontFamily
-                    font.pixelSize: Core.Theme.fontSizeSmall
+                    radius: Core.Theme.radiusSmall
 
-                    color: Core.Theme.foregroundFaint
+                    color: Core.Theme.tinted(popup.tint, Core.Theme.chipAlpha)
+
+                    Text {
+                        anchors.centerIn: parent
+
+                        text: Qt.formatDateTime(popup.now, "ss")
+
+                        font.families: Core.Theme.monoFamilies
+                        font.pixelSize: Core.Theme.fontSizeTiny
+
+                        renderType: Core.Theme.textRender
+
+                        color: popup.tint
+                    }
                 }
+
             }
 
             Rectangle {
                 width: parent.width
                 height: 1
 
-                color: Core.Theme.separator
+                gradient: Gradient {
+                    orientation: Gradient.Horizontal
+
+                    GradientStop {
+                        position: 0.0
+                        color: Core.Theme.tinted(popup.tint, 0.0)
+                    }
+
+                    GradientStop {
+                        position: 0.5
+                        color: Core.Theme.tinted(popup.tint, 0.45)
+                    }
+
+                    GradientStop {
+                        position: 1.0
+                        color: Core.Theme.tinted(popup.tint, 0.0)
+                    }
+                }
             }
 
             // Month navigation
@@ -162,12 +193,12 @@ Components.PopupSurface {
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
 
-                    width: 28
-                    height: 28
+                    width: Core.Theme.chipSize
+                    height: Core.Theme.chipSize
 
-                    radius: 14
+                    radius: Core.Theme.chipRadius
 
-                    color: prevMouse.containsMouse ? Core.Theme.surfaceGlassHover : "transparent"
+                    color: prevMouse.containsMouse ? Core.Theme.tinted(popup.tint, Core.Theme.chipAlphaHover) : "transparent"
 
                     Behavior on color {
                         ColorAnimation {
@@ -193,7 +224,9 @@ Components.PopupSurface {
                         font.family: Core.Theme.iconFont
                         font.pixelSize: Core.Theme.iconSizeSmall
 
-                        color: Core.Theme.foregroundMuted
+                        color: prevMouse.containsMouse ? popup.tint : Core.Theme.foregroundMuted
+
+                        renderType: Core.Theme.textRender
                     }
 
                     MouseArea {
@@ -216,35 +249,11 @@ Components.PopupSurface {
 
                     text: popup.monthLabel
 
-                    font.family: Core.Theme.fontFamily
+                    font.families: Core.Theme.textFamilies
                     font.pixelSize: Core.Theme.fontSizeLarge
                     font.weight: Font.DemiBold
 
                     color: Core.Theme.foreground
-
-                    // Little pop whenever the month changes.
-                    onTextChanged: monthPop.restart()
-
-                    SequentialAnimation {
-                        id: monthPop
-
-                        NumberAnimation {
-                            target: monthText
-                            property: "scale"
-                            to: 1.08
-                            duration: 90
-                            easing.type: Easing.OutQuint
-                        }
-
-                        NumberAnimation {
-                            target: monthText
-                            property: "scale"
-                            to: 1.0
-                            duration: 160
-                            easing.type: Easing.OutQuint
-                        }
-                    }
-
                     MouseArea {
                         anchors.fill: parent
                         anchors.margins: -8
@@ -264,12 +273,12 @@ Components.PopupSurface {
                     anchors.right: parent.right
                     anchors.verticalCenter: parent.verticalCenter
 
-                    width: 28
-                    height: 28
+                    width: Core.Theme.chipSize
+                    height: Core.Theme.chipSize
 
-                    radius: 14
+                    radius: Core.Theme.chipRadius
 
-                    color: nextMouse.containsMouse ? Core.Theme.surfaceGlassHover : "transparent"
+                    color: nextMouse.containsMouse ? Core.Theme.tinted(popup.tint, Core.Theme.chipAlphaHover) : "transparent"
 
                     Behavior on color {
                         ColorAnimation {
@@ -295,7 +304,9 @@ Components.PopupSurface {
                         font.family: Core.Theme.iconFont
                         font.pixelSize: Core.Theme.iconSizeSmall
 
-                        color: Core.Theme.foregroundMuted
+                        color: nextMouse.containsMouse ? popup.tint : Core.Theme.foregroundMuted
+
+                        renderType: Core.Theme.textRender
                     }
 
                     MouseArea {
@@ -350,11 +361,11 @@ Components.PopupSurface {
 
                             text: parent.modelData
 
-                            font.family: Core.Theme.fontFamily
+                            font.families: Core.Theme.textFamilies
                             font.pixelSize: Core.Theme.fontSizeSmall
                             font.weight: Font.DemiBold
 
-                            color: (parent.index === 5 || parent.index === 6) ? Core.Theme.accentSoft : Core.Theme.foregroundFaint
+                            color: (parent.index === 5 || parent.index === 6) ? Core.Theme.tinted(popup.tint, 0.75) : Core.Theme.foregroundFaint
                         }
                     }
                 }
@@ -393,14 +404,14 @@ Components.PopupSurface {
 
                             anchors.centerIn: parent
 
-                            width: 28
-                            height: 28
+                            width: Core.Theme.chipSize
+                            height: Core.Theme.chipSize
 
-                            radius: 14
+                            radius: Core.Theme.chipRadius
 
                             visible: dayCell.filled
 
-                            color: dayCell.today ? Core.Theme.accent : (dayMouse.containsMouse ? Core.Theme.surfaceGlassHover : "transparent")
+                            color: dayCell.today ? popup.tint : (dayMouse.containsMouse ? Core.Theme.tinted(popup.tint, Core.Theme.chipAlpha) : "transparent")
 
                             Behavior on color {
                                 ColorAnimation {
@@ -409,27 +420,6 @@ Components.PopupSurface {
                                 }
                             }
 
-                            // Today's marker springs in on open.
-                            scale: dayCell.today ? 1.0 : 1.0
-
-                            Component.onCompleted: {
-                                if (!dayCell.today)
-                                    return;
-                                todayPop.restart();
-                            }
-
-                            SequentialAnimation {
-                                id: todayPop
-
-                                NumberAnimation {
-                                    target: dayBg
-                                    property: "scale"
-                                    from: 0.0
-                                    to: 1.0
-                                    duration: 180
-                                    easing.type: Easing.OutQuint
-                                }
-                            }
                         }
 
                         Text {
@@ -439,10 +429,12 @@ Components.PopupSurface {
 
                             text: dayCell.filled ? dayCell.day : ""
 
-                            font.family: Core.Theme.fontFamily
+                            font.families: Core.Theme.textFamilies
                             font.pixelSize: Core.Theme.fontSize
 
                             font.weight: dayCell.today ? Font.DemiBold : Font.Normal
+
+                            renderType: Core.Theme.textRender
 
                             color: dayCell.today ? Core.Theme.accentForeground : (popup.isWeekend(dayCell.index) ? Core.Theme.foregroundMuted : Core.Theme.foreground)
                         }
@@ -480,22 +472,38 @@ Components.PopupSurface {
                 Rectangle {
                     anchors.centerIn: parent
 
-                    width: 100
-                    height: 26
+                    width: 104
+                    height: 28
 
-                    radius: 13
+                    radius: height / 2
 
-                    color: todayMouse.containsMouse ? Core.Theme.surfaceGlassHover : Core.Theme.surfaceGlass
+                    color: todayMouse.containsMouse ? Core.Theme.tinted(popup.tint, Core.Theme.chipAlphaHover) : Core.Theme.tinted(popup.tint, Core.Theme.chipAlpha)
+
+                    Behavior on color {
+                        ColorAnimation {
+                            duration: Core.Theme.durFast
+                            easing.type: Easing.OutQuint
+                        }
+                    }
 
                     Text {
                         anchors.centerIn: parent
 
                         text: "\udb80\udced  Today"
 
-                        font.family: Core.Theme.fontFamily
+                        font.families: Core.Theme.textFamilies
                         font.pixelSize: Core.Theme.fontSizeSmall
 
-                        color: Core.Theme.foreground
+                        renderType: Core.Theme.textRender
+
+                        color: todayMouse.containsMouse ? popup.tint : Core.Theme.foreground
+
+                        Behavior on color {
+                            ColorAnimation {
+                                duration: Core.Theme.durFast
+                                easing.type: Easing.OutQuint
+                            }
+                        }
                     }
 
                     MouseArea {
