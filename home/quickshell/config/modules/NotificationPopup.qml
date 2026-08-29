@@ -16,7 +16,6 @@ Components.PopupSurface {
     tint: Core.Theme.hueNotify
 
     cardWidth: 360
-    maxCardHeight: 480
 
     readonly property var list: Services.NotificationServer.notifications
 

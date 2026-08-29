@@ -15,7 +15,6 @@ Components.PopupSurface {
     tint: Core.Theme.hueAudio
 
     cardWidth: 350
-    maxCardHeight: 520
 
     readonly property var svc: Services.AudioService
 

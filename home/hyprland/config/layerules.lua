@@ -73,6 +73,22 @@ hl.layer_rule({
 	order = 8,
 })
 
+-- Quickshell Fallback
+
+hl.layer_rule({
+	name = "quickshell-fallback",
+
+	match = {
+		namespace = "quickshell",
+	},
+
+	blur = true,
+
+	blur_popups = true,
+
+	ignore_alpha = 0.01,
+})
+
 -- Screen Capture and Colour Picking
 
 hl.layer_rule({

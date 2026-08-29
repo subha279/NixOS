@@ -14,7 +14,6 @@ Components.PopupSurface {
     tint: Core.Theme.hueCalendar
 
     cardWidth: 320
-    maxCardHeight: 420
 
     // Seconds precision is only worth the wakeups while visible.
     SystemClock {

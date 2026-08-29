@@ -9,7 +9,8 @@ PanelWindow {
 
     property string popupId: ""
     property int cardWidth: Core.Theme.popupWidth
-    property int maxCardHeight: Core.Theme.popupMaxHeight
+
+    readonly property int maxCardHeight: root.height > 0 ? Math.max(240, Math.round(root.height - root.barBottomY - Core.Theme.popupGap * 3)) : Core.Theme.popupMaxHeight
     property Component contentComponent: null
     property color tint: Core.Theme.accent
 
@@ -31,9 +32,8 @@ PanelWindow {
         top: true
         left: true
         right: true
+        bottom: true
     }
-
-    implicitHeight: root.maxCardHeight + 320
 
     color: "transparent"
 

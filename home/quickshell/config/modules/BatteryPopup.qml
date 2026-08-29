@@ -15,7 +15,6 @@ Components.PopupSurface {
     tint: Core.Theme.hueBattery
 
     cardWidth: 340
-    maxCardHeight: 460
 
     readonly property var svc: Services.BatteryService
 

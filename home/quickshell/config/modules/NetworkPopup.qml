@@ -15,7 +15,6 @@ Components.PopupSurface {
     tint: Core.Theme.hueNetwork
 
     cardWidth: 340
-    maxCardHeight: 470
 
     readonly property var svc: Services.NetworkService
 

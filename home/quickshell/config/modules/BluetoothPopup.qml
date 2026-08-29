@@ -15,7 +15,6 @@ Components.PopupSurface {
     tint: Core.Theme.hueBluetooth
 
     cardWidth: 340
-    maxCardHeight: 470
 
     readonly property var svc: Services.BluetoothService
 
