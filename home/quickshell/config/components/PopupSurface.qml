@@ -140,6 +140,8 @@ PanelWindow {
                     tint: root.tint
 
                     tintAmount: Core.Theme.glassGradientOpacity * 1.6
+
+                    edgeColor: Core.Theme.tinted(root.tint, 0.22)
                 }
             }
 
@@ -207,23 +209,77 @@ PanelWindow {
 
         visible: menuLayer.active || menuBox.opacity > 0.01
 
+        readonly property real chromeWidth: Core.Theme.space1 * 2 + Core.Theme.space3 * 3 + 16
+
+        readonly property real labelWidth: {
+            if (typeof menuMetrics.advanceWidth !== "function")
+                return 0;
+
+            let widest = 0;
+
+            for (let i = 0; i < menuLayer.items.length; i++) {
+                const entry = menuLayer.items[i];
+
+                if (!entry || entry.separator === true)
+                    continue;
+
+                widest = Math.max(widest, menuMetrics.advanceWidth(String(entry.label)));
+            }
+
+            return widest;
+        }
+
+        FontMetrics {
+            id: menuMetrics
+
+            font.family: Core.Theme.fontFamily
+            font.pixelSize: Core.Theme.fontSize
+        }
+
+        Rectangle {
+            x: card.x
+            y: card.y
+
+            width: card.width
+            height: card.height
+
+            radius: Core.Theme.radiusMenu
+
+            color: Core.Theme.scrim
+
+            antialiasing: true
+
+            opacity: menuLayer.active ? 1.0 : 0.0
+
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: menuLayer.active ? 120 : 90
+
+                    easing.type: Easing.OutCubic
+                }
+            }
+        }
+
         Rectangle {
             id: menuBox
 
-            width: 216
+            width: Math.round(Math.max(184, Math.min(card.width - Core.Theme.space2 * 2, menuLayer.labelWidth + menuLayer.chromeWidth + Core.Theme.space2)))
 
             height: menuColumn.implicitHeight + Core.Theme.space2
 
-            x: Math.round(Math.max(Core.Theme.space2, Math.min(menuLayer.width - width - Core.Theme.space2, menuLayer.targetX)))
+            readonly property real minX: card.x + Core.Theme.space2
+            readonly property real maxX: card.x + card.width - menuBox.width - Core.Theme.space2
 
-            y: Math.round(Math.max(Core.Theme.space2, Math.min(menuLayer.height - height - Core.Theme.space2, menuLayer.targetY)))
+            readonly property real minY: card.y + Core.Theme.space2
+            readonly property real maxY: card.y + card.height - menuBox.height - Core.Theme.space2
+
+            x: Math.round(menuBox.maxX < menuBox.minX ? menuBox.minX : Math.max(menuBox.minX, Math.min(menuBox.maxX, menuLayer.targetX)))
+
+            y: Math.round(menuBox.maxY < menuBox.minY ? menuBox.minY : Math.max(menuBox.minY, Math.min(menuBox.maxY, menuLayer.targetY)))
 
             radius: Core.Theme.radius + 4
 
             color: "transparent"
-
-            border.width: Core.Theme.borderWidth
-            border.color: Core.Theme.tinted(root.tint, 0.35)
 
             antialiasing: true
 
@@ -245,6 +301,8 @@ PanelWindow {
                 tint: root.tint
 
                 tintAmount: Core.Theme.glassGradientOpacity
+
+                edgeColor: Core.Theme.tinted(root.tint, 0.30)
             }
 
             Column {
@@ -274,15 +332,19 @@ PanelWindow {
                             id: separatorComp
 
                             Item {
-                                height: 7
+                                height: Core.Theme.space2
 
                                 Rectangle {
-                                    anchors.centerIn: parent
+                                    anchors.left: parent.left
+                                    anchors.right: parent.right
+                                    anchors.verticalCenter: parent.verticalCenter
 
-                                    width: parent.width - 12
+                                    anchors.leftMargin: Core.Theme.space3
+                                    anchors.rightMargin: Core.Theme.space3
+
                                     height: 1
 
-                                    color: Core.Theme.separator
+                                    color: Core.Theme.tinted(Core.Theme.foreground, 0.12)
                                 }
                             }
                         }
@@ -321,6 +383,8 @@ PanelWindow {
 
                                         width: 16
 
+                                        horizontalAlignment: Text.AlignHCenter
+
                                         text: entryLoader.modelData.icon ? entryLoader.modelData.icon : ""
 
                                         font.family: Core.Theme.iconFont
@@ -342,11 +406,15 @@ PanelWindow {
                                     Text {
                                         anchors.verticalCenter: parent.verticalCenter
 
+                                        width: menuBox.width - menuLayer.chromeWidth
+
                                         text: entryLoader.modelData.label
 
                                         font.family: Core.Theme.fontFamily
 
                                         font.pixelSize: Core.Theme.fontSize
+
+                                        elide: Text.ElideRight
 
                                         renderType: Text.QtRendering
 

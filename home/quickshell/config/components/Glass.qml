@@ -9,6 +9,7 @@ Item {
     property real strength: 1.0
     property color tint: Core.Theme.accent
     property real tintAmount: Core.Theme.glassGradientOpacity
+    property color edgeColor: Core.Theme.glassEdge
 
     Rectangle {
         anchors.fill: parent
@@ -71,7 +72,7 @@ Item {
         color: "transparent"
 
         border.width: 1
-        border.color: Core.Theme.glassEdge
+        border.color: glass.edgeColor
 
         antialiasing: true
 
