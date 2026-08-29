@@ -14,8 +14,8 @@
       };
 
       terminal = {
-        name = "Iosevka Nerd Font";
-        package = "nerd-fonts.iosevka";
+        name = "JetBrainsMono Nerd Font Mono";
+        package = "nerd-fonts.jetbrains-mono";
       };
 
       emoji = {

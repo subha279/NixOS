@@ -1,45 +1,16 @@
 { ... }:
 
 {
-  # TMUX
-  #
-  # Behaviour only. Every colour comes from the generated Aurora theme sourced at
-  # the bottom of extraConfig, so `aurora-theme <id>` recolours tmux the same way
-  # it recolours kitty, starship, Hyprland and the shell.
-
   programs.tmux = {
-
     enable = true;
-
-    # Explicit, like stylix.autoEnable = false elsewhere in this config.
-    #
-    # tmux-sensible is a reasonable set of defaults, but it also sets
-    # default-terminal, escape-time and history-limit, which are set deliberately
-    # below. Leaving it on means two sources for the same options and a plugin
-    # dependency for settings that fit in a dozen lines.
     sensibleOnTop = false;
-
-    # tmux-256color, not screen-256color: the latter caps at 8 colours for some
-    # capabilities and is why italics and undercurl go missing inside tmux.
     terminal = "tmux-256color";
-
     historyLimit = 50000;
-
     keyMode = "vi";
-
     mouse = true;
-
-    # Windows and panes both start at 1. The default 0 puts the first window on
-    # the far side of the number row from the rest.
     baseIndex = 1;
-
-    # 500ms by default, which is felt directly as lag leaving insert mode in
-    # Neovim. 10 is low enough to be imperceptible without breaking terminals
-    # that send real escape sequences.
     escapeTime = 10;
-
     clock24 = true;
-
     extraConfig = ''
       # --------------------------------------------------------
       # Terminal capabilities

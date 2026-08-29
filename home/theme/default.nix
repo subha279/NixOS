@@ -269,72 +269,36 @@ let
       palette = "aurora"
 
       # PROMPT
+
       format = """\
-
       $directory\
-
       ''${custom.giturl}\
-
       $git_branch\
-
       ''${custom.git_worktree}\
-
       $git_status\
-
-      $package\
-
-      $nodejs\
-
-      $bun\
-
-      $c\
-
-      $rust\
-
-      $golang\
-
-      $php\
-
-      $java\
-
-      $kotlin\
-
-      $haskell\
-
       $python\
-
-      $docker_context\
-
       $cmd_duration\
-
       $character"""
 
+      # COLORS
+
       [palettes.aurora]
-      bg = "${colors.background}"
+
+      background = "${colors.background}"
       surface = "${colors.surface}"
-      surface2 = "${colors.surfaceHover}"
-      surface3 = "${colors.surfaceActive}"
-
       text = "${colors.text}"
-      text_soft = "${colors.textSecondary}"
-      muted = "${colors.textMuted}"
-      dim = "${colors.textMuted}"
+      textMuted = "${colors.textMuted}"
 
-      purple = "${colors.accent}"
-      purple_bright = "${colors.accentHover}"
-      purple_soft = "${colors.accentMuted}"
-      purple_dark = "${colors.border}"
+      accent = "${colors.accent}"
+      success = "${colors.success}"
+      warning = "${colors.warning}"
+      error = "${colors.error}"
+      info = "${colors.info}"
 
-      blue = "${colors.terminalBlue}"
-      cyan = "${colors.terminalCyan}"
-
-      green = "${colors.success}"
-      yellow = "${colors.warning}"
-      orange = "${colors.warning}"
-      red = "${colors.error}"
-      pink = "${colors.terminalMagenta}"
+      # OS
 
       [os]
+
       disabled = false
       style = "bold text"
       format = "[$symbol ]($style)"
@@ -342,117 +306,56 @@ let
       [os.symbols]
 
       NixOS = ""
-
       Linux = "󰌽"
-
       Arch = "󰣇"
-
-      Artix = "󰣇"
-
       Ubuntu = "󰕈"
-
       Fedora = "󰣛"
-
       Debian = "󰣚"
-
-      Gentoo = "󰣨"
-
-      Manjaro = ""
-
-      Mint = "󰣭"
-
-      SUSE = ""
-
-      Raspbian = "󰐿"
-
-      Alpine = ""
-
-      Amazon = ""
-
-      Android = ""
-
-      CentOS = ""
-
-      Redhat = "󱄛"
-
-      RedHatEnterprise = "󱄛"
-
-      Macos = ""
-
       Windows = "󰍲"
+      Macos = ""
 
       # DIRECTORY
 
       [directory]
 
       style = "bold text"
-
-      format = "[$path]($style)[$read_only]($read_only_style) "
-
+      format = "[$path]($style) "
       home_symbol = "~"
 
       truncation_length = 3
-
       truncate_to_repo = false
-
       truncation_symbol = "…/"
-
-      read_only = " 󰌾"
-
-      read_only_style = "bold red"
 
       # GIT REMOTE
 
       [custom.giturl]
 
-      description = "Display symbol for remote Git server"
+      description = "Display Git remote icon"
 
       command = """
-
       GIT_REMOTE=$(git remote get-url origin 2>/dev/null)
 
       case "$GIT_REMOTE" in
-
-      *github*)
-
-      echo ""
-
-      ;;
-
-      *gitlab*)
-
-      echo ""
-
-      ;;
-
-      *bitbucket*)
-
-      echo ""
-
-      ;;
-
-      *git*)
-
-      echo ""
-
-      ;;
-
-      *)
-
-      echo ""
-
-      ;;
-
+        *github*)
+          echo ""
+          ;;
+        *gitlab*)
+          echo ""
+          ;;
+        *bitbucket*)
+          echo ""
+          ;;
+        *)
+          echo ""
+          ;;
       esac
-
       """
 
       when = "git rev-parse --is-inside-work-tree 2>/dev/null"
 
-      format = "[$output](bold purple) "
+      format = "[$output](bold accent) "
 
       require_repo = true
-
       ignore_timeout = true
 
       # GIT BRANCH
@@ -460,41 +363,31 @@ let
       [git_branch]
 
       symbol = " "
-
-      format = "[](purple)[ $symbol$branch ](bold bg bg:purple)[](purple) "
+      style = "bold accent"
+      format = "[$symbol$branch]($style) "
 
       # GIT WORKTREE
 
       [custom.git_worktree]
 
-      description = "Show indicator when inside a Git worktree"
+      description = "Show Git worktree indicator"
 
       command = """
-
       if git rev-parse --git-dir >/dev/null 2>&1; then
+        common_dir=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null)
+        git_dir=$(git rev-parse --path-format=absolute --git-dir 2>/dev/null)
 
-      common_dir=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null)
-
-      git_dir=$(git rev-parse --path-format=absolute --git-dir 2>/dev/null)
-
-      if [ "$common_dir" != "$git_dir" ]; then
-
-      echo "⛓"
-
+        if [ "$common_dir" != "$git_dir" ]; then
+          echo "⛓"
+        fi
       fi
-
-      fi
-
       """
 
       when = "git rev-parse --is-inside-work-tree >/dev/null 2>&1"
 
-      format = "[$output](bold purple) "
-
-      style = "bold purple"
+      format = "[$output](bold accent) "
 
       require_repo = true
-
       ignore_timeout = true
 
       # GIT STATUS
@@ -502,206 +395,46 @@ let
       [git_status]
 
       style = "bold text"
+      format = "[$all_status$ahead_behind]($style) "
 
-      format = "[$untracked$staged$modified$renamed$deleted$conflicted$stashed$typechanged$ahead_behind]($style) "
+      untracked = "[?](bold error)"
+      staged = "[+](bold success)"
+      modified = "[!](bold warning)"
+      renamed = "[»](bold info)"
+      deleted = "[-](bold error)"
+      conflicted = "[✖](bold error)"
+      stashed = "[≡](bold accent)"
+      typechanged = "[󰜄](bold info)"
 
-      untracked = "[?](bold red)"
-
-      staged = "[+](bold green)"
-
-      modified = "[!](bold yellow)"
-
-      renamed = "[»](bold blue)"
-
-      deleted = "[-](bold red)"
-
-      conflicted = "[✖](bold red)"
-
-      stashed = "[≡](bold purple)"
-
-      typechanged = "[󰜄](bold cyan)"
-
-      ahead = "[⇡''${count}](bold cyan)"
-
-      behind = "[⇣''${count}](bold orange)"
-
-      diverged = "[⇕⇡''${ahead_count}⇣''${behind_count}](bold pink)"
+      ahead = "[⇡''${count}](bold info)"
+      behind = "[⇣''${count}](bold warning)"
+      diverged = "[⇕⇡''${ahead_count}⇣''${behind_count}](bold error)"
 
       up_to_date = ""
-
-      # PACKAGE
-
-      [package]
-
-      disabled = false
-
-      symbol = "󰏗 "
-
-      style = "bold purple"
-
-      format = "[$symbol$version]($style) "
-
-      # NODE.JS
-
-      [nodejs]
-
-      symbol = ""
-
-      style = "bold green"
-
-      format = "[$symbol( $version)]($style) "
-
-      # BUN
-
-      [bun]
-
-      symbol = "🥟"
-
-      style = "bold orange"
-
-      format = "[$symbol( $version)]($style) "
-
-      detect_files = [
-
-      "bun.lock",
-
-      "bun.lockb",
-
-      ]
-
-      # C
-
-      [c]
-
-      symbol = " "
-
-      style = "bold blue"
-
-      format = "[$symbol( $version)]($style) "
-
-      # RUST
-
-      [rust]
-
-      symbol = ""
-
-      style = "bold orange"
-
-      format = "[$symbol( $version)]($style) "
-
-      # GO
-
-      [golang]
-
-      symbol = ""
-
-      style = "bold cyan"
-
-      format = "[$symbol( $version)]($style) "
-
-      detect_files = [
-
-      "go.mod",
-
-      ]
-
-      # PHP
-
-      [php]
-
-      symbol = ""
-
-      style = "bold purple"
-
-      format = "[$symbol( $version)]($style) "
-
-      # JAVA
-
-      [java]
-
-      symbol = " "
-
-      style = "bold red"
-
-      format = "[$symbol( $version)]($style) "
-
-      # KOTLIN
-
-      [kotlin]
-
-      symbol = ""
-
-      style = "bold pink"
-
-      format = "[$symbol( $version)]($style) "
-
-      # HASKELL
-
-      [haskell]
-
-      symbol = ""
-
-      style = "bold purple"
-
-      format = "[$symbol( $version)]($style) "
 
       # PYTHON
 
       [python]
 
-      symbol = ""
-
-      style = "bold yellow"
-
-      format = "[$symbol( $version)]($style) "
-
-      # DOCKER
-
-      [docker_context]
-
-      symbol = ""
-
-      style = "bold cyan"
-
-      format = "[$symbol( $context)]($style) "
-
-      # TIME
-
-      [time]
-
-      disabled = true
-
-      time_format = "%R"
-
-      style = "bold muted"
-
-      format = "[󰥔 $time]($style) "
+      symbol = " "
+      style = "bold warning"
+      format = "[$symbol$version]($style) "
 
       # COMMAND DURATION
 
       [cmd_duration]
 
       min_time = 1000
-
-      style = "bold muted"
-
+      style = "bold textMuted"
       format = "󰔟 [$duration]($style) "
 
       # PROMPT CHARACTER
 
       [character]
 
-      success_symbol = "[➜](bold purple)"
-
-      error_symbol = "[➜](bold red)"
-
-      vimcmd_symbol = "[➜](bold cyan)"
-
-      vimcmd_replace_one_symbol = "[➜](bold pink)"
-
-      vimcmd_replace_symbol = "[➜](bold pink)"
-
-      vimcmd_visual_symbol = "[➜](bold purple)"
+      success_symbol = "[➜](bold accent)"
+      error_symbol = "[➜](bold error)"
+      vimcmd_symbol = "[➜](bold info)"
 
     '';
 
