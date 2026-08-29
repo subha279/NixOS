@@ -71,7 +71,7 @@ A production-oriented, flake-based **NixOS laptop configuration** built around a
 
 ## 🚀 Quick Start
 
-### Fresh NixOS
+### Boot into NixOS live ISO
 
 ```bash
 git clone https://github.com/subha279/NixOS.git ~/NixOS
