@@ -25,14 +25,14 @@ hl.layer_rule({
 	name = "aurora-bar",
 
 	match = {
-		namespace = "^aurora-bar$",
+		namespace = "aurora-bar",
 	},
 
 	blur = true,
 
 	blur_popups = true,
 
-	ignore_alpha = 0.20,
+	ignore_alpha = 0.01,
 
 	order = 10,
 })
@@ -43,14 +43,14 @@ hl.layer_rule({
 	name = "aurora-popup",
 
 	match = {
-		namespace = "^aurora-popup$",
+		namespace = "aurora-popup",
 	},
 
 	blur = true,
 
 	blur_popups = true,
 
-	ignore_alpha = 0.20,
+	ignore_alpha = 0.01,
 
 	order = 6,
 })
@@ -61,14 +61,14 @@ hl.layer_rule({
 	name = "aurora-notifications",
 
 	match = {
-		namespace = "^aurora-notifications$",
+		namespace = "aurora-notifications",
 	},
 
 	blur = true,
 
 	blur_popups = true,
 
-	ignore_alpha = 0.20,
+	ignore_alpha = 0.01,
 
 	order = 8,
 })

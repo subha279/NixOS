@@ -226,7 +226,7 @@ QtObject {
 
     // Liquid Glass
 
-    readonly property real glassOpacity: ui.glassOpacity !== undefined ? ui.glassOpacity : 0.60
+    readonly property real glassOpacity: ui.glassOpacity !== undefined ? ui.glassOpacity : 0.55
 
     readonly property real surfaceOpacity: ui.surfaceOpacity !== undefined ? ui.surfaceOpacity : 0.38
 

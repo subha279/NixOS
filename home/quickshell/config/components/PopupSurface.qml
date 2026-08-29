@@ -118,8 +118,6 @@ PanelWindow {
 
             anchors.fill: parent
 
-            clip: true
-
             opacity: root.open ? 1.0 : 0.0
 
             Glass {
@@ -145,7 +143,9 @@ PanelWindow {
 
                 implicitHeight: contentLoader.item ? contentLoader.item.implicitHeight : 0
 
-                height: implicitHeight
+                height: Math.max(0, Math.min(Math.round(contentHost.implicitHeight), card.height - Core.Theme.padCard * 2))
+
+                clip: true
 
                 opacity: root.open ? 1.0 : 0.0
 
