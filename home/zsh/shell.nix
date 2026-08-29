@@ -28,29 +28,6 @@
       export STARSHIP_CONFIG="$HOME/.config/aurora/active-starship.toml"
     '';
 
-    # Session launcher
-    #
-    # This configuration has no display manager on purpose: nothing under
-    # modules/ enables greetd, sddm or gdm, and programs.hyprland.enable only
-    # installs the compositor, it does not start it. Without this the machine
-    # boots to a text console and Hyprland has to be typed by hand, which also
-    # means quickshell, the wallpaper daemon and the polkit agent never come up,
-    # because they hang off graphical-session.target which
-    # home/hyprland/config/startup.lua starts from inside Hyprland.
-    #
-    # .zprofile rather than .zshrc, because this must run once for a login shell
-    # and not again for every terminal opened inside the session.
-    #
-    # Each guard is load bearing:
-    #
-    #   WAYLAND_DISPLAY unset   not already inside a Wayland session
-    #   SSH_CONNECTION unset    never take over an ssh login
-    #   XDG_VTNR = 1            only the first virtual console
-    #
-    # That last one is the recovery path. If Hyprland cannot start, exec means
-    # the login shell is gone and tty1 returns to the login prompt, so tty2
-    # through tty6 are deliberately left as plain text consoles to log into and
-    # fix it from.
     profileExtra = ''
       # ==================================================
       # Aurora → Hyprland session
@@ -59,7 +36,7 @@
       if [[ -z "''${WAYLAND_DISPLAY:-}" ]] &&
         [[ -z "''${SSH_CONNECTION:-}" ]] &&
         [[ "''${XDG_VTNR:-0}" == "1" ]]; then
-        exec Hyprland
+        exec start-hyprland
       fi
     '';
 

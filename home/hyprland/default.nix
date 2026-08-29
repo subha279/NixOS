@@ -60,22 +60,6 @@
     };
   };
 
-  # Network Applet
-  #
-  # A systemd user service rather than a Hyprland exec, because systemd will
-  # only ever run one of it.
-  #
-  # Launching it from the hyprland.start hook meant that `hyprctl reload`, which
-  # is the last thing `aurora-theme` does, could stack a second copy. Two secret
-  # agents registered against NetworkManager for one session make a perfectly
-  # healthy connection look like it is renegotiating every time the theme
-  # changes. A pgrep guard papered over that; this removes the possibility.
-  #
-  # Quickshell owns the network UI. This is here for the secret agent, which is
-  # what answers a request for credentials that nmcli cannot supply inline, and
-  # for the tray icon. Its own notifications are suppressed by dconf in
-  # home/quickshell/default.nix so they do not double up with NetworkService.
-
   systemd.user.services.nm-applet = {
     Unit = {
       Description = "NetworkManager applet";
@@ -90,8 +74,6 @@
     Service = {
       Type = "exec";
 
-      # --indicator exposes it over StatusNotifier, which is the protocol the
-      # Quickshell tray actually consumes.
       ExecStart = "${pkgs.networkmanagerapplet}/bin/nm-applet --indicator";
 
       Restart = "on-failure";
@@ -107,8 +89,6 @@
   };
 
   # Bluetooth Applet
-  #
-  # Same reasoning as nm-applet above: one owner, no duplicates on reload.
 
   systemd.user.services.blueman-applet = {
     Unit = {

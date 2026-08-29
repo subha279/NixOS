@@ -212,23 +212,10 @@ Item {
                 return;
             }
 
-            // Screen-space anchor for the dropdown.
-            // The bar window spans the full width, so mapToItem(null)
-            // already gives us screen X; we only add the bar's top
-            // margin to get screen Y.
             const p = root.mapToItem(null, 0, root.height);
 
             Core.PopupManager.toggle("network", p.x + root.width / 2, p.y + Core.Theme.barMarginTop);
 
-            // Opening the menu used to force a full rescan every single time.
-            // A rescan is an active scan on an already-associated interface, and
-            // doing it on every click is why opening this menu could knock the
-            // connection over.
-            //
-            // The cached list renders instantly and the poller keeps it current,
-            // so a scan is only worth it when there is genuinely nothing to
-            // show. Anything else is the refresh button in the popup, which is
-            // an explicit request.
             if (Core.PopupManager.isOpen("network") && Services.NetworkService.networkModel.count === 0)
                 Services.NetworkService.rescan();
         }
