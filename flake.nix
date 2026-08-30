@@ -19,11 +19,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    claude-desktop = {
-      url = "github:aaddrick/claude-desktop-debian";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     zen-browser = {
       url = "github:youwen5/zen-browser-flake";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -38,7 +33,6 @@
       home-manager,
       stylix,
       apple-fonts,
-      claude-desktop,
       zen-browser,
       ...
     }:
@@ -54,7 +48,6 @@
             {
               nixpkgs.overlays = [
                 apple-fonts.overlays.default
-                claude-desktop.overlays.default
                 (final: prev: {
                   zen-browser = zen-browser.packages.${final.system}.default;
                 })

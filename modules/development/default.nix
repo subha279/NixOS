@@ -12,7 +12,6 @@
     # Development utilities
     git-lfs
     shellcheck
-    claude-desktop-fhs
     zed-editor
 
     # Rust
