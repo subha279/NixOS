@@ -88,6 +88,13 @@
         minute = "accent";
         second = "foregroundFaint";
       };
+
+      # WORKSPACE
+
+      workspace = {
+        marker = "accent";
+        label = "foreground";
+      };
     };
   };
 

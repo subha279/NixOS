@@ -343,49 +343,79 @@ PanelWindow {
 
             visible: root.osdMix < 0.99 && !root.launcherOpen
 
-            Modules.NotificationCenter {
-                id: notificationCenter
+            // Equal flanks are what actually centre the clock. The row is
+            // centred as a whole, so the clock only lands on the midpoint when
+            // both sides reserve the same width, and the wider one sets it.
+            // Tray is variable width, so this has to be measured, not assumed.
+            readonly property real sideWidth: Math.max(leftGroup.implicitWidth, rightGroup.implicitWidth)
 
-                Layout.preferredWidth: 30 * root.reveal
+            // LEFT FLANK
+
+            RowLayout {
+                id: leftGroup
+
+                Layout.preferredWidth: content.sideWidth
 
                 Layout.preferredHeight: Core.Theme.moduleHeight
+
+                spacing: 3
 
                 visible: root.modulesVisible
 
                 opacity: root.reveal
+
+                // Takes the slack when this flank is the narrower one, which
+                // keeps its modules against the clock instead of the pill edge.
+                Item {
+                    Layout.fillWidth: true
+                }
+
+                Modules.Workspace {
+                    id: workspaceModule
+
+                    Layout.preferredWidth: workspaceModule.implicitWidth * root.reveal
+
+                    Layout.preferredHeight: Core.Theme.moduleHeight
+                }
+
+                Separator {
+                    reveal: root.reveal
+                }
+
+                Modules.NotificationCenter {
+                    id: notificationCenter
+
+                    Layout.preferredWidth: 30 * root.reveal
+
+                    Layout.preferredHeight: Core.Theme.moduleHeight
+                }
+
+                Separator {
+                    reveal: root.reveal
+                }
+
+                Modules.Volume {
+                    Layout.preferredWidth: 58 * root.reveal
+
+                    Layout.preferredHeight: Core.Theme.moduleHeight
+                }
+
+                Separator {
+                    reveal: root.reveal
+                }
+
+                Modules.Brightness {
+                    Layout.preferredWidth: 58 * root.reveal
+
+                    Layout.preferredHeight: Core.Theme.moduleHeight
+                }
+
+                Separator {
+                    reveal: root.reveal
+                }
             }
 
-            Separator {
-                reveal: root.reveal
-            }
-
-            Modules.Volume {
-                Layout.preferredWidth: 58 * root.reveal
-
-                Layout.preferredHeight: Core.Theme.moduleHeight
-
-                visible: root.modulesVisible
-
-                opacity: root.reveal
-            }
-
-            Separator {
-                reveal: root.reveal
-            }
-
-            Modules.Brightness {
-                Layout.preferredWidth: 58 * root.reveal
-
-                Layout.preferredHeight: Core.Theme.moduleHeight
-
-                visible: root.modulesVisible
-
-                opacity: root.reveal
-            }
-
-            Separator {
-                reveal: root.reveal
-            }
+            // CENTRE
 
             Modules.Clock {
                 id: clockModule
@@ -397,66 +427,72 @@ PanelWindow {
                 reveal: root.reveal
             }
 
-            Separator {
-                reveal: root.reveal
-            }
+            // RIGHT FLANK
 
-            Modules.Network {
-                Layout.preferredWidth: 30 * root.reveal
+            RowLayout {
+                id: rightGroup
+
+                Layout.preferredWidth: content.sideWidth
 
                 Layout.preferredHeight: Core.Theme.moduleHeight
+
+                spacing: 3
 
                 visible: root.modulesVisible
 
                 opacity: root.reveal
-            }
 
-            Separator {
-                reveal: root.reveal
-            }
+                Separator {
+                    reveal: root.reveal
+                }
 
-            Modules.Bluetooth {
-                Layout.preferredWidth: 30 * root.reveal
+                Modules.Network {
+                    Layout.preferredWidth: 30 * root.reveal
 
-                Layout.preferredHeight: Core.Theme.moduleHeight
+                    Layout.preferredHeight: Core.Theme.moduleHeight
+                }
 
-                visible: root.modulesVisible
+                Separator {
+                    reveal: root.reveal
+                }
 
-                opacity: root.reveal
-            }
+                Modules.Bluetooth {
+                    Layout.preferredWidth: 30 * root.reveal
 
-            Separator {
-                reveal: root.reveal
-            }
+                    Layout.preferredHeight: Core.Theme.moduleHeight
+                }
 
-            Modules.Battery {
-                Layout.preferredWidth: 58 * root.reveal
+                Separator {
+                    reveal: root.reveal
+                }
 
-                Layout.preferredHeight: Core.Theme.moduleHeight
+                Modules.Battery {
+                    Layout.preferredWidth: 58 * root.reveal
 
-                visible: root.modulesVisible && Services.BatteryService.available
+                    Layout.preferredHeight: Core.Theme.moduleHeight
 
-                opacity: root.reveal
-            }
+                    visible: Services.BatteryService.available
+                }
 
-            Separator {
-                reveal: root.reveal
+                Separator {
+                    reveal: root.reveal
 
-                available: Services.BatteryService.available
-            }
+                    available: Services.BatteryService.available
+                }
 
-            Modules.Tray {
-                id: tray
+                Modules.Tray {
+                    id: tray
 
-                barWindow: root
+                    barWindow: root
 
-                Layout.preferredWidth: tray.implicitWidth * root.reveal
+                    Layout.preferredWidth: tray.implicitWidth * root.reveal
 
-                Layout.preferredHeight: Core.Theme.moduleHeight
+                    Layout.preferredHeight: Core.Theme.moduleHeight
+                }
 
-                visible: root.modulesVisible
-
-                opacity: root.reveal
+                Item {
+                    Layout.fillWidth: true
+                }
             }
         }
 

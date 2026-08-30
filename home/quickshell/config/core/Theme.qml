@@ -176,6 +176,12 @@ QtObject {
 
     readonly property color clockSecond: resolveColor(ui.clock?.second, foregroundFaint)
 
+    // Workspace
+
+    readonly property color workspaceMarker: resolveColor(ui.workspace?.marker, accent)
+
+    readonly property color workspaceLabel: resolveColor(ui.workspace?.label, foreground)
+
     // Liquid Glass
 
     readonly property real glassOpacity: ui.glassOpacity !== undefined ? ui.glassOpacity : 0.51
