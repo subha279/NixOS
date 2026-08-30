@@ -263,132 +263,391 @@ let
     in
     ''
       add_newline = false
-      command_timeout = 1000
-      scan_timeout = 30
-      follow_symlinks = false
-      palette = "aurora"
+        command_timeout = 1000
 
-      format = """$os$directory''${custom.giturl}$git_branch''${custom.git_worktree}$git_status$python$cmd_duration$character"""
+        scan_timeout = 30
 
-      # COLORS
+        follow_symlinks = false
 
-      [palettes.aurora]
-      background = "${colors.background}"
-      surface = "${colors.surface}"
-      text = "${colors.text}"
-      textMuted = "${colors.textMuted}"
-      accent = "${colors.accent}"
-      success = "${colors.success}"
-      warning = "${colors.warning}"
-      error = "${colors.error}"
-      info = "${colors.info}"
+        palette = "aurora"
 
-      # OS
+        format = """\
 
-      [os]
-      disabled = false
-      style = "bold accent"
-      format = "[$symbol]($style) "
+        $directory\
 
-      [os.symbols]
-      NixOS = ""
-      Arch = "󰣇"
-      Fedora = "󰣛"
-      Debian = "󰣚"
-      Windows = "󰍲"
-      Macos = ""
+        ''${custom.giturl}\
 
-      # DIRECTORY
+        $git_branch\
 
-      [directory]
-      style = "bold text"
-      format = "[$path]($style) "
-      home_symbol = "~"
-      read_only = " 󰌾"
-      truncation_length = 3
-      truncate_to_repo = false
-      truncation_symbol = "…/"
+        ''${custom.git_worktree}\
 
-      # GIT REMOTE
+        $git_status\
 
-      [custom.giturl]
-      description = "Git hosting provider"
-      command = """
-      case "$(git remote get-url origin 2>/dev/null)" in
-        *github*)    printf "" ;;
-        *gitlab*)    printf "" ;;
-        *bitbucket*) printf "" ;;
-        *)           printf "" ;;
-      esac
-      """
-      when = "git rev-parse --is-inside-work-tree >/dev/null 2>&1"
-      format = "[$output](bold accent) "
-      require_repo = true
-      ignore_timeout = true
+        $package\
 
-      # GIT BRANCH
+        $nodejs\
 
-      [git_branch]
-      symbol = " "
-      style = "bold accent"
-      format = "[$symbol$branch]($style) "
-      truncation_length = 24
-      truncation_symbol = "…"
+        $bun\
 
-      # GIT WORKTREE
+        $c\
 
-      [custom.git_worktree]
-      description = "Git worktree indicator"
-      command = """
-      common_dir=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null)
-      git_dir=$(git rev-parse --path-format=absolute --git-dir 2>/dev/null)
-      [ "$common_dir" != "$git_dir" ] && printf "⛓"
-      """
-      when = "git rev-parse --is-inside-work-tree >/dev/null 2>&1"
-      format = "[$output](bold info) "
-      require_repo = true
-      ignore_timeout = true
+        $rust\
 
-      # GIT STATUS
+        $golang\
 
-      [git_status]
-      style = "bold text"
-      format = "[$all_status$ahead_behind]($style) "
+        $php\
 
-      untracked = "[?](bold error)"
-      staged = "[+](bold success)"
-      modified = "[!](bold warning)"
-      renamed = "[»](bold info)"
-      deleted = "[-](bold error)"
-      conflicted = "[×](bold error)"
-      stashed = "[≡](bold accent)"
-      typechanged = "[~](bold info)"
+        $java\
 
-      ahead = "[⇡''${count}](bold info)"
-      behind = "[⇣''${count}](bold warning)"
-      diverged = "[⇡''${ahead_count}⇣''${behind_count}](bold error)"
-      up_to_date = ""
+        $kotlin\
 
-      # PYTHON
+        $haskell\
 
-      [python]
-      symbol = " "
-      style = "bold warning"
-      format = "[$symbol$version]($style) "
+        $python\
 
-      # COMMAND DURATION
+        $docker_context\
 
-      [cmd_duration]
-      min_time = 1000
-      style = "bold textMuted"
-      format = "[󰔟 $duration]($style) "
+        $cmd_duration\
 
-      # PROMPT CHARACTER
+        $character"""
 
-      [character]
-      success_symbol = "[❯](bold accent)"
-      error_symbol = "[❯](bold error)"
-      vimcmd_symbol = "[❮](bold info)"
+        [palettes.aurora]
+
+        bg = "${colors.background}"
+
+        surface = "${colors.surface}"
+
+        surface2 = "${colors.surfaceHover}"
+
+        surface3 = "${colors.surfaceActive}"
+
+        text = "${colors.text}"
+
+        text_soft = "${colors.textSecondary}"
+
+        muted = "${colors.textMuted}"
+
+        dim = "${colors.textMuted}"
+
+        purple = "${colors.accent}"
+
+        purple_bright = "${colors.accentHover}"
+
+        purple_soft = "${colors.accentMuted}"
+
+        purple_dark = "${colors.border}"
+
+        blue = "${colors.terminalBlue}"
+
+        cyan = "${colors.terminalCyan}"
+
+        green = "${colors.success}"
+
+        yellow = "${colors.warning}"
+
+        orange = "${colors.warning}"
+
+        red = "${colors.error}"
+
+        pink = "${colors.terminalMagenta}"
+
+        [os]
+
+        disabled = false
+
+        style = "bold text"
+
+        format = "[$symbol ]($style)"
+
+        [os.symbols]
+
+        NixOS = ""
+
+        Macos = ""
+
+        Windows = "󰍲"
+
+        [directory]
+
+        style = "bold text"
+
+        format = "[$path]($style)[$read_only]($read_only_style) "
+
+        home_symbol = "~"
+
+        truncation_length = 3
+
+        truncate_to_repo = false
+
+        truncation_symbol = "…/"
+
+        read_only = " 󰌾"
+
+        read_only_style = "bold red"
+
+        [custom.giturl]
+
+        description = "Display symbol for remote Git server"
+
+        command = """
+
+        GIT_REMOTE=$(git remote get-url origin 2>/dev/null)
+
+        case "$GIT_REMOTE" in
+
+        *github*)
+
+        echo ""
+
+        ;;
+
+        *gitlab*)
+
+        echo ""
+
+        ;;
+
+        *bitbucket*)
+
+        echo ""
+
+        ;;
+
+        *git*)
+
+        echo ""
+
+        ;;
+
+        *)
+
+        echo ""
+
+        ;;
+
+        esac
+
+        """
+
+        when = "git rev-parse --is-inside-work-tree 2>/dev/null"
+
+        format = "[$output](bold purple) "
+
+        require_repo = true
+
+        ignore_timeout = true
+
+        [git_branch]
+
+        symbol = " "
+
+        format = "[](purple)[ $symbol$branch ](bold bg bg:purple)[](purple) "
+
+        [custom.git_worktree]
+
+        description = "Show indicator when inside a Git worktree"
+
+        command = """
+
+        if git rev-parse --git-dir >/dev/null 2>&1; then
+
+        common_dir=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null)
+
+        git_dir=$(git rev-parse --path-format=absolute --git-dir 2>/dev/null)
+
+        if [ "$common_dir" != "$git_dir" ]; then
+
+        echo "⛓"
+
+        fi
+
+        fi
+
+        """
+
+        when = "git rev-parse --is-inside-work-tree >/dev/null 2>&1"
+
+        format = "[$output](bold purple) "
+
+        style = "bold purple"
+
+        require_repo = true
+
+        ignore_timeout = true
+
+        [git_status]
+
+        style = "bold text"
+
+        format = "[$untracked$staged$modified$renamed$deleted$conflicted$stashed$typechanged$ahead_behind]($style) "
+
+        untracked = "[?](bold red)"
+
+        staged = "[+](bold green)"
+
+        modified = "[!](bold yellow)"
+
+        renamed = "[»](bold blue)"
+
+        deleted = "[-](bold red)"
+
+        conflicted = "[✖](bold red)"
+
+        stashed = "[≡](bold purple)"
+
+        typechanged = "[󰜄](bold cyan)"
+
+        ahead = "[⇡''${count}](bold cyan)"
+
+        behind = "[⇣''${count}](bold orange)"
+
+        diverged = "[⇕⇡''${ahead_count}⇣''${behind_count}](bold pink)"
+
+        up_to_date = ""
+
+        [package]
+
+        disabled = false
+
+        symbol = "󰏗 "
+
+        style = "bold purple"
+
+        format = "[$symbol$version]($style) "
+
+        [nodejs]
+
+        symbol = ""
+
+        style = "bold green"
+
+        format = "[$symbol( $version)]($style) "
+
+        [bun]
+
+        symbol = "🥟"
+
+        style = "bold orange"
+
+        format = "[$symbol( $version)]($style) "
+
+        detect_files = [
+
+        "bun.lock",
+
+        "bun.lockb",
+
+        ]
+
+        [c]
+
+        symbol = " "
+
+        style = "bold blue"
+
+        format = "[$symbol( $version)]($style) "
+
+        [rust]
+
+        symbol = ""
+
+        style = "bold orange"
+
+        format = "[$symbol( $version)]($style) "
+
+        [golang]
+
+        symbol = ""
+
+        style = "bold cyan"
+
+        format = "[$symbol( $version)]($style) "
+
+        detect_files = [
+
+        "go.mod",
+
+        ]
+
+        [php]
+
+        symbol = ""
+
+        style = "bold purple"
+
+        format = "[$symbol( $version)]($style) "
+
+        [java]
+
+        symbol = " "
+
+        style = "bold red"
+
+        format = "[$symbol( $version)]($style) "
+
+        [kotlin]
+
+        symbol = ""
+
+        style = "bold pink"
+
+        format = "[$symbol( $version)]($style) "
+
+        [haskell]
+
+        symbol = ""
+
+        style = "bold purple"
+
+        format = "[$symbol( $version)]($style) "
+
+        [python]
+
+        symbol = ""
+
+        style = "bold yellow"
+
+        format = "[$symbol( $version)]($style) "
+
+        [docker_context]
+
+        symbol = ""
+
+        style = "bold cyan"
+
+        format = "[$symbol( $context)]($style) "
+
+        [time]
+
+        disabled = true
+
+        time_format = "%R"
+
+        style = "bold muted"
+
+        format = "[󰥔 $time]($style) "
+
+        [cmd_duration]
+
+        min_time = 1000
+
+        style = "bold muted"
+
+        format = "󰔟 [$duration]($style) "
+
+        [character]
+
+        success_symbol = "[➜](bold purple)"
+
+        error_symbol = "[➜](bold red)"
+
+        vimcmd_symbol = "[➜](bold cyan)"
+
+        vimcmd_replace_one_symbol = "[➜](bold pink)"
+
+        vimcmd_replace_symbol = "[➜](bold pink)"
+
+        vimcmd_visual_symbol = "[➜](bold purple)"
     '';
 
   luaThemeFiles = lib.genAttrs themeNames (themeId: {
