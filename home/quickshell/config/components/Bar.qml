@@ -189,6 +189,11 @@ PanelWindow {
 
     readonly property bool modulesVisible: root.reveal > 0.012 && !root.launcherOpen
 
+    // How far each flank is displaced toward the clock at rest. Kept under one
+    // module width so the slide reads as travel rather than a jump, and it is
+    // inward, so a flank can never overhang the pill mid-animation.
+    readonly property real moduleSlide: 16
+
     // OSD takeover
 
     readonly property bool osd: Core.OsdController.active && !root.expanded && !root.launcherOpen
@@ -349,52 +354,70 @@ PanelWindow {
             // the midpoint, but the shorter flank then reserved the difference
             // as empty bar, which with an empty tray was 63px of nothing on the
             // right. Splitting controls from status instead leaves the flanks
-            // 171 and 182 wide, so the clock sits 5.5px off centre with nothing
+            // 168 and 180, so the clock sits 6px off centre with nothing
             // wasted. Adjust the split, not the padding, if it drifts.
+            //
+            // The two flanks exist so each can carry one Translate. They have no
+            // preferred width, so the nesting is free: 48px of spacing either
+            // way, identical to the flat row it replaced.
 
-            Modules.Workspace {
-                id: workspaceModule
+            // CONTROLS
 
-                Layout.preferredWidth: workspaceModule.implicitWidth * root.reveal
+            RowLayout {
+                id: leftGroup
 
                 Layout.preferredHeight: Core.Theme.moduleHeight
+
+                spacing: 3
 
                 visible: root.modulesVisible
 
                 opacity: root.reveal
+
+                // Rides out from behind the clock rather than stretching in
+                // place. Driven straight off `reveal` with no Behavior of its
+                // own, so it shares that one animation instead of racing it,
+                // and being a transform it never touches layout.
+                transform: Translate {
+                    x: (1.0 - root.reveal) * root.moduleSlide
+                }
+
+                Modules.Workspace {
+                    id: workspaceModule
+
+                    Layout.preferredWidth: workspaceModule.implicitWidth * root.reveal
+
+                    Layout.preferredHeight: Core.Theme.moduleHeight
+                }
+
+                Separator {
+                    reveal: root.reveal
+                }
+
+                Modules.Volume {
+                    Layout.preferredWidth: 58 * root.reveal
+
+                    Layout.preferredHeight: Core.Theme.moduleHeight
+                }
+
+                Separator {
+                    reveal: root.reveal
+                }
+
+                Modules.Brightness {
+                    Layout.preferredWidth: 58 * root.reveal
+
+                    Layout.preferredHeight: Core.Theme.moduleHeight
+                }
+
+                Separator {
+                    reveal: root.reveal
+                }
             }
 
-            Separator {
-                reveal: root.reveal
-            }
-
-            Modules.Volume {
-                Layout.preferredWidth: 58 * root.reveal
-
-                Layout.preferredHeight: Core.Theme.moduleHeight
-
-                visible: root.modulesVisible
-
-                opacity: root.reveal
-            }
-
-            Separator {
-                reveal: root.reveal
-            }
-
-            Modules.Brightness {
-                Layout.preferredWidth: 58 * root.reveal
-
-                Layout.preferredHeight: Core.Theme.moduleHeight
-
-                visible: root.modulesVisible
-
-                opacity: root.reveal
-            }
-
-            Separator {
-                reveal: root.reveal
-            }
+            // CLOCK
+            //
+            // The anchor the flanks slide out from, so it never moves.
 
             Modules.Clock {
                 id: clockModule
@@ -406,84 +429,87 @@ PanelWindow {
                 reveal: root.reveal
             }
 
-            Separator {
-                reveal: root.reveal
-            }
+            // STATUS
 
-            Modules.NotificationCenter {
-                id: notificationCenter
-
-                Layout.preferredWidth: 30 * root.reveal
+            RowLayout {
+                id: rightGroup
 
                 Layout.preferredHeight: Core.Theme.moduleHeight
+
+                spacing: 3
 
                 visible: root.modulesVisible
 
                 opacity: root.reveal
-            }
 
-            Separator {
-                reveal: root.reveal
-            }
+                transform: Translate {
+                    x: -(1.0 - root.reveal) * root.moduleSlide
+                }
 
-            Modules.Network {
-                Layout.preferredWidth: 30 * root.reveal
+                Separator {
+                    reveal: root.reveal
+                }
 
-                Layout.preferredHeight: Core.Theme.moduleHeight
+                Modules.NotificationCenter {
+                    id: notificationCenter
 
-                visible: root.modulesVisible
+                    Layout.preferredWidth: 30 * root.reveal
 
-                opacity: root.reveal
-            }
+                    Layout.preferredHeight: Core.Theme.moduleHeight
+                }
 
-            Separator {
-                reveal: root.reveal
-            }
+                Separator {
+                    reveal: root.reveal
+                }
 
-            Modules.Bluetooth {
-                Layout.preferredWidth: 30 * root.reveal
+                Modules.Network {
+                    Layout.preferredWidth: 30 * root.reveal
 
-                Layout.preferredHeight: Core.Theme.moduleHeight
+                    Layout.preferredHeight: Core.Theme.moduleHeight
+                }
 
-                visible: root.modulesVisible
+                Separator {
+                    reveal: root.reveal
+                }
 
-                opacity: root.reveal
-            }
+                Modules.Bluetooth {
+                    Layout.preferredWidth: 30 * root.reveal
 
-            Separator {
-                reveal: root.reveal
-            }
+                    Layout.preferredHeight: Core.Theme.moduleHeight
+                }
 
-            Modules.Battery {
-                Layout.preferredWidth: 58 * root.reveal
+                Separator {
+                    reveal: root.reveal
+                }
 
-                Layout.preferredHeight: Core.Theme.moduleHeight
+                Modules.Battery {
+                    Layout.preferredWidth: 58 * root.reveal
 
-                visible: root.modulesVisible && Services.BatteryService.available
+                    Layout.preferredHeight: Core.Theme.moduleHeight
 
-                opacity: root.reveal
-            }
+                    visible: Services.BatteryService.available
+                }
 
-            Separator {
-                reveal: root.reveal
+                Separator {
+                    reveal: root.reveal
 
-                available: Services.BatteryService.available
-            }
+                    available: Services.BatteryService.available
+                }
 
-            // Collapses to nothing when there is no tray, which is the normal
-            // case here since isHidden() filters out nm-applet and blueman.
-            Modules.Tray {
-                id: tray
+                // Collapses to nothing when there is no tray, which is the
+                // normal case here since isHidden() filters out nm-applet and
+                // blueman. Hidden outright so it does not even hold a gap.
+                Modules.Tray {
+                    id: tray
 
-                barWindow: root
+                    barWindow: root
 
-                Layout.preferredWidth: tray.implicitWidth * root.reveal
+                    Layout.preferredWidth: tray.implicitWidth * root.reveal
 
-                Layout.preferredHeight: Core.Theme.moduleHeight
+                    Layout.preferredHeight: Core.Theme.moduleHeight
 
-                visible: root.modulesVisible && tray.implicitWidth > 0
-
-                opacity: root.reveal
+                    visible: tray.implicitWidth > 0
+                }
             }
         }
 
