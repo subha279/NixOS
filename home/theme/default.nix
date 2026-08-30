@@ -268,27 +268,15 @@ let
       follow_symlinks = false
       palette = "aurora"
 
-      # PROMPT
-
-      format = """\
-      $directory\
-      ''${custom.giturl}\
-      $git_branch\
-      ''${custom.git_worktree}\
-      $git_status\
-      $python\
-      $cmd_duration\
-      $character"""
+      format = """$os$directory''${custom.giturl}$git_branch''${custom.git_worktree}$git_status$python$cmd_duration$character"""
 
       # COLORS
 
       [palettes.aurora]
-
       background = "${colors.background}"
       surface = "${colors.surface}"
       text = "${colors.text}"
       textMuted = "${colors.textMuted}"
-
       accent = "${colors.accent}"
       success = "${colors.success}"
       warning = "${colors.warning}"
@@ -298,17 +286,13 @@ let
       # OS
 
       [os]
-
       disabled = false
-      style = "bold text"
-      format = "[$symbol ]($style)"
+      style = "bold accent"
+      format = "[$symbol]($style) "
 
       [os.symbols]
-
       NixOS = ""
-      Linux = "󰌽"
       Arch = "󰣇"
-      Ubuntu = "󰕈"
       Fedora = "󰣛"
       Debian = "󰣚"
       Windows = "󰍲"
@@ -317,11 +301,10 @@ let
       # DIRECTORY
 
       [directory]
-
       style = "bold text"
       format = "[$path]($style) "
       home_symbol = "~"
-
+      read_only = " 󰌾"
       truncation_length = 3
       truncate_to_repo = false
       truncation_symbol = "…/"
@@ -329,71 +312,46 @@ let
       # GIT REMOTE
 
       [custom.giturl]
-
-      description = "Display Git remote icon"
-
+      description = "Git hosting provider"
       command = """
-      GIT_REMOTE=$(git remote get-url origin 2>/dev/null)
-
-      case "$GIT_REMOTE" in
-        *github*)
-          echo ""
-          ;;
-        *gitlab*)
-          echo ""
-          ;;
-        *bitbucket*)
-          echo ""
-          ;;
-        *)
-          echo ""
-          ;;
+      case "$(git remote get-url origin 2>/dev/null)" in
+        *github*)    printf "" ;;
+        *gitlab*)    printf "" ;;
+        *bitbucket*) printf "" ;;
+        *)           printf "" ;;
       esac
       """
-
-      when = "git rev-parse --is-inside-work-tree 2>/dev/null"
-
+      when = "git rev-parse --is-inside-work-tree >/dev/null 2>&1"
       format = "[$output](bold accent) "
-
       require_repo = true
       ignore_timeout = true
 
       # GIT BRANCH
 
       [git_branch]
-
       symbol = " "
       style = "bold accent"
       format = "[$symbol$branch]($style) "
+      truncation_length = 24
+      truncation_symbol = "…"
 
       # GIT WORKTREE
 
       [custom.git_worktree]
-
-      description = "Show Git worktree indicator"
-
+      description = "Git worktree indicator"
       command = """
-      if git rev-parse --git-dir >/dev/null 2>&1; then
-        common_dir=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null)
-        git_dir=$(git rev-parse --path-format=absolute --git-dir 2>/dev/null)
-
-        if [ "$common_dir" != "$git_dir" ]; then
-          echo "⛓"
-        fi
-      fi
+      common_dir=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null)
+      git_dir=$(git rev-parse --path-format=absolute --git-dir 2>/dev/null)
+      [ "$common_dir" != "$git_dir" ] && printf "⛓"
       """
-
       when = "git rev-parse --is-inside-work-tree >/dev/null 2>&1"
-
-      format = "[$output](bold accent) "
-
+      format = "[$output](bold info) "
       require_repo = true
       ignore_timeout = true
 
       # GIT STATUS
 
       [git_status]
-
       style = "bold text"
       format = "[$all_status$ahead_behind]($style) "
 
@@ -402,20 +360,18 @@ let
       modified = "[!](bold warning)"
       renamed = "[»](bold info)"
       deleted = "[-](bold error)"
-      conflicted = "[✖](bold error)"
+      conflicted = "[×](bold error)"
       stashed = "[≡](bold accent)"
-      typechanged = "[󰜄](bold info)"
+      typechanged = "[~](bold info)"
 
       ahead = "[⇡''${count}](bold info)"
       behind = "[⇣''${count}](bold warning)"
-      diverged = "[⇕⇡''${ahead_count}⇣''${behind_count}](bold error)"
-
+      diverged = "[⇡''${ahead_count}⇣''${behind_count}](bold error)"
       up_to_date = ""
 
       # PYTHON
 
       [python]
-
       symbol = " "
       style = "bold warning"
       format = "[$symbol$version]($style) "
@@ -423,19 +379,16 @@ let
       # COMMAND DURATION
 
       [cmd_duration]
-
       min_time = 1000
       style = "bold textMuted"
-      format = "󰔟 [$duration]($style) "
+      format = "[󰔟 $duration]($style) "
 
       # PROMPT CHARACTER
 
       [character]
-
-      success_symbol = "[➜](bold accent)"
-      error_symbol = "[➜](bold error)"
-      vimcmd_symbol = "[➜](bold info)"
-
+      success_symbol = "[❯](bold accent)"
+      error_symbol = "[❯](bold error)"
+      vimcmd_symbol = "[❮](bold info)"
     '';
 
   luaThemeFiles = lib.genAttrs themeNames (themeId: {
