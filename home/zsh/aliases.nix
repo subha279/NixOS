@@ -58,5 +58,8 @@
     gp = "git push";
 
     gpl = "git pull --ff-only";
+
+    # Devlopment
+    nd = "nix develop -c zsh";
   };
 }
