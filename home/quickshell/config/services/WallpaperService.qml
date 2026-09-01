@@ -128,7 +128,7 @@ QtObject {
         Quickshell.execDetached([
             "sh",
             "-c",
-            "mkdir -p \"$(dirname \"$2\")\" && awww img \"$1\" --transition-type grow --transition-duration 0.7 && printf '%s\\n' \"$1\" > \"$2\"",
+            "mkdir -p \"$(dirname \"$2\")\" && awww img \"$1\" --transition-type random --transition-fps 180 --transition-step 30 && printf '%s\\n' \"$1\" > \"$2\"",
             "sh",
             path,
             root.statePath
