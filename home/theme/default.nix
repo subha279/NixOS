@@ -180,81 +180,6 @@ let
       background_opacity ${toString ui.terminalOpacity}
     '';
 
-  themeToTmux =
-    themeId:
-    let
-      theme = themeData.themes.${themeId};
-      colors = theme.colors;
-      ui = themeData.global.ui;
-
-      clockColors = {
-        foreground = colors.text;
-        foregroundMuted = colors.textSecondary;
-        foregroundFaint = colors.textMuted;
-
-        text = colors.text;
-        textSecondary = colors.textSecondary;
-        textMuted = colors.textMuted;
-
-        accent = colors.accent;
-        accentHover = colors.accentHover;
-
-        success = colors.success;
-        warning = colors.warning;
-        error = colors.error;
-        info = colors.info;
-      };
-
-      clockColor = name: clockColors.${name} or colors.text;
-    in
-    ''
-      set -g status on
-      set -g status-position bottom
-      set -g status-justify left
-      set -g status-interval 5
-
-      set -g status-style "bg=${colors.background},fg=${colors.textSecondary}"
-
-      set -g status-left-length 60
-      set -g status-right-length 90
-
-      set -g status-left "#[fg=${colors.accent},bg=${colors.background}]#[fg=${colors.accentForeground},bg=${colors.accent},bold] #S #[fg=${colors.accent},bg=${colors.background}] "
-
-      set -g window-status-separator " "
-
-      set -g window-status-format "#[fg=${colors.surface},bg=${colors.background}]#[fg=${colors.textMuted},bg=${colors.surface}] #I #W#{?window_zoomed_flag,  ,}#[fg=${colors.surface},bg=${colors.background}]"
-
-      set -g window-status-current-format "#[fg=${colors.accentMuted},bg=${colors.background}]#[fg=${colors.text},bg=${colors.accentMuted},bold] #I #W#{?window_zoomed_flag,  ,}#[fg=${colors.accentMuted},bg=${colors.background}]"
-
-      set -g window-status-activity-style "fg=${colors.warning},bg=${colors.surface}"
-      set -g window-status-bell-style "fg=${colors.error},bg=${colors.surface},bold"
-
-      set -g status-right "#[fg=${colors.warning},bg=${colors.background}]#{?client_prefix,󰌆 ,}#[fg=${clockColor ui.clock.hour},bg=${colors.background},bold]%H#[fg=${clockColor ui.clock.separator},nobold]:#[fg=${clockColor ui.clock.minute},bold]%M#[fg=${colors.textMuted},nobold]  %a %d %b  "
-
-      set -g pane-border-style "fg=${colors.border}"
-      set -g pane-active-border-style "fg=${colors.accent}"
-
-      set -g pane-border-lines single
-      set -g pane-border-status off
-
-      set -g display-panes-colour "${colors.textMuted}"
-      set -g display-panes-active-colour "${colors.accent}"
-
-      set -g message-style "bg=${colors.surface},fg=${colors.text}"
-      set -g message-command-style "bg=${colors.surface},fg=${colors.accent}"
-
-      set -g mode-style "bg=${colors.accentMuted},fg=${colors.text}"
-      set -g copy-mode-match-style "bg=${colors.accentMuted},fg=${colors.text}"
-      set -g copy-mode-current-match-style "bg=${colors.accent},fg=${colors.accentForeground}"
-
-      set -g popup-style "bg=${colors.background},fg=${colors.text}"
-      set -g popup-border-style "fg=${colors.accent}"
-      set -g popup-border-lines rounded
-
-      set -g clock-mode-colour "${colors.accent}"
-      set -g clock-mode-style 24
-    '';
-
   themeToStarship =
     themeId:
     let
@@ -662,10 +587,6 @@ let
     text = themeToKitty themeId;
   });
 
-  tmuxThemeFiles = lib.genAttrs themeNames (themeId: {
-    text = themeToTmux themeId;
-  });
-
   starshipThemeFiles = lib.genAttrs themeNames (themeId: {
     text = themeToStarship themeId;
   });
@@ -692,10 +613,6 @@ let
     themeId: file: lib.nameValuePair "aurora/themes/${themeId}.kitty.conf" file
   ) kittyThemeFiles;
 
-  generatedTmuxFiles = lib.mapAttrs' (
-    themeId: file: lib.nameValuePair "aurora/themes/${themeId}.tmux.conf" file
-  ) tmuxThemeFiles;
-
   generatedStarshipFiles = lib.mapAttrs' (
     themeId: file: lib.nameValuePair "aurora/themes/${themeId}.starship.toml" file
   ) starshipThemeFiles;
@@ -714,7 +631,6 @@ in
   // generatedLuaFiles
   // generatedJsonFiles
   // generatedKittyFiles
-  // generatedTmuxFiles
   // generatedStarshipFiles;
 
   home.activation.initializeAuroraTheme = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
@@ -722,7 +638,6 @@ in
     theme_file="$theme_dir/active-theme"
     active_lua="$theme_dir/active-theme.lua"
     active_kitty="$theme_dir/active-kitty.conf"
-    active_tmux="$theme_dir/active-tmux.conf"
     active_starship="$theme_dir/active-starship.toml"
 
     mkdir -p "$theme_dir"
@@ -753,16 +668,6 @@ in
         "$active_kitty"
     fi
 
-    if [[ -f "$theme_dir/themes/$selected.tmux.conf" ]]; then
-      ln -sfn \
-        "$theme_dir/themes/$selected.tmux.conf" \
-        "$active_tmux"
-    else
-      ln -sfn \
-        "$theme_dir/themes/catppuccin-mocha.tmux.conf" \
-        "$active_tmux"
-    fi
-
     if [[ -f "$theme_dir/themes/$selected.starship.toml" ]]; then
       ln -sfn \
         "$theme_dir/themes/$selected.starship.toml" \
@@ -787,7 +692,6 @@ in
       ACTIVE_THEME="$CONFIG_DIR/active-theme"
       ACTIVE_LUA="$CONFIG_DIR/active-theme.lua"
       ACTIVE_KITTY="$CONFIG_DIR/active-kitty.conf"
-      ACTIVE_TMUX="$CONFIG_DIR/active-tmux.conf"
       ACTIVE_STARSHIP="$CONFIG_DIR/active-starship.toml"
       THEME_DIR="$CONFIG_DIR/themes"
 
@@ -823,7 +727,6 @@ in
       theme_lua="$THEME_DIR/$theme_id.lua"
       theme_json="$THEME_DIR/$theme_id.json"
       theme_kitty="$THEME_DIR/$theme_id.kitty.conf"
-      theme_tmux="$THEME_DIR/$theme_id.tmux.conf"
       theme_starship="$THEME_DIR/$theme_id.starship.toml"
 
       if [[ ! -f "$theme_lua" ]]; then
@@ -838,11 +741,6 @@ in
 
       if [[ ! -f "$theme_kitty" ]]; then
         echo "Aurora: generated Kitty theme not found: $theme_id" >&2
-        exit 1
-      fi
-
-      if [[ ! -f "$theme_tmux" ]]; then
-        echo "Aurora: generated Tmux theme not found: $theme_id" >&2
         exit 1
       fi
 
@@ -872,7 +770,6 @@ in
 
       ln -sfn "$theme_lua" "$ACTIVE_LUA"
       ln -sfn "$theme_kitty" "$ACTIVE_KITTY"
-      ln -sfn "$theme_tmux" "$ACTIVE_TMUX"
       ln -sfn "$theme_starship" "$ACTIVE_STARSHIP"
 
       printf '%s\n' "$theme_id" > "$ACTIVE_THEME"
@@ -899,13 +796,6 @@ in
             "$theme_kitty" \
             >/dev/null 2>&1 || true
         done
-      fi
-
-      if command -v tmux >/dev/null 2>&1; then
-        if tmux has-session 2>/dev/null; then
-          tmux source-file "$ACTIVE_TMUX" >/dev/null 2>&1 || true
-          tmux refresh-client -S >/dev/null 2>&1 || true
-        fi
       fi
 
       AURORA_ZSH_REFRESH_DIR="''${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/aurora-zsh"
