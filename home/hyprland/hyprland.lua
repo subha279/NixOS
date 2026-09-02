@@ -1,7 +1,5 @@
--- Aurora Hyprland
-
+-- Hyprland
 -- Core Configuration
-
 require("config.variables")
 require("config.env")
 require("config.monitor")
@@ -16,6 +14,5 @@ require("config.startup")
 require("config.keybinds")
 require("config.misc")
 
--- Aurora Theme
-
+-- Theme
 require("config.theme")

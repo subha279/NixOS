@@ -128,11 +128,4 @@ require("plugins.alpha")
 
 require("core.keymaps")
 
--- Live Theme Watcher
---
--- Started last, once every module above has registered its aurora.theme
--- subscriber, so a switch re-applies highlights in exactly this file's require
--- order. Replaces the two independent 500ms uv timers that ui/theme.lua and
--- plugins/alpha.lua each used to run against the same pointer file.
-
 require("aurora.theme").watch()

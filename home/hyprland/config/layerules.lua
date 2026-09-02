@@ -14,13 +14,6 @@ hl.layer_rule({
 	order = 1,
 })
 
--- Aurora Bar
---
--- This layer now carries the launcher popups too: Bar.qml owns the only panel
--- window for the pill and the dmenu-style surfaces, so there is no separate
--- `aurora-launcher` namespace any more. The order is the one the launcher used
--- to have, because an open launcher still has to sit above the notifications.
-
 hl.layer_rule({
 	name = "aurora-bar",
 

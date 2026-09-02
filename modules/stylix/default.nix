@@ -155,32 +155,6 @@ in
       light = iconNameLight;
     };
 
-    # ========================================================================
-    # DESKTOP TARGETS
-    # ========================================================================
-    #
-    # autoEnable = false means targets must be explicitly enabled.
-    #
-    # We intentionally keep GTK, Qt and Fontconfig under Stylix.
-    #
-    # Neovim is deliberately NOT a Stylix target: enabling it would
-    # generate a base16 colorscheme and override the real plugin
-    # colorschemes. Transparency is handled in the Neovim config with a
-    # ColorScheme autocmd instead. If you ever want Stylix to own nvim:
-    #
-    #   targets.neovim = {
-    #     enable = true;
-    #     transparentBackground = {
-    #       main = true;
-    #       signColumn = true;
-    #     };
-    #   };
-    #
-    # Both lines are required -- transparentBackground alone is a no-op
-    # while the target is disabled.
-    #
-    # ========================================================================
-
     targets.gtk.enable = true;
 
     targets.qt.enable = true;

@@ -1,14 +1,8 @@
---------------------------------------------------
 -- Window Rules
---------------------------------------------------
 
---------------------------------------------------
 -- 1. Global
---------------------------------------------------
 
---------------------------------------------------
 -- Suppress Maximize Requests
---------------------------------------------------
 
 hl.window_rule({
 	name = "suppress-maximize-events",
@@ -20,9 +14,7 @@ hl.window_rule({
 	suppress_event = "maximize",
 })
 
---------------------------------------------------
 -- Global Modal Dialogs
---------------------------------------------------
 
 hl.window_rule({
 	name = "modal-dialogs",
@@ -41,9 +33,7 @@ hl.window_rule({
 	animation = "popin",
 })
 
---------------------------------------------------
 -- XWayland Dragging Fix
---------------------------------------------------
 
 hl.window_rule({
 	name = "fix-xwayland-drags",
@@ -64,13 +54,9 @@ hl.window_rule({
 	no_focus = true,
 })
 
---------------------------------------------------
 -- 2. Generic Dialogs
---------------------------------------------------
 
---------------------------------------------------
 -- File Choosers
---------------------------------------------------
 
 hl.window_rule({
 	name = "file-chooser-dialogs",
@@ -89,13 +75,9 @@ hl.window_rule({
 	dim_around = true,
 })
 
---------------------------------------------------
 -- File Operations
---------------------------------------------------
 
---------------------------------------------------
 -- File Conflicts
---------------------------------------------------
 
 hl.window_rule({
 	name = "file-conflict-dialogs",
@@ -112,9 +94,7 @@ hl.window_rule({
 	dim_around = true,
 })
 
---------------------------------------------------
 -- File Operation Progress
---------------------------------------------------
 
 hl.window_rule({
 	name = "file-progress-dialogs",
@@ -132,9 +112,7 @@ hl.window_rule({
 	no_focus = true,
 })
 
---------------------------------------------------
 -- Short Confirmations
---------------------------------------------------
 
 hl.window_rule({
 	name = "confirmation-dialogs",
@@ -151,9 +129,7 @@ hl.window_rule({
 	dim_around = true,
 })
 
---------------------------------------------------
 -- Properties
---------------------------------------------------
 
 hl.window_rule({
 	name = "properties-dialog",
@@ -172,9 +148,7 @@ hl.window_rule({
 	dim_around = true,
 })
 
---------------------------------------------------
 -- Preferences and About
---------------------------------------------------
 
 hl.window_rule({
 	name = "preferences-dialogs",
@@ -195,13 +169,9 @@ hl.window_rule({
 	animation = "popin",
 })
 
---------------------------------------------------
 -- 3. System and Shell UI
---------------------------------------------------
 
---------------------------------------------------
 -- Polkit Authentication Agent
---------------------------------------------------
 
 hl.window_rule({
 	name = "polkit-agent",
@@ -222,9 +192,7 @@ hl.window_rule({
 	animation = "popin",
 })
 
---------------------------------------------------
 -- XDG Desktop Portal
---------------------------------------------------
 
 hl.window_rule({
 	name = "xdg-desktop-portal",
@@ -245,9 +213,7 @@ hl.window_rule({
 	animation = "popin",
 })
 
---------------------------------------------------
 -- Bluetooth Manager
---------------------------------------------------
 
 hl.window_rule({
 	name = "blueman-manager",
@@ -291,9 +257,7 @@ hl.window_rule({
 	animation = "popin",
 })
 
---------------------------------------------------
 -- NetworkManager Connection Editor
---------------------------------------------------
 
 hl.window_rule({
 	name = "network-manager",
@@ -316,9 +280,7 @@ hl.window_rule({
 	animation = "popin",
 })
 
---------------------------------------------------
 -- Pavucontrol
---------------------------------------------------
 
 hl.window_rule({
 	name = "pavucontrol",
@@ -341,9 +303,7 @@ hl.window_rule({
 	animation = "popin",
 })
 
---------------------------------------------------
 -- Appearance Tools
---------------------------------------------------
 
 hl.window_rule({
 	name = "appearance-tools",
@@ -364,13 +324,9 @@ hl.window_rule({
 	animation = "popin",
 })
 
---------------------------------------------------
 -- 4. Applications
---------------------------------------------------
 
---------------------------------------------------
 -- Zen Browser
---------------------------------------------------
 
 hl.window_rule({
 	name = "zen-browser",
@@ -384,9 +340,7 @@ hl.window_rule({
 	xray = true,
 })
 
---------------------------------------------------
 -- Zen Google Authentication
---------------------------------------------------
 
 hl.window_rule({
 	name = "zen-google-auth",
@@ -408,9 +362,7 @@ hl.window_rule({
 	animation = "popin",
 })
 
---------------------------------------------------
 -- Zen Picture-in-Picture
---------------------------------------------------
 
 hl.window_rule({
 	name = "zen-picture-in-picture",
@@ -429,9 +381,7 @@ hl.window_rule({
 	rounding = 10,
 })
 
---------------------------------------------------
 -- Thunar
---------------------------------------------------
 
 hl.window_rule({
 	name = "thunar-bulk-rename",
@@ -451,9 +401,7 @@ hl.window_rule({
 	dim_around = true,
 })
 
---------------------------------------------------
 -- Archive Manager
---------------------------------------------------
 
 hl.window_rule({
 	name = "file-roller",
@@ -474,9 +422,7 @@ hl.window_rule({
 	animation = "popin",
 })
 
---------------------------------------------------
 -- Image Viewer
---------------------------------------------------
 
 hl.window_rule({
 	name = "gwenview",
@@ -508,9 +454,7 @@ hl.window_rule({
 	opacity = "1.0 override 1.0 override",
 })
 
---------------------------------------------------
 -- Screenshot Annotation
---------------------------------------------------
 
 hl.window_rule({
 	name = "swappy",
@@ -531,9 +475,7 @@ hl.window_rule({
 	animation = "popin",
 })
 
---------------------------------------------------
 -- Editors and Notes
---------------------------------------------------
 
 hl.window_rule({
 	name = "code-editors",
@@ -545,9 +487,7 @@ hl.window_rule({
 	opacity = "1.0 override 1.0 override",
 })
 
---------------------------------------------------
 -- Office
---------------------------------------------------
 
 hl.window_rule({
 	name = "libreoffice",
@@ -559,9 +499,7 @@ hl.window_rule({
 	opacity = "1.0 override 1.0 override",
 })
 
---------------------------------------------------
 -- Virtualisation
---------------------------------------------------
 
 hl.window_rule({
 	name = "virt-manager",
@@ -593,13 +531,9 @@ hl.window_rule({
 	opacity = "1.0 override 1.0 override",
 })
 
---------------------------------------------------
 -- 5. Media and Content Creation
---------------------------------------------------
 
---------------------------------------------------
 -- OBS Studio
---------------------------------------------------
 
 hl.window_rule({
 	name = "obs-studio",
@@ -631,9 +565,7 @@ hl.window_rule({
 	dim_around = true,
 })
 
---------------------------------------------------
 -- DaVinci Resolve
---------------------------------------------------
 
 hl.window_rule({
 	name = "davinci-resolve",
@@ -647,9 +579,7 @@ hl.window_rule({
 	xray = true,
 })
 
---------------------------------------------------
 -- VLC
---------------------------------------------------
 
 hl.window_rule({
 	name = "vlc",
@@ -661,9 +591,7 @@ hl.window_rule({
 	opacity = "1.0 override 1.0 override",
 })
 
---------------------------------------------------
 -- GIMP
---------------------------------------------------
 
 hl.window_rule({
 	name = "gimp",
@@ -675,9 +603,7 @@ hl.window_rule({
 	opacity = "1.0 override 1.0 override",
 })
 
---------------------------------------------------
 -- Blender
---------------------------------------------------
 
 hl.window_rule({
 	name = "blender",
@@ -689,13 +615,9 @@ hl.window_rule({
 	opacity = "1.0 override 1.0 override",
 })
 
---------------------------------------------------
 -- 6. Gaming
---------------------------------------------------
 
---------------------------------------------------
 -- Steam
---------------------------------------------------
 
 hl.window_rule({
 	name = "steam",
@@ -707,9 +629,7 @@ hl.window_rule({
 	opacity = "1.0 override 1.0 override",
 })
 
---------------------------------------------------
 -- Steam Secondary Windows
---------------------------------------------------
 
 hl.window_rule({
 	name = "steam-dialogs",
@@ -727,9 +647,7 @@ hl.window_rule({
 	rounding = 10,
 })
 
---------------------------------------------------
 -- Games
---------------------------------------------------
 
 hl.window_rule({
 	name = "games",
@@ -743,13 +661,9 @@ hl.window_rule({
 	xray = true,
 })
 
---------------------------------------------------
 -- 7. Compositor Helpers
---------------------------------------------------
 
---------------------------------------------------
 -- Hyprland Run Dialog
---------------------------------------------------
 
 hl.window_rule({
 	name = "hyprland-run",

@@ -114,8 +114,4 @@ end
 
 M.setup()
 
--- No theme subscriber: snacks draws with its own linked highlight groups and
--- needs no recolouring here. Its refresh_theme() only scheduled a redraw, which
--- aurora.refresh() now does once for the whole pass.
-
 return M
