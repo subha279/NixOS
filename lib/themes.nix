@@ -14,13 +14,13 @@
       };
 
       terminal = {
-        name = "JetBrainsMono Nerd Font Mono";
+        name = "SFMono Nerd Font";
         package = "nerd-fonts.jetbrains-mono";
       };
 
       emoji = {
         name = "Noto Color Emoji";
-        package = "noto-fonts-color-emoji";
+        package = "sf-mono-nerd";
       };
     };
 
