@@ -1,4 +1,6 @@
--- JSONL / NDJSON support
+-- JSONL / NDJSON Support
+
+-- Filetype detection
 
 vim.filetype.add({
 	extension = {
@@ -6,6 +8,3 @@ vim.filetype.add({
 		ndjson = "jsonl",
 	},
 })
-
--- JSONL uses the JSON Treesitter grammar.
-vim.treesitter.language.register("json", "jsonl")

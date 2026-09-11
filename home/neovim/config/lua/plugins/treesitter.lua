@@ -455,6 +455,8 @@ function M.setup()
 
 	treesitter.setup()
 
+	vim.treesitter.language.register("json", "jsonl")
+
 	vim.api.nvim_create_autocmd("FileType", {
 		group = vim.api.nvim_create_augroup("AuroraTreesitterStart", {
 			clear = true,
