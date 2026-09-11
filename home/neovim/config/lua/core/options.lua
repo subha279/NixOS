@@ -105,7 +105,6 @@ opt.fillchars = {
 	foldsep = " ",
 }
 
-
 opt.winblend = 12
 opt.pumblend = 12
 
