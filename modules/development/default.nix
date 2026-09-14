@@ -2,6 +2,10 @@
 
 {
   environment.systemPackages = with pkgs; [
+    # Andrioid
+    scrcpy
+    android-tools
+
     # Build / compilation
     gcc
     clang
