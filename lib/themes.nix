@@ -51,9 +51,9 @@
 
       iconSize = 16;
 
-      fontSize = 10.5;
-      fontSizeSmall = 9;
-      fontSizeLarge = 15;
+      fontSize = 13;
+      fontSizeSmall = 11;
+      fontSizeLarge = 18;
 
       # LIQUID GLASS
 
