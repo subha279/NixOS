@@ -15,12 +15,12 @@
 
       terminal = {
         name = "SFMono Nerd Font";
-        package = "nerd-fonts.jetbrains-mono";
+        package = "sf-mono-nerd";
       };
 
       emoji = {
         name = "Noto Color Emoji";
-        package = "sf-mono-nerd";
+        package = "noto-fonts-color-emoji";
       };
     };
 
@@ -51,8 +51,8 @@
 
       iconSize = 16;
 
-      fontSize = 12;
-      fontSizeSmall = 10;
+      fontSize = 10.5;
+      fontSizeSmall = 9;
       fontSizeLarge = 15;
 
       # LIQUID GLASS
