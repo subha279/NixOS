@@ -13,20 +13,6 @@ map("n", "<Esc>", "<cmd>nohlsearch<cr>", {
 	desc = "Clear search",
 })
 
--- Buffers
-
-map("n", "<leader>bn", "<cmd>bnext<cr>", {
-	desc = "Next buffer",
-})
-
-map("n", "<leader>bp", "<cmd>bprevious<cr>", {
-	desc = "Previous buffer",
-})
-
-map("n", "<leader>bd", "<cmd>bdelete<cr>", {
-	desc = "Delete buffer",
-})
-
 -- Windows
 
 map("n", "<C-h>", "<C-w>h", {
@@ -59,42 +45,6 @@ map("n", "<leader>wc", "<cmd>close<cr>", {
 
 map("n", "<leader>we", "<C-w>=", {
 	desc = "Equalize windows",
-})
-
--- Window Resizing
-
-map("n", "<C-Up>", "<cmd>resize +2<cr>", {
-	desc = "Increase height",
-})
-
-map("n", "<C-Down>", "<cmd>resize -2<cr>", {
-	desc = "Decrease height",
-})
-
-map("n", "<C-Left>", "<cmd>vertical resize -2<cr>", {
-	desc = "Decrease width",
-})
-
-map("n", "<C-Right>", "<cmd>vertical resize +2<cr>", {
-	desc = "Increase width",
-})
-
--- Tabs
-
-map("n", "<leader>tn", "<cmd>tabnew<cr>", {
-	desc = "New tab",
-})
-
-map("n", "<leader>tc", "<cmd>tabclose<cr>", {
-	desc = "Close tab",
-})
-
-map("n", "<leader>tl", "<cmd>tabnext<cr>", {
-	desc = "Next tab",
-})
-
-map("n", "<leader>th", "<cmd>tabprevious<cr>", {
-	desc = "Previous tab",
 })
 
 -- Movement
@@ -139,34 +89,6 @@ map("n", "<leader>dd", '"_dd', {
 	desc = "Delete without yank",
 })
 
--- Terminal
-
-map("n", "<leader>tt", "<cmd>botright split | terminal<cr>", {
-	desc = "Open terminal",
-})
-
-map("t", "<Esc><Esc>", "<C-\\><C-n>", {
-	desc = "Exit terminal mode",
-})
-
--- Terminal window navigation
-
-map("t", "<C-h>", "<C-\\><C-n><C-w>h", {
-	desc = "Move left",
-})
-
-map("t", "<C-j>", "<C-\\><C-n><C-w>j", {
-	desc = "Move down",
-})
-
-map("t", "<C-k>", "<C-\\><C-n><C-w>k", {
-	desc = "Move up",
-})
-
-map("t", "<C-l>", "<C-\\><C-n><C-w>l", {
-	desc = "Move right",
-})
-
 -- Quickfix
 
 map("n", "<leader>co", "<cmd>copen<cr>", {
@@ -183,16 +105,6 @@ map("n", "<leader>cn", "<cmd>cnext<cr>", {
 
 map("n", "<leader>cp", "<cmd>cprevious<cr>", {
 	desc = "Quickfix previous",
-})
-
--- Command History
-
-map("n", "<leader>:", "q:", {
-	desc = "Command history",
-})
-
-map("n", "<leader>/", "q/", {
-	desc = "Search history",
 })
 
 -- Others

@@ -99,7 +99,7 @@ require("nvim-tree").setup({
 
 		highlight_opened_files = "name",
 
-		root_folder_label = false,
+		root_folder_label = ":~:s?$?/..?",
 
 		-- Indent markers
 

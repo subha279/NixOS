@@ -1,5 +1,3 @@
--- Aurora Neovim
-
 -- Leader
 
 vim.g.mapleader = " "
