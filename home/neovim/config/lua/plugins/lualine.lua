@@ -5,196 +5,47 @@ local aurora = require("aurora.theme")
 local function theme()
 	local c = aurora.colors()
 
+	-- Set transparent backgrounds for inner sections
+	local shared = {
+		b = { fg = c.text, bg = "NONE" },
+		c = { fg = c.text, bg = "NONE" },
+		x = { fg = c.textSecondary, bg = "NONE" },
+		y = { fg = c.textSecondary, bg = "NONE" },
+	}
+
+	local function mode(bg)
+		local hl = { fg = c.accentForeground, bg = bg, gui = "bold" }
+		return vim.tbl_extend("force", shared, { a = hl, z = hl })
+	end
+
 	return {
-		normal = {
-			a = {
-				fg = c.accentForeground,
-				bg = c.accent,
-				gui = "bold",
-			},
-			b = {
-				fg = c.text,
-				bg = c.surface,
-			},
-			c = {
-				fg = c.text,
-				bg = c.surface,
-			},
-			x = {
-				fg = c.textSecondary,
-				bg = c.surface,
-			},
-			y = {
-				fg = c.textSecondary,
-				bg = c.surface,
-			},
-			z = {
-				fg = c.accentForeground,
-				bg = c.accent,
-				gui = "bold",
-			},
-		},
-
-		insert = {
-			a = {
-				fg = c.accentForeground,
-				bg = c.success,
-				gui = "bold",
-			},
-			b = {
-				fg = c.text,
-				bg = c.surface,
-			},
-			c = {
-				fg = c.text,
-				bg = c.surface,
-			},
-			x = {
-				fg = c.textSecondary,
-				bg = c.surface,
-			},
-			y = {
-				fg = c.textSecondary,
-				bg = c.surface,
-			},
-			z = {
-				fg = c.accentForeground,
-				bg = c.success,
-				gui = "bold",
-			},
-		},
-
-		visual = {
-			a = {
-				fg = c.accentForeground,
-				bg = c.info,
-				gui = "bold",
-			},
-			b = {
-				fg = c.text,
-				bg = c.surface,
-			},
-			c = {
-				fg = c.text,
-				bg = c.surface,
-			},
-			x = {
-				fg = c.textSecondary,
-				bg = c.surface,
-			},
-			y = {
-				fg = c.textSecondary,
-				bg = c.surface,
-			},
-			z = {
-				fg = c.accentForeground,
-				bg = c.info,
-				gui = "bold",
-			},
-		},
-
-		replace = {
-			a = {
-				fg = c.accentForeground,
-				bg = c.warning,
-				gui = "bold",
-			},
-			b = {
-				fg = c.text,
-				bg = c.surface,
-			},
-			c = {
-				fg = c.text,
-				bg = c.surface,
-			},
-			x = {
-				fg = c.textSecondary,
-				bg = c.surface,
-			},
-			y = {
-				fg = c.textSecondary,
-				bg = c.surface,
-			},
-			z = {
-				fg = c.accentForeground,
-				bg = c.warning,
-				gui = "bold",
-			},
-		},
-
-		command = {
-			a = {
-				fg = c.accentForeground,
-				bg = c.accent,
-				gui = "bold",
-			},
-			b = {
-				fg = c.text,
-				bg = c.surface,
-			},
-			c = {
-				fg = c.text,
-				bg = c.surface,
-			},
-			x = {
-				fg = c.textSecondary,
-				bg = c.surface,
-			},
-			y = {
-				fg = c.textSecondary,
-				bg = c.surface,
-			},
-			z = {
-				fg = c.accentForeground,
-				bg = c.accent,
-				gui = "bold",
-			},
-		},
+		normal = mode(c.accent),
+		insert = mode(c.success),
+		visual = mode(c.info),
+		replace = mode(c.warning),
+		command = mode(c.accent),
 
 		inactive = {
-			a = {
-				fg = c.textMuted,
-				bg = "NONE",
-			},
-			b = {
-				fg = c.textMuted,
-				bg = "NONE",
-			},
-			c = {
-				fg = c.textMuted,
-				bg = "NONE",
-			},
-			x = {
-				fg = c.textMuted,
-				bg = "NONE",
-			},
-			y = {
-				fg = c.textMuted,
-				bg = "NONE",
-			},
-			z = {
-				fg = c.textMuted,
-				bg = "NONE",
-			},
+			a = { fg = c.textMuted, bg = "NONE" },
+			b = { fg = c.textMuted, bg = "NONE" },
+			c = { fg = c.textMuted, bg = "NONE" },
+			x = { fg = c.textMuted, bg = "NONE" },
+			y = { fg = c.textMuted, bg = "NONE" },
+			z = { fg = c.textMuted, bg = "NONE" },
 		},
 	}
 end
 
 local function lsp()
-	local clients = vim.lsp.get_clients({
-		bufnr = 0,
-	})
-
+	local clients = vim.lsp.get_clients({ bufnr = 0 })
 	if #clients == 0 then
 		return ""
 	end
 
 	local names = {}
-
 	for _, client in ipairs(clients) do
 		names[#names + 1] = client.name
 	end
-
 	table.sort(names)
 
 	return "󰒋 " .. table.concat(names, " · ")
@@ -202,7 +53,6 @@ end
 
 function M.setup()
 	local ok, lualine = pcall(require, "lualine")
-
 	if not ok then
 		return false
 	end
@@ -212,10 +62,8 @@ function M.setup()
 			theme = theme(),
 			globalstatus = true,
 			icons_enabled = true,
-
-			section_separators = "",
-			component_separators = "",
-
+			section_separators = { left = "", right = "" },
+			component_separators = { left = "·", right = "·" },
 			disabled_filetypes = {
 				"alpha",
 				"dashboard",
@@ -231,53 +79,39 @@ function M.setup()
 			lualine_a = {
 				{
 					"mode",
-					fmt = function(mode)
-						return mode:sub(1, 1)
+					fmt = function(m)
+						return m:sub(1, 1)
 					end,
+					separator = { left = vim.fn.nr2char(0xe0b6), right = vim.fn.nr2char(0xe0b4) },
 				},
 			},
-
-			lualine_b = {
-				"diagnostics",
-			},
-
+			lualine_b = { "diagnostics" },
 			lualine_c = {
 				{
 					"filename",
-					path = 3,
-					shorting_target = 0,
 					symbols = {
 						modified = " ●",
-						readonly = " ",
+						readonly = " ",
 						unnamed = "[No Name]",
 						newfile = "[New]",
 					},
 				},
 			},
-
-			lualine_x = {
-				lsp,
-				"filetype",
-			},
-
-			lualine_y = {
-				"progress",
-			},
-
+			lualine_x = { lsp, "filetype" },
+			lualine_y = { "progress" },
 			lualine_z = {
-				"location",
+				{
+					"location",
+					separator = { left = vim.fn.nr2char(0xe0b6), right = vim.fn.nr2char(0xe0b4) },
+				},
 			},
 		},
 
 		inactive_sections = {
 			lualine_a = {},
 			lualine_b = {},
-			lualine_c = {
-				"filename",
-			},
-			lualine_x = {
-				"location",
-			},
+			lualine_c = { "filename" },
+			lualine_x = { "location" },
 			lualine_y = {},
 			lualine_z = {},
 		},

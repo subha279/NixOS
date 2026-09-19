@@ -51,7 +51,7 @@
 
       iconSize = 16;
 
-      fontSize = 13;
+      fontSize = 15;
       fontSizeSmall = 11;
       fontSizeLarge = 18;
 
