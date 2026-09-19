@@ -7,40 +7,183 @@ local function theme()
 
 	return {
 		normal = {
-			a = { fg = c.accentForeground, bg = c.accent, gui = "bold" },
-			b = { fg = c.text, bg = "NONE" },
-			c = { fg = c.textSecondary, bg = "NONE" },
+			a = {
+				fg = c.accentForeground,
+				bg = c.accent,
+				gui = "bold",
+			},
+			b = {
+				fg = c.text,
+				bg = c.surface,
+			},
+			c = {
+				fg = c.text,
+				bg = c.surface,
+			},
+			x = {
+				fg = c.textSecondary,
+				bg = c.surface,
+			},
+			y = {
+				fg = c.textSecondary,
+				bg = c.surface,
+			},
+			z = {
+				fg = c.accentForeground,
+				bg = c.accent,
+				gui = "bold",
+			},
 		},
+
 		insert = {
-			a = { fg = c.accentForeground, bg = c.success, gui = "bold" },
-			b = { fg = c.text, bg = "NONE" },
-			c = { fg = c.textSecondary, bg = "NONE" },
+			a = {
+				fg = c.accentForeground,
+				bg = c.success,
+				gui = "bold",
+			},
+			b = {
+				fg = c.text,
+				bg = c.surface,
+			},
+			c = {
+				fg = c.text,
+				bg = c.surface,
+			},
+			x = {
+				fg = c.textSecondary,
+				bg = c.surface,
+			},
+			y = {
+				fg = c.textSecondary,
+				bg = c.surface,
+			},
+			z = {
+				fg = c.accentForeground,
+				bg = c.success,
+				gui = "bold",
+			},
 		},
+
 		visual = {
-			a = { fg = c.accentForeground, bg = c.info, gui = "bold" },
-			b = { fg = c.text, bg = "NONE" },
-			c = { fg = c.textSecondary, bg = "NONE" },
+			a = {
+				fg = c.accentForeground,
+				bg = c.info,
+				gui = "bold",
+			},
+			b = {
+				fg = c.text,
+				bg = c.surface,
+			},
+			c = {
+				fg = c.text,
+				bg = c.surface,
+			},
+			x = {
+				fg = c.textSecondary,
+				bg = c.surface,
+			},
+			y = {
+				fg = c.textSecondary,
+				bg = c.surface,
+			},
+			z = {
+				fg = c.accentForeground,
+				bg = c.info,
+				gui = "bold",
+			},
 		},
+
 		replace = {
-			a = { fg = c.accentForeground, bg = c.warning, gui = "bold" },
-			b = { fg = c.text, bg = "NONE" },
-			c = { fg = c.textSecondary, bg = "NONE" },
+			a = {
+				fg = c.accentForeground,
+				bg = c.warning,
+				gui = "bold",
+			},
+			b = {
+				fg = c.text,
+				bg = c.surface,
+			},
+			c = {
+				fg = c.text,
+				bg = c.surface,
+			},
+			x = {
+				fg = c.textSecondary,
+				bg = c.surface,
+			},
+			y = {
+				fg = c.textSecondary,
+				bg = c.surface,
+			},
+			z = {
+				fg = c.accentForeground,
+				bg = c.warning,
+				gui = "bold",
+			},
 		},
+
 		command = {
-			a = { fg = c.accentForeground, bg = c.accent, gui = "bold" },
-			b = { fg = c.text, bg = "NONE" },
-			c = { fg = c.textSecondary, bg = "NONE" },
+			a = {
+				fg = c.accentForeground,
+				bg = c.accent,
+				gui = "bold",
+			},
+			b = {
+				fg = c.text,
+				bg = c.surface,
+			},
+			c = {
+				fg = c.text,
+				bg = c.surface,
+			},
+			x = {
+				fg = c.textSecondary,
+				bg = c.surface,
+			},
+			y = {
+				fg = c.textSecondary,
+				bg = c.surface,
+			},
+			z = {
+				fg = c.accentForeground,
+				bg = c.accent,
+				gui = "bold",
+			},
 		},
+
 		inactive = {
-			a = { fg = c.textMuted, bg = "NONE" },
-			b = { fg = c.textMuted, bg = "NONE" },
-			c = { fg = c.textMuted, bg = "NONE" },
+			a = {
+				fg = c.textMuted,
+				bg = "NONE",
+			},
+			b = {
+				fg = c.textMuted,
+				bg = "NONE",
+			},
+			c = {
+				fg = c.textMuted,
+				bg = "NONE",
+			},
+			x = {
+				fg = c.textMuted,
+				bg = "NONE",
+			},
+			y = {
+				fg = c.textMuted,
+				bg = "NONE",
+			},
+			z = {
+				fg = c.textMuted,
+				bg = "NONE",
+			},
 		},
 	}
 end
 
 local function lsp()
-	local clients = vim.lsp.get_clients({ bufnr = 0 })
+	local clients = vim.lsp.get_clients({
+		bufnr = 0,
+	})
 
 	if #clients == 0 then
 		return ""
@@ -69,8 +212,10 @@ function M.setup()
 			theme = theme(),
 			globalstatus = true,
 			icons_enabled = true,
+
 			section_separators = "",
-			component_separators = "·",
+			component_separators = "",
+
 			disabled_filetypes = {
 				"alpha",
 				"dashboard",

@@ -14,6 +14,7 @@ vim.api.nvim_create_autocmd("BufWinEnter", {
 
 		vim.wo.number = true
 		vim.wo.relativenumber = true
+		vim.wo.signcolumn = "yes"
 	end,
 })
 

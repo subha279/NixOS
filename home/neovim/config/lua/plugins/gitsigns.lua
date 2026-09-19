@@ -59,6 +59,8 @@ function M.setup()
 		return false
 	end
 
+	vim.opt.signcolumn = "yes"
+
 	gitsigns.setup({
 		signs = {
 			add = {
