@@ -14,8 +14,8 @@
       };
 
       terminal = {
-        name = "SFMono Nerd Font";
-        package = "sf-mono-nerd";
+        name = "JetBrainsMono Nerd Font";
+        package = "nerd-fonts.jetbrains-mono";
       };
 
       emoji = {
@@ -51,9 +51,9 @@
 
       iconSize = 16;
 
-      fontSize = 15;
-      fontSizeSmall = 11;
-      fontSizeLarge = 18;
+      fontSize = 13;
+      fontSizeSmall = 10;
+      fontSizeLarge = 16;
 
       # LIQUID GLASS
 
