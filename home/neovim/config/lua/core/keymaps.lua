@@ -1,20 +1,21 @@
--- Aurora Core Keymaps
+-- Core Keymaps
 
 local map = vim.keymap.set
 
-local opts = {
-	silent = true,
-	noremap = true,
-}
-
--- General
-
+-- Search
 map("n", "<Esc>", "<cmd>nohlsearch<cr>", {
 	desc = "Clear search",
 })
 
--- Windows
+map("n", "n", "nzzzv", {
+	desc = "Next search result",
+})
 
+map("n", "N", "Nzzzv", {
+	desc = "Previous search result",
+})
+
+-- Window Navigation
 map("n", "<C-h>", "<C-w>h", {
 	desc = "Move left",
 })
@@ -31,6 +32,7 @@ map("n", "<C-l>", "<C-w>l", {
 	desc = "Move right",
 })
 
+-- Window Management
 map("n", "<leader>ws", "<cmd>split<cr>", {
 	desc = "Horizontal split",
 })
@@ -47,8 +49,7 @@ map("n", "<leader>we", "<C-w>=", {
 	desc = "Equalize windows",
 })
 
--- Movement
-
+-- Scrolling
 map("n", "<C-d>", "<C-d>zz", {
 	desc = "Half-page down",
 })
@@ -57,19 +58,14 @@ map("n", "<C-u>", "<C-u>zz", {
 	desc = "Half-page up",
 })
 
-map("n", "n", "nzzzv", {
-	desc = "Next search result",
+-- Visual Selection
+map("v", "<", "<gv", {
+	desc = "Indent left",
 })
 
-map("n", "N", "Nzzzv", {
-	desc = "Previous search result",
+map("v", ">", ">gv", {
+	desc = "Indent right",
 })
-
--- Visual Editing
-
-map("v", "<", "<gv", opts)
-
-map("v", ">", ">gv", opts)
 
 map("v", "J", ":m '>+1<CR>gv=gv", {
 	desc = "Move selection down",
@@ -80,7 +76,6 @@ map("v", "K", ":m '<-2<CR>gv=gv", {
 })
 
 -- Paste / Delete Without Yank
-
 map("x", "<leader>p", '"_dP', {
 	desc = "Paste without yank",
 })
@@ -90,7 +85,6 @@ map("n", "<leader>dd", '"_dd', {
 })
 
 -- Quickfix
-
 map("n", "<leader>co", "<cmd>copen<cr>", {
 	desc = "Quickfix open",
 })
@@ -107,12 +101,7 @@ map("n", "<leader>cp", "<cmd>cprevious<cr>", {
 	desc = "Quickfix previous",
 })
 
--- Others
-map(
-	"n",
-	"<leader>rb",
-	[[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]],
-	{ desc = "Rename Same Many Words Together In the Cursor" }
-)
-
-map("n", "<leader>m", "<cmd>NvimTreeFocus<CR>", { desc = "Focus file explorer" })
+-- Search / Replace Word Under Cursor
+map("n", "<leader>rw", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]], {
+	desc = "Replace word under cursor",
+})

@@ -17,10 +17,6 @@
 
       blink-cmp
 
-      # LSP / Code intelligence
-
-      nvim-lspconfig
-
       # Syntax / Treesitter
 
       nvim-treesitter.withAllGrammars

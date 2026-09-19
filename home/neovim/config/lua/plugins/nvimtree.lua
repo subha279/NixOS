@@ -132,8 +132,8 @@ require("nvim-tree").setup({
 				symlink = "",
 
 				folder = {
-					arrow_closed = "",
-					arrow_open = "",
+					arrow_closed = "󰅂",
+					arrow_open = "󰅀",
 
 					default = "",
 					open = "",
@@ -275,7 +275,7 @@ map("n", "<leader>e", api.tree.toggle, {
 })
 
 -- Focus
-map("n", "<leader>E", api.tree.focus, {
+map("n", "<leader>m", api.tree.focus, {
 	desc = "Explorer: Focus",
 })
 

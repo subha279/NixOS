@@ -4,39 +4,30 @@ local group = vim.api.nvim_create_augroup("UserAutocmds", {
 	clear = true,
 })
 
-vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter" }, {
+-- Enable line numbers in normal editing windows
+vim.api.nvim_create_autocmd("BufWinEnter", {
 	group = group,
-
 	callback = function(event)
-		local buf = event.buf
-
-		-- Only normal editable buffers.
-		if vim.bo[buf].buftype ~= "" then
+		if vim.bo[event.buf].buftype ~= "" then
 			return
 		end
 
-		-- Normal editing view.
 		vim.wo.number = true
 		vim.wo.relativenumber = true
-		vim.wo.signcolumn = "yes"
 	end,
 })
 
 -- Highlight yanked text
-
 vim.api.nvim_create_autocmd("TextYankPost", {
 	group = group,
 	callback = function()
-		-- vim.hl replaced vim.highlight in 0.11; vim.highlight still works but is
-		-- deprecated and emits a warning. Prefer the new name where present.
-		local hl = vim.hl or vim.highlight
-
-		hl.on_yank({
+		(vim.hl or vim.highlight).on_yank({
 			timeout = 150,
 		})
 	end,
 })
 
+-- Remove trailing whitespace before saving
 local keep_trailing_whitespace = {
 	markdown = true,
 	text = true,
@@ -51,11 +42,14 @@ local whitespace_line_limit = 20000
 vim.api.nvim_create_autocmd("BufWritePre", {
 	group = group,
 	callback = function(event)
-		if keep_trailing_whitespace[vim.bo[event.buf].filetype] then
+		local buf = event.buf
+		local filetype = vim.bo[buf].filetype
+
+		if keep_trailing_whitespace[filetype] then
 			return
 		end
 
-		if vim.api.nvim_buf_line_count(event.buf) > whitespace_line_limit then
+		if vim.api.nvim_buf_line_count(buf) > whitespace_line_limit then
 			return
 		end
 
@@ -67,21 +61,19 @@ vim.api.nvim_create_autocmd("BufWritePre", {
 	end,
 })
 
--- Remember cursor position
-
+-- Restore cursor position when reopening a file
 vim.api.nvim_create_autocmd("BufReadPost", {
 	group = group,
-	callback = function()
-		local mark = vim.api.nvim_buf_get_mark(0, '"')
+	callback = function(event)
+		local mark = vim.api.nvim_buf_get_mark(event.buf, '"')
 
-		if mark[1] > 0 and mark[1] <= vim.api.nvim_buf_line_count(0) then
+		if mark[1] > 0 and mark[1] <= vim.api.nvim_buf_line_count(event.buf) then
 			pcall(vim.api.nvim_win_set_cursor, 0, mark)
 		end
 	end,
 })
 
 -- Close temporary windows with q
-
 vim.api.nvim_create_autocmd("FileType", {
 	group = group,
 	pattern = {

@@ -13,9 +13,6 @@ function M.setup()
 		return false
 	end
 
-	-- Snacks LazyGit writes its generated theme here.
-	vim.fn.mkdir(vim.fn.stdpath("cache"), "p")
-
 	snacks.setup({
 		-- Large Files
 

@@ -108,37 +108,28 @@ telescope.setup({
 
 			i = {
 
-				["<C-j>"] =
-					actions.move_selection_next,
+				["<C-j>"] = actions.move_selection_next,
 
-				["<C-k>"] =
-					actions.move_selection_previous,
+				["<C-k>"] = actions.move_selection_previous,
 
-				["<C-q>"] =
-					actions.send_selected_to_qflist,
+				["<C-q>"] = actions.send_selected_to_qflist,
 
-				["<Esc>"] =
-					actions.close,
+				["<Esc>"] = actions.close,
 			},
 
 			-- Normal Mode
 
 			n = {
 
-				["q"] =
-					actions.close,
+				["q"] = actions.close,
 
-				["<Esc>"] =
-					actions.close,
+				["<Esc>"] = actions.close,
 
-				["j"] =
-					actions.move_selection_next,
+				["j"] = actions.move_selection_next,
 
-				["k"] =
-					actions.move_selection_previous,
+				["k"] = actions.move_selection_previous,
 
-				["<C-q>"] =
-					actions.send_selected_to_qflist,
+				["<C-q>"] = actions.send_selected_to_qflist,
 			},
 		},
 	},
@@ -203,105 +194,43 @@ pcall(telescope.load_extension, "fzf")
 
 local map = vim.keymap.set
 
-local opts = {
-	noremap = true,
-	silent = true,
-}
+map("n", "<leader>ff", builtin.find_files, {
+	desc = "Find files",
+})
 
--- Find Files
+map("n", "<leader>fg", builtin.live_grep, {
+	desc = "Live grep",
+})
 
-map(
-	"n",
-	"<leader>ff",
-	builtin.find_files,
-	vim.tbl_extend("force", opts, {
-		desc = "Find files",
-	})
-)
+map("n", "<leader>fb", builtin.buffers, {
+	desc = "Buffers",
+})
 
--- Live Grep
+map("n", "<leader>fr", builtin.oldfiles, {
+	desc = "Recent files",
+})
 
-map(
-	"n",
-	"<leader>fg",
-	builtin.live_grep,
-	vim.tbl_extend("force", opts, {
-		desc = "Live grep",
-	})
-)
+map("n", "<leader>fd", builtin.diagnostics, {
+	desc = "Diagnostics",
+})
 
--- Buffers
+map("n", "<leader>fh", builtin.help_tags, {
+	desc = "Help",
+})
 
-map(
-	"n",
-	"<leader>fb",
-	builtin.buffers,
-	vim.tbl_extend("force", opts, {
-		desc = "Buffers",
-	})
-)
+map("n", "<leader>fc", builtin.commands, {
+	desc = "Commands",
+})
 
--- Recent Files
-
-map(
-	"n",
-	"<leader>fr",
-	builtin.oldfiles,
-	vim.tbl_extend("force", opts, {
-		desc = "Recent files",
-	})
-)
-
--- Diagnostics
-
-map(
-	"n",
-	"<leader>fd",
-	builtin.diagnostics,
-	vim.tbl_extend("force", opts, {
-		desc = "Diagnostics",
-	})
-)
-
--- Help
-
-map(
-	"n",
-	"<leader>fh",
-	builtin.help_tags,
-	vim.tbl_extend("force", opts, {
-		desc = "Help",
-	})
-)
-
--- Commands
-
-map(
-	"n",
-	"<leader>fc",
-	builtin.commands,
-	vim.tbl_extend("force", opts, {
-		desc = "Commands",
-	})
-)
-
--- Current Buffer Search
-
-map(
-	"n",
-	"<leader>fo",
-	builtin.current_buffer_fuzzy_find,
-	vim.tbl_extend("force", opts, {
-		desc = "Search buffer",
-	})
-)
+map("n", "<leader>fo", builtin.current_buffer_fuzzy_find, {
+	desc = "Search buffer",
+})
 
 -- Telescope Prompt
 
 vim.api.nvim_create_autocmd("FileType", {
 	pattern = "TelescopePrompt",
-
-	callback = function(args)
-		vim.bo[args.buf].buflisted = false
+	callback = function(event)
+		vim.bo[event.buf].buflisted = false
 	end,
 })

@@ -201,37 +201,29 @@ local function configure_diagnostics()
 end
 
 local function configure_diagnostic_lists()
-	local function map(mode, lhs, rhs, desc)
-		vim.keymap.set(mode, lhs, rhs, {
+	local function map(lhs, rhs, desc)
+		vim.keymap.set("n", lhs, rhs, {
 			silent = true,
 			noremap = true,
 			desc = desc,
 		})
 	end
 
-	local function open_list(command, empty_message)
-		local ok = pcall(vim.cmd, command)
-
-		if not ok then
-			vim.notify(empty_message, vim.log.levels.INFO)
-		end
-	end
-
-	map("n", "<leader>xx", function()
+	map("<leader>xx", function()
 		vim.diagnostic.setqflist({
 			open = true,
 			title = "Diagnostics",
 		})
 	end, "Diagnostics")
 
-	map("n", "<leader>xX", function()
+	map("<leader>xX", function()
 		vim.diagnostic.setloclist({
 			open = true,
 			title = "Buffer diagnostics",
 		})
 	end, "Buffer diagnostics")
 
-	map("n", "<leader>xs", function()
+	map("<leader>xs", function()
 		local ok, builtin = pcall(require, "telescope.builtin")
 
 		if ok then
@@ -241,13 +233,7 @@ local function configure_diagnostic_lists()
 		end
 	end, "Symbols")
 
-	map("n", "<leader>xl", function()
-		open_list("lopen", "The location list is empty")
-	end, "Location list")
-
-	map("n", "<leader>xq", function()
-		open_list("copen", "The quickfix list is empty")
-	end, "Quickfix")
+	map("<leader>xl", "<cmd>lopen<cr>", "Location list")
 end
 
 -- Completion Capabilities

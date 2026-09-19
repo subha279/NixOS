@@ -116,8 +116,6 @@ function M.setup()
 	end, {
 		desc = "Format",
 	})
-
-	return true
 end
 
 -- IMPORTANT

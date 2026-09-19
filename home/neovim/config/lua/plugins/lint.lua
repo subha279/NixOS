@@ -92,8 +92,6 @@ function M.setup()
 	end, {
 		desc = "Lint: Run",
 	})
-
-	return true
 end
 
 -- IMPORTANT

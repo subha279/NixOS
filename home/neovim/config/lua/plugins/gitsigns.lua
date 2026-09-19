@@ -108,15 +108,6 @@ function M.setup()
 
 		current_line_blame = false,
 
-		current_line_blame_opts = {
-			virt_text = true,
-			virt_text_pos = "eol",
-			delay = 500,
-			ignore_whitespace = false,
-		},
-
-		current_line_blame_formatter = " 󰊢 <author> • <summary>",
-
 		preview_config = {
 			border = "rounded",
 			style = "minimal",
@@ -176,8 +167,6 @@ function M.setup()
 			map("n", "<leader>gR", gs.reset_buffer, "Git: Reset buffer")
 
 			map("n", "<leader>gU", gs.undo_stage_hunk, "Git: Undo stage hunk")
-
-			map("n", "<leader>gD", gs.diffthis, "Git: Diff buffer")
 		end,
 	})
 

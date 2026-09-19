@@ -17,8 +17,6 @@ opt.signcolumn = "yes"
 opt.showmode = false
 opt.showcmd = false
 
-opt.ruler = true
-
 opt.laststatus = 3
 opt.showtabline = 0
 
@@ -28,7 +26,6 @@ opt.termguicolors = true
 
 opt.expandtab = true
 opt.smartindent = true
-opt.autoindent = true
 opt.tabstop = 4
 opt.shiftwidth = 4
 opt.softtabstop = 4
@@ -38,8 +35,6 @@ opt.shiftround = true
 -- Editing
 
 opt.wrap = false
-opt.linebreak = true
-opt.breakindent = true
 opt.inccommand = "split"
 
 -- Search

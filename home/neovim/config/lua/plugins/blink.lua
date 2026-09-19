@@ -329,23 +329,6 @@ function M.setup()
 				"path",
 				"buffer",
 			},
-
-			providers = {
-				lsp = {
-					name = "LSP",
-					module = "blink.cmp.sources.lsp",
-				},
-
-				path = {
-					name = "Path",
-					module = "blink.cmp.sources.path",
-				},
-
-				buffer = {
-					name = "Buffer",
-					module = "blink.cmp.sources.buffer",
-				},
-			},
 		},
 
 		-- Fuzzy Matching
