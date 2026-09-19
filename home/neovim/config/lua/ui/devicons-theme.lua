@@ -16,6 +16,11 @@ function M.setup()
 	end
 
 	local c = theme.colors
+	local s = c.syntax
+
+	if type(s) ~= "table" then
+		return
+	end
 
 	-- nvim-web-devicons
 
@@ -32,17 +37,20 @@ function M.setup()
 	end
 
 	-- Semantic Aurora icon palette
+	--
+	-- Used only for icons that do not have an explicit
+	-- language/filetype color below.
 
 	local palette = {
-		c.accent,
-		c.info,
-		c.success,
-		c.warning,
-		c.terminalMagenta,
-		c.terminalCyan,
-		c.terminalBlue,
-		c.terminalGreen,
-		c.terminalYellow,
+		s.func,
+		s.property,
+		s.type,
+		s.string,
+		s.number,
+		s.keyword,
+		s.namespace,
+		s.builtin,
+		s.attribute,
 	}
 
 	local group_names = {}
@@ -51,7 +59,6 @@ function M.setup()
 		if type(icon) == "table" then
 			local group_name
 
-			-- Newer nvim-web-devicons versions provide the highlight name.
 			if type(icon.name) == "string" then
 				group_name = "DevIcon" .. icon.name
 			elseif type(name) == "string" then
@@ -83,63 +90,62 @@ function M.setup()
 	-- Important development files
 
 	local important = {
-
 		-- Nix
-		DevIconNix = c.info,
+		DevIconNix = s.namespace,
 
 		-- Lua
-		DevIconLua = c.terminalBlue,
+		DevIconLua = s.func,
 
 		-- Rust
-		DevIconRs = c.warning,
+		DevIconRs = s.type,
 
 		-- C / C++
-		DevIconC = c.terminalBlue,
-		DevIconCpp = c.terminalBlue,
-		DevIconH = c.terminalBlue,
-		DevIconHpp = c.terminalBlue,
+		DevIconC = s.type,
+		DevIconCpp = s.type,
+		DevIconH = s.type,
+		DevIconHpp = s.type,
 
 		-- Python
-		DevIconPy = c.terminalBlue,
+		DevIconPy = s.func,
 
 		-- JavaScript
-		DevIconJs = c.warning,
-		DevIconJsx = c.warning,
+		DevIconJs = s.constant,
+		DevIconJsx = s.constant,
 
 		-- TypeScript
-		DevIconTs = c.info,
-		DevIconTsx = c.info,
+		DevIconTs = s.type,
+		DevIconTsx = s.type,
 
 		-- Web
-		DevIconHtml = c.terminalRed,
-		DevIconCss = c.terminalBlue,
-		DevIconScss = c.terminalMagenta,
+		DevIconHtml = s.tag,
+		DevIconCss = s.property,
+		DevIconScss = s.special,
 
-		-- Data/config
-		DevIconJson = c.warning,
-		DevIconJsonc = c.warning,
-		DevIconYaml = c.warning,
-		DevIconYml = c.warning,
-		DevIconToml = c.warning,
+		-- Data / config
+		DevIconJson = s.number,
+		DevIconJsonc = s.number,
+		DevIconYaml = s.attribute,
+		DevIconYml = s.attribute,
+		DevIconToml = s.attribute,
 
 		-- Shell
-		DevIconSh = c.success,
-		DevIconBash = c.success,
-		DevIconZsh = c.success,
+		DevIconSh = s.builtin,
+		DevIconBash = s.builtin,
+		DevIconZsh = s.builtin,
 
 		-- Git
 		DevIconGit = c.error,
-		DevIconGitIgnore = c.textMuted,
+		DevIconGitIgnore = s.comment,
 
 		-- Docker
-		DevIconDockerfile = c.info,
+		DevIconDockerfile = s.namespace,
 
 		-- Markdown
-		DevIconMarkdown = c.info,
-		DevIconMd = c.info,
+		DevIconMarkdown = s.keyword,
+		DevIconMd = s.keyword,
 
 		-- Vim
-		DevIconVim = c.success,
+		DevIconVim = s.keyword,
 	}
 
 	for group, color in pairs(important) do

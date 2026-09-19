@@ -18,409 +18,380 @@ end
 
 local function apply_highlights()
 	local c = colors()
+	local s = c.syntax
+
+	if type(s) ~= "table" then
+		vim.notify("Aurora: syntax palette is unavailable", vim.log.levels.WARN)
+		return
+	end
 
 	-- Comments
 
 	set("@comment", {
-		fg = c.textMuted,
-		bg = "NONE",
+		fg = s.comment,
 		italic = true,
 	})
 
 	set("@comment.documentation", {
 		fg = c.textSecondary,
-		bg = "NONE",
 		italic = true,
 	})
 
 	set("@comment.todo", {
 		fg = c.warning,
-		bg = "NONE",
 		bold = true,
 	})
 
 	set("@comment.note", {
 		fg = c.info,
-		bg = "NONE",
 		bold = true,
 	})
 
 	set("@comment.warning", {
 		fg = c.warning,
-		bg = "NONE",
 		bold = true,
 	})
 
 	set("@comment.error", {
 		fg = c.error,
-		bg = "NONE",
 		bold = true,
 	})
 
 	-- Constants / Literals
 
 	set("@constant", {
-		fg = c.warning,
-		bg = "NONE",
+		fg = s.constant,
 	})
 
 	set("@constant.builtin", {
-		fg = c.warning,
-		bg = "NONE",
+		fg = s.builtin,
+		bold = true,
 	})
 
 	set("@constant.macro", {
-		fg = c.warning,
-		bg = "NONE",
+		fg = s.macro,
+		bold = true,
 	})
 
 	set("@number", {
-		fg = c.warning,
-		bg = "NONE",
+		fg = s.number,
 	})
 
 	set("@float", {
-		fg = c.warning,
-		bg = "NONE",
+		fg = s.number,
 	})
 
 	set("@boolean", {
-		fg = c.accent,
-		bg = "NONE",
+		fg = s.boolean,
 		bold = true,
 	})
 
 	-- Strings
 
 	set("@string", {
-		fg = c.success,
-		bg = "NONE",
+		fg = s.string,
 	})
 
 	set("@string.documentation", {
-		fg = c.success,
-		bg = "NONE",
+		fg = s.string,
+		italic = true,
 	})
 
 	set("@string.regex", {
-		fg = c.info,
-		bg = "NONE",
+		fg = s.regex,
 	})
 
 	set("@string.escape", {
-		fg = c.accent,
-		bg = "NONE",
+		fg = s.special,
 		bold = true,
 	})
 
 	set("@string.special", {
-		fg = c.accent,
-		bg = "NONE",
+		fg = s.special,
 	})
 
 	set("@character", {
-		fg = c.success,
-		bg = "NONE",
+		fg = s.string,
 	})
 
 	set("@character.special", {
-		fg = c.accent,
-		bg = "NONE",
+		fg = s.special,
 	})
 
 	-- Keywords
 
 	set("@keyword", {
-		fg = c.accent,
-		bg = "NONE",
+		fg = s.keyword,
 		bold = true,
 	})
 
 	set("@keyword.function", {
-		fg = c.accent,
-		bg = "NONE",
+		fg = s.keyword,
 		bold = true,
 	})
 
 	set("@keyword.operator", {
-		fg = c.accent,
-		bg = "NONE",
+		fg = s.operator,
 	})
 
 	set("@keyword.return", {
-		fg = c.accentHover or c.accent,
-		bg = "NONE",
+		fg = s.keywordControl,
 		bold = true,
 	})
 
 	set("@keyword.conditional", {
-		fg = c.accent,
-		bg = "NONE",
+		fg = s.keywordControl,
 		bold = true,
 	})
 
 	set("@keyword.repeat", {
-		fg = c.accent,
-		bg = "NONE",
+		fg = s.keywordControl,
 		bold = true,
 	})
 
 	set("@keyword.import", {
-		fg = c.info,
-		bg = "NONE",
+		fg = s.keyword,
 		bold = true,
 	})
 
 	set("@keyword.exception", {
-		fg = c.error,
-		bg = "NONE",
+		fg = s.keywordControl,
 		bold = true,
 	})
 
 	set("@operator", {
-		fg = c.textSecondary,
-		bg = "NONE",
+		fg = s.operator,
 	})
 
 	-- Functions
 
 	set("@function", {
-		fg = c.info,
-		bg = "NONE",
+		fg = s.func,
 		bold = true,
 	})
 
 	set("@function.builtin", {
-		fg = c.info,
-		bg = "NONE",
+		fg = s.builtin,
 	})
 
 	set("@function.call", {
-		fg = c.info,
-		bg = "NONE",
+		fg = s.func,
 	})
 
 	set("@function.method", {
-		fg = c.info,
-		bg = "NONE",
+		fg = s.method,
 		bold = true,
 	})
 
 	set("@function.method.call", {
-		fg = c.info,
-		bg = "NONE",
+		fg = s.method,
+	})
+
+	set("@method", {
+		fg = s.method,
+		bold = true,
+	})
+
+	set("@method.call", {
+		fg = s.method,
 	})
 
 	set("@constructor", {
-		fg = c.accent,
-		bg = "NONE",
+		fg = s.type,
 		bold = true,
 	})
 
 	-- Variables
 
 	set("@variable", {
-		fg = c.text,
-		bg = "NONE",
+		fg = s.variable,
 	})
 
 	set("@variable.builtin", {
-		fg = c.accentHover or c.accent,
-		bg = "NONE",
+		fg = s.builtin,
 	})
 
 	set("@variable.parameter", {
-		fg = c.textSecondary,
-		bg = "NONE",
+		fg = s.parameter,
+		italic = true,
 	})
 
 	set("@variable.parameter.builtin", {
-		fg = c.accentHover or c.accent,
-		bg = "NONE",
+		fg = s.builtin,
+		italic = true,
 	})
 
 	-- Properties / Fields
 
 	set("@property", {
-		fg = c.info,
-		bg = "NONE",
+		fg = s.property,
 	})
 
 	set("@field", {
-		fg = c.info,
-		bg = "NONE",
+		fg = s.property,
 	})
 
 	set("@variable.member", {
-		fg = c.info,
-		bg = "NONE",
+		fg = s.property,
 	})
 
 	-- Types
 
 	set("@type", {
-		fg = c.accent,
-		bg = "NONE",
+		fg = s.type,
 		bold = true,
 	})
 
 	set("@type.builtin", {
-		fg = c.accent,
-		bg = "NONE",
+		fg = s.builtin,
 	})
 
 	set("@type.definition", {
-		fg = c.accent,
-		bg = "NONE",
+		fg = s.type,
 		bold = true,
 	})
 
 	set("@type.qualifier", {
-		fg = c.accent,
-		bg = "NONE",
+		fg = s.keyword,
 	})
 
 	set("@attribute", {
-		fg = c.warning,
-		bg = "NONE",
+		fg = s.attribute,
 	})
 
 	set("@attribute.builtin", {
-		fg = c.warning,
-		bg = "NONE",
+		fg = s.attribute,
+		bold = true,
 	})
 
 	-- Modules / Namespaces
 
 	set("@module", {
-		fg = c.info,
-		bg = "NONE",
+		fg = s.namespace,
 	})
 
 	set("@module.builtin", {
-		fg = c.info,
-		bg = "NONE",
+		fg = s.builtin,
+	})
+
+	set("@namespace", {
+		fg = s.namespace,
 	})
 
 	-- Punctuation
 
 	set("@punctuation.delimiter", {
-		fg = c.textSecondary,
-		bg = "NONE",
+		fg = s.punctuation,
 	})
 
 	set("@punctuation.bracket", {
-		fg = c.textMuted,
-		bg = "NONE",
+		fg = s.punctuation,
 	})
 
 	set("@punctuation.special", {
-		fg = c.accent,
-		bg = "NONE",
+		fg = s.special,
 	})
 
 	-- Tags
 
 	set("@tag", {
-		fg = c.accent,
-		bg = "NONE",
+		fg = s.tag,
 		bold = true,
 	})
 
 	set("@tag.builtin", {
-		fg = c.accent,
-		bg = "NONE",
+		fg = s.tag,
 		bold = true,
 	})
 
 	set("@tag.attribute", {
-		fg = c.info,
-		bg = "NONE",
+		fg = s.attribute,
 	})
 
 	set("@tag.delimiter", {
-		fg = c.textSecondary,
-		bg = "NONE",
+		fg = s.punctuation,
 	})
 
 	-- Markup
 
 	set("@markup.heading", {
-		fg = c.accent,
-		bg = "NONE",
+		fg = s.keyword,
 		bold = true,
 	})
 
 	set("@markup.heading.1", {
-		fg = c.accent,
-		bg = "NONE",
+		fg = s.func,
 		bold = true,
 	})
 
 	set("@markup.heading.2", {
-		fg = c.info,
-		bg = "NONE",
+		fg = s.type,
 		bold = true,
 	})
 
 	set("@markup.heading.3", {
-		fg = c.success,
-		bg = "NONE",
+		fg = s.property,
 		bold = true,
 	})
 
 	set("@markup.bold", {
 		fg = c.text,
-		bg = "NONE",
 		bold = true,
 	})
 
 	set("@markup.italic", {
 		fg = c.textSecondary,
-		bg = "NONE",
 		italic = true,
 	})
 
 	set("@markup.link", {
-		fg = c.info,
-		bg = "NONE",
+		fg = s.property,
 		underline = true,
 	})
 
 	set("@markup.link.label", {
-		fg = c.info,
-		bg = "NONE",
+		fg = s.property,
 		underline = true,
 	})
 
 	set("@markup.link.url", {
-		fg = c.info,
-		bg = "NONE",
+		fg = s.special,
 		underline = true,
 	})
 
 	set("@markup.raw", {
-		fg = c.success,
-		bg = "NONE",
+		fg = s.string,
 	})
 
 	set("@markup.list", {
-		fg = c.accent,
-		bg = "NONE",
+		fg = s.keyword,
 	})
 
 	-- Labels
 
 	set("@label", {
-		fg = c.accent,
-		bg = "NONE",
+		fg = s.property,
 	})
 
 	-- Includes / Imports
 
 	set("@include", {
-		fg = c.info,
-		bg = "NONE",
+		fg = s.namespace,
+		bold = true,
+	})
+
+	-- Regex / Special
+
+	set("@string.regexp", {
+		fg = s.regex,
+	})
+
+	set("@special", {
+		fg = s.special,
+	})
+
+	set("@macro", {
+		fg = s.macro,
 		bold = true,
 	})
 
@@ -428,17 +399,14 @@ local function apply_highlights()
 
 	set("@diff.plus", {
 		fg = c.success,
-		bg = "NONE",
 	})
 
 	set("@diff.minus", {
 		fg = c.error,
-		bg = "NONE",
 	})
 
 	set("@diff.delta", {
 		fg = c.warning,
-		bg = "NONE",
 	})
 end
 
@@ -455,7 +423,11 @@ function M.setup()
 
 	treesitter.setup()
 
-	vim.treesitter.language.register("json", "jsonl")
+	vim.filetype.add({
+		extension = {
+			jsonl = "jsonl",
+		},
+	})
 
 	vim.api.nvim_create_autocmd("FileType", {
 		group = vim.api.nvim_create_augroup("AuroraTreesitterStart", {
@@ -466,6 +438,10 @@ function M.setup()
 			local buf = event.buf
 
 			if vim.bo[buf].buftype ~= "" then
+				return
+			end
+
+			if event.match == "jsonl" then
 				return
 			end
 

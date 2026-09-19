@@ -16,6 +16,11 @@ end
 
 local function apply_highlights()
 	local c = colors()
+	local s = c.syntax
+
+	if type(s) ~= "table" then
+		return
+	end
 
 	-- Floating UI
 
@@ -87,70 +92,72 @@ local function apply_highlights()
 	-- Semantic Tokens
 
 	set_hl("@lsp.type.namespace", {
-		fg = c.info,
+		fg = s.namespace,
 	})
 
 	set_hl("@lsp.type.type", {
-		fg = c.accent,
+		fg = s.type,
+		bold = true,
 	})
 
 	set_hl("@lsp.type.class", {
-		fg = c.accent,
+		fg = s.type,
 		bold = true,
 	})
 
 	set_hl("@lsp.type.struct", {
-		fg = c.accent,
+		fg = s.type,
 	})
 
 	set_hl("@lsp.type.interface", {
-		fg = c.accent,
+		fg = s.type,
 	})
 
 	set_hl("@lsp.type.enum", {
-		fg = c.accent,
+		fg = s.type,
 	})
 
 	set_hl("@lsp.type.enumMember", {
-		fg = c.warning,
+		fg = s.constant,
 	})
 
 	set_hl("@lsp.type.function", {
-		fg = c.info,
+		fg = s.func,
 		bold = true,
 	})
 
 	set_hl("@lsp.type.method", {
-		fg = c.info,
+		fg = s.method,
 	})
 
 	set_hl("@lsp.type.variable", {
-		fg = c.text,
+		fg = s.variable,
 	})
 
 	set_hl("@lsp.type.parameter", {
-		fg = c.textSecondary,
+		fg = s.parameter,
+		italic = true,
 	})
 
 	set_hl("@lsp.type.property", {
-		fg = c.info,
+		fg = s.property,
 	})
 
 	set_hl("@lsp.type.keyword", {
-		fg = c.accent,
+		fg = s.keyword,
 		bold = true,
 	})
 
 	set_hl("@lsp.type.string", {
-		fg = c.success,
+		fg = s.string,
 	})
 
 	set_hl("@lsp.type.number", {
-		fg = c.warning,
+		fg = s.number,
 	})
 
 	set_hl("@lsp.type.comment", {
-		fg = c.textMuted,
+		fg = s.comment,
 		italic = true,
 	})
 end

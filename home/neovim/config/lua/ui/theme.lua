@@ -1,18 +1,10 @@
--- Aurora Dynamic Neovim Theme
-
 local M = {}
 
--- Theme
-
 local aurora = require("aurora.theme")
-
--- Highlight Helper
 
 local function set(name, opts)
 	vim.api.nvim_set_hl(0, name, opts)
 end
-
--- Apply Aurora Theme
 
 function M.apply()
 	local theme = aurora.get()
@@ -23,11 +15,16 @@ function M.apply()
 
 	local c = theme.colors
 
+	local s = c.syntax
+
+	if type(s) ~= "table" then
+		return
+	end
+
 	local glass = (theme.ui and theme.ui.terminalOpacity or 1.0) < 0.999
 
 	local bg = glass and "NONE" or c.background
-
-	local bgDark = glass and "NONE" or c.backgroundDark
+	local bg_dark = glass and "NONE" or c.backgroundDark
 
 	-- Editor
 
@@ -156,7 +153,6 @@ function M.apply()
 		bold = true,
 	})
 
-	-- accentForeground is a near-background tone, so on accentMuted it sat at 1.4-2.8:1 depending on theme.
 	set("MatchParen", {
 		fg = c.text,
 		bg = c.accentMuted,
@@ -233,127 +229,128 @@ function M.apply()
 		bold = true,
 	})
 
-	-- Comments
+	-- Classic Vim Syntax
+	-- Keep these aligned with the Treesitter semantic palette.
 
 	set("Comment", {
-		fg = c.textMuted,
+		fg = s.comment,
 		italic = true,
 	})
 
-	-- Classic Vim Syntax
-
 	set("Constant", {
-		fg = c.terminalMagenta,
+		fg = s.constant,
 	})
 
 	set("String", {
-		fg = c.terminalGreen,
+		fg = s.string,
 	})
 
 	set("Character", {
-		fg = c.terminalGreen,
+		fg = s.string,
 	})
 
 	set("Number", {
-		fg = c.terminalYellow,
+		fg = s.number,
 	})
 
 	set("Float", {
-		fg = c.terminalYellow,
+		fg = s.number,
 	})
 
 	set("Boolean", {
-		fg = c.terminalYellow,
+		fg = s.boolean,
 		bold = true,
 	})
 
 	set("Identifier", {
-		fg = c.text,
+		fg = s.variable,
 	})
 
 	set("Function", {
-		fg = c.accent,
+		fg = s.func,
+		bold = true,
 	})
 
 	set("Statement", {
-		fg = c.accent,
+		fg = s.keyword,
 		bold = true,
 	})
 
 	set("Conditional", {
-		fg = c.accent,
+		fg = s.keywordControl,
 		bold = true,
 	})
 
 	set("Repeat", {
-		fg = c.accent,
+		fg = s.keywordControl,
 		bold = true,
 	})
 
 	set("Label", {
-		fg = c.accentHover,
+		fg = s.property,
 	})
 
 	set("Operator", {
-		fg = c.terminalCyan,
+		fg = s.operator,
 	})
 
 	set("Keyword", {
-		fg = c.accent,
+		fg = s.keyword,
 		bold = true,
 	})
 
 	set("Exception", {
-		fg = c.error,
+		fg = s.keywordControl,
 		bold = true,
 	})
 
 	set("PreProc", {
-		fg = c.terminalBlue,
+		fg = s.namespace,
 	})
 
 	set("Include", {
-		fg = c.terminalBlue,
+		fg = s.namespace,
 	})
 
 	set("Define", {
-		fg = c.terminalBlue,
+		fg = s.macro,
 	})
 
 	set("Macro", {
-		fg = c.terminalBlue,
+		fg = s.macro,
 	})
 
 	set("Type", {
-		fg = c.terminalBlue,
+		fg = s.type,
+		bold = true,
 	})
 
 	set("StorageClass", {
-		fg = c.terminalBlue,
+		fg = s.keyword,
 	})
 
 	set("Structure", {
-		fg = c.terminalBlue,
+		fg = s.type,
 	})
 
 	set("Typedef", {
-		fg = c.terminalBlue,
+		fg = s.type,
 	})
 
 	set("Special", {
-		fg = c.terminalCyan,
+		fg = s.special,
 	})
 
 	set("SpecialChar", {
-		fg = c.terminalCyan,
+		fg = s.special,
 	})
 
 	set("Tag", {
-		fg = c.accent,
+		fg = s.tag,
 	})
 
 	set("Delimiter", {
-		fg = c.textSecondary,
+		fg = s.punctuation,
 	})
 
 	set("Error", {
@@ -366,6 +363,44 @@ function M.apply()
 		bg = c.accentMuted,
 		bold = true,
 	})
+
+	-- JSONL
+
+	set("jsonlString", {
+		fg = s.string,
+	})
+
+	set("jsonlNumber", {
+		fg = s.number,
+	})
+
+	set("jsonlBoolean", {
+		fg = s.boolean,
+		bold = true,
+	})
+
+	set("jsonlNull", {
+		fg = s.constant,
+	})
+
+	set("jsonlProperty", {
+		fg = s.property,
+	})
+
+	set("jsonlDelimiter", {
+		fg = s.punctuation,
+	})
+
+	set("jsonlBracket", {
+		fg = s.punctuation,
+	})
+
+	set("jsonlEscape", {
+		fg = s.special,
+		bold = true,
+	})
+
+	-- Diagnostics
 
 	set("DiagnosticError", {
 		fg = c.error,
@@ -409,22 +444,22 @@ function M.apply()
 
 	set("DiagnosticVirtualTextError", {
 		fg = c.error,
-		bg = bgDark,
+		bg = bg_dark,
 	})
 
 	set("DiagnosticVirtualTextWarn", {
 		fg = c.warning,
-		bg = bgDark,
+		bg = bg_dark,
 	})
 
 	set("DiagnosticVirtualTextInfo", {
 		fg = c.info,
-		bg = bgDark,
+		bg = bg_dark,
 	})
 
 	set("DiagnosticVirtualTextHint", {
 		fg = c.success,
-		bg = bgDark,
+		bg = bg_dark,
 	})
 
 	-- Diff
@@ -493,7 +528,7 @@ function M.apply()
 		bold = true,
 	})
 
-	-- Which-Key
+	-- WhichKey
 
 	set("WhichKey", {
 		fg = c.accent,
@@ -553,7 +588,7 @@ function M.apply()
 		fg = c.info,
 	})
 
-	-- Generic / Miscellaneous
+	-- Generic
 
 	set("Title", {
 		fg = c.accent,
@@ -594,7 +629,5 @@ end
 apply_icon_themes()
 
 aurora.on_change(apply_icon_themes)
-
--- Return
 
 return M

@@ -133,6 +133,32 @@
         accentMuted = "#585B70";
         accentForeground = "#1E1E2E";
 
+        # Syntax
+        syntax = {
+          comment = "#6C7086";
+          variable = "#CDD6F4";
+          parameter = "#F2CDCD";
+          property = "#89B4FA";
+          func = "#89B4FA";
+          method = "#89B4FA";
+          keyword = "#CBA6F7";
+          keywordControl = "#F38BA8";
+          type = "#F9E2AF";
+          constant = "#FAB387";
+          string = "#A6E3A1";
+          number = "#FAB387";
+          boolean = "#CBA6F7";
+          operator = "#89DCEB";
+          punctuation = "#9399B2";
+          tag = "#F38BA8";
+          attribute = "#F9E2AF";
+          namespace = "#89B4FA";
+          builtin = "#94E2D5";
+          regex = "#F5C2E7";
+          special = "#F5C2E7";
+          macro = "#CBA6F7";
+        };
+
         # Semantic
         success = "#A6E3A1";
         warning = "#F9E2AF";
@@ -197,6 +223,32 @@
         accentActive = "#BB9AF7";
         accentMuted = "#414868";
         accentForeground = "#1A1B26";
+
+        # Syntax
+        syntax = {
+          comment = "#565F89";
+          variable = "#C0CAF5";
+          parameter = "#E0AF68";
+          property = "#7DCFFF";
+          func = "#7AA2F7";
+          method = "#7DCFFF";
+          keyword = "#BB9AF7";
+          keywordControl = "#F7768E";
+          type = "#2AC3DE";
+          constant = "#FF9E64";
+          string = "#9ECE6A";
+          number = "#FF9E64";
+          boolean = "#BB9AF7";
+          operator = "#89DDFF";
+          punctuation = "#A9B1D6";
+          tag = "#F7768E";
+          attribute = "#E0AF68";
+          namespace = "#7DCFFF";
+          builtin = "#73DACA";
+          regex = "#B4F9F8";
+          special = "#BB9AF7";
+          macro = "#7AA2F7";
+        };
 
         # Semantic
         success = "#9ECE6A";
@@ -263,6 +315,32 @@
         accentMuted = "#665C54";
         accentForeground = "#282828";
 
+        # Syntax
+        syntax = {
+          comment = "#928374";
+          variable = "#EBDBB2";
+          parameter = "#D5C4A1";
+          property = "#83A598";
+          func = "#B8BB26";
+          method = "#8EC07C";
+          keyword = "#FB4934";
+          keywordControl = "#FE8019";
+          type = "#FABD2F";
+          constant = "#D3869B";
+          string = "#B8BB26";
+          number = "#D3869B";
+          boolean = "#FE8019";
+          operator = "#8EC07C";
+          punctuation = "#A89984";
+          tag = "#FB4934";
+          attribute = "#FABD2F";
+          namespace = "#83A598";
+          builtin = "#8EC07C";
+          regex = "#D3869B";
+          special = "#FE8019";
+          macro = "#B16286";
+        };
+
         # Semantic
         success = "#B8BB26";
         warning = "#FABD2F";
@@ -327,6 +405,32 @@
         accentActive = "#C678DD";
         accentMuted = "#3E4451";
         accentForeground = "#282C34";
+
+        # Syntax
+        syntax = {
+          comment = "#5C6370";
+          variable = "#ABB2BF";
+          parameter = "#E5C07B";
+          property = "#61AFEF";
+          func = "#61AFEF";
+          method = "#56B6C2";
+          keyword = "#C678DD";
+          keywordControl = "#E06C75";
+          type = "#E5C07B";
+          constant = "#D19A66";
+          string = "#98C379";
+          number = "#D19A66";
+          boolean = "#C678DD";
+          operator = "#56B6C2";
+          punctuation = "#ABB2BF";
+          tag = "#E06C75";
+          attribute = "#E5C07B";
+          namespace = "#61AFEF";
+          builtin = "#56B6C2";
+          regex = "#56B6C2";
+          special = "#C678DD";
+          macro = "#61AFEF";
+        };
 
         # Semantic
         success = "#98C379";
@@ -393,6 +497,32 @@
         accentMuted = "#475258";
         accentForeground = "#2D353B";
 
+        # Syntax
+        syntax = {
+          comment = "#859289";
+          variable = "#D3C6AA";
+          parameter = "#DBBC7F";
+          property = "#7FBBB3";
+          func = "#A7C080";
+          method = "#83C092";
+          keyword = "#D699B6";
+          keywordControl = "#E67E80";
+          type = "#DBBC7F";
+          constant = "#D699B6";
+          string = "#A7C080";
+          number = "#D699B6";
+          boolean = "#D699B6";
+          operator = "#83C092";
+          punctuation = "#9DA9A0";
+          tag = "#E67E80";
+          attribute = "#DBBC7F";
+          namespace = "#7FBBB3";
+          builtin = "#83C092";
+          regex = "#D699B6";
+          special = "#E69875";
+          macro = "#A7C080";
+        };
+
         # Semantic
         success = "#A7C080";
         warning = "#DBBC7F";
@@ -458,6 +588,32 @@
         accentMuted = "#403D52";
         accentForeground = "#191724";
 
+        # Syntax
+        syntax = {
+          comment = "#6E6A86";
+          variable = "#E0DEF4";
+          parameter = "#F6C177";
+          property = "#9CCFD8";
+          func = "#C4A7E7";
+          method = "#9CCFD8";
+          keyword = "#C4A7E7";
+          keywordControl = "#EB6F92";
+          type = "#F6C177";
+          constant = "#EBBCBA";
+          string = "#9CCFD8";
+          number = "#F6C177";
+          boolean = "#C4A7E7";
+          operator = "#9CCFD8";
+          punctuation = "#908CAA";
+          tag = "#EB6F92";
+          attribute = "#F6C177";
+          namespace = "#31748F";
+          builtin = "#9CCFD8";
+          regex = "#EBBCBA";
+          special = "#EBBCBA";
+          macro = "#C4A7E7";
+        };
+
         # Semantic
         success = "#9CCFD8";
         warning = "#F6C177";
@@ -522,6 +678,32 @@
         accentActive = "#957FB8";
         accentMuted = "#54546D";
         accentForeground = "#1F1F28";
+
+        # Syntax
+        syntax = {
+          comment = "#727169";
+          variable = "#DCD7BA";
+          parameter = "#E6C384";
+          property = "#7FB4CA";
+          func = "#7E9CD8";
+          method = "#6A9589";
+          keyword = "#957FB8";
+          keywordControl = "#C34043";
+          type = "#E6C384";
+          constant = "#D27E99";
+          string = "#98BB6C";
+          number = "#D27E99";
+          boolean = "#957FB8";
+          operator = "#7FB4CA";
+          punctuation = "#C8C093";
+          tag = "#C34043";
+          attribute = "#E6C384";
+          namespace = "#7FB4CA";
+          builtin = "#6A9589";
+          regex = "#D27E99";
+          special = "#E6C384";
+          macro = "#7E9CD8";
+        };
 
         # Semantic
         success = "#98BB6C";

@@ -60,6 +60,31 @@ let
           terminalCyan = "${colors.terminalCyan}",
           terminalWhite = "${colors.terminalWhite}",
 
+          syntax = {
+            comment = "${colors.syntax.comment}";
+            variable = "${colors.syntax.variable}";
+            parameter = "${colors.syntax.parameter}";
+            property = "${colors.syntax.property}";
+            func = "${colors.syntax.func}";
+            method = "${colors.syntax.method}";
+            keyword = "${colors.syntax.keyword}";
+            keywordControl = "${colors.syntax.keywordControl}";
+            type = "${colors.syntax.type}";
+            constant = "${colors.syntax.constant}";
+            string = "${colors.syntax.string}";
+            number = "${colors.syntax.number}";
+            boolean = "${colors.syntax.boolean}";
+            operator = "${colors.syntax.operator}";
+            punctuation = "${colors.syntax.punctuation}";
+            tag = "${colors.syntax.tag}";
+            attribute = "${colors.syntax.attribute}";
+            namespace = "${colors.syntax.namespace}";
+            builtin = "${colors.syntax.builtin}";
+            regex = "${colors.syntax.regex}";
+            special = "${colors.syntax.special}";
+            macro = "${colors.syntax.macro}";
+          },
+
           terminalBrightBlack = "${colors.terminalBrightBlack}",
           terminalBrightRed = "${colors.terminalBrightRed}",
           terminalBrightGreen = "${colors.terminalBrightGreen}",

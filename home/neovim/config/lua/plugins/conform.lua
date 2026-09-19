@@ -13,7 +13,14 @@ function M.setup()
 		return false
 	end
 
+	local formatters = {
+		jq = {
+			args = { "-c", "." },
+		},
+	}
+
 	conform.setup({
+		formatters = formatters,
 		-- Formatters
 
 		formatters_by_ft = {
@@ -59,6 +66,14 @@ function M.setup()
 
 			json = {
 				"prettier",
+			},
+
+			jsonl = {
+				"jq",
+			},
+
+			ndjson = {
+				"jq",
 			},
 
 			yaml = {
