@@ -60,7 +60,7 @@ opt.splitright = true
 opt.backup = false
 opt.writebackup = false
 opt.swapfile = false
-
+opt.undodir = os.getenv("HOME") .. "/.nvim/undodir"
 opt.undofile = true
 
 -- Performance
