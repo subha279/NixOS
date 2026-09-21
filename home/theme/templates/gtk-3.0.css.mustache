@@ -1,0 +1,1260 @@
+/* ============================================================
+ * Aurora GTK 3
+ * Generated from the Aurora semantic palette.
+ *
+ * base00 = background
+ * base01 = surface
+ * base02 = surface hover
+ * base03 = muted text
+ * base04 = secondary text / border
+ * base05 = primary text
+ * base08 = error
+ * base09 = warning
+ * base0A = yellow
+ * base0B = success
+ * base0C = cyan
+ * base0D = info
+ * base0E = accent
+ * ============================================================ */
+
+@define-color aurora_background #{{base00-hex}};
+@define-color aurora_surface #{{base01-hex}};
+@define-color aurora_surface_hover #{{base02-hex}};
+@define-color aurora_text_muted #{{base03-hex}};
+@define-color aurora_text_secondary #{{base04-hex}};
+@define-color aurora_text #{{base05-hex}};
+
+@define-color aurora_error #{{base08-hex}};
+@define-color aurora_warning #{{base09-hex}};
+@define-color aurora_yellow #{{base0A-hex}};
+@define-color aurora_success #{{base0B-hex}};
+@define-color aurora_cyan #{{base0C-hex}};
+@define-color aurora_info #{{base0D-hex}};
+@define-color aurora_accent #{{base0E-hex}};
+@define-color aurora_magenta #{{base0F-hex}};
+
+@define-color theme_fg_color @aurora_text;
+@define-color theme_text_color @aurora_text;
+@define-color theme_bg_color @aurora_background;
+@define-color theme_base_color @aurora_background;
+@define-color theme_selected_bg_color @aurora_accent;
+@define-color theme_selected_fg_color @aurora_background;
+
+/* ============================================================
+ * Base
+ * ============================================================ */
+
+* {
+    -GtkToolButton-icon-spacing: 6;
+    -GtkToolItemGroup-expander-size: 16;
+    -GtkTreeView-expander-size: 16;
+    -GtkTreeView-vertical-separator: 0;
+}
+
+window,
+.background {
+    background-color: @aurora_background;
+    color: @aurora_text;
+}
+
+.view,
+.view text,
+textview,
+textview.view,
+text {
+    background-color: @aurora_background;
+    color: @aurora_text;
+}
+/* ============================================================
+ * Global window / CSD decoration
+ * ============================================================ */
+
+window,
+window.background,
+window.csd,
+window.solid-csd {
+    background-color: @aurora_background;
+    color: @aurora_text;
+}
+
+/* GTK client-side window decoration */
+
+decoration {
+    background-color: @aurora_background;
+    border: 1px solid @aurora_surface_hover;
+    box-shadow: none;
+}
+
+decoration:backdrop {
+    background-color: @aurora_background;
+    border-color: @aurora_surface;
+}
+
+/* ============================================================
+ * Menubar
+ * ============================================================ */
+
+menubar {
+    background-color: @aurora_background;
+    color: @aurora_text;
+
+    border: none;
+    box-shadow: none;
+}
+
+menubar > menuitem {
+    background-color: transparent;
+    color: @aurora_text_secondary;
+
+    padding: 6px 9px;
+}
+
+menubar > menuitem:hover {
+    background-color: @aurora_surface_hover;
+    color: @aurora_text;
+}
+
+menubar > menuitem:active,
+menubar > menuitem:selected {
+    background-color: @aurora_accent;
+    color: @aurora_background;
+}
+
+menubar:backdrop,
+menubar > menuitem:backdrop {
+    background-color: @aurora_background;
+    color: @aurora_text_muted;
+}
+
+/* Remove the default GTK light decoration/shadow */
+
+window.csd {
+    background-color: @aurora_background;
+}
+
+window.csd decoration {
+    background-color: @aurora_background;
+    border: 1px solid @aurora_surface_hover;
+    box-shadow: none;
+}
+
+/* ============================================================
+ * Headerbar / titlebar
+ * ============================================================ */
+
+headerbar,
+.titlebar {
+    background-color: @aurora_surface;
+    color: @aurora_text;
+
+    border: none;
+    box-shadow: none;
+
+    min-height: 42px;
+    padding: 5px 8px;
+}
+
+headerbar:backdrop,
+.titlebar:backdrop {
+    background-color: @aurora_background;
+    color: @aurora_text_muted;
+}
+
+headerbar .title,
+headerbar .subtitle {
+    color: @aurora_text;
+}
+
+headerbar .subtitle {
+    color: @aurora_text_secondary;
+}
+
+/* ============================================================
+ * Toolbars / Thunar
+ * ============================================================ */
+
+toolbar,
+.primary-toolbar,
+.toolbar {
+    background-color: @aurora_surface;
+    color: @aurora_text;
+
+    border: none;
+    box-shadow: none;
+}
+
+toolbar button,
+.primary-toolbar button,
+.toolbar button {
+    background-color: transparent;
+    color: @aurora_text;
+
+    border: 1px solid transparent;
+    border-radius: 7px;
+}
+
+toolbar button:hover,
+.primary-toolbar button:hover,
+.toolbar button:hover {
+    background-color: @aurora_surface_hover;
+    color: @aurora_text;
+}
+
+toolbar button:active,
+.primary-toolbar button:active,
+.toolbar button:active {
+    background-color: @aurora_accent;
+    color: @aurora_background;
+}
+
+toolbar entry,
+.primary-toolbar entry,
+.toolbar entry {
+    background-color: @aurora_background;
+    color: @aurora_text;
+
+    border: 1px solid @aurora_surface_hover;
+    border-radius: 8px;
+}
+
+/* ============================================================
+ * Thunar / Tree selection
+ * ============================================================ */
+
+treeview.view:selected,
+treeview.view:selected:focus,
+treeview:selected,
+treeview:selected:focus {
+    background-color: @aurora_accent;
+    color: @aurora_background;
+}
+
+treeview.view:selected:hover,
+treeview:selected:hover {
+    background-color: @aurora_accent;
+    color: @aurora_background;
+}
+
+treeview.view {
+    background-color: @aurora_background;
+    color: @aurora_text;
+}
+
+treeview.view:hover {
+    background-color: @aurora_surface;
+    color: @aurora_text;
+}
+
+/* ============================================================
+ * Thunar file view
+ * ============================================================ */
+
+.view {
+    background-color: @aurora_background;
+    color: @aurora_text;
+}
+
+.view:hover {
+    background-color: @aurora_surface;
+}
+
+.view:selected {
+    background-color: @aurora_accent;
+    color: @aurora_background;
+}
+
+.view:selected:focus {
+    background-color: @aurora_accent;
+    color: @aurora_background;
+}
+
+iconview {
+    background-color: @aurora_background;
+    color: @aurora_text;
+}
+
+iconview:selected {
+    background-color: @aurora_accent;
+    color: @aurora_background;
+}
+
+/* ============================================================
+ * Buttons
+ * ============================================================ */
+
+button {
+    background-image: none;
+    background-color: @aurora_surface;
+
+    color: @aurora_text;
+
+    border: 1px solid @aurora_surface_hover;
+    border-radius: 8px;
+
+    box-shadow: none;
+
+    padding: 6px 12px;
+    min-height: 28px;
+}
+
+button:hover {
+    background-color: @aurora_surface_hover;
+    border-color: @aurora_accent;
+}
+
+button:active,
+button:checked {
+    background-color: @aurora_accent;
+    color: @aurora_background;
+    border-color: @aurora_accent;
+}
+
+button:focus {
+    border-color: @aurora_accent;
+    box-shadow: inset 0 0 0 1px @aurora_accent;
+}
+
+button:disabled {
+    background-color: @aurora_background;
+    color: @aurora_text_muted;
+    border-color: @aurora_surface;
+}
+
+/* Flat buttons */
+
+button.flat {
+    background-color: transparent;
+    border-color: transparent;
+}
+
+button.flat:hover {
+    background-color: @aurora_surface_hover;
+    border-color: @aurora_surface_hover;
+}
+
+button.flat:active,
+button.flat:checked {
+    background-color: @aurora_accent;
+    color: @aurora_background;
+}
+
+/* ============================================================
+ * Entries / search fields
+ * ============================================================ */
+
+entry,
+spinbutton,
+combobox {
+    background-color: @aurora_surface;
+    color: @aurora_text;
+
+    border: 1px solid @aurora_surface_hover;
+    border-radius: 8px;
+
+    box-shadow: none;
+
+    padding: 7px 10px;
+}
+
+entry:hover,
+spinbutton:hover,
+combobox:hover {
+    border-color: @aurora_text_secondary;
+}
+
+entry:focus,
+spinbutton:focus,
+combobox:focus {
+    border-color: @aurora_accent;
+    box-shadow: inset 0 0 0 1px @aurora_accent;
+}
+
+entry:disabled,
+spinbutton:disabled,
+combobox:disabled {
+    background-color: @aurora_background;
+    color: @aurora_text_muted;
+}
+
+/* Search */
+
+searchbar {
+    background-color: @aurora_surface;
+    border: none;
+    box-shadow: none;
+}
+
+searchbar entry {
+    border-radius: 10px;
+}
+
+/* ============================================================
+ * Menus / popovers
+ * ============================================================ */
+
+menu,
+.menu,
+popover,
+popover.background,
+popover.menu {
+    background-color: @aurora_surface;
+    color: @aurora_text;
+
+    border: 1px solid @aurora_surface_hover;
+    border-radius: 10px;
+
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+menuitem {
+    background-color: transparent;
+    color: @aurora_text;
+
+    border-radius: 6px;
+
+    padding: 7px 10px;
+}
+
+menuitem:hover {
+    background-color: @aurora_surface_hover;
+    color: @aurora_text;
+}
+
+menuitem:active,
+menuitem:selected {
+    background-color: @aurora_accent;
+    color: @aurora_background;
+}
+
+/* ============================================================
+ * Lists / tree views / Thunar
+ * ============================================================ */
+
+treeview,
+treeview.view,
+.view {
+    background-color: @aurora_background;
+    color: @aurora_text;
+}
+
+treeview:hover,
+treeview.view:hover,
+.view:hover {
+    background-color: @aurora_surface;
+}
+
+treeview:selected,
+treeview.view:selected,
+.view:selected {
+    background-color: @aurora_accent;
+    color: @aurora_background;
+}
+
+treeview:selected:focus,
+treeview.view:selected:focus,
+.view:selected:focus {
+    background-color: @aurora_accent;
+    color: @aurora_background;
+}
+
+/* Thunar icon/list rows */
+
+iconview {
+    background-color: @aurora_background;
+    color: @aurora_text;
+}
+
+iconview:hover {
+    background-color: @aurora_surface;
+}
+
+iconview:selected {
+    background-color: @aurora_accent;
+    color: @aurora_background;
+}
+
+/* ============================================================
+ * Sidebar
+ * ============================================================ */
+
+.sidebar,
+.sidebar.view {
+    background-color: @aurora_surface;
+    color: @aurora_text;
+}
+
+.sidebar row {
+    background-color: transparent;
+    color: @aurora_text;
+    border-radius: 7px;
+    padding: 5px;
+}
+
+.sidebar row:hover {
+    background-color: @aurora_surface_hover;
+}
+
+.sidebar row:selected {
+    background-color: @aurora_accent;
+    color: @aurora_background;
+}
+
+/* ============================================================
+ * Scrollbars
+ * ============================================================ */
+
+scrollbar {
+    background-color: transparent;
+}
+
+scrollbar trough {
+    background-color: transparent;
+    border-radius: 8px;
+}
+
+scrollbar slider {
+    background-color: @aurora_text_muted;
+    border-radius: 8px;
+
+    min-width: 7px;
+    min-height: 7px;
+}
+
+scrollbar slider:hover {
+    background-color: @aurora_text_secondary;
+}
+
+scrollbar slider:active {
+    background-color: @aurora_accent;
+}
+
+/* ============================================================
+ * Scale / sliders
+ * ============================================================ */
+
+scale trough {
+    background-color: @aurora_surface_hover;
+    border-radius: 5px;
+}
+
+scale highlight {
+    background-color: @aurora_accent;
+    border-radius: 5px;
+}
+
+scale slider {
+    background-color: @aurora_accent;
+    border: 2px solid @aurora_background;
+    border-radius: 50%;
+}
+
+/* ============================================================
+ * Checkboxes / radio buttons
+ * ============================================================ */
+
+checkbutton,
+radiobutton {
+    color: @aurora_text;
+}
+
+checkbutton check,
+radiobutton radio {
+    background-color: @aurora_surface;
+    border: 1px solid @aurora_text_muted;
+}
+
+checkbutton:hover check,
+radiobutton:hover radio {
+    border-color: @aurora_accent;
+}
+
+checkbutton:checked check,
+radiobutton:checked radio {
+    background-color: @aurora_accent;
+    color: @aurora_background;
+    border-color: @aurora_accent;
+}
+
+/* ============================================================
+ * Switch
+ * ============================================================ */
+
+switch {
+    background-color: @aurora_surface_hover;
+    border: 1px solid @aurora_text_muted;
+    border-radius: 999px;
+}
+
+switch slider {
+    background-color: @aurora_text;
+    border-radius: 999px;
+}
+
+switch:checked {
+    background-color: @aurora_accent;
+    border-color: @aurora_accent;
+}
+
+switch:checked slider {
+    background-color: @aurora_background;
+}
+
+/* ============================================================
+ * Progress bars
+ * ============================================================ */
+
+progressbar trough {
+    background-color: @aurora_surface_hover;
+    border-radius: 6px;
+}
+
+progressbar progress {
+    background-color: @aurora_accent;
+    border-radius: 6px;
+}
+
+/* ============================================================
+ * Tabs
+ * ============================================================ */
+
+notebook {
+    background-color: @aurora_background;
+    color: @aurora_text;
+}
+
+notebook header {
+    background-color: @aurora_surface;
+    border: none;
+}
+
+notebook tab {
+    background-color: transparent;
+    color: @aurora_text_secondary;
+    padding: 7px 12px;
+}
+
+notebook tab:hover {
+    background-color: @aurora_surface_hover;
+    color: @aurora_text;
+}
+
+notebook tab:checked {
+    background-color: @aurora_accent;
+    color: @aurora_background;
+}
+
+/* ============================================================
+ * Tooltips
+ * ============================================================ */
+
+tooltip {
+    background-color: @aurora_surface;
+    color: @aurora_text;
+
+    border: 1px solid @aurora_surface_hover;
+    border-radius: 8px;
+
+    padding: 6px 9px;
+}
+
+/* ============================================================
+ * Separators
+ * ============================================================ */
+
+separator {
+    background-color: @aurora_surface_hover;
+}
+
+/* ============================================================
+ * Links
+ * ============================================================ */
+
+*:link,
+*:visited {
+    color: @aurora_accent;
+}
+
+*:link:hover,
+*:visited:hover {
+    color: @aurora_cyan;
+}
+
+/* ============================================================
+ * Selection / focus
+ * ============================================================ */
+
+*:focus {
+    outline-color: @aurora_accent;
+}
+
+selection,
+*:selected {
+    background-color: @aurora_accent;
+    color: @aurora_background;
+}
+
+/* ============================================================
+ * Destructive / warning / success
+ * ============================================================ */
+
+.destructive-action {
+    background-color: @aurora_error;
+    color: @aurora_background;
+}
+
+.destructive-action:hover {
+    background-color: @aurora_error;
+}
+
+.suggested-action {
+    background-color: @aurora_accent;
+    color: @aurora_background;
+}
+
+.warning {
+    color: @aurora_warning;
+}
+
+.success {
+    color: @aurora_success;
+}
+
+/* ============================================================
+ * AURORA — GLOBAL DARK OVERRIDE
+ *
+ * This section intentionally comes LAST so it wins against
+ * earlier/default GTK styling.
+ * ============================================================ */
+
+/* ------------------------------------------------------------
+ * GTK semantic theme colors
+ * ------------------------------------------------------------ */
+
+@define-color theme_fg_color              @aurora_text;
+@define-color theme_text_color            @aurora_text;
+@define-color theme_bg_color              @aurora_background;
+@define-color theme_base_color            @aurora_background;
+
+@define-color theme_unfocused_fg_color    @aurora_text_secondary;
+@define-color theme_unfocused_text_color  @aurora_text_secondary;
+@define-color theme_unfocused_bg_color    @aurora_background;
+@define-color theme_unfocused_base_color  @aurora_background;
+
+@define-color insensitive_fg_color        @aurora_text_muted;
+@define-color insensitive_bg_color        @aurora_surface;
+@define-color insensitive_base_color      @aurora_background;
+
+@define-color borders                      @aurora_surface_hover;
+@define-color unfocused_borders            @aurora_surface;
+
+@define-color theme_selected_bg_color      @aurora_accent;
+@define-color theme_selected_fg_color      @aurora_background;
+
+@define-color content_view_bg              @aurora_background;
+@define-color text_view_bg                 @aurora_background;
+
+/* ------------------------------------------------------------
+ * EVERYTHING
+ * ------------------------------------------------------------ */
+
+* {
+    color: @aurora_text;
+}
+
+/* ------------------------------------------------------------
+ * Windows
+ * ------------------------------------------------------------ */
+
+window,
+window.background,
+window.csd,
+window.solid-csd,
+window.unified,
+window > decoration {
+    background-color: @aurora_background;
+    color: @aurora_text;
+    border-color: @aurora_surface_hover;
+}
+
+/* ------------------------------------------------------------
+ * GTK client-side decoration
+ * ------------------------------------------------------------ */
+
+decoration,
+decoration.background,
+decoration:backdrop {
+    background-color: @aurora_background;
+    border: 1px solid @aurora_surface_hover;
+    box-shadow: none;
+}
+
+/* ------------------------------------------------------------
+ * Menubars
+ * ------------------------------------------------------------ */
+
+menubar,
+menubar.background {
+    background-color: @aurora_background;
+    color: @aurora_text;
+    border: none;
+    box-shadow: none;
+}
+
+menubar > menuitem {
+    background-color: transparent;
+    color: @aurora_text_secondary;
+}
+
+menubar > menuitem:hover,
+menubar > menuitem:focus {
+    background-color: @aurora_surface_hover;
+    color: @aurora_text;
+}
+
+menubar > menuitem:active,
+menubar > menuitem:selected {
+    background-color: @aurora_accent;
+    color: @aurora_background;
+}
+
+/* ------------------------------------------------------------
+ * Toolbars
+ * ------------------------------------------------------------ */
+
+toolbar,
+.toolbar,
+.primary-toolbar {
+    background-color: @aurora_surface;
+    color: @aurora_text;
+
+    border: none;
+    box-shadow: none;
+}
+
+toolbar > *,
+.toolbar > *,
+.primary-toolbar > * {
+    color: @aurora_text;
+}
+
+/* ------------------------------------------------------------
+ * Frames / containers
+ * ------------------------------------------------------------ */
+
+frame,
+frame > border,
+viewport,
+scrolledwindow,
+scrolledwindow > viewport,
+stack,
+stacksidebar,
+paned,
+eventbox,
+box {
+    background-color: @aurora_background;
+    color: @aurora_text;
+}
+
+/* ------------------------------------------------------------
+ * Main views
+ * ------------------------------------------------------------ */
+
+.view,
+.view text,
+treeview,
+treeview.view,
+iconview,
+textview,
+textview.view {
+    background-color: @aurora_background;
+    color: @aurora_text;
+}
+
+/* ------------------------------------------------------------
+ * Headerbars
+ * ------------------------------------------------------------ */
+
+headerbar,
+headerbar.background,
+.titlebar,
+.titlebar.background {
+    background-color: @aurora_surface;
+    color: @aurora_text;
+
+    border: none;
+    box-shadow: none;
+}
+
+headerbar:backdrop,
+.titlebar:backdrop {
+    background-color: @aurora_background;
+    color: @aurora_text_muted;
+}
+
+/* ------------------------------------------------------------
+ * Buttons
+ * ------------------------------------------------------------ */
+
+button {
+    background-image: none;
+    background-color: @aurora_surface;
+    color: @aurora_text;
+
+    border: 1px solid @aurora_surface_hover;
+    box-shadow: none;
+}
+
+button:hover {
+    background-color: @aurora_surface_hover;
+    color: @aurora_text;
+}
+
+button:active,
+button:checked,
+button:selected {
+    background-color: @aurora_accent;
+    color: @aurora_background;
+}
+
+button:disabled {
+    background-color: @aurora_background;
+    color: @aurora_text_muted;
+}
+
+/* ------------------------------------------------------------
+ * Entries / inputs
+ * ------------------------------------------------------------ */
+
+entry,
+entry.background,
+spinbutton,
+combobox {
+    background-color: @aurora_surface;
+    color: @aurora_text;
+
+    border-color: @aurora_surface_hover;
+}
+
+entry:focus,
+spinbutton:focus,
+combobox:focus {
+    background-color: @aurora_surface;
+    color: @aurora_text;
+    border-color: @aurora_accent;
+}
+
+/* ------------------------------------------------------------
+ * Lists / rows
+ * ------------------------------------------------------------ */
+
+list,
+listview,
+row {
+    background-color: @aurora_background;
+    color: @aurora_text;
+}
+
+row:hover,
+list row:hover {
+    background-color: @aurora_surface;
+    color: @aurora_text;
+}
+
+row:selected,
+list row:selected,
+.view:selected,
+treeview:selected,
+iconview:selected {
+    background-color: @aurora_accent;
+    color: @aurora_background;
+}
+
+/* ------------------------------------------------------------
+ * Sidebar
+ * ------------------------------------------------------------ */
+
+.sidebar,
+.sidebar.view,
+stacksidebar {
+    background-color: @aurora_surface;
+    color: @aurora_text;
+}
+
+.sidebar row,
+.sidebar.view row {
+    background-color: transparent;
+    color: @aurora_text_secondary;
+}
+
+.sidebar row:hover,
+.sidebar.view row:hover {
+    background-color: @aurora_surface_hover;
+    color: @aurora_text;
+}
+
+.sidebar row:selected,
+.sidebar.view row:selected {
+    background-color: @aurora_accent;
+    color: @aurora_background;
+}
+
+/* ------------------------------------------------------------
+ * Menus
+ * ------------------------------------------------------------ */
+
+menu,
+.menu,
+menu.background,
+popover,
+popover.background,
+popover.menu {
+    background-color: @aurora_surface;
+    color: @aurora_text;
+
+    border: 1px solid @aurora_surface_hover;
+    box-shadow: none;
+}
+
+menuitem,
+modelbutton {
+    background-color: transparent;
+    color: @aurora_text;
+}
+
+menuitem:hover,
+modelbutton:hover {
+    background-color: @aurora_surface_hover;
+    color: @aurora_text;
+}
+
+menuitem:selected,
+menuitem:active,
+modelbutton:active {
+    background-color: @aurora_accent;
+    color: @aurora_background;
+}
+
+/* ------------------------------------------------------------
+ * Scrollbars
+ * ------------------------------------------------------------ */
+
+scrollbar,
+scrollbar trough {
+    background-color: transparent;
+}
+
+scrollbar slider {
+    background-color: @aurora_text_muted;
+}
+
+scrollbar slider:hover {
+    background-color: @aurora_text_secondary;
+}
+
+scrollbar slider:active {
+    background-color: @aurora_accent;
+}
+
+/* ------------------------------------------------------------
+ * Checkboxes / radio / switches
+ * ------------------------------------------------------------ */
+
+checkbutton,
+radiobutton {
+    background-color: transparent;
+    color: @aurora_text;
+}
+
+check,
+radio {
+    background-color: @aurora_surface;
+    color: @aurora_text;
+
+    border-color: @aurora_text_muted;
+}
+
+check:checked,
+radio:checked {
+    background-color: @aurora_accent;
+    color: @aurora_background;
+    border-color: @aurora_accent;
+}
+
+switch {
+    background-color: @aurora_surface_hover;
+    color: @aurora_text;
+
+    border-color: @aurora_text_muted;
+}
+
+switch:checked {
+    background-color: @aurora_accent;
+    border-color: @aurora_accent;
+}
+
+/* ------------------------------------------------------------
+ * Tabs
+ * ------------------------------------------------------------ */
+
+notebook,
+notebook header {
+    background-color: @aurora_background;
+    color: @aurora_text;
+}
+
+notebook tab {
+    background-color: transparent;
+    color: @aurora_text_secondary;
+}
+
+notebook tab:hover {
+    background-color: @aurora_surface_hover;
+    color: @aurora_text;
+}
+
+notebook tab:checked {
+    background-color: @aurora_accent;
+    color: @aurora_background;
+}
+
+/* ------------------------------------------------------------
+ * Progress / scales
+ * ------------------------------------------------------------ */
+
+progressbar trough,
+scale trough {
+    background-color: @aurora_surface_hover;
+}
+
+progressbar progress,
+scale highlight {
+    background-color: @aurora_accent;
+}
+
+/* ------------------------------------------------------------
+ * Tooltips
+ * ------------------------------------------------------------ */
+
+tooltip,
+tooltip.background {
+    background-color: @aurora_surface;
+    color: @aurora_text;
+
+    border: 1px solid @aurora_surface_hover;
+    box-shadow: none;
+}
+
+/* ------------------------------------------------------------
+ * Separators
+ * ------------------------------------------------------------ */
+
+separator {
+    background-color: @aurora_surface_hover;
+}
+
+/* ------------------------------------------------------------
+ * Focus
+ * ------------------------------------------------------------ */
+
+*:focus {
+    outline-color: @aurora_accent;
+}
+
+/* ------------------------------------------------------------
+ * Selection
+ * ------------------------------------------------------------ */
+
+selection {
+    background-color: @aurora_accent;
+    color: @aurora_background;
+}
+
+/* ============================================================
+ * AURORA — SWAPPY FOCUSED WINDOW FIX
+ * ============================================================ */
+
+/* Swappy header bar — focused AND unfocused */
+headerbar,
+headerbar:backdrop,
+headerbar:focus,
+headerbar:focus-within,
+headerbar.default-decoration,
+headerbar.titlebar {
+    background: @aurora_surface;
+    background-color: @aurora_surface;
+    background-image: none;
+    color: @aurora_text;
+    border: none;
+    box-shadow: none;
+}
+
+/* The window itself */
+window,
+window:focus,
+window:backdrop {
+    background: @aurora_background;
+    background-color: @aurora_background;
+    color: @aurora_text;
+}
+
+/* Headerbar internal containers */
+headerbar > box,
+headerbar > box > box,
+headerbar .title,
+headerbar .subtitle {
+    background: transparent;
+    background-color: transparent;
+    color: @aurora_text;
+}
+
+/* Swappy buttons */
+headerbar button,
+headerbar button:focus,
+headerbar button:active,
+headerbar button:checked {
+    background: @aurora_surface;
+    background-color: @aurora_surface;
+    background-image: none;
+    color: @aurora_text;
+    border: 1px solid transparent;
+    box-shadow: none;
+}
+
+/* Hover */
+headerbar button:hover {
+    background: @aurora_surface_hover;
+    background-color: @aurora_surface_hover;
+    background-image: none;
+    color: @aurora_text;
+    border-color: @aurora_accent;
+}
+
+/* Active */
+headerbar button:active,
+headerbar button:checked {
+    background: @aurora_accent;
+    background-color: @aurora_accent;
+    color: @aurora_background;
+}
+
+/* Headerbar separators */
+headerbar separator,
+headerbar separator:backdrop {
+    background: @aurora_surface_hover;
+    background-color: @aurora_surface_hover;
+}
+
+/* Headerbar button icons */
+headerbar button image {
+    color: @aurora_text;
+    -gtk-icon-shadow: none;
+}
+
+headerbar button:hover image {
+    color: @aurora_text;
+}
+
+headerbar button:active image,
+headerbar button:checked image {
+    color: @aurora_background;
+}

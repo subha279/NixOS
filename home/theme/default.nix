@@ -1,8 +1,153 @@
-{ lib, ... }:
+{ lib, pkgs, ... }:
 
 let
   themeData = import ../../lib/themes.nix;
   themeNames = builtins.attrNames themeData.themes;
+
+  iconPackage = pkgs.colloid-icon-theme;
+  iconThemeName = themeData.global.icons.name;
+
+  hexToDec =
+    hex:
+    let
+      h = lib.removePrefix "#" hex;
+
+      digit =
+        c:
+        {
+          "0" = 0;
+          "1" = 1;
+          "2" = 2;
+          "3" = 3;
+          "4" = 4;
+          "5" = 5;
+          "6" = 6;
+          "7" = 7;
+          "8" = 8;
+          "9" = 9;
+          "a" = 10;
+          "b" = 11;
+          "c" = 12;
+          "d" = 13;
+          "e" = 14;
+          "f" = 15;
+        }
+        .${lib.toLower c};
+
+      byte =
+        offset: digit (builtins.substring offset 1 h) * 16 + digit (builtins.substring (offset + 1) 1 h);
+    in
+    {
+      r = byte 0;
+      g = byte 2;
+      b = byte 4;
+    };
+
+  stylixBase16 =
+    themeId:
+    let
+      colors = themeData.themes.${themeId}.colors;
+    in
+    {
+      base00 = lib.removePrefix "#" colors.background;
+      base01 = lib.removePrefix "#" colors.surface;
+      base02 = lib.removePrefix "#" colors.surfaceHover;
+      base03 = lib.removePrefix "#" colors.textMuted;
+      base04 = lib.removePrefix "#" colors.textSecondary;
+      base05 = lib.removePrefix "#" colors.text;
+      base06 = lib.removePrefix "#" colors.terminalWhite;
+      base07 = lib.removePrefix "#" colors.terminalBrightWhite;
+      base08 = lib.removePrefix "#" colors.error;
+      base09 = lib.removePrefix "#" colors.warning;
+      base0A = lib.removePrefix "#" colors.terminalYellow;
+      base0B = lib.removePrefix "#" colors.success;
+      base0C = lib.removePrefix "#" colors.terminalCyan;
+      base0D = lib.removePrefix "#" colors.info;
+      base0E = lib.removePrefix "#" colors.accent;
+      base0F = lib.removePrefix "#" colors.terminalMagenta;
+    };
+
+  renderStylixTemplate =
+    template: base16:
+    let
+      base01Rgb = hexToDec base16.base01;
+
+      replacements = {
+        "{{base00-hex}}" = base16.base00;
+        "{{base01-hex}}" = base16.base01;
+        "{{base02-hex}}" = base16.base02;
+        "{{base03-hex}}" = base16.base03;
+        "{{base04-hex}}" = base16.base04;
+        "{{base05-hex}}" = base16.base05;
+        "{{base06-hex}}" = base16.base06;
+        "{{base07-hex}}" = base16.base07;
+        "{{base08-hex}}" = base16.base08;
+        "{{base09-hex}}" = base16.base09;
+        "{{base0A-hex}}" = base16.base0A;
+        "{{base0B-hex}}" = base16.base0B;
+        "{{base0C-hex}}" = base16.base0C;
+        "{{base0D-hex}}" = base16.base0D;
+        "{{base0E-hex}}" = base16.base0E;
+        "{{base0F-hex}}" = base16.base0F;
+
+        "{{base01-dec-r}}" = toString base01Rgb.r;
+        "{{base01-dec-g}}" = toString base01Rgb.g;
+        "{{base01-dec-b}}" = toString base01Rgb.b;
+      };
+    in
+    lib.foldl' (result: replacement: lib.replaceStrings [ replacement.from ] [ replacement.to ] result)
+      (builtins.readFile template)
+      (
+        lib.mapAttrsToList (from: to: {
+          inherit from to;
+        }) replacements
+      );
+
+  gtk3Template = ./templates/gtk-3.0.css.mustache;
+  gtk4Template = ./templates/gtk-4.0.css.mustache;
+
+  kvconfigTemplate = ./templates/kvconfig.mustache;
+  kvantumSvgTemplate = ./templates/kvantum.svg.mustache;
+
+  themeToGtk3 = themeId: renderStylixTemplate gtk3Template (stylixBase16 themeId);
+
+  themeToGtk4 = themeId: renderStylixTemplate gtk4Template (stylixBase16 themeId);
+
+  themeToKvantumConfig = themeId: renderStylixTemplate kvconfigTemplate (stylixBase16 themeId);
+
+  themeToKvantumSvg = themeId: renderStylixTemplate kvantumSvgTemplate (stylixBase16 themeId);
+
+  gtk3ThemeFiles = lib.genAttrs themeNames (themeId: {
+    text = themeToGtk3 themeId;
+  });
+
+  gtk4ThemeFiles = lib.genAttrs themeNames (themeId: {
+    text = themeToGtk4 themeId;
+  });
+
+  kvantumConfigFiles = lib.genAttrs themeNames (themeId: {
+    text = themeToKvantumConfig themeId;
+  });
+
+  kvantumSvgFiles = lib.genAttrs themeNames (themeId: {
+    text = themeToKvantumSvg themeId;
+  });
+
+  generatedGtk3Files = lib.mapAttrs' (
+    themeId: file: lib.nameValuePair "aurora/themes/${themeId}/gtk-3.0/gtk.css" file
+  ) gtk3ThemeFiles;
+
+  generatedGtk4Files = lib.mapAttrs' (
+    themeId: file: lib.nameValuePair "aurora/themes/${themeId}/gtk-4.0/gtk.css" file
+  ) gtk4ThemeFiles;
+
+  generatedKvantumConfigFiles = lib.mapAttrs' (
+    themeId: file: lib.nameValuePair "aurora/themes/${themeId}/kvantum/Base16Kvantum.kvconfig" file
+  ) kvantumConfigFiles;
+
+  generatedKvantumSvgFiles = lib.mapAttrs' (
+    themeId: file: lib.nameValuePair "aurora/themes/${themeId}/kvantum/Base16Kvantum.svg" file
+  ) kvantumSvgFiles;
 
   themeToLua =
     themeId:
@@ -643,9 +788,23 @@ let
   ) starshipThemeFiles;
 
 in
+
 {
-  stylix.targets.gtk.enable = true;
-  stylix.targets.qt.enable = true;
+  home.packages = [
+    iconPackage
+  ];
+
+  gtk = {
+    enable = true;
+
+    iconTheme = {
+      package = iconPackage;
+      name = iconThemeName;
+    };
+  };
+
+  stylix.targets.gtk.enable = false;
+  stylix.targets.qt.enable = false;
   stylix.targets.fontconfig.enable = true;
 
   xdg.configFile = {
@@ -656,7 +815,11 @@ in
   // generatedLuaFiles
   // generatedJsonFiles
   // generatedKittyFiles
-  // generatedStarshipFiles;
+  // generatedStarshipFiles
+  // generatedGtk3Files
+  // generatedGtk4Files
+  // generatedKvantumConfigFiles
+  // generatedKvantumSvgFiles;
 
   home.activation.initializeAuroraTheme = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     theme_dir="$HOME/.config/aurora"
@@ -702,6 +865,24 @@ in
         "$theme_dir/themes/catppuccin-mocha.starship.toml" \
         "$active_starship"
     fi
+
+    gtk3_dir="$HOME/.config/gtk-3.0"
+    gtk4_dir="$HOME/.config/gtk-4.0"
+    kvantum_dir="$HOME/.config/Kvantum"
+    kvantum_theme="$kvantum_dir/Base16Kvantum"
+
+    mkdir -p "$gtk3_dir" "$gtk4_dir" "$kvantum_dir"
+
+    ln -sfn "$theme_dir/themes/$selected/gtk-3.0/gtk.css" "$gtk3_dir/gtk.css"
+    ln -sfn "$theme_dir/themes/$selected/gtk-4.0/gtk.css" "$gtk4_dir/gtk.css"
+
+    if [[ -L "$kvantum_theme" || -e "$kvantum_theme" ]]; then
+    rm -rf "$kvantum_theme"
+    fi
+
+    ln -s \
+    "$theme_dir/themes/$selected/kvantum" \
+    "$kvantum_theme"
   '';
 
   home.file.".local/bin/aurora-theme" = {
@@ -719,123 +900,163 @@ in
       ACTIVE_KITTY="$CONFIG_DIR/active-kitty.conf"
       ACTIVE_STARSHIP="$CONFIG_DIR/active-starship.toml"
       THEME_DIR="$CONFIG_DIR/themes"
+      GTK3_DIR="$HOME/.config/gtk-3.0"
+      GTK4_DIR="$HOME/.config/gtk-4.0"
+      KVANTUM_DIR="$HOME/.config/Kvantum"
+      KVANTUM_THEME="$KVANTUM_DIR/Base16Kvantum"
 
-      if [[ ! -f "$THEMES_FILE" ]]; then
-        echo "Aurora: theme list not found." >&2
-        exit 1
-      fi
+        if [[ ! -f "$THEMES_FILE" ]]; then
+          echo "Aurora: theme list not found." >&2
+          exit 1
+        fi
 
-      if [[ $# -gt 0 ]]; then
-        selected="$1"
-      else
-        echo "Aurora: usage: aurora-theme <theme-id|display-name>" >&2
-        echo "Aurora: for a picker, run: qs ipc call theme toggle" >&2
-        exit 1
-      fi
+        if [[ $# -gt 0 ]]; then
+          selected="$1"
+        else
+          echo "Aurora: usage: aurora-theme <theme-id|display-name>" >&2
+          echo "Aurora: for a picker, run: qs ipc call theme toggle" >&2
+          exit 1
+        fi
 
-      [[ -z "$selected" ]] && exit 0
+        [[ -z "$selected" ]] && exit 0
 
-      theme_id="$(
-        awk -F '\t' -v sel="$selected" '
-          $1 == sel || $2 == sel {
-            print $1
-            exit
-          }
-        ' "$THEMES_FILE"
-      )"
+        theme_id="$(
+          awk -F '\t' -v sel="$selected" '
+            $1 == sel || $2 == sel {
+              print $1
+              exit
+            }
+          ' "$THEMES_FILE"
+        )"
 
-      if [[ -z "$theme_id" ]]; then
-        echo "Aurora: unknown theme: $selected" >&2
-        exit 1
-      fi
+        if [[ -z "$theme_id" ]]; then
+          echo "Aurora: unknown theme: $selected" >&2
+          exit 1
+        fi
 
-      theme_lua="$THEME_DIR/$theme_id.lua"
-      theme_json="$THEME_DIR/$theme_id.json"
-      theme_kitty="$THEME_DIR/$theme_id.kitty.conf"
-      theme_starship="$THEME_DIR/$theme_id.starship.toml"
+        theme_lua="$THEME_DIR/$theme_id.lua"
+        theme_json="$THEME_DIR/$theme_id.json"
+        theme_kitty="$THEME_DIR/$theme_id.kitty.conf"
+        theme_starship="$THEME_DIR/$theme_id.starship.toml"
 
-      if [[ ! -f "$theme_lua" ]]; then
-        echo "Aurora: generated Lua theme not found: $theme_id" >&2
-        exit 1
-      fi
+        if [[ ! -f "$theme_lua" ]]; then
+          echo "Aurora: generated Lua theme not found: $theme_id" >&2
+          exit 1
+        fi
 
-      if [[ ! -f "$theme_json" ]]; then
-        echo "Aurora: generated JSON theme not found: $theme_id" >&2
-        exit 1
-      fi
+        if [[ ! -f "$theme_json" ]]; then
+          echo "Aurora: generated JSON theme not found: $theme_id" >&2
+          exit 1
+        fi
 
-      if [[ ! -f "$theme_kitty" ]]; then
-        echo "Aurora: generated Kitty theme not found: $theme_id" >&2
-        exit 1
-      fi
+        if [[ ! -f "$theme_kitty" ]]; then
+          echo "Aurora: generated Kitty theme not found: $theme_id" >&2
+          exit 1
+        fi
 
-      if [[ ! -f "$theme_starship" ]]; then
-        echo "Aurora: generated Starship theme not found: $theme_id" >&2
-        exit 1
-      fi
+        if [[ ! -f "$theme_starship" ]]; then
+          echo "Aurora: generated Starship theme not found: $theme_id" >&2
+          exit 1
+        fi
 
-      KREO_CONFIG="/etc/aurora/kreo-rgb.conf"
+        KREO_CONFIG="/etc/aurora/kreo-rgb.conf"
 
-      if [[ -r "$KREO_CONFIG" ]] &&
-         grep -q '^enabled=1$' "$KREO_CONFIG" &&
-         grep -q '^follow-theme=1$' "$KREO_CONFIG"; then
+        if [[ -r "$KREO_CONFIG" ]] &&
+           grep -q '^enabled=1$' "$KREO_CONFIG" &&
+           grep -q '^follow-theme=1$' "$KREO_CONFIG"; then
 
-        if command -v kreo-rgb >/dev/null 2>&1 &&
-           command -v jq >/dev/null 2>&1; then
+          if command -v kreo-rgb >/dev/null 2>&1 &&
+             command -v jq >/dev/null 2>&1; then
 
-          kreo_accent="$(
-            jq -r '.colors.accent // empty' "$theme_json"
-          )"
+            kreo_accent="$(
+              jq -r '.colors.accent // empty' "$theme_json"
+            )"
 
-          if [[ "$kreo_accent" =~ ^#[0-9A-Fa-f]{6}$ ]]; then
-            kreo-rgb "$kreo_accent" >/dev/null 2>&1 || true
+            if [[ "$kreo_accent" =~ ^#[0-9A-Fa-f]{6}$ ]]; then
+              kreo-rgb "$kreo_accent" >/dev/null 2>&1 || true
+            fi
           fi
         fi
-      fi
 
-      ln -sfn "$theme_lua" "$ACTIVE_LUA"
-      ln -sfn "$theme_kitty" "$ACTIVE_KITTY"
-      ln -sfn "$theme_starship" "$ACTIVE_STARSHIP"
+        ln -sfn "$theme_lua" "$ACTIVE_LUA"
+        ln -sfn "$theme_kitty" "$ACTIVE_KITTY"
+        ln -sfn "$theme_starship" "$ACTIVE_STARSHIP"
 
-      printf '%s\n' "$theme_id" > "$ACTIVE_THEME"
+        # GTK
+        mkdir -p "$GTK3_DIR" "$GTK4_DIR"
 
-      if command -v hyprctl >/dev/null 2>&1; then
-        hyprctl reload >/dev/null 2>&1 || true
-      fi
+        ln -sfn "$THEME_DIR/$selected/gtk-3.0/gtk.css" \
+        "$GTK3_DIR/gtk.css"
 
-      if command -v kitten >/dev/null 2>&1; then
-        shopt -s nullglob
+        ln -sfn "$THEME_DIR/$selected/gtk-4.0/gtk.css" \
+        "$GTK4_DIR/gtk.css"
 
-        kitty_sockets=(
-          "$XDG_RUNTIME_DIR"/kitty-*
-        )
 
-        for socket in "''${kitty_sockets[@]}"; do
-          [[ -S "$socket" ]] || continue
+        # Kvantum
+        mkdir -p "$KVANTUM_DIR"
 
-          kitten @ \
-            --to "unix:$socket" \
-            set-colors \
-            --all \
-            --configured \
-            "$theme_kitty" \
-            >/dev/null 2>&1 || true
-        done
-      fi
+        if [[ -L "$KVANTUM_THEME" || -e "$KVANTUM_THEME" ]]; then
+        rm -rf "$KVANTUM_THEME"
+        fi
 
-      AURORA_ZSH_REFRESH_DIR="''${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/aurora-zsh"
+        ln -s \
+        "$THEME_DIR/$selected/kvantum" \
+        "$KVANTUM_THEME"
 
-      if [[ -d "$AURORA_ZSH_REFRESH_DIR" ]]; then
-        for fifo in "$AURORA_ZSH_REFRESH_DIR"/*; do
-          [[ -p "$fifo" ]] || continue
+        mkdir -p "$KVANTUM_DIR"
 
-          (
-            printf '%s\n' "refresh" > "$fifo"
-          ) >/dev/null 2>&1 &
-        done
-      fi
+        if [[ -L "$KVANTUM_THEME" || -e "$KVANTUM_THEME" ]]; then
+        rm -rf "$KVANTUM_THEME"
+        fi
 
-      echo "Aurora theme: $selected"
+        ln -s "$THEME_DIR/$selected/kvantum" "$KVANTUM_THEME"
+
+        # Kvantum
+        kvantum_config="$KVANTUM_DIR/kvantum.kvconfig"
+        printf '%s\n' \
+        '[General]' \
+        'theme=Base16Kvantum' \
+        > "$kvantum_config"
+
+        printf '%s\n' "$theme_id" > "$ACTIVE_THEME"
+
+        if command -v hyprctl >/dev/null 2>&1; then
+          hyprctl reload >/dev/null 2>&1 || true
+        fi
+
+        if command -v kitten >/dev/null 2>&1; then
+          shopt -s nullglob
+
+          kitty_sockets=(
+            "$XDG_RUNTIME_DIR"/kitty-*
+          )
+
+          for socket in "''${kitty_sockets[@]}"; do
+            [[ -S "$socket" ]] || continue
+
+            kitten @ \
+              --to "unix:$socket" \
+              set-colors \
+              --all \
+              --configured \
+              "$theme_kitty" \
+              >/dev/null 2>&1 || true
+          done
+        fi
+
+        AURORA_ZSH_REFRESH_DIR="''${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/aurora-zsh"
+
+        if [[ -d "$AURORA_ZSH_REFRESH_DIR" ]]; then
+          for fifo in "$AURORA_ZSH_REFRESH_DIR"/*; do
+            [[ -p "$fifo" ]] || continue
+
+            (
+              printf '%s\n' "refresh" > "$fifo"
+            ) >/dev/null 2>&1 &
+          done
+        fi
+
+        echo "Aurora theme: $selected"
     '';
   };
 }

@@ -309,7 +309,7 @@ hl.window_rule({
 	name = "appearance-tools",
 
 	match = {
-		class = "^(nwg-look|qt6ct|kvantummanager|org\\.kde\\.kvantummanager)$",
+		class = "^(kvantummanager|org\\.kde\\.kvantummanager)$",
 	},
 
 	float = true,

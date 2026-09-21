@@ -1,6 +1,8 @@
 { pkgs, ... }:
 
 let
+  themeData = import ../../lib/themes.nix;
+  iconTheme = themeData.global.icons.name;
   emojiSource = pkgs.fetchurl {
     url = "https://www.unicode.org/Public/17.0.0/emoji/emoji-test.txt";
     hash = "sha256-HYqUT4jXlS9+98UWf+88Z5lbyuJFQ5SXECMbA6IBrNo=";
@@ -71,22 +73,16 @@ let
 
   quickshellConfig = pkgs.runCommand "aurora-quickshell-config" { } ''
     mkdir -p "$out"
-
     cp -r ${./config}/. "$out/"
-
     chmod -R u+w "$out"
-
     mkdir -p "$out/assets"
-
     cp ${emojiDatabase} "$out/assets/emoji.json"
-
     chmod -R u-w "$out"
   '';
 in
 {
   home.packages = with pkgs; [
     quickshell
-    libnotify
     wtype
     wl-clipboard
     cava
@@ -117,32 +113,23 @@ in
   systemd.user.services.quickshell = {
     Unit = {
       Description = "Quickshell desktop shell and notification daemon";
-
       PartOf = [ "graphical-session.target" ];
-
       After = [
         "graphical-session.target"
         "dbus.socket"
       ];
-
       Requires = [ "dbus.socket" ];
-
       ConditionEnvironment = "WAYLAND_DISPLAY";
-
       StartLimitBurst = 8;
-
       StartLimitIntervalSec = 60;
     };
 
     Service = {
       Type = "exec";
-
+      Environment = "QS_ICON_THEME=${iconTheme}";
       ExecStart = "${pkgs.quickshell}/bin/qs";
-
       Restart = "on-failure";
-
       RestartSec = 2;
-
       Slice = "session.slice";
     };
 

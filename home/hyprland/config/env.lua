@@ -10,7 +10,8 @@ hl.env("XDG_SESSION_DESKTOP", "Hyprland")
 
 -- Qt Applications
 
-hl.env("QT_QPA_PLATFORMTHEME", "qt6ct")
+hl.env("QT_QPA_PLATFORMTHEME", "")
+hl.env("QT_STYLE_OVERRIDE", "kvantum")
 hl.env("QT_WAYLAND_DISABLE_WINDOWDECORATION", "1")
 
 -- GTK Applications

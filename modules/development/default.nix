@@ -2,7 +2,7 @@
 
 {
   environment.systemPackages = with pkgs; [
-    # Andrioid
+    # Android
     scrcpy
     android-tools
 

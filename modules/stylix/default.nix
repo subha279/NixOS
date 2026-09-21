@@ -49,15 +49,6 @@ let
 
   cursorPackage = pkgFromPath global.cursor.package;
 
-  # Central Icons
-
-  iconPackage = pkgFromPath global.icons.package;
-
-  # Colloid-Dark -> Colloid-Light for light polarity.
-  iconNameLight = lib.replaceStrings [ "-Dark" ] [ "-Light" ] global.icons.name;
-
-  iconNameDark = global.icons.name;
-
 in
 {
   stylix = {
@@ -144,20 +135,9 @@ in
       size = global.cursor.size;
     };
 
-    # ICON THEME
+    targets.gtk.enable = false;
 
-    icons = {
-      enable = true;
-
-      package = iconPackage;
-
-      dark = iconNameDark;
-      light = iconNameLight;
-    };
-
-    targets.gtk.enable = true;
-
-    targets.qt.enable = true;
+    targets.qt.enable = false;
 
     targets.fontconfig.enable = true;
   };
