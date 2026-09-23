@@ -11,6 +11,7 @@ opt.relativenumber = true
 
 opt.cursorline = true
 opt.cursorcolumn = false
+opt.guicursor = "n-v-i-c:block-Cursor"
 
 opt.signcolumn = "yes"
 

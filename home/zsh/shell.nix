@@ -3,11 +3,9 @@
 {
   programs.zsh = {
     enable = true;
-
     dotDir = "${config.xdg.configHome}/zsh";
 
     # Shell Options
-
     setOptions = [
       "AUTO_CD"
       "AUTO_PUSHD"
@@ -19,20 +17,13 @@
     ];
 
     # Environment
-
     envExtra = ''
-      # ==================================================
       # Aurora → Starship
-      # ==================================================
-
       export STARSHIP_CONFIG="$HOME/.config/aurora/active-starship.toml"
     '';
 
     profileExtra = ''
-      # ==================================================
       # Aurora → Hyprland session
-      # ==================================================
-
       if [[ -z "''${WAYLAND_DISPLAY:-}" ]] &&
         [[ -z "''${SSH_CONNECTION:-}" ]] &&
         [[ "''${XDG_VTNR:-0}" == "1" ]]; then
@@ -41,7 +32,6 @@
     '';
 
     # Interactive Zsh Configuration
-
     initContent = ''
 
       clear() {
@@ -103,10 +93,8 @@
   };
 
   # Starship
-
   programs.starship = {
     enable = true;
-
     enableZshIntegration = true;
   };
 }

@@ -2,7 +2,6 @@
 
 {
   # fzf
-
   programs.fzf = {
     enable = true;
     enableZshIntegration = true;
@@ -18,7 +17,6 @@
   };
 
   # zoxide
-
   programs.zoxide = {
     enable = true;
     enableZshIntegration = true;
@@ -30,7 +28,6 @@
   };
 
   # fzf-tab
-
   programs.zsh.plugins = [
     {
       name = "fzf-tab";
