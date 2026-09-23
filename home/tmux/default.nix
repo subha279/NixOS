@@ -5,5 +5,5 @@
     enable = true;
   };
 
-  xdg.configFile."tmux/tmux.conf".source = ./config/tmux.conf;
+  xdg.configFile."tmux".source = ./config;
 }
