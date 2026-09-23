@@ -14,8 +14,8 @@
       };
 
       terminal = {
-        name = "JetBrainsMono Nerd Font";
-        package = "nerd-fonts.jetbrains-mono";
+        name = "CaskaydiaCove Nerd Font";
+        package = "nerd-fonts.caskaydia-cove";
       };
 
       emoji = {
