@@ -1,5 +1,4 @@
 -- Input Configuration
-
 -- Keyboard / Mouse
 
 hl.config({
@@ -7,19 +6,15 @@ hl.config({
 	input = {
 
 		-- Keyboard
-
 		kb_layout = "us",
         kb_options = "caps:swapescape",
 
 		-- Mouse
-
 		follow_mouse = 1,
-
 		sensitivity = 0,
 		accel_profile = "flat",
 
 		-- Touchpad
-
 		touchpad = {
 
 			natural_scroll = true,
@@ -41,19 +36,13 @@ hl.config({
 -- Gestures
 
 hl.gesture({
-
 	fingers = 3,
-
 	direction = "horizontal",
-
 	action = "workspace",
 })
 
 -- Device Specific Configuration
-
 hl.device({
-
 	name = "epic-mouse-v1",
-
 	sensitivity = -0.5,
 })

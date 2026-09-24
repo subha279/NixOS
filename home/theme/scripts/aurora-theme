@@ -1,0 +1,213 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+CONFIG_DIR="$HOME/.config/aurora"
+THEMES_FILE="$CONFIG_DIR/themes.list"
+ACTIVE_THEME="$CONFIG_DIR/active-theme"
+ACTIVE_LUA="$CONFIG_DIR/active-theme.lua"
+ACTIVE_KITTY="$CONFIG_DIR/active-kitty.conf"
+ACTIVE_TMUX="$CONFIG_DIR/active-tmux.conf"
+ACTIVE_STARSHIP="$CONFIG_DIR/active-starship.toml"
+THEME_DIR="$CONFIG_DIR/themes"
+GTK3_DIR="$HOME/.config/gtk-3.0"
+GTK4_DIR="$HOME/.config/gtk-4.0"
+KVANTUM_DIR="$HOME/.config/Kvantum"
+KVANTUM_THEME="$KVANTUM_DIR/Base16Kvantum"
+
+save_active_theme() {
+    printf '%s\n' "$theme_id" >"$ACTIVE_THEME"
+}
+
+resolve_theme() {
+    if [[ ! -f "$THEMES_FILE" ]]; then
+        echo "Aurora: theme list not found." >&2
+        exit 1
+    fi
+
+    if [[ $# -gt 0 ]]; then
+        selected="$1"
+    else
+        echo "Aurora: usage: aurora-theme <theme-id|display-name>" >&2
+        echo "Aurora: for a picker, run: qs ipc call theme toggle" >&2
+        exit 1
+    fi
+
+    [[ -z "$selected" ]] && exit 0
+
+    theme_id="$(
+        awk -F '\t' -v sel="$selected" '
+            $1 == sel || $2 == sel {
+                print $1
+                exit
+            }
+        ' "$THEMES_FILE"
+    )"
+
+    if [[ -z "$theme_id" ]]; then
+        echo "Aurora: unknown theme: $selected" >&2
+        exit 1
+    fi
+}
+
+validate_theme() {
+    theme_lua="$THEME_DIR/$theme_id.lua"
+    theme_json="$THEME_DIR/$theme_id.json"
+    theme_kitty="$THEME_DIR/$theme_id.kitty.conf"
+    theme_tmux="$THEME_DIR/$theme_id.tmux.conf"
+    theme_starship="$THEME_DIR/$theme_id.starship.toml"
+
+    local required_files=(
+        "$theme_lua"
+        "$theme_json"
+        "$theme_kitty"
+        "$theme_tmux"
+        "$theme_starship"
+    )
+
+    local file
+
+    for file in "${required_files[@]}"; do
+        if [[ ! -f "$file" ]]; then
+            echo "Aurora: generated theme file not found: $file" >&2
+            exit 1
+        fi
+    done
+}
+
+apply_kreo() {
+    local kreo_config="/etc/aurora/kreo-rgb.conf"
+
+    if [[ ! -r "$kreo_config" ]]; then
+        return
+    fi
+
+    if ! grep -q '^enabled=1$' "$kreo_config"; then
+        return
+    fi
+
+    if ! grep -q '^follow-theme=1$' "$kreo_config"; then
+        return
+    fi
+
+    if ! command -v kreo-rgb >/dev/null 2>&1; then
+        return
+    fi
+
+    if ! command -v jq >/dev/null 2>&1; then
+        return
+    fi
+
+    local accent
+
+    accent="$(
+        jq -r '.colors.accent // empty' "$theme_json"
+    )"
+
+    if [[ "$accent" =~ ^#[0-9A-Fa-f]{6}$ ]]; then
+        kreo-rgb "$accent" >/dev/null 2>&1 || true
+    fi
+}
+
+activate_theme_links() {
+    ln -sfn "$theme_lua" "$ACTIVE_LUA"
+    ln -sfn "$theme_kitty" "$ACTIVE_KITTY"
+    ln -sfn "$theme_tmux" "$ACTIVE_TMUX"
+    ln -sfn "$theme_starship" "$ACTIVE_STARSHIP"
+}
+
+apply_gtk() {
+    mkdir -p "$GTK3_DIR" "$GTK4_DIR"
+
+    ln -sfn \
+        "$THEME_DIR/$theme_id/gtk-3.0/gtk.css" \
+        "$GTK3_DIR/gtk.css"
+
+    ln -sfn \
+        "$THEME_DIR/$theme_id/gtk-4.0/gtk.css" \
+        "$GTK4_DIR/gtk.css"
+}
+
+apply_kvantum() {
+    mkdir -p "$KVANTUM_DIR"
+
+    if [[ -L "$KVANTUM_THEME" || -e "$KVANTUM_THEME" ]]; then
+        rm -rf "$KVANTUM_THEME"
+    fi
+    ln -s \
+        "$THEME_DIR/$theme_id/kvantum" \
+        "$KVANTUM_THEME"
+    printf '%s\n' \
+        '[General]' \
+        'theme=Base16Kvantum' \
+        >"$KVANTUM_DIR/kvantum.kvconfig"
+}
+
+reload_hyprland() {
+    if command -v hyprctl >/dev/null 2>&1; then
+        hyprctl reload >/dev/null 2>&1 || true
+    fi
+}
+
+reload_kitty() {
+    if ! command -v kitten >/dev/null 2>&1; then
+        return
+    fi
+    shopt -s nullglob
+    local kitty_sockets=(
+        "$XDG_RUNTIME_DIR"/kitty-*
+    )
+    local socket
+    for socket in "${kitty_sockets[@]}"; do
+        [[ -S "$socket" ]] || continue
+
+        kitten @ \
+            --to "unix:$socket" \
+            set-colors \
+            --all \
+            --configured \
+            "$theme_kitty" \
+            >/dev/null 2>&1 || true
+    done
+}
+
+reload_tmux() {
+    if ! command -v tmux >/dev/null 2>&1; then
+        return
+    fi
+    tmux source-file "$theme_tmux" >/dev/null 2>&1 || true
+    tmux source-file \
+        "$HOME/.config/tmux/theme/bar.conf" \
+        >/dev/null 2>&1 || true
+}
+
+refresh_zsh() {
+    local refresh_dir
+    refresh_dir="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/aurora-zsh"
+    [[ -d "$refresh_dir" ]] || return
+    local fifo
+    for fifo in "$refresh_dir"/*; do
+        [[ -p "$fifo" ]] || continue
+
+        (
+            printf '%s\n' "refresh" >"$fifo"
+        ) >/dev/null 2>&1 &
+    done
+}
+
+main() {
+    resolve_theme "$@"
+    validate_theme
+    apply_kreo
+    activate_theme_links
+    apply_gtk
+    apply_kvantum
+    save_active_theme
+
+    reload_hyprland
+    reload_kitty
+    reload_tmux
+    refresh_zsh
+    printf '%s\n' "Aurora theme: $selected"
+}
+main "$@"

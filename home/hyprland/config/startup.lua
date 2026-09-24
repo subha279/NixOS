@@ -1,6 +1,5 @@
 hl.on("hyprland.start", function()
 	-- Session Environment
-
 	hl.exec_cmd(
 		"dbus-update-activation-environment --systemd "
 			.. "WAYLAND_DISPLAY "
@@ -12,6 +11,5 @@ hl.on("hyprland.start", function()
 	)
 
 	-- Wallpaper
-
 	hl.exec_cmd("sleep 1 && ~/.config/hypr/scripts/restore-wallpaper.sh")
 end)

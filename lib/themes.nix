@@ -36,7 +36,7 @@ let
 
     # UI
     ui = {
-      borderWidth = 0;
+      borderWidth = 2;
       radius = 15;
       radiusSmall = 10;
       radiusLarge = 18;
