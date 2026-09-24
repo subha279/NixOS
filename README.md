@@ -2,23 +2,23 @@
 
 <img src="https://readme-typing-svg.herokuapp.com?font=JetBrains+Mono&weight=600&size=44&pause=1200&color=CBA6F7&center=true&vCenter=true&width=620&lines=%F0%9F%8C%BB+Sunflower" alt="Sunflower" />
 
-<a href="https://github.com/subha279/NixOS">
+<a href="https://github.com/subha279/Sunflower">
   <img src="https://readme-typing-svg.herokuapp.com?font=JetBrains+Mono&size=16&pause=2000&color=989CAC&center=true&vCenter=true&width=720&lines=Declarative+desktop%2C+planted+once;Hyprland+%2B+Quickshell%2C+keyboard-first;7+Sunflower+themes.+Zero+rebuilds.;One+setup.sh%3A+install+%E2%80%A2+update+%E2%80%A2+repair" alt="Sunflower tagline" />
 </a>
 
 **Hyprland** · **Quickshell** · **Sunflower themes** · **Home Manager**
 
 <p>
-  <a href="https://github.com/subha279/NixOS">
+  <a href="https://github.com/subha279/Sunflower">
     <img src="https://img.shields.io/badge/Sunflower-desktop-C792EA?style=for-the-badge&logo=sunrise&logoColor=white" alt="Sunflower desktop">
   </a>
-  <a href="https://github.com/subha279/NixOS">
+  <a href="https://github.com/subha279/Sunflower">
     <img src="https://img.shields.io/badge/nixpkgs-26.05-7E7DFF?style=for-the-badge&logo=nixos&logoColor=white" alt="nixpkgs 26.05 base">
   </a>
-  <a href="https://github.com/subha279/NixOS">
+  <a href="https://github.com/subha279/Sunflower">
     <img src="https://img.shields.io/badge/Hyprland-Lua-58E1FF?style=for-the-badge" alt="Hyprland Lua">
   </a>
-  <a href="https://github.com/subha279/NixOS">
+  <a href="https://github.com/subha279/Sunflower">
     <img src="https://img.shields.io/badge/Quickshell-QML-BB86FC?style=for-the-badge" alt="Quickshell QML">
   </a>
 </p>
@@ -128,8 +128,8 @@
 ### Boot the installer ISO, then:
 
 ```bash
-git clone https://github.com/subha279/NixOS.git ~/NixOS
-cd ~/NixOS
+git clone https://github.com/subha279/Sunflower.git ~/Sunflower
+cd ~/Sunflower
 ./setup.sh
 ```
 
@@ -394,7 +394,7 @@ SUPER + C
 ## 💻 Everyday Commands
 
 ```bash
-cd ~/NixOS
+cd ~/Sunflower
 
 ./setup.sh check       # validate
 ./setup.sh dry         # test without switching
@@ -431,7 +431,7 @@ systemctl --user restart quickshell
 ```
 
 > [!NOTE]
-> **Why?** Home Manager usually links managed files from the active store generation. The running system therefore sees the generation that was activated, not arbitrary edits sitting in `~/NixOS`.
+> **Why?** Home Manager usually links managed files from the active store generation. The running system therefore sees the generation that was activated, not arbitrary edits sitting in `~/Sunflower`.
 
 ---
 

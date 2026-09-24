@@ -2801,7 +2801,7 @@ CI_TARGET="/mnt"
 CI_ESP_LABEL="EFI"
 CI_ROOT_LABEL="nixos"
 CI_ESP_SGDISK_SIZE="+1G"
-CI_REPO_URL="https://github.com/subha279/NixOS.git"
+CI_REPO_URL="https://github.com/subha279/Sunflower.git"
 CI_DRY_RUN=0
 
 CI_DISK=""
