@@ -3,80 +3,12 @@
 let
   themeData = import ../../lib/themes.nix;
   iconTheme = themeData.global.icons.name;
-  emojiSource = pkgs.fetchurl {
-    url = "https://www.unicode.org/Public/17.0.0/emoji/emoji-test.txt";
-    hash = "sha256-HYqUT4jXlS9+98UWf+88Z5lbyuJFQ5SXECMbA6IBrNo=";
-  };
-
-  emojiDatabase =
-    pkgs.runCommand "sunflower-emoji-database"
-      {
-        nativeBuildInputs = [ pkgs.python3 ];
-      }
-      ''
-        python3 - "${emojiSource}" "$out" <<'PY'
-        import json
-        import re
-        import sys
-
-        source = sys.argv[1]
-        output = sys.argv[2]
-
-        items = []
-        group = ""
-        subgroup = ""
-
-        with open(source, encoding="utf-8") as f:
-            for line in f:
-                line = line.rstrip()
-
-                if line.startswith("# group:"):
-                    group = line.split(":", 1)[1].strip()
-                    continue
-
-                if line.startswith("# subgroup:"):
-                    subgroup = line.split(":", 1)[1].strip()
-                    continue
-
-                if not line or line.startswith("#"):
-                    continue
-
-                match = re.match(
-                    r"^([0-9A-F ]+);\s+fully-qualified\s+#\s+(\S+)\s+(.+)$",
-                    line
-                )
-
-                if not match:
-                    continue
-
-                emoji = "".join(
-                    chr(int(cp, 16))
-                    for cp in match.group(1).split()
-                )
-
-                items.append({
-                    "emoji": emoji,
-                    "name": match.group(3).strip().lower(),
-                    "group": group.lower(),
-                    "subgroup": subgroup.lower(),
-                })
-
-        with open(output, "w", encoding="utf-8") as f:
-            json.dump(
-                items,
-                f,
-                ensure_ascii=False,
-                separators=(",", ":")
-            )
-        PY
-      '';
 
   quickshellConfig = pkgs.runCommand "sunflower-quickshell-config" { } ''
     mkdir -p "$out"
     cp -r ${./config}/. "$out/"
     chmod -R u+w "$out"
     mkdir -p "$out/assets"
-    cp ${emojiDatabase} "$out/assets/emoji.json"
     chmod -R u-w "$out"
   '';
 in

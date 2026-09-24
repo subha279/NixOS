@@ -33,7 +33,7 @@ in
 
     require-sigs = true;
 
-    http-connections = 25;
+    http-connections = 3;
 
     connect-timeout = 10;
     stalled-download-timeout = 90;
