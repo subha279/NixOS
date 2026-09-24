@@ -1,92 +1,81 @@
 <div align="center">
 
-<img src="https://readme-typing-svg.herokuapp.com?font=JetBrains+Mono&weight=600&size=44&pause=1200&color=CBA6F7&center=true&vCenter=true&width=620&lines=%F0%9F%8C%BB+Sunflower" alt="Sunflower" />
-
-# Sunflower
-
-### A declarative, keyboard-driven Sunflower desktop
-
-**Hyprland** · **Quickshell** · **Sunflower themes** · **Home Manager**
-
-<p>
+  <!-- Dynamic Animated Banner -->
   <a href="https://github.com/subha279/Sunflower">
-    <img src="https://img.shields.io/badge/Sunflower-desktop-C792EA?style=for-the-badge&logo=sunrise&logoColor=white" alt="Sunflower desktop">
+    <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=38&duration=2800&pause=1000&color=CBA6F7&center=true&vCenter=true&width=680&lines=%F0%9F%8C%BB+Sunflower;Declarative.+Keyboard-Driven.;Powered+by+NixOS+%2B+Hyprland+%2B+Quickshell" alt="Sunflower Desktop Banner" />
   </a>
-  <a href="https://github.com/subha279/Sunflower">
-    <img src="https://img.shields.io/badge/nixpkgs-26.05-7E7DFF?style=for-the-badge&logo=nixos&logoColor=white" alt="nixpkgs 26.05 base">
-  </a>
-  <a href="https://github.com/subha279/Sunflower">
-    <img src="https://img.shields.io/badge/Hyprland-Lua-58E1FF?style=for-the-badge" alt="Hyprland Lua">
-  </a>
-  <a href="https://github.com/subha279/Sunflower">
-    <img src="https://img.shields.io/badge/Quickshell-QML-BB86FC?style=for-the-badge" alt="Quickshell QML">
-  </a>
-</p>
 
-<p>
-  <a href="#showcase">Showcase</a> ·
-  <a href="#features">Features</a> ·
-  <a href="#installation">Installation</a> ·
-  <a href="#architecture">Architecture</a> ·
-  <a href="#theme-system">Theme system</a> ·
-  <a href="#components">Components</a> ·
-  <a href="#customization">Customization</a> ·
-  <a href="#useful-commands">Commands</a>
-</p>
+  <p align="center">
+    <b>A declarative, keyboard-driven Linux environment crafted for performance & aesthetic cohesion.</b>
+  </p>
+
+  <!-- Clean, Un-crowded Badges -->
+  <p align="center">
+    <a href="https://github.com/subha279/Sunflower"><img src="https://img.shields.io/badge/NixOS-26.05-7E7DFF?style=flat-square&logo=nixos&logoColor=white" alt="NixOS Base"></a>
+    <a href="https://github.com/subha279/Sunflower"><img src="https://img.shields.io/badge/Hyprland-Lua-58E1FF?style=flat-square&logo=lua&logoColor=white" alt="Hyprland Lua"></a>
+    <a href="https://github.com/subha279/Sunflower"><img src="https://img.shields.io/badge/Quickshell-QML-BB86FC?style=flat-square&logo=qt&logoColor=white" alt="Quickshell QML"></a>
+    <a href="https://github.com/subha279/Sunflower"><img src="https://img.shields.io/badge/Theme-Catppuccin-CBA6F7?style=flat-square&logo=palette&logoColor=white" alt="Sunflower Themes"></a>
+  </p>
+
+  <!-- Minimalist Navigation Bar -->
+  <p align="center">
+    <a href="#-showcase">Showcase</a> •
+    <a href="#-features">Features</a> •
+    <a href="#-quick-start">Quick Start</a> •
+    <a href="#-architecture">Architecture</a> •
+    <a href="#-theme-engine">Themes</a> •
+    <a href="#-customization">Customization</a> •
+    <a href="#-commands">Commands</a>
+  </p>
 
 </div>
 
 ---
 
-## Showcase
+## 📽️ Showcase
 
-Video tour of the desktop:
+> **Visual Tour**: Watch the video preview below to see Sunflower in action. No static screenshots are shipped in this repository.
 
-<p align="center">
+<div align="center">
   <a href="https://www.youtube.com/watch?v=J9286xiVBNk">
-    <img src="https://img.youtube.com/vi/J9286xiVBNk/maxresdefault.jpg"
-         alt="Sunflower desktop showcase"
-         width="720">
+    <img src="https://img.youtube.com/vi/J9286xiVBNk/maxresdefault.jpg" alt="Sunflower desktop showcase video" width="760" style="border-radius: 8px;">
   </a>
-</p>
-
-No screenshots are shipped in this repository; the video above is the visual reference.
+</div>
 
 ---
 
-## Features
+## ✨ Features
 
-**Desktop**
+### 🖥️ Desktop & Compositor
+- **Lua-driven Hyprland**: Modular config structured under `home/hyprland/config/`.
+- **Quickshell Unified Desktop**: Replaces bar, launcher, and notification daemons with a unified QML surface.
+- **Instant IPC Surfaces**: App launcher, theme picker, wallpaper switcher, clipboard history, and emoji picker mapped directly to <kbd>SUPER</kbd> chords.
+- **Monotonic Animations**: Layer surfaces animate smoothly within the compositor without UI stutter.
+- **Smart Wallpaper Persistence**: Managed state in `~/.cache/sunflower/current-wallpaper` restored via `restore-wallpaper.sh` over `awww`.
 
-- Hyprland composed in Lua (`hyprland.lua` + one module per concern under `home/hyprland/config/`)
-- Quickshell replaces the bar/launcher/notification daemons with a single QML shell (`home/quickshell/config/`)
-- App launcher, theme picker, wallpaper picker, clipboard history and emoji picker as Quickshell IPC surfaces, all on `SUPER` chords
-- Monotonic compositor animations; layer surfaces animate once, in the compositor
-- Managed wallpaper state (`~/.cache/sunflower/current-wallpaper`) restored at login via `restore-wallpaper.sh` on top of `awww`
+### 🎨 Theme Engine
+- **Centralized Palette Engine**: Define colors once in `lib/colorschemes/`, dynamic generation propagates to Lua, JSON, Kitty, tmux, Starship, GTK, and Kvantum.
+- **Instant Runtime Switching**: Press <kbd>SUPER</kbd> + <kbd>C</kbd> to switch colors dynamically without rebuilding your system.
+- **7 Built-in Palettes**: 
+  `catppuccin-mocha` *(default)* · `tokyo-night` · `gruvbox` · `one-dark` · `everforest` · `rose-pine` · `kanagawa`
+- **Stylix Base**: Manages Base16 schemes, fonts, and cursors cleanly while disabling intrusive GTK/Qt overrides.
 
-**Theme**
+### 💻 Terminal & Workspaces
+- **Kitty & Tmux**: Dynamic theme inclusion (`active-kitty.conf` & `active-tmux.conf`) with `fzf` and `zoxide` shell integration.
+- **Zsh & Starship**: Custom prompt exports directly into generated `active-starship.toml`.
+- **Neovim Ecosystem**: Treesitter, Telescope, completion plugins, and 18 LSP configurations under `home/neovim/config/lsp/`.
 
-- Centralized Sunflower engine: one palette per theme in `lib/colorschemes/`, generated out to Lua, JSON, Kitty, tmux, Starship, GTK and Kvantum
-- Runtime switching with `SUPER + C` — no rebuild; Kitty sockets repaint, tmux re-sources, Hyprland reloads
-- 7 themes: `catppuccin-mocha` (active default), `tokyo-night`, `gruvbox`, `one-dark`, `everforest`, `rose-pine`, `kanagawa`
-- Stylix provides the base16 scheme, system fonts, cursor and sizes; `autoEnable` is off and GTK/Qt targets are disabled
-
-**Terminal and editor**
-
-- Kitty (theme include reads the generated `active-kitty.conf`), Zsh with Starship prompt (config path exported to the generated `active-starship.toml`), tmux (sources `active-tmux.conf` first), fzf and zoxide integration
-- Neovim with Treesitter, completion, Telescope, formatting/lint plugins and 18 language-server configs under `home/neovim/config/lsp/`, highlighted through the Sunflower palette
-
-**System**
-
-- Flake-based host (`nixosConfigurations.sunflower`), 24 system modules, 13 Home Manager modules
-- One manager script (`setup.sh`, v1.0): install, upgrade, rebuild, validate, maintain, roll back, verify boot — with preflight checks, timestamped backups and confirmations on destructive steps
-- Fonts: JetBrainsMono Nerd Font as terminal face plus Iosevka, Caskaydia Cove, Fira Code, SF Mono Nerd, Comic Shanns Mono, Maple Mono and Inter, with Noto family and color emoji coverage
+### ⚙️ System Architecture
+- **NixOS Flake Host**: `nixosConfigurations.sunflower` backed by 24 system modules and 13 Home Manager modules.
+- **Unified Manager (`setup.sh`)**: Interactive installer, dry runner, validator, updates, backups, and generations rollback manager.
+- **Rich Typography**: JetBrainsMono Nerd Font baseline complemented by Iosevka, Caskaydia Cove, Fira Code, SF Mono, Comic Shanns, Maple Mono, Inter, and Noto Emoji.
 
 ---
 
-## Installation
+## 🚀 Quick Start
 
-Prerequisites: the NixOS installer ISO (all partitioning and install tooling is expected from that environment) and a network connection for the binary cache.
+> [!NOTE]
+> **Prerequisites**: Ensure you are booted into a NixOS Installer ISO with active network connectivity.
 
 ```bash
 git clone https://github.com/subha279/Sunflower.git ~/Sunflower
@@ -94,161 +83,119 @@ cd ~/Sunflower
 ./setup.sh
 ```
 
-What happens next:
-
-1. `./setup.sh` opens the interactive manager; option `1` starts the clean installer on the ISO, or the identity pass on an installed system.
-2. Identity (Linux user, full name, hostname, Git user/email, timezone, locale) is collected up front and written to `lib/variables.nix` — never passwords; those are set interactively via `passwd`.
-3. The installer partitions (1 GiB ESP + ext4 root), generates `hosts/sunflower/hardware-configuration.nix` against `/mnt`, validates the flake, builds the `.#sunflower` closure into the target store and installs it.
-4. Reboot into GRUB, then the newest generation.
-
-Non-interactive surface: every menu action also exists as `./setup.sh <command>` (see Commands).
+### Installation Workflow
+1. **Launch Manager**: `./setup.sh` presents an interactive menu. Option `1` triggers system bootstrap.
+2. **Configure Identity**: User, git credentials, hostname, timezone, and local variables are written to `lib/variables.nix`.
+3. **Partition & Build**: Partitioning (1 GiB ESP + ext4 root), hardware generation, flake validation, and target store closure building.
+4. **Reboot**: Boot into your fresh GRUB generation.
 
 ---
 
-## Architecture
+## 🏗️ Architecture
 
 ```text
 flake.nix (.#sunflower)
 │
-├─ hosts/sunflower ───────── host entry + generated hardware-configuration.nix
-├─ modules/* (24) ────────── system: boot, networking, audio, graphics,
-│                             nvidia, desktop, session, stylix, …
-└─ home/* (13, Home Manager) ─ hyprland, quickshell, theme, neovim,
-                               zsh, kitty, tmux, git, ssh, …
+├─ hosts/sunflower ───────── Host setup & generated hardware-configuration.nix
+├─ modules/* (24) ────────── Boot, networking, audio, graphics, NVIDIA, desktop, stylix...
+└─ home/* (13, HM) ───────── Hyprland, Quickshell, Neovim, Shell, Themes, Kitty, Tmux...
 
-lib/variables.nix ── identity + hardware IDs (single source of truth)
+lib/variables.nix ── Identity & Hardware IDs (Single source of truth)
 lib/themes.nix ─┬── global.activeTheme ──► home/theme generators
-                │                            ├─ active-theme / themes/*.json + *.lua
-lib/colorschemes/                            ├─ active-kitty.conf / active-tmux.conf
-(7 palettes)                                 ├─ active-starship.toml
-                                             └─ GTK / Kvantum assets
-                                                        │
-              ┌─────────────────────────────────────────┘
+                │                           ├─ active-theme / themes/*.json + *.lua
+lib/colorschemes/                           ├─ active-kitty.conf / active-tmux.conf
+(7 palettes)                                ├─ active-starship.toml
+                                            └─ GTK / Kvantum assets
+                                                       │
+              ┌────────────────────────────────────────┘
               ▼
  Hyprland ◄── active-theme.lua      Quickshell ◄── themes/*.json
  Kitty ◄───── active-kitty.conf     tmux ◄────── active-tmux.conf
  Starship ◄── active-starship.toml  Neovim ◄──── sunflower.theme (lua)
 ```
 
-`setup.sh` never configures applications directly. It bootstraps identity and hardware, then orchestrates `nix` / `nixos-rebuild` / `nixos-install`; everything else lives in Nix.
-
 ---
 
-## Theme system
+## 🎨 Theme Engine
 
-Centralized in two files plus one directory:
+Centralized controls lie within `lib/themes.nix` and `lib/colorschemes/`:
 
-- `lib/themes.nix` — global settings (active theme, fonts, icons, cursor, UI metrics) and auto-loading of every palette in `lib/colorschemes/`
-- `lib/colorschemes/*.nix` — one file per theme, same schema
-- `home/theme/` — generators (`generators/`: data, kitty, tmux, starship, gtk, kvantum) plus `activation.nix` and the `sunflower-theme` switcher script
-
-Switching writes `~/.config/sunflower/active-theme` (and the per-target `active-*` files); every consumer re-reads at runtime, which is why no rebuild is needed. Stylix stays responsible for the base16 scheme, fonts, cursor and fontconfig only.
-
-| Change this | Effect |
-|---|---|
-| `global.activeTheme` in `lib/themes.nix` | Default theme after rebuild |
-| Add/edit a file in `lib/colorschemes/` | New/changed palette everywhere once generated |
-| `SUPER + C` at runtime | Immediate switch, no rebuild |
-
----
-
-## Components
-
-| Component | Location | Controls |
+| Action | How to Apply | Effect |
 |---|---|---|
-| Host | `hosts/sunflower/` | Imports, hardware config, hostname wiring |
-| System modules | `modules/` | Boot, networking, users, packages, fonts, audio, bluetooth, graphics, nvidia, desktop, session, xdg, notifications, hyprland, power, polkit, monitoring, development, ai, creator, virtualisation, stylix, `hardware/kreo-rgb` |
-| Hyprland | `home/hyprland/` | `hyprland.lua` entry; `config/` modules (variables, keybinds, monitors, rules, animation, decoration, layout, input, env, theme, startup); `scripts/restore-wallpaper.sh` |
-| Quickshell | `home/quickshell/config/` | `shell.qml`; `core/` (theme, icons, popups); `services/` (apps, wallpaper, theme, audio, network…); `components/`; `modules/` (bar, launchers, pickers, notifications…) |
-| Theme engine | `home/theme/` | Generators, activation, `scripts/sunflower-theme` |
-| Neovim | `home/neovim/` | `default.nix` plugin/tool declarations; `config/` Lua + 18 LSP server configs |
-| Shell/terminal | `home/zsh/`, `home/kitty/`, `home/tmux/` | Aliases, completion, history, keybindings, fzf/zoxide/starship wiring; Kitty + tmux configs that source generated theme files |
-| Identity | `lib/variables.nix` | Username, display name, Git identity, hostname, timezone, locale, NVIDIA bus IDs |
-| Manager | `setup.sh` | Install, upgrade, rebuild, validate, maintain, rollback, verify |
+| **Change Palette** | Press <kbd>SUPER</kbd> + <kbd>C</kbd> | Live runtime theme swap across terminal, shell, & bar |
+| **Set Default Theme** | Edit `global.activeTheme` in `lib/themes.nix` | Persists default palette across system rebuilds |
+| **Create Custom Theme** | Add `.nix` palette in `lib/colorschemes/` | Auto-generated into system-wide configurations |
 
 ---
 
-## Structure
+## 🧩 Components Matrix
 
-```text
-Sunflower/
-├── flake.nix
-├── hosts/sunflower/
-├── modules/            # core boot networking users packages fonts audio
-│                       # bluetooth polkit graphics xdg notifications hyprland
-│                       # desktop session monitoring nvidia power stylix
-│                       # development ai creator virtualisation hardware/kreo-rgb
-├── home/               # hyprland quickshell theme neovim zsh kitty tmux
-│                       # git ssh xdg fastfetch obsidian mpv
-├── lib/                # variables.nix themes.nix colorschemes/
-└── setup.sh
-```
-
----
-
-## Customization
-
-| Target | Edit | Apply |
+| Component | Target Location | Description / Function |
 |---|---|---|
-| Themes | `lib/themes.nix` (`global.activeTheme`), palettes in `lib/colorschemes/` | `SUPER + C` at runtime; rebuild for a new default |
-| Fonts | Packages in `modules/fonts/default.nix`; faces in `lib/themes.nix` (`global.fonts`) | Rebuild |
-| Hyprland | `home/hyprland/config/` (`keybinds.lua`, `variables.lua`, …) | Rebuild, then `hyprctl reload` for runtime-only tweaks |
-| Quickshell | `home/quickshell/config/` (QML + services) | Rebuild, then `systemctl --user restart quickshell` |
-| Terminal | `home/kitty/config/kitty.conf` (+ generated `active-kitty.conf`) | Rebuild |
-| Shell | `home/zsh/` (`aliases.nix`, `keybindings.nix`, `shell.nix`, …) | Rebuild (new login shell) |
-| Editor | `home/neovim/config/` (Lua, plugins, `lsp/`) | Rebuild |
-| Applications | `modules/desktop/applications.nix` | Rebuild |
-| Identity | `lib/variables.nix` (or `./setup.sh configure`) | Rebuild |
-
-Keybinds reference shared variables (`home/hyprland/config/variables.lua`: `SUPER`/`ALT`, terminal `kitty`, browser `zen`, `qs ipc call …` pickers), so one edit propagates to every binding.
+| **Host Configuration** | `hosts/sunflower/` | Hardware bindings, imports, and system hostname |
+| **System Modules** | `modules/` | Graphics, power management, fonts, audio, & virtualisation |
+| **Hyprland Compositor** | `home/hyprland/` | Modular Lua configs (keybinds, rules, animations, env) |
+| **Quickshell** | `home/quickshell/config/` | Bar UI, launchers, pickers, & notification daemons |
+| **Theme System** | `home/theme/` | Code generators, activation hooks, & runtime swapper |
+| **Neovim** | `home/neovim/` | LSP configurations, plugins, and custom UI themes |
+| **Identity & Vars** | `lib/variables.nix` | Unified variables (User details, GPU Bus IDs) |
+| **Management CLI** | `setup.sh` | Maintenance, rollback, validation, & installer engine |
 
 ---
 
-## Useful commands
+## 🛠️ Customization Quick-Guide
 
-All of these map to `./setup.sh` actions (run from the repo root):
+| Goal | Target File | Action Required |
+|---|---|---|
+| **Keybindings** | `home/hyprland/config/keybinds.lua` | Edit & run `hyprctl reload` |
+| **System Fonts** | `modules/fonts/default.nix` | Modify packages & rebuild system |
+| **Quickshell Widgets** | `home/quickshell/config/` | Edit QML & run `systemctl --user restart quickshell` |
+| **Terminal Config** | `home/kitty/config/kitty.conf` | Edit config & trigger rebuild |
+| **Shell Aliases** | `home/zsh/aliases.nix` | Modify aliases & restart shell session |
+
+---
+
+## 💻 Commands Reference
+
+All orchestration actions are executed from the repo root via `./setup.sh`:
 
 ```bash
-./setup.sh check        # nix flake check
-./setup.sh dry          # nixos-rebuild dry-build --flake .#sunflower
-./setup.sh rebuild      # validate, then nixos-rebuild switch --flake .#sunflower
-./setup.sh update       # git pull --ff-only + nix flake update (+ optional rebuild)
-./setup.sh validate     # full configuration validator
-./setup.sh maintain     # maintenance dashboard (generations, GC, verify)
-./setup.sh rollback     # switch --rollback
-./setup.sh generations  # list system generations
-./setup.sh gc           # garbage collection
+./setup.sh check        # Run `nix flake check`
+./setup.sh dry          # Dry-run build (.#sunflower)
+./setup.sh rebuild      # Validate & rebuild system configuration
+./setup.sh update       # Git pull & update flake inputs
+./setup.sh validate     # Perform comprehensive config verification
+./setup.sh maintain     # Open maintenance dashboard (GC, verify)
+./setup.sh rollback     # Roll back to previous NixOS generation
+./setup.sh generations  # View system generation history
 ```
 
-Safe order: `check` → `dry` → `rebuild` → verify the new generation. There is no repository-level formatter command; Lua is formatted inside Neovim via its formatter plugin.
+> [!TIP]
+> **Recommended Workflow**: Always execute `./setup.sh check` → `./setup.sh dry` → `./setup.sh rebuild` when testing configuration changes.
 
 ---
 
-## Philosophy
+## 💡 Philosophy
 
-- One declarative source of truth: identity in `lib/variables.nix`, palettes in `lib/colorschemes/`, nothing duplicated across modules.
-- Runtime over rebuilds: anything that can re-read (theme, wallpaper, shell surfaces) does, so the desktop changes without reactivating the system.
-- Verify before mutating: flake check and dry-build gate rebuilds; installers verify UUIDs, bootloader and UEFI entries before reporting success; destructive steps confirm and back up first.
-- Keyboard-first: launcher, pickers, workspaces and media all resolve to short chords defined once in `variables.lua`.
+- **Declarative Truth**: Identity defined in `lib/variables.nix`, colors in `lib/colorschemes/`. Zero duplication across modules.
+- **Runtime Over Rebuilds**: Anything that can reload at runtime (themes, wallpapers, shell modules) re-reads states dynamically.
+- **Safe State Transitions**: Dry builds gate rebuilds, installer verifies UEFI & UUID integrity, and destructive steps require manual verification.
+- **Keyboard Precision**: Keybinds, pickers, and workspace navigation map to short ergonomic chords defined in `variables.lua`.
 
 ---
 
-## Credits
+## 📜 Credits & Ecosystem
 
-- [NixOS / nixpkgs](https://nixos.org) (`nixos-26.05`) — base system and package set
-- [Home Manager](https://github.com/nix-community/home-manager) (`release-26.05`) — user environment
-- [Hyprland](https://hyprland.org) — Wayland compositor, driven here in Lua
-- [Quickshell](https://quickshell.org) — QML desktop shell
-- [Stylix](https://github.com/danth/stylix) (`release-26.05`) — base16 scheme, system fonts, cursor, fontconfig
-- [Zen Browser](https://github.com/youwen5/zen-browser-flake) — default browser package
-- [Apple Fonts](https://github.com/Lyndeno/apple-fonts.nix) — overlay-provided fonts
-- [Kitty](https://sw.kovidgoyal.net/kitty/), [Neovim](https://neovim.io), [tmux](https://github.com/tmux/tmux), [Starship](https://starship.rs) — terminal stack
-- [awww](https://github.com/lyghxht/awww) — animated wallpaper daemon behind the wallpaper picker and restore script
+- **Base System**: [NixOS](https://nixos.org) (`nixos-26.05`) & [Home Manager](https://github.com/nix-community/home-manager)
+- **Compositor & Shell**: [Hyprland](https://hyprland.org) & [Quickshell](https://quickshell.org)
+- **Styling & Fonts**: [Stylix](https://github.com/danth/stylix), [Apple Fonts Overlay](https://github.com/Lyndeno/apple-fonts.nix)
+- **Applications**: [Zen Browser](https://github.com/youwen5/zen-browser-flake), [Kitty](https://sw.kovidgoyal.net/kitty/), [Neovim](https://neovim.io), [tmux](https://github.com/tmux/tmux), [Starship](https://starship.rs), [awww](https://github.com/lyghxht/awww)
 
 ---
 
 <div align="center">
 
-<sub>Sunflower: plant once, bloom everywhere.</sub>
+<sub>🌻 Sunflower: Plant once, bloom everywhere.</sub>
 
 </div>
+
