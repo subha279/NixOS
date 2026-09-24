@@ -2,12 +2,8 @@
 
   <!-- Dynamic Animated Banner -->
   <a href="https://github.com/subha279/Sunflower">
-    <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=38&duration=2800&pause=1000&color=CBA6F7&center=true&vCenter=true&width=680&lines=%F0%9F%8C%BB+Sunflower;Declarative.+Keyboard-Driven.;Powered+by+NixOS+%2B+Hyprland+%2B+Quickshell" alt="Sunflower Desktop Banner" />
+    <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=38&duration=2800&pause=1000&color=CBA6F7&center=true&vCenter=true&width=680&lines=%F0%9F%8C%BB+Sunflower;" alt="Sunflower Desktop Banner" />
   </a>
-
-  <p align="center">
-    <b>subha279</b>
-  </p>
 
   <p align="center">
     <a href="https://github.com/subha279/Sunflower"><img src="https://img.shields.io/badge/NixOS-26.05-7E7DFF?style=flat-square&logo=nixos&logoColor=white" alt="NixOS Base"></a>
