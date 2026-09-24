@@ -6,10 +6,9 @@
   </a>
 
   <p align="center">
-    <b>A declarative, keyboard-driven Linux environment crafted for performance & aesthetic cohesion.</b>
+    <b>subha279</b>
   </p>
 
-  <!-- Clean, Un-crowded Badges -->
   <p align="center">
     <a href="https://github.com/subha279/Sunflower"><img src="https://img.shields.io/badge/NixOS-26.05-7E7DFF?style=flat-square&logo=nixos&logoColor=white" alt="NixOS Base"></a>
     <a href="https://github.com/subha279/Sunflower"><img src="https://img.shields.io/badge/Hyprland-Lua-58E1FF?style=flat-square&logo=lua&logoColor=white" alt="Hyprland Lua"></a>
@@ -17,7 +16,6 @@
     <a href="https://github.com/subha279/Sunflower"><img src="https://img.shields.io/badge/Theme-Catppuccin-CBA6F7?style=flat-square&logo=palette&logoColor=white" alt="Sunflower Themes"></a>
   </p>
 
-  <!-- Minimalist Navigation Bar -->
   <p align="center">
     <a href="#-showcase">Showcase</a> •
     <a href="#-features">Features</a> •
@@ -198,4 +196,3 @@ All orchestration actions are executed from the repo root via `./setup.sh`:
 <sub>🌻 Sunflower: Plant once, bloom everywhere.</sub>
 
 </div>
-
