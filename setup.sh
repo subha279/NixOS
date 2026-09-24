@@ -15,7 +15,7 @@ set -Eeuo pipefail
 #   2. Core state - get_var/set_var_in/backup_config/
 #                   write_hardware_config/detect_nvidia
 #                   (only mutation of lib/variables.nix and
-#                   hosts/laptop/hardware-configuration.nix;
+#                   hosts/sunflower/hardware-configuration.nix;
 #                   everything else stays in Nix/Home Manager)
 #   3. Lifecycle  - flake_check/dry_build/rebuild/update_config/
 #                   rollback/list_generations/refresh_hardware
@@ -30,7 +30,7 @@ set -Eeuo pipefail
 #
 # What this script deliberately does NOT do (owned by Nix):
 #   directories, git config, Hyprland/Quickshell/themes/fonts/
-#   shell/apps setup. Those are Home Manager/NixOS modules under
+#                   shell/apps setup. Those are Home Manager/Sunflower modules under
 #   home/, modules/, lib/themes.nix. This script only bootstraps
 #   identity + hardware, then orchestrates nixos-rebuild/nix.
 # ============================================================
@@ -38,7 +38,7 @@ set -Eeuo pipefail
 VERSION="1.0"
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 VARS="$ROOT/lib/variables.nix"
-FLAKE_TARGET="$ROOT#laptop"
+FLAKE_TARGET="$ROOT#sunflower"
 
 # ============================================================
 # PRESENTATION LAYER — modular UI (submodules UI 1–8)
@@ -595,7 +595,7 @@ preflight() {
 }
 
 # Where are we? Returns a short label and never fails:
-# live-installer (NixOS ISO), nixos (running system), other.
+# live-installer (Sunflower ISO), nixos (running system), other.
 detect_system() {
     if ci_is_live_installer 2>/dev/null; then
         printf 'live-installer\n'
@@ -647,8 +647,8 @@ backup_config() {
     backup="$ROOT/.setup-backups/$stamp"
     mkdir -p "$backup"
     [[ -f "$VARS" ]] && cp -a "$VARS" "$backup/"
-    [[ -f "$ROOT/hosts/laptop/hardware-configuration.nix" ]] &&
-        cp -a "$ROOT/hosts/laptop/hardware-configuration.nix" "$backup/"
+    [[ -f "$ROOT/hosts/sunflower/hardware-configuration.nix" ]] &&
+        cp -a "$ROOT/hosts/sunflower/hardware-configuration.nix" "$backup/"
     success "Backup created: $backup"
 }
 
@@ -664,8 +664,8 @@ flake_check() {
 dry_build() {
     preflight
     check_dependencies nix
-    section "NixOS dry build"
-    run_cmd "nixos-rebuild dry-build --flake .#laptop"
+    section "Sunflower dry build"
+    run_cmd "nixos-rebuild dry-build --flake .#sunflower"
     sudo nixos-rebuild dry-build --flake "$FLAKE_TARGET"
     success "Dry-build passed."
 }
@@ -674,8 +674,8 @@ rebuild() {
     preflight
     check_dependencies nix
     flake_check
-    section "NixOS rebuild"
-    run_cmd "sudo nixos-rebuild switch --flake .#laptop"
+    section "Sunflower rebuild"
+    run_cmd "sudo nixos-rebuild switch --flake .#sunflower"
     sudo nixos-rebuild switch --flake "$FLAKE_TARGET"
     success "System rebuilt and switched successfully."
 }
@@ -704,14 +704,14 @@ update_config() {
 
 rollback() {
     section "Rollback"
-    warning "This switches to the previous NixOS generation."
+    warning "This switches to the previous Sunflower generation."
     confirm "Continue with rollback?" || return
     sudo nixos-rebuild switch --rollback
     success "Rollback completed."
 }
 
 list_generations() {
-    section "NixOS generations"
+    section "Sunflower generations"
     sudo nix-env --list-generations --profile /nix/var/nix/profiles/system
 }
 
@@ -745,14 +745,14 @@ refresh_hardware() {
 
     # Regenerating from the installer would describe the installer.
     if ci_is_live_installer; then
-        warning "This looks like the NixOS installer environment."
+        warning "This looks like the Sunflower installer environment."
         warning "Generating here describes the ISO, not the system on disk."
         info "For a fresh machine use: ./setup.sh clean-install"
         confirm "Generate anyway?" || return
     fi
 
     backup_config
-    write_hardware_config "" "$ROOT/hosts/laptop/hardware-configuration.nix"
+    write_hardware_config "" "$ROOT/hosts/sunflower/hardware-configuration.nix"
     success "Hardware configuration regenerated."
     warning "Review the generated file before rebuilding."
 }
@@ -762,13 +762,13 @@ detect_nvidia() {
 }
 
 install_flow() {
-    # This flow ends in `nixos-rebuild switch`, which needs a running NixOS.
+    # This flow ends in `nixos-rebuild switch`, which needs a running Sunflower.
     # From the installer ISO it would do a lot of work and then fail at the last
     # step, so it redirects instead.
     if ci_is_live_installer; then
         section "Wrong flow for this environment"
-        warning "This is the NixOS installer, and this option configures a system"
-        warning "that is already running NixOS. It ends in nixos-rebuild switch,"
+        warning "This is the Sunflower installer, and this option configures a system"
+        warning "that is already running Sunflower. It ends in nixos-rebuild switch,"
         warning "which cannot work from here."
         echo
         info "For a fresh machine you want the clean installer:"
@@ -791,7 +791,7 @@ install_flow() {
     # "Could not find variable". Nothing in Nix consumes user.name yet
     # (no GECOS/description field), but the value is preserved for
     # future use instead of being dropped.
-    section "NixOS installation / setup"
+    section "Sunflower installation / setup"
     local username="${SUDO_USER:-${USER:-}}" full_name hostname git_user git_email timezone locale
     local nvidia="false"
 
@@ -1008,11 +1008,11 @@ menu() {
         clear_screen
 
         echo
-        panel "NixOS Configuration Manager" "v$VERSION" "$(overview_facts)"
+        panel "Sunflower Configuration Manager" "v$VERSION" "$(overview_facts)"
         echo
 
         if ci_is_live_installer; then
-            printf '  %b%s%b %b%bInstaller environment detected — choose 1 to install NixOS.%b\n' \
+            printf '  %b%s%b %b%bInstaller environment detected — choose 1 to install Sunflower.%b\n' \
                 "$YELLOW" "$ICON_WARN" "$RESET" "$YELLOW" "$BOLD" "$RESET"
             hr
         fi
@@ -1021,7 +1021,7 @@ menu() {
         # install the machine, keep it current, reclaim space. Everything below
         # them is a tool you reach for only when you need it.
         menu_group "$ICON_SECTION" "MAIN"
-        menu_item 1 "Install NixOS" "fresh install, partitions the disk"
+        menu_item 1 "Install Sunflower" "fresh install, partitions the disk"
         menu_item 2 "Upgrade" "git pull, flake update, rebuild"
         menu_item 3 "Free disk space" "old generations, GC, optimise"
 
@@ -1152,13 +1152,13 @@ menu() {
 }
 
 # Integrated maintenance dashboard (from cleanup.sh)
-M_NIXOS_DIR="$ROOT"
-M_FLAKE_TARGET="$ROOT#laptop"
+M_SUN_DIR="$ROOT"
+M_FLAKE_TARGET="$ROOT#sunflower"
 M_KEEP_GENERATIONS=2
 M_ICON_OK="✓"
 M_ICON_INFO="ℹ"
 M_ICON_CLEAN="✦"
-M_ICON_NIX=""
+M_ICON_FLAKE=""
 M_ICON_GIT=""
 M_ICON_SYSTEM="⚙"
 M_ICON_DISK="▣"
@@ -1187,9 +1187,9 @@ m_check_environment() {
         exit 1
     fi
 
-    if [[ ! -d "$M_NIXOS_DIR" ]]; then
-        error "NixOS directory not found:"
-        echo "    $M_NIXOS_DIR"
+    if [[ ! -d "$M_SUN_DIR" ]]; then
+        error "Sunflower directory not found:"
+        echo "    $M_SUN_DIR"
         exit 1
     fi
 
@@ -1208,8 +1208,8 @@ m_check_environment() {
         exit 1
     fi
 
-    success "NixOS environment detected."
-    info "Configuration: $M_NIXOS_DIR"
+    success "Sunflower environment detected."
+    info "Configuration: $M_SUN_DIR"
     info "Flake target:  $M_FLAKE_TARGET"
 }
 
@@ -1219,7 +1219,7 @@ m_check_git() {
 
     section "${M_ICON_GIT} Git status"
 
-    cd "$M_NIXOS_DIR"
+    cd "$M_SUN_DIR"
 
     if [[ -n "$(git status --porcelain)" ]]; then
 
@@ -1246,7 +1246,7 @@ m_check_git() {
 
 m_check_flake() {
 
-    section "${M_ICON_NIX} Flake validation"
+    section "${M_ICON_FLAKE} Flake validation"
 
     if flake_check; then
         return 0
@@ -1262,7 +1262,7 @@ m_check_flake() {
 
 m_dry_build() {
 
-    section "${M_ICON_CHECK} NixOS configuration"
+    section "${M_ICON_CHECK} Sunflower configuration"
 
     # dry_build() already prints its own section and runs the sudo
     # dry-build; calling it keeps output slightly more verbose but
@@ -1439,7 +1439,7 @@ m_garbage_collect() {
 
 m_optimize_store() {
 
-    section "${M_ICON_NIX} Store optimization"
+    section "${M_ICON_FLAKE} Store optimization"
 
     if confirm "Optimize the Nix store?"; then
 
@@ -1551,14 +1551,14 @@ m_system_overview() {
 
     printf '  %b Host:       %s\n' "${CYAN}${M_ICON_SYSTEM}${RESET}" "$hostname"
     printf '  %b Kernel:     %s\n' "${BLUE}${M_ICON_INFO}${RESET}" "$kernel"
-    printf '  %b Nix:        %s\n' "${MAGENTA}${M_ICON_NIX}${RESET}" "$nix_version"
+    printf '  %b Nix:        %s\n' "${MAGENTA}${M_ICON_FLAKE}${RESET}" "$nix_version"
     printf '  %b Uptime:     %s\n' "${GREEN}${M_ICON_OK}${RESET}" "$uptime"
 }
 
 # Full maintenance is implemented by m_maintenance_dashboard above.
 m_maintenance_dashboard() {
     clear_screen
-    panel "NixOS Maintenance" "v$VERSION" "System maintenance dashboard"
+    panel "Sunflower Maintenance" "v$VERSION" "System maintenance dashboard"
     echo
     m_check_environment
     m_check_git
@@ -1571,7 +1571,7 @@ m_maintenance_dashboard() {
     if ! m_dry_build; then
         error "Maintenance stopped."
         echo
-        echo "Fix the NixOS configuration before cleanup."
+        echo "Fix the Sunflower configuration before cleanup."
         pause
         return
     fi
@@ -1598,7 +1598,7 @@ m_maintenance_dashboard() {
     printf '  %b Current generation: %s\n' "${GREEN}${M_ICON_SYSTEM}${RESET}" "$(m_get_current_generation)"
     printf '  %b Generations kept:  %s\n' "${CYAN}${M_ICON_CLEAN}${RESET}" "$M_KEEP_GENERATIONS"
     echo
-    printf '%b\n' "${DIM}  Your NixOS configuration was not modified.${RESET}"
+    printf '%b\n' "${DIM}  Your Sunflower configuration was not modified.${RESET}"
     echo
     pause
 }
@@ -1621,7 +1621,7 @@ validator_run() {
 
     clear_screen
 
-    panel "NixOS Configuration Check" "" \
+    panel "Sunflower Configuration Check" "" \
         "Repository: $ROOT" \
         "Branch:     $(git branch --show-current 2>/dev/null || printf 'unknown')"
 
@@ -1703,8 +1703,8 @@ validator_run() {
 
         "flake.nix"
 
-        "hosts/laptop/default.nix"
-        "hosts/laptop/hardware-configuration.nix"
+        "hosts/sunflower/default.nix"
+        "hosts/sunflower/hardware-configuration.nix"
 
         "home/default.nix"
 
@@ -2751,7 +2751,7 @@ validator_run() {
 
         printf "\n"
         printf '%b%s%b\n' "$DIM" "Safe to run:" "$RESET"
-        printf '  %b%s%b\n' "$CYAN" "sudo nixos-rebuild switch --flake .#laptop" "$RESET"
+        printf '  %b%s%b\n' "$CYAN" "sudo nixos-rebuild switch --flake .#sunflower" "$RESET"
 
         V_RESULT=0
 
@@ -2921,7 +2921,7 @@ ci_preflight() {
     if [[ "${#missing[@]}" -gt 0 ]]; then
         for c in "${missing[@]}"; do error "missing: $c"; done
         echo
-        error "A stock NixOS installer ISO provides all of these."
+        error "A stock Sunflower installer ISO provides all of these."
         info "If one really is absent, borrow it without installing anything:"
         info "  nix-shell -p gptfdisk dosfstools e2fsprogs efibootmgr util-linux"
 
@@ -2971,7 +2971,7 @@ ci_preflight() {
     success "Toolchain complete; nothing needs installing."
 }
 
-# Is this the NixOS installation ISO?
+# Is this the Sunflower installation ISO?
 #
 # This used to accept any overlay, tmpfs or squashfs root, which was wrong: a
 # container has an overlay root too, so `install` inside one would have decided
@@ -2989,11 +2989,11 @@ ci_is_live_installer() {
 
 ci_require_live() {
     command -v nixos-install >/dev/null 2>&1 ||
-        die "nixos-install not found. Run this from the NixOS installer ISO."
+        die "nixos-install not found. Run this from the Sunflower installer ISO."
 
     ci_is_live_installer && return 0
 
-    error "This is not the NixOS installer environment."
+    error "This is not the Sunflower installer environment."
     error "No VARIANT_ID=installer, no /iso, no read-only store mount."
     die "Refusing to partition a disk from anything but the installer ISO."
 }
@@ -3416,7 +3416,7 @@ ci_teardown_swap() {
 ci_place_repo() {
     section "Repository"
 
-    CI_DEST="$CI_TARGET/home/$CI_USER/NixOS"
+    CI_DEST="$CI_TARGET/home/$CI_USER/Sunflower"
     ci_run mkdir -p "$CI_DEST"
 
     if [[ -d "$ROOT/.git" ]]; then
@@ -3433,8 +3433,8 @@ ci_place_repo() {
             error "No flake.nix at $CI_DEST"
             return 1
         }
-        [[ -d "$CI_DEST/hosts/laptop" ]] || {
-            error "No hosts/laptop at $CI_DEST"
+        [[ -d "$CI_DEST/hosts/sunflower" ]] || {
+            error "No hosts/sunflower at $CI_DEST"
             return 1
         }
     fi
@@ -3498,7 +3498,7 @@ ci_collect_identity() {
     done
 
     CI_USER="${CI_ID[username]}"
-    CI_DEST="$CI_TARGET/home/$CI_USER/NixOS"
+    CI_DEST="$CI_TARGET/home/$CI_USER/Sunflower"
 
     if detect_nvidia; then
         info "NVIDIA GPU detected; the nvidia module stays enabled."
@@ -3507,7 +3507,7 @@ ci_collect_identity() {
         info "Review lib/variables.nix if this machine has no NVIDIA card."
     fi
 
-    info "Repository will be installed to /home/$CI_USER/NixOS"
+    info "Repository will be installed to /home/$CI_USER/Sunflower"
 }
 
 ci_apply_identity() {
@@ -3538,7 +3538,7 @@ ci_generate_hardware() {
     ci_need_cmd nixos-generate-config
     section "Hardware configuration for the target"
 
-    local dest="$CI_DEST/hosts/laptop/hardware-configuration.nix"
+    local dest="$CI_DEST/hosts/sunflower/hardware-configuration.nix"
 
     if [[ "$CI_DRY_RUN" -eq 1 ]]; then
         run_cmd "nixos-generate-config --root $CI_TARGET --show-hardware-config > $dest"
@@ -3561,7 +3561,7 @@ ci_generate_hardware() {
     # repository as "dubious ownership" and skip the staging silently.
     if [[ -d "$CI_DEST/.git" ]] && command -v git >/dev/null 2>&1; then
         git -C "$CI_DEST" -c safe.directory='*' \
-            add -- hosts/laptop/hardware-configuration.nix 2>/dev/null || true
+            add -- hosts/sunflower/hardware-configuration.nix 2>/dev/null || true
     fi
 
     success "Generated against $CI_TARGET."
@@ -3587,7 +3587,7 @@ ci_fs_type() {
 ci_verify_hardware() {
     section "Hardware configuration verification"
 
-    local f="$CI_DEST/hosts/laptop/hardware-configuration.nix"
+    local f="$CI_DEST/hosts/sunflower/hardware-configuration.nix"
     if [[ ! -f "$f" ]]; then
         v_fail "missing $f"
         return 1
@@ -3691,9 +3691,9 @@ ci_prepare_target_store() {
 }
 
 ci_build_system() {
-    section "Build .#laptop in target store"
+    section "Build .#sunflower in target store"
 
-    local attr="$CI_DEST#nixosConfigurations.laptop.config.system.build.toplevel"
+    local attr="$CI_DEST#nixosConfigurations.sunflower.config.system.build.toplevel"
 
     if [[ "$CI_DRY_RUN" -eq 1 ]]; then
         run_cmd "nix --store $CI_TARGET build --no-link --print-out-paths $attr"
@@ -3711,7 +3711,7 @@ ci_build_system() {
             --print-out-paths \
             "$attr"
     )" || {
-        error "Build of .#laptop failed."
+        error "Build of .#sunflower failed."
         return 1
     }
 
@@ -3735,7 +3735,7 @@ ci_build_system() {
 
 ci_install() {
     ci_need_cmd nixos-install
-    section "Installing NixOS"
+    section "Installing Sunflower"
 
     if [[ "$CI_DRY_RUN" -eq 1 ]]; then
         run_cmd "nixos-install --root $CI_TARGET --store-path /nix/store/<system-closure> --no-channel-copy"
@@ -3768,7 +3768,7 @@ ci_install() {
         return 1
     }
 
-    success "NixOS installed from the target-store closure."
+    success "Sunflower installed from the target-store closure."
 }
 
 ci_cleanup_installer_artifacts() {
@@ -3888,9 +3888,9 @@ ci_verify_bootloader() {
     fi
 
     if grep -q "nixos-system" "$cfg"; then
-        v_ok "grub.cfg boots a NixOS system closure"
+        v_ok "grub.cfg boots a Sunflower system closure"
     else
-        v_fail "grub.cfg references no NixOS system closure"
+        v_fail "grub.cfg references no Sunflower system closure"
     fi
 
     local sys
@@ -3909,7 +3909,7 @@ ci_verify_bootloader() {
 ci_efi_entries() { efibootmgr -v 2>/dev/null || true; }
 
 # Read efibootmgr -v on stdin, print NUM|LABEL for entries that are stale
-# NixOS systemd-boot loaders and nothing else.
+# Sunflower systemd-boot loaders and nothing else.
 #
 # Deliberately narrow. Only an entry naming systemd-bootx64.efi, or carrying
 # the label systemd itself writes, is ever a candidate. Anything belonging to
@@ -3949,7 +3949,7 @@ ci_handle_stale_efi() {
         warning "GRUB here is installed only to the removable fallback path and creates"
         warning "no NVRAM entry, so a leftover entry can still win the boot."
         warning "From any live environment run: efibootmgr -v"
-        warning "Then delete stale NixOS entries with: efibootmgr -b <NUM> -B"
+        warning "Then delete stale Sunflower entries with: efibootmgr -b <NUM> -B"
         return 1
     fi
 
@@ -4072,8 +4072,8 @@ clean_install() {
     [[ "${1:-}" == "--dry-run" || "${1:-}" == "-n" ]] && CI_DRY_RUN=1
 
     clear_screen
-    panel "NixOS Clean Installation" "v$VERSION" \
-        "Flake target : .#laptop" \
+    panel "Sunflower Clean Installation" "v$VERSION" \
+        "Flake target : .#sunflower" \
         "Repository   : the git checkout, never /etc/nixos" \
         "Bootloader   : GRUB at \\EFI\\BOOT\\BOOTX64.EFI"
     echo
@@ -4209,7 +4209,7 @@ free_space() {
 # Shared by the menu and the CLI so there is one copy.
 verify_boot() {
     CI_USER="$(get_var username || printf '')"
-    CI_DEST="$CI_TARGET/home/$CI_USER/NixOS"
+    CI_DEST="$CI_TARGET/home/$CI_USER/Sunflower"
     CI_ROOT_PART="$(findmnt -no SOURCE "$CI_TARGET" 2>/dev/null || printf '')"
     CI_ESP="$(findmnt -no SOURCE "$CI_TARGET/boot" 2>/dev/null || printf '')"
     ci_final_verify
@@ -4217,7 +4217,7 @@ verify_boot() {
 
 usage() {
     cat <<EOF
-NixOS Configuration Manager v$VERSION
+Sunflower Configuration Manager v$VERSION
 
 Usage:
   ./setup.sh                         Interactive menu
@@ -4248,7 +4248,7 @@ Usage:
 
 What 'install' does depends on where you run it:
   from the installer ISO   partitions the disk and runs nixos-install
-  on a running NixOS       identity pass, ends in nixos-rebuild switch
+  on a running Sunflower       identity pass, ends in nixos-rebuild switch
 
 Typical life of a machine:
   1. Boot the installer, clone this repo, ./setup.sh, choose 1.
@@ -4268,7 +4268,7 @@ main() {
     case "${1:-menu}" in
     menu) menu ;;
     # `install` means "install this machine" in whichever environment you are
-    # standing in. From the ISO that is a fresh install; on a running NixOS it
+    # standing in. From the ISO that is a fresh install; on a running Sunflower it
     # is the identity/setup pass it has always been, so nobody's habit breaks.
     install)
         if ci_is_live_installer; then clean_install; else install_flow; fi

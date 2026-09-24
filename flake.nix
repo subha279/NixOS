@@ -1,5 +1,5 @@
 {
-  description = "subha279 NixOS Configuration";
+  description = "subha279 Sunflower Configuration";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
@@ -42,7 +42,7 @@
     in
     {
       nixosConfigurations = {
-        laptop = nixpkgs.lib.nixosSystem {
+        sunflower = nixpkgs.lib.nixosSystem {
           system = "x86_64-linux";
 
           specialArgs = {
@@ -63,7 +63,7 @@
             }
 
             stylix.nixosModules.stylix
-            ./hosts/laptop
+            ./hosts/sunflower
 
             home-manager.nixosModules.home-manager
 

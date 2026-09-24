@@ -15,7 +15,7 @@ return {
 			},
 			options = {
 				nixos = {
-					expr = "(builtins.getFlake (toString ./.)).nixosConfigurations.laptop.options",
+					expr = "(builtins.getFlake (toString ./.)).nixosConfigurations.sunflower.options",
 				},
 			},
 		},
