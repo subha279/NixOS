@@ -1,14 +1,19 @@
 <div align="center">
 
-# ❄️ NixOS
+<img src="https://readme-typing-svg.herokuapp.com?font=JetBrains+Mono&weight=600&size=42&pause=1200&color=CBA6F7&center=true&vCenter=true&width=600&lines=%F0%9F%8C%BB+Sunflower" alt="Sunflower" />
 
-### A declarative, modular & keyboard-driven NixOS desktop
+<a href="https://github.com/subha279/NixOS">
+  <img src="https://readme-typing-svg.herokuapp.com?font=JetBrains+Mono&size=16&pause=2000&color=989CAC&center=true&vCenter=true&width=700&lines=Declarative+NixOS+desktop;Hyprland+%2B+Quickshell%2C+keyboard-first;7+Sunflower+themes.+Zero+rebuilds.;One+setup.sh+for+install+%E2%80%A2+update+%E2%80%A2+repair" alt="Sunflower tagline" />
+</a>
 
 **Hyprland** · **Quickshell** · **Sunflower themes** · **Home Manager**
 
 <p>
   <a href="https://github.com/subha279/NixOS">
-    <img src="https://img.shields.io/badge/NixOS-26.05-7E7DFF?style=for-the-badge&logo=nixos&logoColor=white" alt="NixOS 26.05">
+    <img src="https://img.shields.io/badge/Sunflower-desktop-C792EA?style=for-the-badge&logo=sunrise&logoColor=white" alt="Sunflower desktop">
+  </a>
+  <a href="https://github.com/subha279/NixOS">
+    <img src="https://img.shields.io/badge/NixOS-26.05-7E7DFF?style=for-the-badge&logo=nixos&logoColor=white" alt="NixOS 26.05 base">
   </a>
   <a href="https://github.com/subha279/NixOS">
     <img src="https://img.shields.io/badge/Hyprland-Lua-58E1FF?style=for-the-badge" alt="Hyprland Lua">
@@ -16,13 +21,11 @@
   <a href="https://github.com/subha279/NixOS">
     <img src="https://img.shields.io/badge/Quickshell-QML-BB86FC?style=for-the-badge" alt="Quickshell">
   </a>
-  <a href="https://github.com/subha279/NixOS">
-    <img src="https://img.shields.io/badge/Sunflower-themes-C792EA?style=for-the-badge" alt="Sunflower themes">
-  </a>
 </p>
 
 <p>
   <a href="#-showcase">Showcase</a> ·
+  <a href="#-features">Features</a> ·
   <a href="#-quick-start">Quick Start</a> ·
   <a href="#-setup-manager">Setup Manager</a> ·
   <a href="#-architecture">Architecture</a> ·
@@ -39,33 +42,53 @@
 <p align="center">
   <a href="https://www.youtube.com/watch?v=J9286xiVBNk">
     <img src="https://img.youtube.com/vi/J9286xiVBNk/maxresdefault.jpg"
-         alt="NixOS + Hyprland desktop showcase"
+         alt="Sunflower desktop showcase"
          width="900">
   </a>
 </p>
 
 <p align="center">
-  <sub>▶ Watch the full desktop showcase on YouTube</sub>
+  <sub>▶ Watch the full Sunflower desktop showcase on YouTube</sub>
+</p>
+
+<p align="center">
+  <img src="https://readme-typing-svg.herokuapp.com?font=JetBrains+Mono&size=14&pause=1500&color=89B4FA&center=true&vCenter=true&width=620&lines=%24+qs+ipc+call+launcher+toggle;%24+qs+ipc+call+theme+toggle+%F0%9F%8C%BB;%24+sunflower-theme+tokyo-night+%E2%9C%A8;%24+hyprctl+reload+%E2%9A%A1" alt="Sunflower live commands demo" />
 </p>
 
 ---
 
-## ✦ What this is
+## ✦ What is Sunflower?
 
-A production-oriented, flake-based **NixOS laptop configuration** built around a clean Wayland workflow.
+**Sunflower** is a production-oriented, flake-based **NixOS desktop** built around a clean Wayland workflow — Hyprland composed in Lua, a Quickshell shell in QML, and a runtime theme engine that repaints the whole desktop without rebuilding.
 
 | Layer          | Stack                          |
 | :------------- | :----------------------------- |
-| 🐧 OS          | NixOS 26.05 · `x86_64-linux`   |
+| 🌻 Identity    | Sunflower desktop on NixOS 26.05 · `x86_64-linux` |
 | 🖥️ Desktop     | Hyprland · Lua                 |
 | 🐚 Shell       | Quickshell · QML               |
-| 🎨 Theme       | Stylix + Sunflower · 7 themes  |
+| 🎨 Theme       | Sunflower engine + Stylix · 7 themes, zero-rebuild switching |
 | 💻 Terminal    | Kitty · Zsh · tmux · Starship  |
 | ✏️ Editor      | Neovim · LSPs + formatters     |
-| 📦 Management  | Home Manager · Flakes          |
+| 📦 Management  | Home Manager · Flakes · `setup.sh` |
 
 > [!TIP]
 > **Design goals:** `Declarative` → `Modular` → `Centralised` → `Reproducible` → `Keyboard-driven` → `Consistently themed`
+
+---
+
+## ✨ Features
+
+| | Feature | Details |
+| :- | :------ | :------ |
+| 🌻 | **Runtime theming** | `SUPER + C` swaps theme across Hyprland, Quickshell, Kitty, Neovim, tmux and Starship — no rebuild |
+| 🎨 | **7 palettes** | `catppuccin-mocha · tokyo-night · gruvbox · one-dark · everforest · rose-pine · kanagawa` |
+| 🖥️ | **Lua compositor** | Hyprland config as composable Lua modules with monotonic, bounce-free animation |
+| 🐚 | **QML shell** | One Quickshell shell replaces Waybar/Wofi/Dunst: bar, popups, launchers, notifications, clipboard, emoji |
+| ⌨️ | **Keyboard-first** | Launcher, theme/wallpaper pickers, clipboard, emoji, notes, screenshot — all on `SUPER` chords |
+| 🧰 | **One manager** | `./setup.sh` installs, upgrades, rebuilds, validates, cleans, rolls back, verifies boot |
+| 🛡️ | **Safe workflow** | `check → dry-build → rebuild → verify`, timestamped backups, hardware re-detection |
+| 🧩 | **Centralised identity** | User, hostname, Git identity, locale, timezone live once in `lib/variables.nix` |
+| 🔒 | **No secrets in Nix** | Passwords only via interactive `passwd`, never written to the store |
 
 ---
 
@@ -98,13 +121,13 @@ One entry point for the whole configuration:
 ```
 
 ```text
-╭─ NixOS Configuration Manager ── v1.0 ─╮
-│  subha · kernel · nix 2.34 · up 11m    │
-╰────────────────────────────────────────╯
+╭─ Sunflower Configuration Manager ── v1.0 ─╮
+│  subha · kernel · nix 2.34 · up 11m        │
+╰────────────────────────────────────────────╯
 
   ◆  MAIN
   ──────────────────────────────────────
-    1  Install NixOS           fresh install, partitions the disk
+    1  Install Sunflower       fresh install, partitions the disk
     2  Upgrade                 git pull, flake update, rebuild
     3  Free disk space         old generations, GC, optimise
 
@@ -136,6 +159,10 @@ One entry point for the whole configuration:
 
     0  Exit
 ```
+
+<p align="center">
+  <img src="https://readme-typing-svg.herokuapp.com?font=JetBrains+Mono&size=14&pause=1500&color=A6E3A1&center=true&vCenter=true&width=560&lines=%24+..%2Fsetup.sh+check+%E2%9C%93;%24+..%2Fsetup.sh+dry+%E2%9C%93;%24+..%2Fsetup.sh+rebuild+%F0%9F%8C%BB;%24+..%2Fsetup.sh+rollback+%E2%86%A9" alt="Sunflower safe workflow demo" />
+</p>
 
 <details>
 <summary><b>CLI mode</b></summary>
@@ -179,7 +206,7 @@ The installer backs up changed configuration before personalising it, generates 
 ## 📁 Architecture
 
 ```text
-NixOS/
+Sunflower/  (NixOS desktop)
 ├── flake.nix                  # nixpkgs 26.05, home-manager, stylix,
 │                              # apple-fonts, zen-browser
 ├── hosts/
@@ -195,7 +222,7 @@ NixOS/
 │   └── hardware/kreo-rgb
 │
 ├── home/                      # Home Manager modules
-│   ├── hyprland · quickshell · theme
+│   ├── hyprland · quickshell · theme (Sunflower engine)
 │   ├── neovim · zsh · kitty · tmux
 │   ├── git · ssh · xdg
 │   └── fastfetch · obsidian · mpv
@@ -214,7 +241,7 @@ Core Nix settings, GRUB, NetworkManager, users, fonts, PipeWire, Bluetooth, grap
 
 ### Home Manager
 
-Hyprland, Quickshell, Neovim, Zsh, Kitty, tmux, Git/SSH, Fastfetch, Obsidian, XDG and theme configuration.
+Hyprland, Quickshell, Neovim, Zsh, Kitty, tmux, Git/SSH, Fastfetch, Obsidian, XDG and Sunflower theme configuration.
 
 ---
 
@@ -309,6 +336,10 @@ colours into a running program without disturbing its keybindings — `sunflower
 reloads Hyprland, repaints every live Kitty socket, re-sources tmux and nudges
 open Zsh sessions.
 
+<p align="center">
+  <img src="https://readme-typing-svg.herokuapp.com?font=JetBrains+Mono&size=14&pause=1500&color=F5C2E7&center=true&vCenter=true&width=620&lines=catppuccin-mocha+%E2%80%A2+tokyo-night+%E2%80%A2+gruvbox;one-dark+%E2%80%A2+everforest+%E2%80%A2+rose-pine+%E2%80%A2+kanagawa;%F0%9F%8C%BB+SUPER+%2B+C+to+bloom+%E2%9C%A8" alt="Sunflower themes animation" />
+</p>
+
 Available themes:
 
 ```text
@@ -328,7 +359,7 @@ SUPER + C
 
 | Shared file | Purpose |
 | :---------- | :------ |
-| `lib/themes.nix` | Theme definitions + active theme |
+| `lib/themes.nix` | Sunflower theme definitions + active theme |
 | `lib/variables.nix` | Identity + system configuration |
 
 ---
@@ -384,7 +415,7 @@ systemctl --user restart quickshell
 | Keybinding | `home/hyprland/config/keybinds.lua` → `hyprctl reload` |
 | Application | `home/hyprland/config/variables.lua` (bindings reference shared variables, so one change propagates) |
 | Identity | `lib/variables.nix` (keep shared values there, never duplicate across modules) |
-| Theme | `lib/themes.nix` + `lib/colorschemes/` → `SUPER + C` at runtime |
+| Sunflower theme | `lib/themes.nix` + `lib/colorschemes/` → `SUPER + C` at runtime |
 
 ---
 
@@ -416,12 +447,12 @@ List generations:
 Declarative → Modular → Centralised → Reproducible → Keyboard-led → Consistently themed
 ```
 
-> The goal is simple: **one declarative source of truth for the OS, desktop, shell, applications, identity and theme.**
+> The goal is simple: **one declarative source of truth for the OS, desktop, shell, applications, identity and theme — with Sunflower, it blooms at runtime.**
 
 ---
 
 <div align="center">
 
-<sub>Built for a fast, minimal and reproducible Wayland workflow.</sub>
+<img src="https://readme-typing-svg.herokuapp.com?font=JetBrains+Mono&size=13&pause=2500&color=989CAC&center=true&vCenter=true&width=520&lines=Built+for+a+fast%2C+minimal%2C+reproducible+Wayland+workflow.;%F0%9F%8C%BB+Sunflower%3A+plant+once%2C+bloom+everywhere." alt="Sunflower footer" />
 
 </div>
