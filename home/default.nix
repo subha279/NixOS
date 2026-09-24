@@ -18,6 +18,7 @@ in
     ./quickshell
     ./obsidian
     ./theme
+    ./mpv
   ];
 
   home.username = vars.username;

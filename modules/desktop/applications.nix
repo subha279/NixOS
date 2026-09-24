@@ -53,7 +53,6 @@
     })
 
     ffmpeg
-    vlc
     libreoffice-fresh
     gimp
     blender

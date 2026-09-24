@@ -579,16 +579,14 @@ hl.window_rule({
 	xray = true,
 })
 
--- VLC
+-- MPV
 
 hl.window_rule({
-	name = "vlc",
-
+	name = "mpv-no-animation",
 	match = {
-		class = "^vlc$",
+		class = "^mpv$",
 	},
-
-	opacity = "1.0 override 1.0 override",
+	no_anim = true,
 })
 
 -- GIMP

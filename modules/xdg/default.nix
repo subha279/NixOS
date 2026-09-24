@@ -29,7 +29,7 @@
 
         images = "org.kde.gwenview.desktop";
 
-        video = "vlc.desktop";
+        video = "mpv.desktop";
 
         files = "thunar.desktop";
 

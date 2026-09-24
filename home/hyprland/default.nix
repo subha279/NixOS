@@ -2,38 +2,27 @@
 
 {
   # Aurora Hyprland
-
   # Polkit Qt Environment Override
-
   xdg.configFile."systemd/user/plasma-polkit-agent.service.d/environment.conf".text = ''
     [Service]
     Environment=QT_STYLE_OVERRIDE=
   '';
 
   # Hyprland Lua Configuration
-
   xdg.configFile."hypr/hyprland.lua".source = ./hyprland.lua;
 
   # Hyprland Configuration Modules
-
   xdg.configFile."hypr/config".source = ./config;
-
   xdg.configFile."hypr/scripts/restore-wallpaper.sh".source = ./scripts/restore-wallpaper.sh;
 
   # Aurora Desktop Services
-
   systemd.user.targets.hyprland-session = {
     Unit = {
       Description = "Hyprland compositor session";
-
       Documentation = [ "man:systemd.special(7)" ];
-
       BindsTo = [ "graphical-session.target" ];
-
       Wants = [ "graphical-session-pre.target" ];
-
       After = [ "graphical-session-pre.target" ];
-
       Before = [ "graphical-session.target" ];
     };
   };
@@ -41,11 +30,8 @@
   systemd.user.targets.desktop-services = {
     Unit = {
       Description = "Aurora desktop services";
-
       PartOf = [ "graphical-session.target" ];
-
       After = [ "graphical-session.target" ];
-
       Wants = [
         "quickshell.service"
         "awww-daemon.service"
@@ -63,23 +49,16 @@
   systemd.user.services.nm-applet = {
     Unit = {
       Description = "NetworkManager applet";
-
       PartOf = [ "graphical-session.target" ];
-
       After = [ "graphical-session.target" ];
-
       ConditionEnvironment = "WAYLAND_DISPLAY";
     };
 
     Service = {
       Type = "exec";
-
       ExecStart = "${pkgs.networkmanagerapplet}/bin/nm-applet --indicator";
-
       Restart = "on-failure";
-
       RestartSec = 2;
-
       Slice = "session.slice";
     };
 
@@ -89,27 +68,19 @@
   };
 
   # Bluetooth Applet
-
   systemd.user.services.blueman-applet = {
     Unit = {
       Description = "Blueman bluetooth applet";
-
       PartOf = [ "graphical-session.target" ];
-
       After = [ "graphical-session.target" ];
-
       ConditionEnvironment = "WAYLAND_DISPLAY";
     };
 
     Service = {
       Type = "exec";
-
       ExecStart = "${pkgs.blueman}/bin/blueman-applet";
-
       Restart = "on-failure";
-
       RestartSec = 2;
-
       Slice = "session.slice";
     };
 
@@ -119,31 +90,23 @@
   };
 
   # Awww Wallpaper Daemon
-
   systemd.user.services.awww-daemon = {
     Unit = {
       Description = "Awww Wayland wallpaper daemon";
-
       PartOf = [
         "graphical-session.target"
       ];
-
       After = [
         "graphical-session.target"
       ];
-
       ConditionEnvironment = "WAYLAND_DISPLAY";
     };
 
     Service = {
       Type = "exec";
-
       ExecStart = "${pkgs.awww}/bin/awww-daemon";
-
       Restart = "on-failure";
-
       RestartSec = 2;
-
       Slice = "session.slice";
     };
 
