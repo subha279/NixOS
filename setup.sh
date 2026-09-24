@@ -4,6 +4,35 @@ set -Eeuo pipefail
 # ============================================================
 # Single entry point: install, update, rebuild, validate,
 # maintenance, rollback and system recovery.
+#
+# Architecture (modules in this file, in order):
+#   0. Bootstrap  - ROOT/VARS/FLAKE_TARGET, preflight(),
+#                   detect_system(), check_dependencies()
+#   1. Presentation (UI 1-8, TTY-aware, Sunflower-themed, read-only):
+#                   1 capabilities, 2 palette, 3 glyphs,
+#                   4 cursor+primitives, 5 log lines,
+#                   6 sections/steps/kv, 7 prompts, 8 panels/menus/spinner
+#   2. Core state - get_var/set_var_in/backup_config/
+#                   write_hardware_config/detect_nvidia
+#                   (only mutation of lib/variables.nix and
+#                   hosts/laptop/hardware-configuration.nix;
+#                   everything else stays in Nix/Home Manager)
+#   3. Lifecycle  - flake_check/dry_build/rebuild/update_config/
+#                   rollback/list_generations/refresh_hardware
+#   4. Identity   - install_flow (running system) + test_install
+#                   preview (both map the "Full name" prompt to
+#                   the `name` key in lib/variables.nix)
+#   5. Maintenance - m_* dashboard reusing Lifecycle primitives
+#   6. Validator  - validator_run (read-only checks only)
+#   7. Clean install - ci_* (only path that partitions/formats;
+#                   requires live ISO + root, ends in nixos-install)
+#   8. Dispatch   - menu + main CLI
+#
+# What this script deliberately does NOT do (owned by Nix):
+#   directories, git config, Hyprland/Quickshell/themes/fonts/
+#   shell/apps setup. Those are Home Manager/NixOS modules under
+#   home/, modules/, lib/themes.nix. This script only bootstraps
+#   identity + hardware, then orchestrates nixos-rebuild/nix.
 # ============================================================
 
 VERSION="1.0"
@@ -12,22 +41,32 @@ VARS="$ROOT/lib/variables.nix"
 FLAKE_TARGET="$ROOT#laptop"
 
 # ============================================================
-# PRESENTATION LAYER
+# PRESENTATION LAYER — modular UI (submodules UI 1–8)
 #
-# One vocabulary for everything this script prints. The names
+# One vocabulary for everything this script prints. The public names
 # below -- info / success / warning / error / run_cmd / section /
-# pause / confirm, plus v_ok / v_fail / v_info for the validator's
-# aligned results -- are the whole set. There used to be three
-# parallel copies of this: these, an m_* family for the maintenance
-# dashboard, and a v_* family nested inside the validator. They are
-# now one implementation.
+# subsection / step / kv / note / pause / confirm, plus v_ok / v_fail /
+# v_info for the validator, plus panel / verdict / menu_group /
+# menu_item / spinner -- are the whole set.
 #
-# The colour variables keep their old names (RED, CYAN, ...) on
-# purpose. Around a hundred printf call sites in the maintenance
-# and validator sections reference them directly, so re-pointing
-# the values at the live theme upgrades all of them without
-# touching any of them.
+# Submodules (in order):
+#   UI 1  capabilities  IS_TTY/UI_COLOR/UI_TRUECOLOR/UI_UNICODE/UI_WIDTH
+#   UI 2  palette       Sunflower theme -> RED/GREEN/.../DIM + RESET/BOLD
+#   UI 3  glyphs        ICON_* + box-drawing + ASCII fallback
+#   UI 4  cursor+primitives  hide/show_cursor, ui_repeat, ui_visible_len,
+#                       clear_screen, hr
+#   UI 5  log lines     die/info/success/warning/error/run_cmd
+#   UI 6  structure     section/subsection/step/kv/note
+#   UI 7  prompts       pause/confirm (return-code contract preserved)
+#   UI 8  blocks        panel/verdict/menu_group/menu_item/spinner
+#
+# Rules for every helper here: respect UI_COLOR (no escapes when off),
+# respect UI_UNICODE (ASCII fallback), never fail under `set -e`
+# except die(), never write to stdout when the message belongs on
+# stderr (error/die only).
 # ============================================================
+
+# --- UI 1: capabilities --------------------------------------
 
 # Terminal capabilities
 #
@@ -91,6 +130,19 @@ if [[ "$IS_TTY" -eq 1 ]]; then
     if [[ "$UI_WIDTH" -gt 74 ]]; then UI_WIDTH=74; fi
     if [[ "$UI_WIDTH" -lt 40 ]]; then UI_WIDTH=40; fi
 fi
+
+# Re-apply terminal width (e.g. after a resize before re-drawing the
+# menu). Idempotent and read-only; clamps exactly like initialisation.
+ui_refresh_width() {
+    UI_WIDTH=64
+    if [[ "$IS_TTY" -eq 1 ]]; then
+        UI_WIDTH="$(tput cols 2>/dev/null || printf '64')"
+        if [[ "$UI_WIDTH" -gt 74 ]]; then UI_WIDTH=74; fi
+        if [[ "$UI_WIDTH" -lt 40 ]]; then UI_WIDTH=40; fi
+    fi
+}
+
+# --- UI 2: palette (Sunflower theme -> ANSI) -----------------
 
 # Palette, read from the live Sunflower theme
 #
@@ -156,7 +208,9 @@ else
 fi
 
 # Semantic, not literal. The names are historical; the theme role in
-# the trailing comment is what each one actually means.
+# the trailing comment is what each one actually means. Kept stable on
+# purpose: ~100 printf call sites reference them directly, so updating
+# the values here re-themes the whole script at once.
 RED="$(ui_fg error '#F38BA8' 31)"               # failure
 GREEN="$(ui_fg success '#A6E3A1' 32)"           # success
 YELLOW="$(ui_fg warning '#F9E2AF' 33)"          # warning
@@ -164,6 +218,8 @@ BLUE="$(ui_fg info '#89B4FA' 34)"               # information
 MAGENTA="$(ui_fg terminalMagenta '#F5C2E7' 35)" # a command about to run
 CYAN="$(ui_fg accent '#CBA6F7' 36)"             # chrome: headings, numbers, frames
 DIM="$(ui_fg textMuted '#989CAC' 2)"            # de-emphasised
+
+# --- UI 3: glyphs + box drawing ------------------------------
 
 # Glyphs
 #
@@ -176,6 +232,12 @@ ICON_FAIL="✗"
 ICON_WARN="!"
 ICON_INFO="ℹ"
 ICON_ARROW="→"
+ICON_SECTION="◆"
+ICON_STEP="▸"
+ICON_DOT="·"
+ICON_GEAR="⚙"
+ICON_TOOLS="▸"
+ICON_SHIELD="✓"
 
 UI_TL="╭"
 UI_TR="╮"
@@ -196,6 +258,12 @@ if [[ "$UI_UNICODE" -eq 0 ]]; then
     ICON_WARN="!"
     ICON_INFO="i"
     ICON_ARROW=">"
+    ICON_SECTION="*"
+    ICON_STEP=">"
+    ICON_DOT="-"
+    ICON_GEAR="*"
+    ICON_TOOLS=">"
+    ICON_SHIELD="+"
 
     UI_TL="+"
     UI_TR="+"
@@ -208,11 +276,10 @@ if [[ "$UI_UNICODE" -eq 0 ]]; then
     UI_SPIN=("|" "/" "-" "\\")
 fi
 
-# Cursor
+# --- UI 4: cursor + primitives -------------------------------
 #
-# The trap lives here rather than three hundred lines further down next
-# to the maintenance dashboard, because a Ctrl-C anywhere in the script
-# has to put the cursor back.
+# The trap lives here rather than next to the maintenance dashboard,
+# because a Ctrl-C anywhere in the script has to put the cursor back.
 
 hide_cursor() {
     if [[ "$IS_TTY" -eq 1 ]]; then tput civis 2>/dev/null || true; fi
@@ -253,7 +320,14 @@ hr() {
     printf '  %b%s%b\n' "$DIM" "$(ui_repeat "$UI_RULE" "$((UI_WIDTH - 2))")" "$RESET"
 }
 
-# Log lines
+# Accent rule used under panel titles and menu groups. Same width
+# discipline as hr(), but tinted so group boundaries read as structure
+# rather than plain dividers.
+hr_accent() {
+    printf '  %b%s%b\n' "$CYAN" "$(ui_repeat "$UI_RULE" "$((UI_WIDTH - 2))")" "$RESET"
+}
+
+# --- UI 5: log lines -----------------------------------------
 #
 # Two leading spaces, a coloured glyph, then the message -- the shape
 # this script has always had, so nothing downstream needs re-reading.
@@ -268,22 +342,70 @@ warning() { printf '  %b%s%b %s\n' "$YELLOW" "$ICON_WARN" "$RESET" "$*"; }
 error() { printf '  %b%s%b %s\n' "$RED" "$ICON_FAIL" "$RESET" "$*" >&2; }
 run_cmd() { printf '  %b%s%b %b%s%b\n' "$MAGENTA" "$ICON_ARROW" "$RESET" "$DIM" "$*" "$RESET"; }
 
+# --- UI 6: structure (section / subsection / step / kv / note) --
+#
+# section() is the top-level divider (same signature as before, now
+# with a section glyph so headings scan as headings). subsection(),
+# step(), kv() and note() compose inside a section without adding new
+# divider weight.
+
 section() {
-    printf '\n  %b%b%s%b\n' "$CYAN" "$BOLD" "$1" "$RESET"
+    printf '\n  %b%b%s %s%b\n' "$CYAN" "$ICON_SECTION" "$BOLD" "$1" "$RESET"
     hr
 }
 
+# Lighter sub-header: no leading blank line, dimmer rule.
+subsection() {
+    printf '\n  %b%s %s%b\n' "$CYAN" "$ICON_STEP" "$1" "$RESET"
+}
+
+# Numbered progress line: step "2/7 — Partitioning".
+# Purely presentational; exit status always 0 so it never trips set -e.
+step() {
+    local cur="$1" total="$2"
+    shift 2 || true
+    printf '  %b[%s/%s]%b %b%s%b %s\n' \
+        "$CYAN" "$cur" "$total" "$RESET" "$BOLD" "$ICON_STEP" "$RESET" "$*"
+}
+
+# Aligned key/value line for reviews and summaries.
+# Usage: kv "Username" "subha"
+kv() {
+    local key="$1"
+    shift || true
+    printf '  %b%-12s%b %b%s%b %s\n' \
+        "$DIM" "$key" "$RESET" "$DIM" "$ICON_DOT" "$RESET" "$*"
+}
+
+# Dim indented hint. Never fails; wraps nothing (caller keeps lines short).
+note() {
+    printf '  %b%s%b %s\n' "$DIM" "$ICON_DOT" "$RESET" "$*"
+}
+
+# --- UI 7: prompts (pause / confirm) --------------------------
+#
+# Contracts preserved: pause() always succeeds; confirm() returns 0 on
+# yes, 1 on no, so `confirm ... || return` and `if confirm` keep working.
+
 pause() {
     echo
-    read -r -p "  Press Enter to continue..." _ || true
+    printf '  %b%s%b ' "$DIM" "Press Enter to continue..." "$RESET"
+    read -r _ || true
 }
 
 confirm() {
     local prompt="${1:-Continue?}" answer
     echo
-    read -r -p "  $prompt [y/N]: " answer
+    printf '  %b?%b %s %b[y/N]:%b ' "$YELLOW" "$RESET" "$prompt" "$DIM" "$RESET"
+    read -r answer || return 1
     [[ "$answer" =~ ^[Yy]([Ee][Ss])?$ ]]
 }
+
+# --- UI 8: blocks (panel / verdict / menus / progress) --------
+#
+# panel() and verdict() keep their exact signatures. menu_group() and
+# menu_footer() are the only new menu vocabulary so menu() reads as
+# structure instead of repeated ad-hoc printf lines.
 
 # Validator results
 #
@@ -450,7 +572,50 @@ spinner() {
 }
 
 need_cmd() { command -v "$1" >/dev/null 2>&1 || die "Required command not found: $1"; }
-as_root() { sudo "$@"; }
+
+# ------------------------------------------------------------
+# Bootstrap module: preflight / detect_system / check_dependencies
+#
+# Only three functions are needed here because Nix owns all real
+# configuration. There are deliberately no setup_directories,
+# setup_git, setup_hyprland, setup_quickshell, setup_themes,
+# setup_fonts, setup_shell or setup_apps functions: those would
+# duplicate home/, modules/ and lib/themes.nix as a second config
+# system. This script only validates the environment, detects
+# where it runs, checks commands, then delegates to Nix.
+# ------------------------------------------------------------
+
+# Verify the checkout itself is usable. Idempotent and read-only:
+# fails fast when ROOT/VARS are missing or HOME is unset, so later
+# steps never fail halfway through a mutation.
+preflight() {
+    [[ -n "${ROOT:-}" && -d "$ROOT" ]] || die "Repository root not found."
+    [[ -f "$VARS" ]] || die "Missing $VARS"
+    [[ -n "${HOME:-}" && -d "$HOME" ]] || die "HOME is unset or missing."
+}
+
+# Where are we? Returns a short label and never fails:
+# live-installer (NixOS ISO), nixos (running system), other.
+detect_system() {
+    if ci_is_live_installer 2>/dev/null; then
+        printf 'live-installer\n'
+    elif [[ -e /etc/NIXOS ]] || command -v nixos-rebuild >/dev/null 2>&1; then
+        printf 'nixos\n'
+    else
+        printf 'other\n'
+    fi
+}
+
+# Check one or more commands exist. Thin loop over need_cmd so every
+# lifecycle/maintenance entry point declares its needs in one line
+# instead of scattering ad-hoc `command -v` tests.
+# Usage: check_dependencies nix git nixos-rebuild
+check_dependencies() {
+    local cmd
+    for cmd in "$@"; do
+        need_cmd "$cmd"
+    done
+}
 
 get_var() {
     local key="$1"
@@ -488,7 +653,8 @@ backup_config() {
 }
 
 flake_check() {
-    need_cmd nix
+    preflight
+    check_dependencies nix
     section "Flake validation"
     run_cmd "nix flake check"
     nix flake check
@@ -496,7 +662,8 @@ flake_check() {
 }
 
 dry_build() {
-    need_cmd nix
+    preflight
+    check_dependencies nix
     section "NixOS dry build"
     run_cmd "nixos-rebuild dry-build --flake .#laptop"
     sudo nixos-rebuild dry-build --flake "$FLAKE_TARGET"
@@ -504,7 +671,8 @@ dry_build() {
 }
 
 rebuild() {
-    need_cmd nix
+    preflight
+    check_dependencies nix
     flake_check
     section "NixOS rebuild"
     run_cmd "sudo nixos-rebuild switch --flake .#laptop"
@@ -513,8 +681,8 @@ rebuild() {
 }
 
 update_config() {
-    need_cmd git
-    need_cmd nix
+    preflight
+    check_dependencies git nix
     section "Update configuration"
     cd "$ROOT"
     if [[ -n "$(git status --porcelain)" ]]; then
@@ -571,7 +739,8 @@ write_hardware_config() {
 }
 
 refresh_hardware() {
-    need_cmd nixos-generate-config
+    preflight
+    check_dependencies nixos-generate-config
     section "Hardware configuration"
 
     # Regenerating from the installer would describe the installer.
@@ -606,17 +775,22 @@ install_flow() {
         info "  ./setup.sh clean-install --dry-run    review the plan"
         info "  ./setup.sh clean-install              do it"
         echo
-        confirm "Run the clean installer now?" && {
+        if confirm "Run the clean installer now?"; then
             clean_install
             return
-        }
+        fi
         return
     fi
 
-    need_cmd nix
-    need_cmd python3
-    need_cmd git
+    preflight
+    check_dependencies nix python3 git
 
+    # Identity key map: the "Full name" prompt writes the `name` key in
+    # lib/variables.nix (user.name). There is no `fullName` key in the
+    # current schema; writing fullName would abort in set_var_in with
+    # "Could not find variable". Nothing in Nix consumes user.name yet
+    # (no GECOS/description field), but the value is preserved for
+    # future use instead of being dropped.
     section "NixOS installation / setup"
     local username="${SUDO_USER:-${USER:-}}" full_name hostname git_user git_email timezone locale
     local nvidia="false"
@@ -644,19 +818,21 @@ install_flow() {
         info "NVIDIA GPU detected."
     else
         read -r -p "  Enable NVIDIA support anyway? [y/N]: " ans
-        [[ "$ans" =~ ^[Yy]$ ]] && nvidia=true
+        if [[ "$ans" =~ ^[Yy]$ ]]; then
+            nvidia=true
+        fi
     fi
 
     echo
     section "Review"
-    printf '  Username : %s\n' "$username"
-    printf '  Full name: %s\n' "$full_name"
-    printf '  Hostname : %s\n' "$hostname"
-    printf '  Git user : %s\n' "$git_user"
-    printf '  Git email: %s\n' "$git_email"
-    printf '  Timezone : %s\n' "$timezone"
-    printf '  Locale   : %s\n' "$locale"
-    printf '  NVIDIA   : %s\n' "$nvidia"
+    kv "Username" "$username"
+    kv "Full name" "$full_name"
+    kv "Hostname" "$hostname"
+    kv "Git user" "$git_user"
+    kv "Git email" "$git_email"
+    kv "Timezone" "$timezone"
+    kv "Locale" "$locale"
+    kv "NVIDIA" "$nvidia"
     confirm "Apply these settings?" || {
         warning "Installation cancelled."
         return
@@ -664,7 +840,7 @@ install_flow() {
 
     backup_config
     set_var username "$username"
-    set_var fullName "$full_name"
+    set_var name "$full_name"
     set_var hostname "$hostname"
     set_var gitUser "$git_user"
     set_var email "$git_email"
@@ -703,7 +879,9 @@ PY
 }
 
 test_install() {
-    need_cmd python3
+    # Preview only: no files are read or written beyond prompts, so no
+    # external commands are required. (The old `need_cmd python3` was
+    # spurious; nothing here invokes python3.)
     section "Installer preview"
     local username="${SUDO_USER:-${USER:-testuser}}" full_name hostname git_user git_email timezone locale
     # Was "${username:-$SUDO_USER}", which aborts under set -u whenever the
@@ -725,7 +903,8 @@ test_install() {
     echo
     info "No files will be changed."
     printf '  username = "%s";\n' "$username"
-    printf '  fullName = "%s";\n' "$full_name"
+    # Matches lib/variables.nix (user.name); the prompt stays "Full name".
+    printf '  name = "%s";\n' "$full_name"
     printf '  hostname = "%s";\n' "$hostname"
     printf '  gitUser = "%s";\n' "$git_user"
     printf '  email = "%s";\n' "$git_email"
@@ -736,7 +915,10 @@ test_install() {
 }
 
 system_overview() {
+    # Shares overview_facts() with the menu panel so the one-line
+    # "user · kernel · nix · uptime" summary has one implementation.
     section "System overview"
+    printf '  %s\n' "$(overview_facts)"
     printf '  Host:    %s\n' "$(hostname)"
     printf '  Kernel:  %s\n' "$(uname -r)"
     printf '  Nix:     %s\n' "$(nix --version 2>/dev/null || echo unavailable)"
@@ -787,16 +969,42 @@ overview_facts() {
 
 # One menu row: number, label, dimmed description. The number keeps its
 # colour so the eye can jump to it; the label is padded to a fixed
-# column so the descriptions line up.
+# column so the descriptions line up. Column widened to 24 so
+# "Configure identity" no longer pushes its description out of line.
 menu_item() {
-    local num="$1" label="$2" desc="$3"
+    local num="$1" label="$2" desc="${3:-}"
 
-    printf '   %b%2s%b  %-22s%b%s%b\n' \
-        "$CYAN" "$num" "$RESET" "$label" "$DIM" "$desc" "$RESET"
+    if [[ -z "$desc" ]]; then
+        printf '   %b%2s%b  %s\n' \
+            "$CYAN" "$num" "$RESET" "$label"
+    else
+        printf '   %b%2s%b  %-24s%b%s%b\n' \
+            "$CYAN" "$num" "$RESET" "$label" "$DIM" "$desc" "$RESET"
+    fi
+}
+
+# Group heading inside the menu: glyph + letterspaced title + accent
+# rule. Replaces the ad-hoc `printf MAIN/SYSTEM/...` lines so menu()
+# reads as structure.
+menu_group() {
+    local icon="$1" title="$2"
+
+    echo
+    printf '  %b%s%b  %b%b%s%b\n' \
+        "$CYAN" "$icon" "$RESET" "$CYAN" "$BOLD" "$title" "$RESET"
+    hr_accent
+}
+
+# Closing hint rendered once at the end of the menu.
+menu_footer() {
+    echo
+    printf '  %b%s%b  Type a number and press Enter %b(0 to exit)%b\n' \
+        "$DIM" "$ICON_DOT" "$RESET" "$DIM" "$RESET"
 }
 
 menu() {
     while true; do
+        ui_refresh_width
         clear_screen
 
         echo
@@ -804,20 +1012,20 @@ menu() {
         echo
 
         if ci_is_live_installer; then
-            printf '  %b%bInstaller environment detected. Choose 1 to install NixOS.%b\n\n' \
-                "$YELLOW" "$BOLD" "$RESET"
+            printf '  %b%s%b %b%bInstaller environment detected — choose 1 to install NixOS.%b\n' \
+                "$YELLOW" "$ICON_WARN" "$RESET" "$YELLOW" "$BOLD" "$RESET"
+            hr
         fi
 
         # The first three are the whole lifecycle, in the order they are used:
         # install the machine, keep it current, reclaim space. Everything below
         # them is a tool you reach for only when you need it.
-        printf '  %b%bMAIN%b\n' "$CYAN" "$BOLD" "$RESET"
+        menu_group "$ICON_SECTION" "MAIN"
         menu_item 1 "Install NixOS" "fresh install, partitions the disk"
         menu_item 2 "Upgrade" "git pull, flake update, rebuild"
         menu_item 3 "Free disk space" "old generations, GC, optimise"
 
-        echo
-        printf '  %b%bSYSTEM%b\n' "$CYAN" "$BOLD" "$RESET"
+        menu_group "$ICON_GEAR" "SYSTEM"
         menu_item 4 "Rebuild / Switch" "validate then switch"
         menu_item 5 "Dry rebuild" "build without switching"
         menu_item 6 "Check flake" "evaluate the flake"
@@ -826,8 +1034,7 @@ menu() {
         menu_item 9 "Refresh hardware" "regenerate hardware config"
         menu_item 10 "Configure identity" "on an already-installed system"
 
-        echo
-        printf '  %b%bCHECKS & MAINTENANCE%b\n' "$CYAN" "$BOLD" "$RESET"
+        menu_group "$ICON_SHIELD" "CHECKS & MAINTENANCE"
         menu_item 11 "Configuration check" "full validator"
         menu_item 12 "Maintenance dashboard" "guarded full cleanup"
         menu_item 13 "Garbage collection" "reclaim store space"
@@ -836,18 +1043,20 @@ menu() {
         menu_item 16 "Systemd health" "failed units"
         menu_item 17 "Store usage" "disk footprint"
 
-        echo
-        printf '  %b%bINSTALLER TOOLS%b\n' "$CYAN" "$BOLD" "$RESET"
+        menu_group "$ICON_TOOLS" "INSTALLER TOOLS"
         menu_item 18 "Install dry-run" "plan the install, change nothing"
         menu_item 19 "Verify boot" "re-check an install mounted at /mnt"
         menu_item 20 "Identity preview" "preview the prompts only"
 
         echo
+        hr
         menu_item 0 "Exit" ""
+        menu_footer
         echo
 
         local choice
-        read -r -p "  Select: " choice
+        printf '  %b%s%b Select: ' "$CYAN" "$ICON_ARROW" "$RESET"
+        read -r choice || choice=""
         case "$choice" in
         1)
             clean_install
@@ -945,7 +1154,7 @@ menu() {
 # Integrated maintenance dashboard (from cleanup.sh)
 M_NIXOS_DIR="$ROOT"
 M_FLAKE_TARGET="$ROOT#laptop"
-M_KEEP_GENERATIONS=5
+M_KEEP_GENERATIONS=2
 M_ICON_OK="✓"
 M_ICON_INFO="ℹ"
 M_ICON_CLEAN="✦"
@@ -1030,15 +1239,17 @@ m_check_git() {
 }
 
 # Flake check
+#
+# Thin wrapper over flake_check so there is one copy of the actual
+# `nix flake check` step. The icon header is kept for dashboard
+# consistency; the work itself is delegated.
 
 m_check_flake() {
 
     section "${M_ICON_NIX} Flake validation"
 
-    run_cmd "nix flake check"
-
-    if nix flake check; then
-        success "Flake check passed."
+    if flake_check; then
+        return 0
     else
         error "Flake check failed."
         return 1
@@ -1046,15 +1257,17 @@ m_check_flake() {
 }
 
 # Dry build
+#
+# Same pattern: one copy of the dry-build step lives in dry_build().
 
 m_dry_build() {
 
     section "${M_ICON_CHECK} NixOS configuration"
 
-    run_cmd "nixos-rebuild dry-build"
-
-    if sudo nixos-rebuild dry-build --flake "$M_FLAKE_TARGET"; then
-        success "Dry-build passed."
+    # dry_build() already prints its own section and runs the sudo
+    # dry-build; calling it keeps output slightly more verbose but
+    # guarantees both paths validate identically.
+    if dry_build; then
         return 0
     fi
 
@@ -1937,6 +2150,12 @@ validator_run() {
     fi
 
     # Validate activeTheme using Nix
+    #
+    # Sunflower is the theme *engine* (the ~/.config/sunflower tree and
+    # the generator in home/theme), not a theme id. Valid ids are the
+    # files in lib/colorschemes/ (catppuccin-mocha, tokyo-night, ...),
+    # so the check resolves the evaluated id against that directory
+    # instead of comparing against a stale literal.
 
     THEME_EVAL="$(
         nix-instantiate \
@@ -1947,13 +2166,15 @@ validator_run() {
             true
     )"
 
-    if [[ "$THEME_EVAL" == '"sunflower"' ]]; then
+    THEME_ID="$(printf '%s' "$THEME_EVAL" | tr -d '"')"
 
-        v_ok "Active theme evaluates correctly: sunflower"
+    if [[ -n "$THEME_ID" && -f "$ROOT/lib/colorschemes/${THEME_ID}.nix" ]]; then
 
-    elif [[ -n "$THEME_EVAL" ]]; then
+        v_ok "Active theme evaluates correctly: $THEME_ID"
 
-        v_ok "Active theme evaluates: $THEME_EVAL"
+    elif [[ -n "$THEME_ID" ]]; then
+
+        v_fail "Active theme '$THEME_ID' has no definition in lib/colorschemes/"
 
     else
 
@@ -2529,8 +2750,8 @@ validator_run() {
         verdict "$GREEN" "$ICON_OK" "Configuration is healthy"
 
         printf "\n"
-        printf "${DIM}Safe to run:${RESET}\n"
-        printf "  ${CYAN}sudo nixos-rebuild switch --flake .#laptop${RESET}\n"
+        printf '%b%s%b\n' "$DIM" "Safe to run:" "$RESET"
+        printf '  %b%s%b\n' "$CYAN" "sudo nixos-rebuild switch --flake .#laptop" "$RESET"
 
         V_RESULT=0
 
@@ -2539,7 +2760,7 @@ validator_run() {
         verdict "$RED" "$ICON_FAIL" "Problems require attention"
 
         printf "\n"
-        printf "${YELLOW}Fix the problems above before rebuilding.${RESET}\n"
+        printf '%b%s%b\n' "$YELLOW" "Fix the problems above before rebuilding." "$RESET"
 
         V_RESULT=1
 
@@ -3232,17 +3453,36 @@ ci_place_repo() {
 # from the username, so changing the username at the prompt left the
 # repository under the old name while ownership was fixed on the new one.
 
-CI_ID_KEYS=(username fullName hostname gitUser email timezone locale)
+# Nix keys in lib/variables.nix. The "Full name" prompt maps to `name`
+# (user.name). There is no `fullName` key; the old list used fullName
+# and every run aborted in set_var_in with "Could not find variable".
+CI_ID_KEYS=(username name hostname gitUser email timezone locale)
 declare -A CI_ID=()
+
+# Human labels for the identity prompts, so the `name` key still asks
+# as "Full name" and the rest stay self-describing.
+ci_id_label() {
+    case "$1" in
+    username) printf 'Linux username' ;;
+    name) printf 'Full name' ;;
+    hostname) printf 'Hostname' ;;
+    gitUser) printf 'Git username' ;;
+    email) printf 'Git email' ;;
+    timezone) printf 'Timezone' ;;
+    locale) printf 'Locale' ;;
+    *) printf '%s' "$1" ;;
+    esac
+}
 
 ci_collect_identity() {
     section "Identity"
     info "Asked now, before anything on disk is touched."
 
-    local cur ans k
+    local cur ans k label
     for k in "${CI_ID_KEYS[@]}"; do
         cur="$(sed -nE "s/^[[:space:]]*${k}[[:space:]]*=[[:space:]]*\"([^\"]*)\";.*/\1/p" "$VARS" | head -n1)"
-        read -r -p "  $k [$cur]: " ans
+        label="$(ci_id_label "$k")"
+        read -r -p "  $label [$cur]: " ans
         ans="${ans:-$cur}"
 
         case "$k" in
@@ -3770,16 +4010,25 @@ ci_final_verify() {
     V_FAILED=0
     section "Final verification"
 
-    mountpoint -q "$CI_TARGET" && v_ok "$CI_TARGET mounted" || v_fail "$CI_TARGET not mounted"
-    mountpoint -q "$CI_TARGET/boot" && v_ok "$CI_TARGET/boot mounted" || v_fail "$CI_TARGET/boot not mounted"
+    # Explicit if/else (not `A && v_ok || v_fail`): v_ok/v_fail always
+    # succeed, so the &&/|| form would misreport if later refactored to
+    # return non-zero, and shellcheck SC2015 flags it as fragile.
+    if mountpoint -q "$CI_TARGET"; then v_ok "$CI_TARGET mounted"; else v_fail "$CI_TARGET not mounted"; fi
+    if mountpoint -q "$CI_TARGET/boot"; then v_ok "$CI_TARGET/boot mounted"; else v_fail "$CI_TARGET/boot not mounted"; fi
 
-    [[ -d "$CI_TARGET/etc" ]] && v_ok "$CI_TARGET/etc exists" || v_fail "$CI_TARGET/etc missing"
+    if [[ -d "$CI_TARGET/etc" ]]; then v_ok "$CI_TARGET/etc exists"; else v_fail "$CI_TARGET/etc missing"; fi
 
-    [[ -d "$CI_TARGET/home/$CI_USER" ]] &&
-        v_ok "$CI_TARGET/home/$CI_USER exists" || v_fail "$CI_TARGET/home/$CI_USER missing"
+    if [[ -d "$CI_TARGET/home/$CI_USER" ]]; then
+        v_ok "$CI_TARGET/home/$CI_USER exists"
+    else
+        v_fail "$CI_TARGET/home/$CI_USER missing"
+    fi
 
-    [[ -f "$CI_DEST/flake.nix" ]] &&
-        v_ok "repository present at ${CI_DEST#"$CI_TARGET"}" || v_fail "repository missing at $CI_DEST"
+    if [[ -f "$CI_DEST/flake.nix" ]]; then
+        v_ok "repository present at ${CI_DEST#"$CI_TARGET"}"
+    else
+        v_fail "repository missing at $CI_DEST"
+    fi
 
     local owner
     owner="$(stat -c '%U:%G' "$CI_TARGET/home/$CI_USER" 2>/dev/null || printf '')"
@@ -3916,7 +4165,12 @@ clean_install() {
     echo
     success "Clean installation complete."
     info "Reboot into GRUB, then the newest generation of ${CI_DEST#"$CI_TARGET"}."
-    confirm "Reboot now?" && reboot
+    # Explicit if (not `confirm ... && reboot`): under `set -e` with the
+    # ERR trap armed, a declined confirmation must be a normal No, not
+    # an error path through ci_on_error.
+    if confirm "Reboot now?"; then
+        reboot
+    fi
 }
 
 # Reclaim disk space.

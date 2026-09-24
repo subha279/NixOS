@@ -1,10 +1,10 @@
 <div align="center">
 
-# NixOS
+# ❄️ NixOS
 
-### A declarative, modular and keyboard-driven NixOS desktop
+### A declarative, modular & keyboard-driven NixOS desktop
 
-**Hyprland** · **Quickshell** · **Stylix** · **Home Manager**
+**Hyprland** · **Quickshell** · **Sunflower themes** · **Home Manager**
 
 <p>
   <a href="https://github.com/subha279/NixOS">
@@ -17,7 +17,7 @@
     <img src="https://img.shields.io/badge/Quickshell-QML-BB86FC?style=for-the-badge" alt="Quickshell">
   </a>
   <a href="https://github.com/subha279/NixOS">
-    <img src="https://img.shields.io/badge/Stylix-themes-C792EA?style=for-the-badge" alt="Stylix">
+    <img src="https://img.shields.io/badge/Sunflower-themes-C792EA?style=for-the-badge" alt="Sunflower themes">
   </a>
 </p>
 
@@ -26,6 +26,7 @@
   <a href="#-quick-start">Quick Start</a> ·
   <a href="#-setup-manager">Setup Manager</a> ·
   <a href="#-architecture">Architecture</a> ·
+  <a href="#-theming">Theming</a> ·
   <a href="#-customisation">Customisation</a>
 </p>
 
@@ -53,25 +54,24 @@
 
 A production-oriented, flake-based **NixOS laptop configuration** built around a clean Wayland workflow.
 
-| Layer | Stack |
-|---|---|
-| 🐧 OS | NixOS 26.05 · `x86_64-linux` |
-| 🖥️ Desktop | Hyprland · Lua |
-| 🐚 Shell | Quickshell · QML |
-| 🎨 Theme | Stylix · 7 themes |
-| 💻 Terminal | Kitty · Zsh |
-| ✏️ Editor | Neovim · 17 LSPs |
-| 📦 Management | Home Manager · Flakes |
+| Layer          | Stack                          |
+| :------------- | :----------------------------- |
+| 🐧 OS          | NixOS 26.05 · `x86_64-linux`   |
+| 🖥️ Desktop     | Hyprland · Lua                 |
+| 🐚 Shell       | Quickshell · QML               |
+| 🎨 Theme       | Stylix + Sunflower · 7 themes  |
+| 💻 Terminal    | Kitty · Zsh · tmux · Starship  |
+| ✏️ Editor      | Neovim · LSPs + formatters     |
+| 📦 Management  | Home Manager · Flakes          |
 
-### Design goals
-
-`Declarative` → `Modular` → `Centralised` → `Reproducible` → `Keyboard-driven` → `Consistently themed`
+> [!TIP]
+> **Design goals:** `Declarative` → `Modular` → `Centralised` → `Reproducible` → `Keyboard-driven` → `Consistently themed`
 
 ---
 
 ## 🚀 Quick Start
 
-### Boot into NixOS live ISO
+### Boot the NixOS live ISO, then:
 
 ```bash
 git clone https://github.com/subha279/NixOS.git ~/NixOS
@@ -79,10 +79,12 @@ cd ~/NixOS
 ./setup.sh
 ```
 
-The single setup manager handles installation, updates, rebuilds, validation, rollback and maintenance. The repository no longer depends on a separate installer entry point.
+The single setup manager handles installation, updates, rebuilds, validation, rollback and maintenance. There is no separate installer entry point.
 
-> **Identity stays centralised:** user name, hostname, Git identity, locale and timezone live in `lib/variables.nix`. The installer can replace these values for a new machine.
+> [!NOTE]
+> **Identity stays centralised:** user name, hostname, Git identity, locale and timezone live in `lib/variables.nix`. The installer replaces these values for a new machine.
 
+> [!IMPORTANT]
 > **Passwords are never stored in Nix.** Setup invokes `passwd` interactively.
 
 ---
@@ -96,52 +98,78 @@ One entry point for the whole configuration:
 ```
 
 ```text
-╭────────────────────────────────────────────╮
-│        NixOS Configuration Manager         │
-│                 v1.1.0                     │
-╰────────────────────────────────────────────╯
+╭─ NixOS Configuration Manager ── v1.0 ─╮
+│  subha · kernel · nix 2.34 · up 11m    │
+╰────────────────────────────────────────╯
 
-  SYSTEM
-  1  Install / Setup
-  2  Update configuration
-  3  Rebuild / Switch
-  4  Dry rebuild
-  5  Check flake
+  ◆  MAIN
+  ──────────────────────────────────────
+    1  Install NixOS           fresh install, partitions the disk
+    2  Upgrade                 git pull, flake update, rebuild
+    3  Free disk space         old generations, GC, optimise
 
-  RECOVERY & TOOLS
-  6  Rollback
-  7  Refresh hardware config
-  8  Garbage collection
-  9  List generations
- 10  Test installer (preview)
-  0  Exit
+  ⚙  SYSTEM
+  ──────────────────────────────────────
+    4  Rebuild / Switch        validate then switch
+    5  Dry rebuild             build without switching
+    6  Check flake             evaluate the flake
+    7  Rollback                previous generation
+    8  List generations        system profile history
+    9  Refresh hardware        regenerate hardware config
+   10  Configure identity      on an already-installed system
+
+  ✓  CHECKS & MAINTENANCE
+  ──────────────────────────────────────
+   11  Configuration check     full validator
+   12  Maintenance dashboard   guarded full cleanup
+   13  Garbage collection      reclaim store space
+   14  Optimize store          deduplicate the store
+   15  Verify store            check store integrity
+   16  Systemd health          failed units
+   17  Store usage             disk footprint
+
+  ▸  INSTALLER TOOLS
+  ──────────────────────────────────────
+   18  Install dry-run         plan the install, change nothing
+   19  Verify boot             re-check an install mounted at /mnt
+   20  Identity preview        preview the prompts only
+
+    0  Exit
 ```
 
-### CLI mode
+<details>
+<summary><b>CLI mode</b></summary>
 
 ```bash
-./setup.sh install
-./setup.sh update
-./setup.sh rebuild
-./setup.sh dry
-./setup.sh check
-./setup.sh rollback
-./setup.sh hardware
-./setup.sh gc
-./setup.sh generations
-./setup.sh help
+./setup.sh install                 # smart: clean-install on ISO, identity pass on NixOS
+./setup.sh clean-install           # force the fresh installer
+./setup.sh clean-install --dry-run # plan a fresh install, change nothing
+./setup.sh update                  # pull repo + update flake inputs + rebuild
+./setup.sh rebuild                 # validate + rebuild/switch
+./setup.sh dry                     # dry rebuild
+./setup.sh check                   # flake check
+./setup.sh validate                # full configuration validator
+./setup.sh maintain                # full maintenance dashboard
+./setup.sh free-space              # old generations, GC, store optimisation
+./setup.sh rollback                # roll back one generation
+./setup.sh hardware                # regenerate hardware config
+./setup.sh generations             # list system generations
+./setup.sh gc                      # garbage collection
+./setup.sh optimize                # optimize Nix store
+./setup.sh verify-store            # verify Nix store contents
+./setup.sh systemd                 # check failed systemd units
+./setup.sh store                   # show Nix store usage
+./setup.sh verify-boot             # re-verify an install mounted at /mnt
+./setup.sh configure               # identity pass on an existing install
+./setup.sh test-install            # safe installer preview
 ```
+
+</details>
 
 ### Safe workflow
 
 ```text
-check
-  ↓
-dry-build
-  ↓
-rebuild / switch
-  ↓
-verify generation
+check  →  dry-build  →  rebuild / switch  →  verify generation
 ```
 
 The installer backs up changed configuration before personalising it, generates hardware configuration, validates the flake and then rebuilds NixOS.
@@ -152,45 +180,32 @@ The installer backs up changed configuration before personalising it, generates 
 
 ```text
 NixOS/
-├── flake.nix
+├── flake.nix                  # nixpkgs 26.05, home-manager, stylix,
+│                              # apple-fonts, zen-browser
 ├── hosts/
-│   └── laptop/
-│       ├── default.nix
-│       └── hardware-configuration.nix
+│   └── laptop/                # host entry + hardware-configuration.nix
 │
-├── modules/
-│   ├── core
-│   ├── boot
-│   ├── networking
-│   ├── graphics
-│   ├── nvidia
-│   ├── audio
-│   ├── bluetooth
-│   ├── desktop
-│   ├── fonts
-│   ├── notifications
-│   ├── power
-│   ├── virtualisation
-│   ├── development
-│   ├── hardware/kreo-rgb
-│   └── stylix
+├── modules/                   # NixOS system modules
+│   ├── core · boot · networking · users · packages
+│   ├── audio · bluetooth · graphics · nvidia
+│   ├── desktop · hyprland · session · xdg
+│   ├── fonts · stylix · notifications
+│   ├── power · polkit · monitoring
+│   ├── development · ai · creator · virtualisation
+│   └── hardware/kreo-rgb
 │
-├── home/
-│   ├── hyprland
-│   ├── quickshell
-│   ├── neovim
-│   ├── zsh
-│   ├── kitty
-│   ├── tmux
-│   ├── git
-│   ├── ssh
-│   └── theme
+├── home/                      # Home Manager modules
+│   ├── hyprland · quickshell · theme
+│   ├── neovim · zsh · kitty · tmux
+│   ├── git · ssh · xdg
+│   └── fastfetch · obsidian · mpv
 │
 ├── lib/
-│   ├── variables.nix
-│   └── themes.nix
+│   ├── variables.nix          # identity: user, system, hardware
+│   ├── themes.nix             # Sunflower engine + active theme
+│   └── colorschemes/          # 7 theme definitions
 │
-└── setup.sh
+└── setup.sh                   # bootstrap + lifecycle manager
 ```
 
 ### System
@@ -199,7 +214,7 @@ Core Nix settings, GRUB, NetworkManager, users, fonts, PipeWire, Bluetooth, grap
 
 ### Home Manager
 
-Hyprland, Quickshell, Neovim, Zsh, Kitty, Git/SSH, Fastfetch, Obsidian, XDG and theme configuration.
+Hyprland, Quickshell, Neovim, Zsh, Kitty, tmux, Git/SSH, Fastfetch, Obsidian, XDG and theme configuration.
 
 ---
 
@@ -213,51 +228,47 @@ Hyprland is configured in Lua:
 home/hyprland/
 ├── hyprland.lua
 └── config/
-    ├── variables.lua
-    ├── keybinds.lua
-    ├── monitor.lua
-    ├── windowrules.lua
-    ├── layerules.lua
-    ├── animation.lua
-    ├── decoration.lua
-    ├── general.lua
-    ├── layout.lua
-    ├── input.lua
-    ├── env.lua
-    └── startup.lua
+    ├── variables.lua · keybinds.lua · monitor.lua
+    ├── windowrules.lua · layerules.lua
+    ├── animation.lua · decoration.lua
+    ├── general.lua · layout.lua
+    ├── input.lua · env.lua · misc.lua
+    ├── theme.lua · startup.lua
 ```
 
-#### Motion
+> [!NOTE]
+> **Motion:** animation lives in `home/hyprland/config/animation.lua`, and it is the compositor
+> that animates Quickshell — the bar, popups, launchers and notifications are all
+> Wayland layer surfaces, so `layersIn` / `layersOut` are what run when a popup
+> opens. QML does not animate those surfaces as well; two animations on one window
+> is what makes motion look unstable.
+>
+> Every bezier there is monotonic: no control point has `y > 1`, so nothing travels
+> past its target and springs back. If you add a curve, keep that property —
+> `easeOutBack`-style curves are what produce the bounce.
 
-Animation lives in `home/hyprland/config/animation.lua`, and it is the compositor
-that animates Quickshell — the bar, popups, launchers and notifications are all
-Wayland layer surfaces, so `layersIn` / `layersOut` are what run when a popup
-opens. QML does not animate those surfaces as well; two animations on one window
-is what makes motion look unstable.
+<details>
+<summary><b>⌨️ Common bindings</b></summary>
 
-Every bezier there is monotonic: no control point has `y > 1`, so nothing travels
-past its target and springs back. If you add a curve, keep that property —
-`easeOutBack`-style curves are what produce the bounce.
+| Key                | Action               |
+| :----------------- | :------------------- |
+| `SUPER + T`        | Terminal             |
+| `SUPER + E`        | File manager         |
+| `SUPER + B`        | Browser              |
+| `SUPER + A`        | App launcher         |
+| `SUPER + C`        | Theme picker         |
+| `SUPER + P`        | Wallpaper picker     |
+| `SUPER + V`        | Clipboard history    |
+| `SUPER + I`        | Emoji picker         |
+| `SUPER + N`        | Notes                |
+| `SUPER + Z`        | GUI editor           |
+| `SUPER + F`        | Toggle floating      |
+| `SUPER + Q`        | Close window         |
+| `ALT + H/J/K/L`    | Move focus           |
+| `SUPER + 1…9/0`    | Workspaces           |
+| `SUPER + SHIFT + S`| Screenshot + annotate|
 
-Common bindings:
-
-| Key | Action |
-|---|---|
-| `SUPER + T` | Terminal |
-| `SUPER + E` | File manager |
-| `SUPER + B` | Browser |
-| `SUPER + A` | App launcher |
-| `SUPER + C` | Theme picker |
-| `SUPER + P` | Wallpaper picker |
-| `SUPER + V` | Clipboard history |
-| `SUPER + I` | Emoji picker |
-| `SUPER + N` | Notes |
-| `SUPER + Z` | GUI editor |
-| `SUPER + F` | Toggle floating |
-| `SUPER + Q` | Close window |
-| `ALT + H/J/K/L` | Move focus |
-| `SUPER + 1…9/0` | Workspaces |
-| `SUPER + SHIFT + S` | Screenshot + annotation |
+</details>
 
 ### Quickshell
 
@@ -266,10 +277,10 @@ Quickshell replaces the traditional Waybar/Wofi/Dunst stack with a single QML sh
 ```text
 config/
 ├── shell.qml
-├── core/
-├── services/
-├── components/
-└── modules/
+├── core/         # Theme, icons, popup + OSD controllers
+├── services/     # Apps, wallpaper, theme, audio, network, …
+├── components/   # Bar, popups, launcher views, sliders
+└── modules/      # Clock, battery, volume, notifications, …
 ```
 
 Useful IPC:
@@ -288,14 +299,10 @@ qs ipc call emoji toggle
 
 Theming has two halves.
 
-**Stylix** owns the toolkit layer — GTK, Qt and fontconfig — driven from
-`lib/themes.nix`. Those are the only three targets enabled; `autoEnable` is off
-so nothing else is themed behind your back.
-
-**The Sunflower generator** in `home/theme` owns everything else. It reads the same
-`lib/themes.nix` and writes a Lua, JSON, Kitty, Tmux and Starship file per theme,
-which Hyprland, Quickshell, Kitty, Neovim, tmux and the prompt then read at
-runtime. This is why switching theme does not need a rebuild.
+| Owner | Scope |
+| :---- | :---- |
+| **Stylix** | Toolkit layer — GTK, Qt, fontconfig — driven from `lib/themes.nix` (`autoEnable` off, so nothing is themed behind your back) |
+| **Sunflower generator** (`home/theme`) | Everything else — per-theme Lua, JSON, Kitty, tmux and Starship files that Hyprland, Quickshell, Kitty, Neovim, tmux and the prompt read at runtime. Switching theme needs no rebuild. |
 
 Each target is generated as appearance only, so switching theme re-sources
 colours into a running program without disturbing its keybindings — `sunflower-theme`
@@ -309,8 +316,8 @@ catppuccin-mocha · tokyo-night · gruvbox
 one-dark · everforest · rose-pine · kanagawa
 ```
 
-Each is defined once in `lib/themes.nix` and generated out to Lua, JSON, a Kitty
-conf, a Tmux conf and a Starship TOML, so Hyprland, Quickshell, Kitty, Neovim,
+Each is defined once in `lib/colorschemes/` and generated out to Lua, JSON, a Kitty
+conf, a tmux conf and a Starship TOML, so Hyprland, Quickshell, Kitty, Neovim,
 tmux and the prompt all read the same palette.
 
 Runtime theme switching:
@@ -319,17 +326,10 @@ Runtime theme switching:
 SUPER + C
 ```
 
-Shared theme definitions:
-
-```text
-lib/themes.nix
-```
-
-Shared identity/configuration:
-
-```text
-lib/variables.nix
-```
+| Shared file | Purpose |
+| :---------- | :------ |
+| `lib/themes.nix` | Theme definitions + active theme |
+| `lib/variables.nix` | Identity + system configuration |
 
 ---
 
@@ -338,32 +338,22 @@ lib/variables.nix
 ```bash
 cd ~/NixOS
 
-# Validate
-./setup.sh check
-
-# Test without switching
-./setup.sh dry
-
-# Rebuild and switch
-./setup.sh rebuild
-
-# Update repository + flake inputs
-./setup.sh update
-
-# Roll back
-./setup.sh rollback
-
-# List generations
-./setup.sh generations
+./setup.sh check       # validate
+./setup.sh dry         # test without switching
+./setup.sh rebuild     # rebuild and switch
+./setup.sh update      # update repository + flake inputs
+./setup.sh rollback    # roll back
+./setup.sh generations # list generations
 ```
 
 ### Reloading vs applying configuration changes
 
-> **Important:** `hyprctl reload` and restarting Quickshell only reload the **currently installed** configuration.
+> [!IMPORTANT]
+> `hyprctl reload` and restarting Quickshell only reload the **currently installed** configuration.
 > If the Lua/QML file is managed by Home Manager, editing the repository does **not** update the live config until Home Manager/NixOS activation runs.
 
 | Change | After editing the repository |
-|---|---|
+| :----- | :--------------------------- |
 | Hyprland Lua | `./setup.sh rebuild` → `hyprctl reload` |
 | Quickshell QML | `./setup.sh rebuild` → `systemctl --user restart quickshell` |
 | Debug current Quickshell config | `qs` |
@@ -382,39 +372,19 @@ hyprctl reload
 systemctl --user restart quickshell
 ```
 
+> [!NOTE]
 > **Why?** Home Manager usually links managed files from the active Nix store generation. The running system therefore sees the generation that was activated, not arbitrary edits sitting in `~/NixOS`.
 
 ---
 
 ## 🛠️ Customisation
 
-### Change a keybinding
-
-```text
-home/hyprland/config/keybinds.lua
-```
-
-Then:
-
-```bash
-hyprctl reload
-```
-
-### Change an application
-
-```text
-home/hyprland/config/variables.lua
-```
-
-Bindings reference the shared variables, so one change propagates cleanly.
-
-### Change identity
-
-```text
-lib/variables.nix
-```
-
-Keep shared values there instead of duplicating them across modules.
+| Want to change | Edit |
+| :------------- | :--- |
+| Keybinding | `home/hyprland/config/keybinds.lua` → `hyprctl reload` |
+| Application | `home/hyprland/config/variables.lua` (bindings reference shared variables, so one change propagates) |
+| Identity | `lib/variables.nix` (keep shared values there, never duplicate across modules) |
+| Theme | `lib/themes.nix` + `lib/colorschemes/` → `SUPER + C` at runtime |
 
 ---
 
@@ -443,33 +413,10 @@ List generations:
 ## 🧭 Philosophy
 
 ```text
-             ┌──────────────┐
-             │  Declarative │
-             └──────┬───────┘
-                    ↓
-             ┌──────────────┐
-             │    Modular   │
-             └──────┬───────┘
-                    ↓
-             ┌──────────────┐
-             │  Centralised │
-             └──────┬───────┘
-                    ↓
-             ┌──────────────┐
-             │ Reproducible │
-             └──────┬───────┘
-                    ↓
-             ┌──────────────┐
-             │ Keyboard-led │
-             └──────┬───────┘
-                    ↓
-             ┌──────────────┐
-             │  Consistent  │
-             │    Theme     │
-             └──────────────┘
+Declarative → Modular → Centralised → Reproducible → Keyboard-led → Consistently themed
 ```
 
-The goal is simple: **one declarative source of truth for the OS, desktop, shell, applications, identity and theme.**
+> The goal is simple: **one declarative source of truth for the OS, desktop, shell, applications, identity and theme.**
 
 ---
 
