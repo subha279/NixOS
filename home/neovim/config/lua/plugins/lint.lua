@@ -1,4 +1,4 @@
--- Aurora nvim-lint
+-- Sunflower nvim-lint
 
 local M = {}
 
@@ -8,7 +8,7 @@ function M.setup()
 	local ok, lint = pcall(require, "lint")
 
 	if not ok then
-		vim.notify("Aurora: nvim-lint could not be loaded\n" .. tostring(lint), vim.log.levels.WARN)
+		vim.notify("Sunflower: nvim-lint could not be loaded\n" .. tostring(lint), vim.log.levels.WARN)
 
 		return false
 	end
@@ -47,7 +47,7 @@ function M.setup()
 
 	-- Automatic linting
 
-	local group = vim.api.nvim_create_augroup("AuroraNvimLint", {
+	local group = vim.api.nvim_create_augroup("SunflowerNvimLint", {
 		clear = true,
 	})
 

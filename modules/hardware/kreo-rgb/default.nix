@@ -114,7 +114,7 @@ in
       kreoRgbTheme
     ];
 
-    environment.etc."aurora/kreo-rgb.conf".text = ''
+    environment.etc."sunflower/kreo-rgb.conf".text = ''
       enabled=1
       follow-theme=${if cfg.followTheme then "1" else "0"}
     '';

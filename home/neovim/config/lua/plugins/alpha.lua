@@ -1,14 +1,14 @@
 local alpha = require("alpha")
 local dashboard = require("alpha.themes.dashboard")
 
-local aurora = require("aurora.theme")
+local sunflower = require("sunflower.theme")
 
 local function startup_time()
-	if not vim.g.aurora_startup_time then
+	if not vim.g.sunflower_startup_time then
 		return "󰅐  Ready"
 	end
 
-	local elapsed = (vim.uv.hrtime() - vim.g.aurora_startup_time) / 1000000
+	local elapsed = (vim.uv.hrtime() - vim.g.sunflower_startup_time) / 1000000
 
 	if elapsed < 1000 then
 		return string.format("󰅐  Ready in %.0f ms", elapsed)
@@ -18,7 +18,7 @@ local function startup_time()
 end
 
 local function apply_theme()
-	local theme = aurora.get()
+	local theme = sunflower.get()
 
 	if not theme then
 		return
@@ -122,7 +122,7 @@ vim.api.nvim_create_autocmd("FileType", {
 	end,
 })
 
-aurora.on_change(function()
+sunflower.on_change(function()
 	apply_theme()
 
 	if vim.bo.filetype == "alpha" then

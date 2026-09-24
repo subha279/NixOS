@@ -8,7 +8,7 @@ import "../components" as Components
 import "../core" as Core
 import "../services" as Services
 
-// Aurora Notifications — transient toast overlay
+// Sunflower Notifications — transient toast overlay
 
 PanelWindow {
     id: root
@@ -41,7 +41,7 @@ PanelWindow {
 
     color: "transparent"
 
-    WlrLayershell.namespace: "aurora-notifications"
+    WlrLayershell.namespace: "sunflower-notifications"
     WlrLayershell.layer: WlrLayer.Overlay
 
     // A toast must never steal keyboard focus from whatever you are typing in.

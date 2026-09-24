@@ -1,15 +1,15 @@
--- Aurora NvimTree Theme
+-- Sunflower NvimTree Theme
 
 local M = {}
 
 -- Theme Loader
 
-local aurora = require("aurora.theme")
+local sunflower = require("sunflower.theme")
 
 -- Apply NvimTree Theme
 
 function M.setup()
-	local theme = aurora.get()
+	local theme = sunflower.get()
 
 	if not theme then
 		return

@@ -4,14 +4,14 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-// Aurora Wallpaper Service
+// Sunflower Wallpaper Service
 
 QtObject {
     id: root
 
     readonly property string home: Quickshell.env("HOME")
     readonly property string wallpaperDirectory: root.home + "/Wallpapers"
-    readonly property string statePath: root.home + "/.cache/aurora/current-wallpaper"
+    readonly property string statePath: root.home + "/.cache/sunflower/current-wallpaper"
 
     property bool scanning: false
     property string error: ""

@@ -2,9 +2,9 @@
 
 set -euo pipefail
 
-# Aurora Wallpaper Restore
+# Sunflower Wallpaper Restore
 
-CACHE_FILE="$HOME/.cache/aurora/current-wallpaper"
+CACHE_FILE="$HOME/.cache/sunflower/current-wallpaper"
 
 # Nothing to restore
 

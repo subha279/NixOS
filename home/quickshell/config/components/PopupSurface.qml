@@ -41,7 +41,7 @@ PanelWindow {
     visible: root.open
 
     WlrLayershell.layer: WlrLayer.Overlay
-    WlrLayershell.namespace: "aurora-popup"
+    WlrLayershell.namespace: "sunflower-popup"
 
     WlrLayershell.keyboardFocus: root.open ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 

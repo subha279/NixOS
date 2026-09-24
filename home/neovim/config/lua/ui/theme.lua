@@ -1,13 +1,13 @@
 local M = {}
 
-local aurora = require("aurora.theme")
+local sunflower = require("sunflower.theme")
 
 local function set(name, opts)
 	vim.api.nvim_set_hl(0, name, opts)
 end
 
 function M.apply()
-	local theme = aurora.get()
+	local theme = sunflower.get()
 
 	if not theme then
 		return
@@ -614,7 +614,7 @@ end
 
 M.apply()
 
-aurora.on_change(M.apply)
+sunflower.on_change(M.apply)
 
 local function apply_icon_themes()
 	pcall(function()
@@ -628,6 +628,6 @@ end
 
 apply_icon_themes()
 
-aurora.on_change(apply_icon_themes)
+sunflower.on_change(apply_icon_themes)
 
 return M

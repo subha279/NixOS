@@ -9,7 +9,7 @@ let
   };
 
   emojiDatabase =
-    pkgs.runCommand "aurora-emoji-database"
+    pkgs.runCommand "sunflower-emoji-database"
       {
         nativeBuildInputs = [ pkgs.python3 ];
       }
@@ -71,7 +71,7 @@ let
         PY
       '';
 
-  quickshellConfig = pkgs.runCommand "aurora-quickshell-config" { } ''
+  quickshellConfig = pkgs.runCommand "sunflower-quickshell-config" { } ''
     mkdir -p "$out"
     cp -r ${./config}/. "$out/"
     chmod -R u+w "$out"

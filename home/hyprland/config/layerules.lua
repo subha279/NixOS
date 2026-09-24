@@ -11,9 +11,9 @@ hl.layer_rule({
 })
 
 hl.layer_rule({
-	name = "aurora-bar",
+	name = "sunflower-bar",
 	match = {
-		namespace = "^aurora-bar$",
+		namespace = "^sunflower-bar$",
 	},
 	blur = true,
 	blur_popups = true,
@@ -21,12 +21,12 @@ hl.layer_rule({
 	order = 10,
 })
 
--- Aurora Popups
+-- Sunflower Popups
 
 hl.layer_rule({
-	name = "aurora-popup",
+	name = "sunflower-popup",
 	match = {
-		namespace = "^aurora-popup$",
+		namespace = "^sunflower-popup$",
 	},
 	blur = true,
 	blur_popups = true,
@@ -34,12 +34,12 @@ hl.layer_rule({
 	order = 6,
 })
 
--- Aurora Notifications
+-- Sunflower Notifications
 
 hl.layer_rule({
-	name = "aurora-notifications",
+	name = "sunflower-notifications",
 	match = {
-		namespace = "^aurora-notifications$",
+		namespace = "^sunflower-notifications$",
 	},
 	blur = true,
 	blur_popups = true,

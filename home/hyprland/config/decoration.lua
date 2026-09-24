@@ -1,27 +1,27 @@
 -- Decoration
--- Load Active Aurora Theme
+-- Load Active Sunflower Theme
 local home = os.getenv("HOME")
-local themePath = home .. "/.config/aurora/active-theme.lua"
+local themePath = home .. "/.config/sunflower/active-theme.lua"
 local ok, theme = pcall(dofile, themePath)
 
 if not ok or not theme then
-	local fallback = home .. "/.config/aurora/themes/catppuccin-mocha.lua"
+	local fallback = home .. "/.config/sunflower/themes/catppuccin-mocha.lua"
 	ok, theme = pcall(dofile, fallback)
 end
 
 if not ok or not theme then
-	error("Aurora: unable to load theme in decoration.lua")
+	error("Sunflower: unable to load theme in decoration.lua")
 end
 
 local ui = theme.ui
 local colors = theme.colors
 
 if not ui then
-	error("Aurora: theme has no valid 'ui' table")
+	error("Sunflower: theme has no valid 'ui' table")
 end
 
 if not colors then
-	error("Aurora: theme has no valid 'colors' table")
+	error("Sunflower: theme has no valid 'colors' table")
 end
 
 local shadowAlpha = string.format("%02x", math.floor((ui.shadowOpacity or 0.20) * 255 + 0.5))

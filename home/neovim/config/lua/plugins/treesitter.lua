@@ -1,12 +1,12 @@
--- Aurora Treesitter
+-- Sunflower Treesitter
 
 local M = {}
 
 -- Theme
 
-local aurora = require("aurora.theme")
+local sunflower = require("sunflower.theme")
 
-local colors = aurora.colors
+local colors = sunflower.colors
 
 -- Helper
 
@@ -21,7 +21,7 @@ local function apply_highlights()
 	local s = c.syntax
 
 	if type(s) ~= "table" then
-		vim.notify("Aurora: syntax palette is unavailable", vim.log.levels.WARN)
+		vim.notify("Sunflower: syntax palette is unavailable", vim.log.levels.WARN)
 		return
 	end
 
@@ -416,7 +416,7 @@ function M.setup()
 	local ok, treesitter = pcall(require, "nvim-treesitter")
 
 	if not ok then
-		vim.notify("Aurora: nvim-treesitter could not be loaded\n" .. tostring(treesitter), vim.log.levels.WARN)
+		vim.notify("Sunflower: nvim-treesitter could not be loaded\n" .. tostring(treesitter), vim.log.levels.WARN)
 
 		return false
 	end
@@ -430,7 +430,7 @@ function M.setup()
 	})
 
 	vim.api.nvim_create_autocmd("FileType", {
-		group = vim.api.nvim_create_augroup("AuroraTreesitterStart", {
+		group = vim.api.nvim_create_augroup("SunflowerTreesitterStart", {
 			clear = true,
 		}),
 
@@ -471,7 +471,7 @@ end
 
 M.setup()
 
-aurora.on_change(apply_highlights)
+sunflower.on_change(apply_highlights)
 
 -- Return
 

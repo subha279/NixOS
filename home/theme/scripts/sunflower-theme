@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-CONFIG_DIR="$HOME/.config/aurora"
+CONFIG_DIR="$HOME/.config/sunflower"
 THEMES_FILE="$CONFIG_DIR/themes.list"
 ACTIVE_THEME="$CONFIG_DIR/active-theme"
 ACTIVE_LUA="$CONFIG_DIR/active-theme.lua"
@@ -21,15 +21,15 @@ save_active_theme() {
 
 resolve_theme() {
     if [[ ! -f "$THEMES_FILE" ]]; then
-        echo "Aurora: theme list not found." >&2
+        echo "Sunflower: theme list not found." >&2
         exit 1
     fi
 
     if [[ $# -gt 0 ]]; then
         selected="$1"
     else
-        echo "Aurora: usage: aurora-theme <theme-id|display-name>" >&2
-        echo "Aurora: for a picker, run: qs ipc call theme toggle" >&2
+        echo "Sunflower: usage: sunflower-theme <theme-id|display-name>" >&2
+        echo "Sunflower: for a picker, run: qs ipc call theme toggle" >&2
         exit 1
     fi
 
@@ -45,7 +45,7 @@ resolve_theme() {
     )"
 
     if [[ -z "$theme_id" ]]; then
-        echo "Aurora: unknown theme: $selected" >&2
+        echo "Sunflower: unknown theme: $selected" >&2
         exit 1
     fi
 }
@@ -69,14 +69,14 @@ validate_theme() {
 
     for file in "${required_files[@]}"; do
         if [[ ! -f "$file" ]]; then
-            echo "Aurora: generated theme file not found: $file" >&2
+            echo "Sunflower: generated theme file not found: $file" >&2
             exit 1
         fi
     done
 }
 
 apply_kreo() {
-    local kreo_config="/etc/aurora/kreo-rgb.conf"
+    local kreo_config="/etc/sunflower/kreo-rgb.conf"
 
     if [[ ! -r "$kreo_config" ]]; then
         return
@@ -183,7 +183,7 @@ reload_tmux() {
 
 refresh_zsh() {
     local refresh_dir
-    refresh_dir="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/aurora-zsh"
+    refresh_dir="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/sunflower-zsh"
     [[ -d "$refresh_dir" ]] || return
     local fifo
     for fifo in "$refresh_dir"/*; do
@@ -208,6 +208,6 @@ main() {
     reload_kitty
     reload_tmux
     refresh_zsh
-    printf '%s\n' "Aurora theme: $selected"
+    printf '%s\n' "Sunflower theme: $selected"
 }
 main "$@"

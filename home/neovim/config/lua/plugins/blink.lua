@@ -1,14 +1,14 @@
--- Aurora Blink Completion
+-- Sunflower Blink Completion
 
 local M = {}
 
 -- Theme
 
-local aurora = require("aurora.theme")
+local sunflower = require("sunflower.theme")
 
-local colors = aurora.colors
+local colors = sunflower.colors
 
--- Aurora Highlights
+-- Sunflower Highlights
 
 local function apply_highlights()
 	local c = colors()
@@ -153,7 +153,7 @@ function M.setup()
 	local ok, blink = pcall(require, "blink.cmp")
 
 	if not ok then
-		vim.notify("Aurora: Blink could not be loaded\n" .. tostring(blink), vim.log.levels.WARN)
+		vim.notify("Sunflower: Blink could not be loaded\n" .. tostring(blink), vim.log.levels.WARN)
 
 		return false
 	end
@@ -347,9 +347,9 @@ end
 
 M.setup()
 
--- Live Aurora Theme Refresh
+-- Live Sunflower Theme Refresh
 
-aurora.on_change(apply_highlights)
+sunflower.on_change(apply_highlights)
 
 -- Return
 

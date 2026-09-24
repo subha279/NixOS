@@ -79,13 +79,13 @@ in
   stylix.targets.fontconfig.enable = true;
 
   xdg.configFile = {
-    "aurora/themes.json".text = builtins.toJSON themeData;
-    "aurora/themes.list".text = themeList + "\n";
+    "sunflower/themes.json".text = builtins.toJSON themeData;
+    "sunflower/themes.list".text = themeList + "\n";
   }
   // generatedThemeFiles;
 
-  home.file.".local/bin/aurora-theme" = {
+  home.file.".local/bin/sunflower-theme" = {
     executable = true;
-    source = ./scripts/aurora-theme;
+    source = ./scripts/sunflower-theme;
   };
 }

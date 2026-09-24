@@ -1,7 +1,7 @@
 { lib, ... }:
 {
-  home.activation.initializeAuroraTheme = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    theme_dir="$HOME/.config/aurora"
+  home.activation.initializeSunflowerTheme = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    theme_dir="$HOME/.config/sunflower"
     theme_file="$theme_dir/active-theme"
     active_lua="$theme_dir/active-theme.lua"
     active_kitty="$theme_dir/active-kitty.conf"
@@ -9,7 +9,7 @@
     active_starship="$theme_dir/active-starship.toml"
 
     mkdir -p "$theme_dir"
-    mkdir -p "$HOME/.cache/aurora"
+    mkdir -p "$HOME/.cache/sunflower"
 
     if [ ! -f "$theme_file" ]; then
       printf '%s\n' "catppuccin-mocha" > "$theme_file"

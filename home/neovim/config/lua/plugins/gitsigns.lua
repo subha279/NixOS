@@ -1,12 +1,12 @@
--- Aurora Gitsigns
+-- Sunflower Gitsigns
 
 local M = {}
 
 -- Theme
 
-local aurora = require("aurora.theme")
+local sunflower = require("sunflower.theme")
 
-local colors = aurora.colors
+local colors = sunflower.colors
 
 -- Highlights
 
@@ -177,9 +177,9 @@ function M.setup()
 	return true
 end
 
--- Live Aurora Theme Refresh
+-- Live Sunflower Theme Refresh
 
-aurora.on_change(function()
+sunflower.on_change(function()
 	apply_highlights()
 
 	local ok, gitsigns = pcall(require, "gitsigns")

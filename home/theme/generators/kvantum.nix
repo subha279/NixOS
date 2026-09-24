@@ -31,10 +31,10 @@ in
     ;
 
   generatedKvantumConfigFiles = lib.mapAttrs' (
-    themeId: file: lib.nameValuePair "aurora/themes/${themeId}/kvantum/Base16Kvantum.kvconfig" file
+    themeId: file: lib.nameValuePair "sunflower/themes/${themeId}/kvantum/Base16Kvantum.kvconfig" file
   ) kvantumConfigFiles;
 
   generatedKvantumSvgFiles = lib.mapAttrs' (
-    themeId: file: lib.nameValuePair "aurora/themes/${themeId}/kvantum/Base16Kvantum.svg" file
+    themeId: file: lib.nameValuePair "sunflower/themes/${themeId}/kvantum/Base16Kvantum.svg" file
   ) kvantumSvgFiles;
 }

@@ -1,6 +1,6 @@
 /* ============================================================
- * Aurora GTK 3
- * Generated from the Aurora semantic palette.
+ * Sunflower GTK 3
+ * Generated from the Sunflower semantic palette.
  *
  * base00 = background
  * base01 = surface
@@ -17,28 +17,28 @@
  * base0E = accent
  * ============================================================ */
 
-@define-color aurora_background #{{base00-hex}};
-@define-color aurora_surface #{{base01-hex}};
-@define-color aurora_surface_hover #{{base02-hex}};
-@define-color aurora_text_muted #{{base03-hex}};
-@define-color aurora_text_secondary #{{base04-hex}};
-@define-color aurora_text #{{base05-hex}};
+@define-color sunflower_background #{{base00-hex}};
+@define-color sunflower_surface #{{base01-hex}};
+@define-color sunflower_surface_hover #{{base02-hex}};
+@define-color sunflower_text_muted #{{base03-hex}};
+@define-color sunflower_text_secondary #{{base04-hex}};
+@define-color sunflower_text #{{base05-hex}};
 
-@define-color aurora_error #{{base08-hex}};
-@define-color aurora_warning #{{base09-hex}};
-@define-color aurora_yellow #{{base0A-hex}};
-@define-color aurora_success #{{base0B-hex}};
-@define-color aurora_cyan #{{base0C-hex}};
-@define-color aurora_info #{{base0D-hex}};
-@define-color aurora_accent #{{base0E-hex}};
-@define-color aurora_magenta #{{base0F-hex}};
+@define-color sunflower_error #{{base08-hex}};
+@define-color sunflower_warning #{{base09-hex}};
+@define-color sunflower_yellow #{{base0A-hex}};
+@define-color sunflower_success #{{base0B-hex}};
+@define-color sunflower_cyan #{{base0C-hex}};
+@define-color sunflower_info #{{base0D-hex}};
+@define-color sunflower_accent #{{base0E-hex}};
+@define-color sunflower_magenta #{{base0F-hex}};
 
-@define-color theme_fg_color @aurora_text;
-@define-color theme_text_color @aurora_text;
-@define-color theme_bg_color @aurora_background;
-@define-color theme_base_color @aurora_background;
-@define-color theme_selected_bg_color @aurora_accent;
-@define-color theme_selected_fg_color @aurora_background;
+@define-color theme_fg_color @sunflower_text;
+@define-color theme_text_color @sunflower_text;
+@define-color theme_bg_color @sunflower_background;
+@define-color theme_base_color @sunflower_background;
+@define-color theme_selected_bg_color @sunflower_accent;
+@define-color theme_selected_fg_color @sunflower_background;
 
 /* ============================================================
  * Base
@@ -53,8 +53,8 @@
 
 window,
 .background {
-    background-color: @aurora_background;
-    color: @aurora_text;
+    background-color: @sunflower_background;
+    color: @sunflower_text;
 }
 
 .view,
@@ -62,8 +62,8 @@ window,
 textview,
 textview.view,
 text {
-    background-color: @aurora_background;
-    color: @aurora_text;
+    background-color: @sunflower_background;
+    color: @sunflower_text;
 }
 /* ============================================================
  * Global window / CSD decoration
@@ -73,23 +73,23 @@ window,
 window.background,
 window.csd,
 window.solid-csd {
-    background-color: @aurora_background;
-    color: @aurora_text;
+    background-color: @sunflower_background;
+    color: @sunflower_text;
 }
 
 /* GTK client-side window decoration */
 
 decoration {
-    background-color: @aurora_background;
-    border: 1px solid @aurora_surface_hover;
+    background-color: @sunflower_background;
+    border: 1px solid @sunflower_surface_hover;
     border-radius: 12px;
     box-shadow: 0 3px 6px alpha(black, 0.14),
                 0 12px 28px alpha(black, 0.28);
 }
 
 decoration:backdrop {
-    background-color: @aurora_background;
-    border-color: @aurora_surface;
+    background-color: @sunflower_background;
+    border-color: @sunflower_surface;
     box-shadow: 0 2px 4px alpha(black, 0.10),
                 0 8px 20px alpha(black, 0.20);
 }
@@ -99,8 +99,8 @@ decoration:backdrop {
  * ============================================================ */
 
 menubar {
-    background-color: @aurora_background;
-    color: @aurora_text;
+    background-color: @sunflower_background;
+    color: @sunflower_text;
 
     border: none;
     box-shadow: none;
@@ -108,37 +108,37 @@ menubar {
 
 menubar > menuitem {
     background-color: transparent;
-    color: @aurora_text_secondary;
+    color: @sunflower_text_secondary;
 
     padding: 6px 9px;
 }
 
 menubar > menuitem:hover {
-    background-color: @aurora_surface_hover;
-    color: @aurora_text;
+    background-color: @sunflower_surface_hover;
+    color: @sunflower_text;
 }
 
 menubar > menuitem:active,
 menubar > menuitem:selected {
-    background-color: @aurora_accent;
-    color: @aurora_background;
+    background-color: @sunflower_accent;
+    color: @sunflower_background;
 }
 
 menubar:backdrop,
 menubar > menuitem:backdrop {
-    background-color: @aurora_background;
-    color: @aurora_text_muted;
+    background-color: @sunflower_background;
+    color: @sunflower_text_muted;
 }
 
 /* Remove the default GTK light decoration/shadow */
 
 window.csd {
-    background-color: @aurora_background;
+    background-color: @sunflower_background;
 }
 
 window.csd decoration {
-    background-color: @aurora_background;
-    border: 1px solid @aurora_surface_hover;
+    background-color: @sunflower_background;
+    border: 1px solid @sunflower_surface_hover;
     box-shadow: none;
 }
 
@@ -148,8 +148,8 @@ window.csd decoration {
 
 headerbar,
 .titlebar {
-    background-color: @aurora_surface;
-    color: @aurora_text;
+    background-color: @sunflower_surface;
+    color: @sunflower_text;
 
     border: none;
     box-shadow: none;
@@ -160,17 +160,17 @@ headerbar,
 
 headerbar:backdrop,
 .titlebar:backdrop {
-    background-color: @aurora_background;
-    color: @aurora_text_muted;
+    background-color: @sunflower_background;
+    color: @sunflower_text_muted;
 }
 
 headerbar .title,
 headerbar .subtitle {
-    color: @aurora_text;
+    color: @sunflower_text;
 }
 
 headerbar .subtitle {
-    color: @aurora_text_secondary;
+    color: @sunflower_text_secondary;
 }
 
 /* ============================================================
@@ -180,8 +180,8 @@ headerbar .subtitle {
 toolbar,
 .primary-toolbar,
 .toolbar {
-    background-color: @aurora_surface;
-    color: @aurora_text;
+    background-color: @sunflower_surface;
+    color: @sunflower_text;
 
     border: none;
     box-shadow: none;
@@ -191,7 +191,7 @@ toolbar button,
 .primary-toolbar button,
 .toolbar button {
     background-color: transparent;
-    color: @aurora_text;
+    color: @sunflower_text;
 
     border: 1px solid transparent;
     border-radius: 7px;
@@ -200,24 +200,24 @@ toolbar button,
 toolbar button:hover,
 .primary-toolbar button:hover,
 .toolbar button:hover {
-    background-color: @aurora_surface_hover;
-    color: @aurora_text;
+    background-color: @sunflower_surface_hover;
+    color: @sunflower_text;
 }
 
 toolbar button:active,
 .primary-toolbar button:active,
 .toolbar button:active {
-    background-color: @aurora_accent;
-    color: @aurora_background;
+    background-color: @sunflower_accent;
+    color: @sunflower_background;
 }
 
 toolbar entry,
 .primary-toolbar entry,
 .toolbar entry {
-    background-color: @aurora_background;
-    color: @aurora_text;
+    background-color: @sunflower_background;
+    color: @sunflower_text;
 
-    border: 1px solid @aurora_surface_hover;
+    border: 1px solid @sunflower_surface_hover;
     border-radius: 8px;
 }
 
@@ -229,24 +229,24 @@ treeview.view:selected,
 treeview.view:selected:focus,
 treeview:selected,
 treeview:selected:focus {
-    background-color: @aurora_accent;
-    color: @aurora_background;
+    background-color: @sunflower_accent;
+    color: @sunflower_background;
 }
 
 treeview.view:selected:hover,
 treeview:selected:hover {
-    background-color: @aurora_accent;
-    color: @aurora_background;
+    background-color: @sunflower_accent;
+    color: @sunflower_background;
 }
 
 treeview.view {
-    background-color: @aurora_background;
-    color: @aurora_text;
+    background-color: @sunflower_background;
+    color: @sunflower_text;
 }
 
 treeview.view:hover {
-    background-color: @aurora_surface;
-    color: @aurora_text;
+    background-color: @sunflower_surface;
+    color: @sunflower_text;
 }
 
 /* ============================================================
@@ -254,32 +254,32 @@ treeview.view:hover {
  * ============================================================ */
 
 .view {
-    background-color: @aurora_background;
-    color: @aurora_text;
+    background-color: @sunflower_background;
+    color: @sunflower_text;
 }
 
 .view:hover {
-    background-color: @aurora_surface;
+    background-color: @sunflower_surface;
 }
 
 .view:selected {
-    background-color: @aurora_accent;
-    color: @aurora_background;
+    background-color: @sunflower_accent;
+    color: @sunflower_background;
 }
 
 .view:selected:focus {
-    background-color: @aurora_accent;
-    color: @aurora_background;
+    background-color: @sunflower_accent;
+    color: @sunflower_background;
 }
 
 iconview {
-    background-color: @aurora_background;
-    color: @aurora_text;
+    background-color: @sunflower_background;
+    color: @sunflower_text;
 }
 
 iconview:selected {
-    background-color: @aurora_accent;
-    color: @aurora_background;
+    background-color: @sunflower_accent;
+    color: @sunflower_background;
 }
 
 /* ============================================================
@@ -288,11 +288,11 @@ iconview:selected {
 
 button {
     background-image: none;
-    background-color: @aurora_surface;
+    background-color: @sunflower_surface;
 
-    color: @aurora_text;
+    color: @sunflower_text;
 
-    border: 1px solid @aurora_surface_hover;
+    border: 1px solid @sunflower_surface_hover;
     border-radius: 8px;
 
     box-shadow: none;
@@ -302,27 +302,27 @@ button {
 }
 
 button:hover {
-    background-color: @aurora_surface_hover;
-    border-color: @aurora_accent;
+    background-color: @sunflower_surface_hover;
+    border-color: @sunflower_accent;
 }
 
 button:active,
 button:checked {
-    background-color: @aurora_accent;
-    color: @aurora_background;
-    border-color: @aurora_accent;
+    background-color: @sunflower_accent;
+    color: @sunflower_background;
+    border-color: @sunflower_accent;
 }
 
 button:focus {
-    border-color: @aurora_accent;
-    box-shadow: inset 0 0 0 1px @aurora_accent,
-                0 0 0 2px alpha(@aurora_accent, 0.22);
+    border-color: @sunflower_accent;
+    box-shadow: inset 0 0 0 1px @sunflower_accent,
+                0 0 0 2px alpha(@sunflower_accent, 0.22);
 }
 
 button:disabled {
-    background-color: @aurora_background;
-    color: @aurora_text_muted;
-    border-color: @aurora_surface;
+    background-color: @sunflower_background;
+    color: @sunflower_text_muted;
+    border-color: @sunflower_surface;
 }
 
 /* Flat buttons */
@@ -333,14 +333,14 @@ button.flat {
 }
 
 button.flat:hover {
-    background-color: @aurora_surface_hover;
-    border-color: @aurora_surface_hover;
+    background-color: @sunflower_surface_hover;
+    border-color: @sunflower_surface_hover;
 }
 
 button.flat:active,
 button.flat:checked {
-    background-color: @aurora_accent;
-    color: @aurora_background;
+    background-color: @sunflower_accent;
+    color: @sunflower_background;
 }
 
 /* ============================================================
@@ -350,10 +350,10 @@ button.flat:checked {
 entry,
 spinbutton,
 combobox {
-    background-color: @aurora_surface;
-    color: @aurora_text;
+    background-color: @sunflower_surface;
+    color: @sunflower_text;
 
-    border: 1px solid @aurora_surface_hover;
+    border: 1px solid @sunflower_surface_hover;
     border-radius: 8px;
 
     box-shadow: none;
@@ -364,28 +364,28 @@ combobox {
 entry:hover,
 spinbutton:hover,
 combobox:hover {
-    border-color: @aurora_text_secondary;
+    border-color: @sunflower_text_secondary;
 }
 
 entry:focus,
 spinbutton:focus,
 combobox:focus {
-    border-color: @aurora_accent;
-    box-shadow: inset 0 0 0 1px @aurora_accent,
-                0 0 0 2px alpha(@aurora_accent, 0.22);
+    border-color: @sunflower_accent;
+    box-shadow: inset 0 0 0 1px @sunflower_accent,
+                0 0 0 2px alpha(@sunflower_accent, 0.22);
 }
 
 entry:disabled,
 spinbutton:disabled,
 combobox:disabled {
-    background-color: @aurora_background;
-    color: @aurora_text_muted;
+    background-color: @sunflower_background;
+    color: @sunflower_text_muted;
 }
 
 /* Search */
 
 searchbar {
-    background-color: @aurora_surface;
+    background-color: @sunflower_surface;
     border: none;
     box-shadow: none;
 }
@@ -403,10 +403,10 @@ menu,
 popover,
 popover.background,
 popover.menu {
-    background-color: @aurora_surface;
-    color: @aurora_text;
+    background-color: @sunflower_surface;
+    color: @sunflower_text;
 
-    border: 1px solid @aurora_surface_hover;
+    border: 1px solid @sunflower_surface_hover;
     border-radius: 10px;
 
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
@@ -414,7 +414,7 @@ popover.menu {
 
 menuitem {
     background-color: transparent;
-    color: @aurora_text;
+    color: @sunflower_text;
 
     border-radius: 6px;
 
@@ -422,14 +422,14 @@ menuitem {
 }
 
 menuitem:hover {
-    background-color: @aurora_surface_hover;
-    color: @aurora_text;
+    background-color: @sunflower_surface_hover;
+    color: @sunflower_text;
 }
 
 menuitem:active,
 menuitem:selected {
-    background-color: @aurora_accent;
-    color: @aurora_background;
+    background-color: @sunflower_accent;
+    color: @sunflower_background;
 }
 
 /* ============================================================
@@ -439,44 +439,44 @@ menuitem:selected {
 treeview,
 treeview.view,
 .view {
-    background-color: @aurora_background;
-    color: @aurora_text;
+    background-color: @sunflower_background;
+    color: @sunflower_text;
 }
 
 treeview:hover,
 treeview.view:hover,
 .view:hover {
-    background-color: @aurora_surface;
+    background-color: @sunflower_surface;
 }
 
 treeview:selected,
 treeview.view:selected,
 .view:selected {
-    background-color: @aurora_accent;
-    color: @aurora_background;
+    background-color: @sunflower_accent;
+    color: @sunflower_background;
 }
 
 treeview:selected:focus,
 treeview.view:selected:focus,
 .view:selected:focus {
-    background-color: @aurora_accent;
-    color: @aurora_background;
+    background-color: @sunflower_accent;
+    color: @sunflower_background;
 }
 
 /* Thunar icon/list rows */
 
 iconview {
-    background-color: @aurora_background;
-    color: @aurora_text;
+    background-color: @sunflower_background;
+    color: @sunflower_text;
 }
 
 iconview:hover {
-    background-color: @aurora_surface;
+    background-color: @sunflower_surface;
 }
 
 iconview:selected {
-    background-color: @aurora_accent;
-    color: @aurora_background;
+    background-color: @sunflower_accent;
+    color: @sunflower_background;
 }
 
 /* ============================================================
@@ -485,24 +485,24 @@ iconview:selected {
 
 .sidebar,
 .sidebar.view {
-    background-color: @aurora_surface;
-    color: @aurora_text;
+    background-color: @sunflower_surface;
+    color: @sunflower_text;
 }
 
 .sidebar row {
     background-color: transparent;
-    color: @aurora_text;
+    color: @sunflower_text;
     border-radius: 7px;
     padding: 5px;
 }
 
 .sidebar row:hover {
-    background-color: @aurora_surface_hover;
+    background-color: @sunflower_surface_hover;
 }
 
 .sidebar row:selected {
-    background-color: @aurora_accent;
-    color: @aurora_background;
+    background-color: @sunflower_accent;
+    color: @sunflower_background;
 }
 
 /* ============================================================
@@ -519,7 +519,7 @@ scrollbar trough {
 }
 
 scrollbar slider {
-    background-color: @aurora_text_muted;
+    background-color: @sunflower_text_muted;
     border-radius: 8px;
 
     min-width: 7px;
@@ -527,11 +527,11 @@ scrollbar slider {
 }
 
 scrollbar slider:hover {
-    background-color: @aurora_text_secondary;
+    background-color: @sunflower_text_secondary;
 }
 
 scrollbar slider:active {
-    background-color: @aurora_accent;
+    background-color: @sunflower_accent;
 }
 
 /* ============================================================
@@ -539,18 +539,18 @@ scrollbar slider:active {
  * ============================================================ */
 
 scale trough {
-    background-color: @aurora_surface_hover;
+    background-color: @sunflower_surface_hover;
     border-radius: 5px;
 }
 
 scale highlight {
-    background-color: @aurora_accent;
+    background-color: @sunflower_accent;
     border-radius: 5px;
 }
 
 scale slider {
-    background-color: @aurora_accent;
-    border: 2px solid @aurora_background;
+    background-color: @sunflower_accent;
+    border: 2px solid @sunflower_background;
     border-radius: 50%;
 }
 
@@ -560,25 +560,25 @@ scale slider {
 
 checkbutton,
 radiobutton {
-    color: @aurora_text;
+    color: @sunflower_text;
 }
 
 checkbutton check,
 radiobutton radio {
-    background-color: @aurora_surface;
-    border: 1px solid @aurora_text_muted;
+    background-color: @sunflower_surface;
+    border: 1px solid @sunflower_text_muted;
 }
 
 checkbutton:hover check,
 radiobutton:hover radio {
-    border-color: @aurora_accent;
+    border-color: @sunflower_accent;
 }
 
 checkbutton:checked check,
 radiobutton:checked radio {
-    background-color: @aurora_accent;
-    color: @aurora_background;
-    border-color: @aurora_accent;
+    background-color: @sunflower_accent;
+    color: @sunflower_background;
+    border-color: @sunflower_accent;
 }
 
 /* ============================================================
@@ -586,23 +586,23 @@ radiobutton:checked radio {
  * ============================================================ */
 
 switch {
-    background-color: @aurora_surface_hover;
-    border: 1px solid @aurora_text_muted;
+    background-color: @sunflower_surface_hover;
+    border: 1px solid @sunflower_text_muted;
     border-radius: 999px;
 }
 
 switch slider {
-    background-color: @aurora_text;
+    background-color: @sunflower_text;
     border-radius: 999px;
 }
 
 switch:checked {
-    background-color: @aurora_accent;
-    border-color: @aurora_accent;
+    background-color: @sunflower_accent;
+    border-color: @sunflower_accent;
 }
 
 switch:checked slider {
-    background-color: @aurora_background;
+    background-color: @sunflower_background;
 }
 
 /* ============================================================
@@ -610,12 +610,12 @@ switch:checked slider {
  * ============================================================ */
 
 progressbar trough {
-    background-color: @aurora_surface_hover;
+    background-color: @sunflower_surface_hover;
     border-radius: 6px;
 }
 
 progressbar progress {
-    background-color: @aurora_accent;
+    background-color: @sunflower_accent;
     border-radius: 6px;
 }
 
@@ -624,29 +624,29 @@ progressbar progress {
  * ============================================================ */
 
 notebook {
-    background-color: @aurora_background;
-    color: @aurora_text;
+    background-color: @sunflower_background;
+    color: @sunflower_text;
 }
 
 notebook header {
-    background-color: @aurora_surface;
+    background-color: @sunflower_surface;
     border: none;
 }
 
 notebook tab {
     background-color: transparent;
-    color: @aurora_text_secondary;
+    color: @sunflower_text_secondary;
     padding: 7px 12px;
 }
 
 notebook tab:hover {
-    background-color: @aurora_surface_hover;
-    color: @aurora_text;
+    background-color: @sunflower_surface_hover;
+    color: @sunflower_text;
 }
 
 notebook tab:checked {
-    background-color: @aurora_accent;
-    color: @aurora_background;
+    background-color: @sunflower_accent;
+    color: @sunflower_background;
 }
 
 /* ============================================================
@@ -654,10 +654,10 @@ notebook tab:checked {
  * ============================================================ */
 
 tooltip {
-    background-color: @aurora_surface;
-    color: @aurora_text;
+    background-color: @sunflower_surface;
+    color: @sunflower_text;
 
-    border: 1px solid @aurora_surface_hover;
+    border: 1px solid @sunflower_surface_hover;
     border-radius: 8px;
 
     padding: 6px 9px;
@@ -668,7 +668,7 @@ tooltip {
  * ============================================================ */
 
 separator {
-    background-color: @aurora_surface_hover;
+    background-color: @sunflower_surface_hover;
 }
 
 /* ============================================================
@@ -677,12 +677,12 @@ separator {
 
 *:link,
 *:visited {
-    color: @aurora_accent;
+    color: @sunflower_accent;
 }
 
 *:link:hover,
 *:visited:hover {
-    color: @aurora_cyan;
+    color: @sunflower_cyan;
 }
 
 /* ============================================================
@@ -690,13 +690,13 @@ separator {
  * ============================================================ */
 
 *:focus {
-    outline-color: @aurora_accent;
+    outline-color: @sunflower_accent;
 }
 
 selection,
 *:selected {
-    background-color: @aurora_accent;
-    color: @aurora_background;
+    background-color: @sunflower_accent;
+    color: @sunflower_background;
 }
 
 /* ============================================================
@@ -704,29 +704,29 @@ selection,
  * ============================================================ */
 
 .destructive-action {
-    background-color: @aurora_error;
-    color: @aurora_background;
+    background-color: @sunflower_error;
+    color: @sunflower_background;
 }
 
 .destructive-action:hover {
-    background-color: @aurora_error;
+    background-color: @sunflower_error;
 }
 
 .suggested-action {
-    background-color: @aurora_accent;
-    color: @aurora_background;
+    background-color: @sunflower_accent;
+    color: @sunflower_background;
 }
 
 .warning {
-    color: @aurora_warning;
+    color: @sunflower_warning;
 }
 
 .success {
-    color: @aurora_success;
+    color: @sunflower_success;
 }
 
 /* ============================================================
- * AURORA — GLOBAL DARK OVERRIDE
+ * SUNFLOWER — GLOBAL DARK OVERRIDE
  *
  * This section intentionally comes LAST so it wins against
  * earlier/default GTK styling.
@@ -736,35 +736,35 @@ selection,
  * GTK semantic theme colors
  * ------------------------------------------------------------ */
 
-@define-color theme_fg_color              @aurora_text;
-@define-color theme_text_color            @aurora_text;
-@define-color theme_bg_color              @aurora_background;
-@define-color theme_base_color            @aurora_background;
+@define-color theme_fg_color              @sunflower_text;
+@define-color theme_text_color            @sunflower_text;
+@define-color theme_bg_color              @sunflower_background;
+@define-color theme_base_color            @sunflower_background;
 
-@define-color theme_unfocused_fg_color    @aurora_text_secondary;
-@define-color theme_unfocused_text_color  @aurora_text_secondary;
-@define-color theme_unfocused_bg_color    @aurora_background;
-@define-color theme_unfocused_base_color  @aurora_background;
+@define-color theme_unfocused_fg_color    @sunflower_text_secondary;
+@define-color theme_unfocused_text_color  @sunflower_text_secondary;
+@define-color theme_unfocused_bg_color    @sunflower_background;
+@define-color theme_unfocused_base_color  @sunflower_background;
 
-@define-color insensitive_fg_color        @aurora_text_muted;
-@define-color insensitive_bg_color        @aurora_surface;
-@define-color insensitive_base_color      @aurora_background;
+@define-color insensitive_fg_color        @sunflower_text_muted;
+@define-color insensitive_bg_color        @sunflower_surface;
+@define-color insensitive_base_color      @sunflower_background;
 
-@define-color borders                      @aurora_surface_hover;
-@define-color unfocused_borders            @aurora_surface;
+@define-color borders                      @sunflower_surface_hover;
+@define-color unfocused_borders            @sunflower_surface;
 
-@define-color theme_selected_bg_color      @aurora_accent;
-@define-color theme_selected_fg_color      @aurora_background;
+@define-color theme_selected_bg_color      @sunflower_accent;
+@define-color theme_selected_fg_color      @sunflower_background;
 
-@define-color content_view_bg              @aurora_background;
-@define-color text_view_bg                 @aurora_background;
+@define-color content_view_bg              @sunflower_background;
+@define-color text_view_bg                 @sunflower_background;
 
 /* ------------------------------------------------------------
  * EVERYTHING
  * ------------------------------------------------------------ */
 
 * {
-    color: @aurora_text;
+    color: @sunflower_text;
 }
 
 /* ------------------------------------------------------------
@@ -777,9 +777,9 @@ window.csd,
 window.solid-csd,
 window.unified,
 window > decoration {
-    background-color: @aurora_background;
-    color: @aurora_text;
-    border-color: @aurora_surface_hover;
+    background-color: @sunflower_background;
+    color: @sunflower_text;
+    border-color: @sunflower_surface_hover;
 }
 
 /* ------------------------------------------------------------
@@ -789,8 +789,8 @@ window > decoration {
 decoration,
 decoration.background,
 decoration:backdrop {
-    background-color: @aurora_background;
-    border: 1px solid @aurora_surface_hover;
+    background-color: @sunflower_background;
+    border: 1px solid @sunflower_surface_hover;
     box-shadow: none;
 }
 
@@ -800,27 +800,27 @@ decoration:backdrop {
 
 menubar,
 menubar.background {
-    background-color: @aurora_background;
-    color: @aurora_text;
+    background-color: @sunflower_background;
+    color: @sunflower_text;
     border: none;
     box-shadow: none;
 }
 
 menubar > menuitem {
     background-color: transparent;
-    color: @aurora_text_secondary;
+    color: @sunflower_text_secondary;
 }
 
 menubar > menuitem:hover,
 menubar > menuitem:focus {
-    background-color: @aurora_surface_hover;
-    color: @aurora_text;
+    background-color: @sunflower_surface_hover;
+    color: @sunflower_text;
 }
 
 menubar > menuitem:active,
 menubar > menuitem:selected {
-    background-color: @aurora_accent;
-    color: @aurora_background;
+    background-color: @sunflower_accent;
+    color: @sunflower_background;
 }
 
 /* ------------------------------------------------------------
@@ -830,8 +830,8 @@ menubar > menuitem:selected {
 toolbar,
 .toolbar,
 .primary-toolbar {
-    background-color: @aurora_surface;
-    color: @aurora_text;
+    background-color: @sunflower_surface;
+    color: @sunflower_text;
 
     border: none;
     box-shadow: none;
@@ -840,7 +840,7 @@ toolbar,
 toolbar > *,
 .toolbar > *,
 .primary-toolbar > * {
-    color: @aurora_text;
+    color: @sunflower_text;
 }
 
 /* ------------------------------------------------------------
@@ -857,8 +857,8 @@ stacksidebar,
 paned,
 eventbox,
 box {
-    background-color: @aurora_background;
-    color: @aurora_text;
+    background-color: @sunflower_background;
+    color: @sunflower_text;
 }
 
 /* ------------------------------------------------------------
@@ -872,8 +872,8 @@ treeview.view,
 iconview,
 textview,
 textview.view {
-    background-color: @aurora_background;
-    color: @aurora_text;
+    background-color: @sunflower_background;
+    color: @sunflower_text;
 }
 
 /* ------------------------------------------------------------
@@ -884,8 +884,8 @@ headerbar,
 headerbar.background,
 .titlebar,
 .titlebar.background {
-    background-color: @aurora_surface;
-    color: @aurora_text;
+    background-color: @sunflower_surface;
+    color: @sunflower_text;
 
     border: none;
     box-shadow: none;
@@ -893,8 +893,8 @@ headerbar.background,
 
 headerbar:backdrop,
 .titlebar:backdrop {
-    background-color: @aurora_background;
-    color: @aurora_text_muted;
+    background-color: @sunflower_background;
+    color: @sunflower_text_muted;
 }
 
 /* ------------------------------------------------------------
@@ -903,28 +903,28 @@ headerbar:backdrop,
 
 button {
     background-image: none;
-    background-color: @aurora_surface;
-    color: @aurora_text;
+    background-color: @sunflower_surface;
+    color: @sunflower_text;
 
-    border: 1px solid @aurora_surface_hover;
+    border: 1px solid @sunflower_surface_hover;
     box-shadow: none;
 }
 
 button:hover {
-    background-color: @aurora_surface_hover;
-    color: @aurora_text;
+    background-color: @sunflower_surface_hover;
+    color: @sunflower_text;
 }
 
 button:active,
 button:checked,
 button:selected {
-    background-color: @aurora_accent;
-    color: @aurora_background;
+    background-color: @sunflower_accent;
+    color: @sunflower_background;
 }
 
 button:disabled {
-    background-color: @aurora_background;
-    color: @aurora_text_muted;
+    background-color: @sunflower_background;
+    color: @sunflower_text_muted;
 }
 
 /* ------------------------------------------------------------
@@ -935,18 +935,18 @@ entry,
 entry.background,
 spinbutton,
 combobox {
-    background-color: @aurora_surface;
-    color: @aurora_text;
+    background-color: @sunflower_surface;
+    color: @sunflower_text;
 
-    border-color: @aurora_surface_hover;
+    border-color: @sunflower_surface_hover;
 }
 
 entry:focus,
 spinbutton:focus,
 combobox:focus {
-    background-color: @aurora_surface;
-    color: @aurora_text;
-    border-color: @aurora_accent;
+    background-color: @sunflower_surface;
+    color: @sunflower_text;
+    border-color: @sunflower_accent;
 }
 
 /* ------------------------------------------------------------
@@ -956,14 +956,14 @@ combobox:focus {
 list,
 listview,
 row {
-    background-color: @aurora_background;
-    color: @aurora_text;
+    background-color: @sunflower_background;
+    color: @sunflower_text;
 }
 
 row:hover,
 list row:hover {
-    background-color: @aurora_surface;
-    color: @aurora_text;
+    background-color: @sunflower_surface;
+    color: @sunflower_text;
 }
 
 row:selected,
@@ -971,8 +971,8 @@ list row:selected,
 .view:selected,
 treeview:selected,
 iconview:selected {
-    background-color: @aurora_accent;
-    color: @aurora_background;
+    background-color: @sunflower_accent;
+    color: @sunflower_background;
 }
 
 /* ------------------------------------------------------------
@@ -982,26 +982,26 @@ iconview:selected {
 .sidebar,
 .sidebar.view,
 stacksidebar {
-    background-color: @aurora_surface;
-    color: @aurora_text;
+    background-color: @sunflower_surface;
+    color: @sunflower_text;
 }
 
 .sidebar row,
 .sidebar.view row {
     background-color: transparent;
-    color: @aurora_text_secondary;
+    color: @sunflower_text_secondary;
 }
 
 .sidebar row:hover,
 .sidebar.view row:hover {
-    background-color: @aurora_surface_hover;
-    color: @aurora_text;
+    background-color: @sunflower_surface_hover;
+    color: @sunflower_text;
 }
 
 .sidebar row:selected,
 .sidebar.view row:selected {
-    background-color: @aurora_accent;
-    color: @aurora_background;
+    background-color: @sunflower_accent;
+    color: @sunflower_background;
 }
 
 /* ------------------------------------------------------------
@@ -1014,30 +1014,30 @@ menu.background,
 popover,
 popover.background,
 popover.menu {
-    background-color: @aurora_surface;
-    color: @aurora_text;
+    background-color: @sunflower_surface;
+    color: @sunflower_text;
 
-    border: 1px solid @aurora_surface_hover;
+    border: 1px solid @sunflower_surface_hover;
     box-shadow: none;
 }
 
 menuitem,
 modelbutton {
     background-color: transparent;
-    color: @aurora_text;
+    color: @sunflower_text;
 }
 
 menuitem:hover,
 modelbutton:hover {
-    background-color: @aurora_surface_hover;
-    color: @aurora_text;
+    background-color: @sunflower_surface_hover;
+    color: @sunflower_text;
 }
 
 menuitem:selected,
 menuitem:active,
 modelbutton:active {
-    background-color: @aurora_accent;
-    color: @aurora_background;
+    background-color: @sunflower_accent;
+    color: @sunflower_background;
 }
 
 /* ------------------------------------------------------------
@@ -1050,15 +1050,15 @@ scrollbar trough {
 }
 
 scrollbar slider {
-    background-color: @aurora_text_muted;
+    background-color: @sunflower_text_muted;
 }
 
 scrollbar slider:hover {
-    background-color: @aurora_text_secondary;
+    background-color: @sunflower_text_secondary;
 }
 
 scrollbar slider:active {
-    background-color: @aurora_accent;
+    background-color: @sunflower_accent;
 }
 
 /* ------------------------------------------------------------
@@ -1068,34 +1068,34 @@ scrollbar slider:active {
 checkbutton,
 radiobutton {
     background-color: transparent;
-    color: @aurora_text;
+    color: @sunflower_text;
 }
 
 check,
 radio {
-    background-color: @aurora_surface;
-    color: @aurora_text;
+    background-color: @sunflower_surface;
+    color: @sunflower_text;
 
-    border-color: @aurora_text_muted;
+    border-color: @sunflower_text_muted;
 }
 
 check:checked,
 radio:checked {
-    background-color: @aurora_accent;
-    color: @aurora_background;
-    border-color: @aurora_accent;
+    background-color: @sunflower_accent;
+    color: @sunflower_background;
+    border-color: @sunflower_accent;
 }
 
 switch {
-    background-color: @aurora_surface_hover;
-    color: @aurora_text;
+    background-color: @sunflower_surface_hover;
+    color: @sunflower_text;
 
-    border-color: @aurora_text_muted;
+    border-color: @sunflower_text_muted;
 }
 
 switch:checked {
-    background-color: @aurora_accent;
-    border-color: @aurora_accent;
+    background-color: @sunflower_accent;
+    border-color: @sunflower_accent;
 }
 
 /* ------------------------------------------------------------
@@ -1104,23 +1104,23 @@ switch:checked {
 
 notebook,
 notebook header {
-    background-color: @aurora_background;
-    color: @aurora_text;
+    background-color: @sunflower_background;
+    color: @sunflower_text;
 }
 
 notebook tab {
     background-color: transparent;
-    color: @aurora_text_secondary;
+    color: @sunflower_text_secondary;
 }
 
 notebook tab:hover {
-    background-color: @aurora_surface_hover;
-    color: @aurora_text;
+    background-color: @sunflower_surface_hover;
+    color: @sunflower_text;
 }
 
 notebook tab:checked {
-    background-color: @aurora_accent;
-    color: @aurora_background;
+    background-color: @sunflower_accent;
+    color: @sunflower_background;
 }
 
 /* ------------------------------------------------------------
@@ -1129,12 +1129,12 @@ notebook tab:checked {
 
 progressbar trough,
 scale trough {
-    background-color: @aurora_surface_hover;
+    background-color: @sunflower_surface_hover;
 }
 
 progressbar progress,
 scale highlight {
-    background-color: @aurora_accent;
+    background-color: @sunflower_accent;
 }
 
 /* ------------------------------------------------------------
@@ -1143,10 +1143,10 @@ scale highlight {
 
 tooltip,
 tooltip.background {
-    background-color: @aurora_surface;
-    color: @aurora_text;
+    background-color: @sunflower_surface;
+    color: @sunflower_text;
 
-    border: 1px solid @aurora_surface_hover;
+    border: 1px solid @sunflower_surface_hover;
     box-shadow: none;
 }
 
@@ -1155,7 +1155,7 @@ tooltip.background {
  * ------------------------------------------------------------ */
 
 separator {
-    background-color: @aurora_surface_hover;
+    background-color: @sunflower_surface_hover;
 }
 
 /* ------------------------------------------------------------
@@ -1163,7 +1163,7 @@ separator {
  * ------------------------------------------------------------ */
 
 *:focus {
-    outline-color: @aurora_accent;
+    outline-color: @sunflower_accent;
 }
 
 /* ------------------------------------------------------------
@@ -1171,12 +1171,12 @@ separator {
  * ------------------------------------------------------------ */
 
 selection {
-    background-color: @aurora_accent;
-    color: @aurora_background;
+    background-color: @sunflower_accent;
+    color: @sunflower_background;
 }
 
 /* ============================================================
- * AURORA — SWAPPY FOCUSED WINDOW FIX
+ * SUNFLOWER — SWAPPY FOCUSED WINDOW FIX
  * ============================================================ */
 
 /* Swappy header bar — focused AND unfocused */
@@ -1186,10 +1186,10 @@ headerbar:focus,
 headerbar:focus-within,
 headerbar.default-decoration,
 headerbar.titlebar {
-    background: @aurora_surface;
-    background-color: @aurora_surface;
+    background: @sunflower_surface;
+    background-color: @sunflower_surface;
     background-image: none;
-    color: @aurora_text;
+    color: @sunflower_text;
     border: none;
     box-shadow: none;
 }
@@ -1198,9 +1198,9 @@ headerbar.titlebar {
 window,
 window:focus,
 window:backdrop {
-    background: @aurora_background;
-    background-color: @aurora_background;
-    color: @aurora_text;
+    background: @sunflower_background;
+    background-color: @sunflower_background;
+    color: @sunflower_text;
 }
 
 /* Headerbar internal containers */
@@ -1210,7 +1210,7 @@ headerbar .title,
 headerbar .subtitle {
     background: transparent;
     background-color: transparent;
-    color: @aurora_text;
+    color: @sunflower_text;
 }
 
 /* Swappy buttons */
@@ -1218,49 +1218,49 @@ headerbar button,
 headerbar button:focus,
 headerbar button:active,
 headerbar button:checked {
-    background: @aurora_surface;
-    background-color: @aurora_surface;
+    background: @sunflower_surface;
+    background-color: @sunflower_surface;
     background-image: none;
-    color: @aurora_text;
+    color: @sunflower_text;
     border: 1px solid transparent;
     box-shadow: none;
 }
 
 /* Hover */
 headerbar button:hover {
-    background: @aurora_surface_hover;
-    background-color: @aurora_surface_hover;
+    background: @sunflower_surface_hover;
+    background-color: @sunflower_surface_hover;
     background-image: none;
-    color: @aurora_text;
-    border-color: @aurora_accent;
+    color: @sunflower_text;
+    border-color: @sunflower_accent;
 }
 
 /* Active */
 headerbar button:active,
 headerbar button:checked {
-    background: @aurora_accent;
-    background-color: @aurora_accent;
-    color: @aurora_background;
+    background: @sunflower_accent;
+    background-color: @sunflower_accent;
+    color: @sunflower_background;
 }
 
 /* Headerbar separators */
 headerbar separator,
 headerbar separator:backdrop {
-    background: @aurora_surface_hover;
-    background-color: @aurora_surface_hover;
+    background: @sunflower_surface_hover;
+    background-color: @sunflower_surface_hover;
 }
 
 /* Headerbar button icons */
 headerbar button image {
-    color: @aurora_text;
+    color: @sunflower_text;
     -gtk-icon-shadow: none;
 }
 
 headerbar button:hover image {
-    color: @aurora_text;
+    color: @sunflower_text;
 }
 
 headerbar button:active image,
 headerbar button:checked image {
-    color: @aurora_background;
+    color: @sunflower_background;
 }

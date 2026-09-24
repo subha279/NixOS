@@ -1,15 +1,15 @@
--- Aurora theme access
+-- Sunflower theme access
 
 local M = {}
 
 -- Paths
 
-local AURORA_DIR = vim.fn.expand("~/.config/aurora")
+local SUNFLOWER_DIR = vim.fn.expand("~/.config/sunflower")
 
-M.id_path = AURORA_DIR .. "/active-theme"
+M.id_path = SUNFLOWER_DIR .. "/active-theme"
 
 -- Symlink to the generated theme for the active id.
-M.theme_path = AURORA_DIR .. "/active-theme.lua"
+M.theme_path = SUNFLOWER_DIR .. "/active-theme.lua"
 
 -- Load / cache
 
@@ -100,7 +100,7 @@ function M.refresh()
 
 		if not ok then
 			vim.schedule(function()
-				vim.notify("Aurora: theme refresh failed\n" .. tostring(err), vim.log.levels.WARN)
+				vim.notify("Sunflower: theme refresh failed\n" .. tostring(err), vim.log.levels.WARN)
 			end)
 		end
 	end

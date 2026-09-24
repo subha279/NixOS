@@ -7,11 +7,11 @@ import Quickshell.Io
 QtObject {
     id: theme
 
-    // Aurora Runtime Theme
+    // Sunflower Runtime Theme
 
-    readonly property string auroraDirectory: Quickshell.env("HOME") + "/.config/aurora"
+    readonly property string sunflowerDirectory: Quickshell.env("HOME") + "/.config/sunflower"
 
-    readonly property string activeThemePath: auroraDirectory + "/active-theme"
+    readonly property string activeThemePath: sunflowerDirectory + "/active-theme"
 
     // Active Theme
 
@@ -34,7 +34,7 @@ QtObject {
     // Active Theme JSON
 
     property var themeFile: FileView {
-        path: theme.auroraDirectory + "/themes/" + theme.activeTheme + ".json"
+        path: theme.sunflowerDirectory + "/themes/" + theme.activeTheme + ".json"
 
         watchChanges: true
         blockLoading: true
@@ -53,7 +53,7 @@ QtObject {
         try {
             return JSON.parse(theme.themeFile.text());
         } catch (error) {
-            console.warn("Aurora Theme: invalid JSON:", error);
+            console.warn("Sunflower Theme: invalid JSON:", error);
 
             return ({});
         }

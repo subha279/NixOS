@@ -172,10 +172,10 @@ in
     ;
 
   generatedLuaFiles = lib.mapAttrs' (
-    themeId: file: lib.nameValuePair "aurora/themes/${themeId}.lua" file
+    themeId: file: lib.nameValuePair "sunflower/themes/${themeId}.lua" file
   ) luaThemeFiles;
 
   generatedJsonFiles = lib.mapAttrs' (
-    themeId: file: lib.nameValuePair "aurora/themes/${themeId}.json" file
+    themeId: file: lib.nameValuePair "sunflower/themes/${themeId}.json" file
   ) jsonThemeFiles;
 }

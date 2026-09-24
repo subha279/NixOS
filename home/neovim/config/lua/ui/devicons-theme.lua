@@ -1,15 +1,15 @@
--- Aurora DevIcons Theme
+-- Sunflower DevIcons Theme
 
 local M = {}
 
 -- Theme Loader
 
-local aurora = require("aurora.theme")
+local sunflower = require("sunflower.theme")
 
 -- Apply
 
 function M.setup()
-	local theme = aurora.get()
+	local theme = sunflower.get()
 
 	if not theme then
 		return
@@ -36,7 +36,7 @@ function M.setup()
 		return
 	end
 
-	-- Semantic Aurora icon palette
+	-- Semantic Sunflower icon palette
 	--
 	-- Used only for icons that do not have an explicit
 	-- language/filetype color below.

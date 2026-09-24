@@ -42,7 +42,7 @@ PanelWindow {
     // pill. Unchanged from before so the gap stays exactly where it was.
     exclusiveZone: Core.Theme.pillHeight + margins.top + 4
 
-    WlrLayershell.namespace: "aurora-bar"
+    WlrLayershell.namespace: "sunflower-bar"
 
     // Keyboard only while a launcher is up; the bar itself never wants focus.
     WlrLayershell.keyboardFocus: root.launcherOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None

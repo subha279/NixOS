@@ -15,7 +15,7 @@ let
       ui = themeData.global.ui;
     in
     ''
-      # ---- Theme palette (Aurora: ${theme.name}) ----
+      # ---- Theme palette (Sunflower: ${theme.name}) ----
       set -g @THM_BG "${colors.background}"
       set -g @THM_FG "${colors.text}"
       set -g @THM_ACCENT "${colors.accent}"
@@ -59,7 +59,7 @@ let
   });
 
   generatedTmuxFiles = lib.mapAttrs' (
-    themeId: file: lib.nameValuePair "aurora/themes/${themeId}.tmux.conf" file
+    themeId: file: lib.nameValuePair "sunflower/themes/${themeId}.tmux.conf" file
   ) tmuxThemeFiles;
 
 in

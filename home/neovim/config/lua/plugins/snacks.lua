@@ -1,4 +1,4 @@
--- Aurora Snacks
+-- Sunflower Snacks
 
 local M = {}
 
@@ -8,7 +8,7 @@ function M.setup()
 	local ok, snacks = pcall(require, "snacks")
 
 	if not ok then
-		vim.notify("Aurora: Snacks could not be loaded\n" .. tostring(snacks), vim.log.levels.WARN)
+		vim.notify("Sunflower: Snacks could not be loaded\n" .. tostring(snacks), vim.log.levels.WARN)
 
 		return false
 	end

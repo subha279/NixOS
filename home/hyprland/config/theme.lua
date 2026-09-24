@@ -1,9 +1,9 @@
--- Aurora Hyprland Theme
+-- Sunflower Hyprland Theme
 
 -- Paths
 local home = os.getenv("HOME")
-local activeThemePath = home .. "/.config/aurora/active-theme.lua"
-local fallbackThemePath = home .. "/.config/aurora/themes/catppuccin-mocha.lua"
+local activeThemePath = home .. "/.config/sunflower/active-theme.lua"
+local fallbackThemePath = home .. "/.config/sunflower/themes/catppuccin-mocha.lua"
 
 -- Load Active Theme
 local ok = false
@@ -25,7 +25,7 @@ end
 -- Fail clearly if no theme is available
 if not ok or not theme then
 	error(
-		"Aurora: unable to load theme.\n"
+		"Sunflower: unable to load theme.\n"
 			.. "Active theme: "
 			.. activeThemePath
 			.. "\n"
@@ -54,7 +54,7 @@ end
 local colors = theme.colors
 
 if type(colors) ~= "table" then
-	error("Aurora: theme has no valid 'colors' table")
+	error("Sunflower: theme has no valid 'colors' table")
 end
 
 -- Hyprland Theme

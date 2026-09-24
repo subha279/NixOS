@@ -2,7 +2,7 @@
 
 let
 
-  # Aurora Theme Source
+  # Sunflower Theme Source
 
   themeData = import ../../lib/themes.nix;
   activeTheme = themeData.theme;
@@ -50,16 +50,16 @@ in
     # Core
     enable = true;
 
-    # Aurora explicitly owns application-specific theming.
+    # Sunflower explicitly owns application-specific theming.
     autoEnable = false;
 
     # Derived, not hardcoded. See Polarity Detection above.
     polarity = if isLight then "light" else "dark";
 
-    # STATIC AURORA COLOR SOURCE
+    # STATIC SUNFLOWER COLOR SOURCE
     base16Scheme = {
       scheme = activeTheme.name;
-      author = "Aurora (lib/themes.nix)";
+      author = "Sunflower (lib/themes.nix)";
 
       # Base ramp
       base00 = hex colors.background;

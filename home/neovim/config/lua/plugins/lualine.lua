@@ -1,9 +1,9 @@
 local M = {}
 
-local aurora = require("aurora.theme")
+local sunflower = require("sunflower.theme")
 
 local function theme()
-	local c = aurora.colors()
+	local c = sunflower.colors()
 
 	-- Set transparent backgrounds for inner sections
 	local shared = {
@@ -124,7 +124,7 @@ function M.setup()
 	return true
 end
 
-aurora.on_change(function()
+sunflower.on_change(function()
 	M.setup()
 	vim.cmd("redrawstatus!")
 end)

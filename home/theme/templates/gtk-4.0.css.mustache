@@ -1,29 +1,29 @@
 /* ============================================================
- * Aurora GTK 4
+ * Sunflower GTK 4
  * ============================================================ */
 
-@define-color aurora_background #{{base00-hex}};
-@define-color aurora_surface #{{base01-hex}};
-@define-color aurora_surface_hover #{{base02-hex}};
-@define-color aurora_text_muted #{{base03-hex}};
-@define-color aurora_text_secondary #{{base04-hex}};
-@define-color aurora_text #{{base05-hex}};
+@define-color sunflower_background #{{base00-hex}};
+@define-color sunflower_surface #{{base01-hex}};
+@define-color sunflower_surface_hover #{{base02-hex}};
+@define-color sunflower_text_muted #{{base03-hex}};
+@define-color sunflower_text_secondary #{{base04-hex}};
+@define-color sunflower_text #{{base05-hex}};
 
-@define-color aurora_error #{{base08-hex}};
-@define-color aurora_warning #{{base09-hex}};
-@define-color aurora_yellow #{{base0A-hex}};
-@define-color aurora_success #{{base0B-hex}};
-@define-color aurora_cyan #{{base0C-hex}};
-@define-color aurora_info #{{base0D-hex}};
-@define-color aurora_accent #{{base0E-hex}};
-@define-color aurora_magenta #{{base0F-hex}};
+@define-color sunflower_error #{{base08-hex}};
+@define-color sunflower_warning #{{base09-hex}};
+@define-color sunflower_yellow #{{base0A-hex}};
+@define-color sunflower_success #{{base0B-hex}};
+@define-color sunflower_cyan #{{base0C-hex}};
+@define-color sunflower_info #{{base0D-hex}};
+@define-color sunflower_accent #{{base0E-hex}};
+@define-color sunflower_magenta #{{base0F-hex}};
 
 /* Base */
 
 window,
 .background {
-    background-color: @aurora_background;
-    color: @aurora_text;
+    background-color: @sunflower_background;
+    color: @sunflower_text;
 }
 
 /* ============================================================
@@ -31,27 +31,27 @@ window,
  * ============================================================ */
 
 window {
-    background-color: @aurora_background;
-    color: @aurora_text;
+    background-color: @sunflower_background;
+    color: @sunflower_text;
 }
 
 window.background {
-    background-color: @aurora_background;
-    color: @aurora_text;
+    background-color: @sunflower_background;
+    color: @sunflower_text;
 }
 
 /* Client-side decoration */
 
 decoration {
-    background-color: @aurora_background;
-    border: 1px solid @aurora_surface_hover;
+    background-color: @sunflower_background;
+    border: 1px solid @sunflower_surface_hover;
     border-radius: 12px;
     box-shadow: 0 3px 6px alpha(black, 0.14),
                 0 12px 28px alpha(black, 0.28);
 }
 
 decoration:backdrop {
-    border-color: @aurora_surface;
+    border-color: @sunflower_surface;
     box-shadow: 0 2px 4px alpha(black, 0.10),
                 0 8px 20px alpha(black, 0.20);
 }
@@ -61,8 +61,8 @@ decoration:backdrop {
  * ============================================================ */
 
 menubar {
-    background-color: @aurora_background;
-    color: @aurora_text;
+    background-color: @sunflower_background;
+    color: @sunflower_text;
 
     border: none;
     box-shadow: none;
@@ -70,30 +70,30 @@ menubar {
 
 menubar > item {
     background-color: transparent;
-    color: @aurora_text_secondary;
+    color: @sunflower_text_secondary;
 }
 
 menubar > item:hover {
-    background-color: @aurora_surface_hover;
-    color: @aurora_text;
+    background-color: @sunflower_surface_hover;
+    color: @sunflower_text;
 }
 
 menubar > item:active,
 menubar > item:selected {
-    background-color: @aurora_accent;
-    color: @aurora_background;
+    background-color: @sunflower_accent;
+    color: @sunflower_background;
 }
 
 .view {
-    background-color: @aurora_background;
-    color: @aurora_text;
+    background-color: @sunflower_background;
+    color: @sunflower_text;
 }
 
 /* Headerbars */
 
 headerbar {
-    background: @aurora_surface;
-    color: @aurora_text;
+    background: @sunflower_surface;
+    color: @sunflower_text;
 
     min-height: 42px;
     padding: 5px 8px;
@@ -103,17 +103,17 @@ headerbar {
 }
 
 headerbar:backdrop {
-    background: @aurora_background;
-    color: @aurora_text_muted;
+    background: @sunflower_background;
+    color: @sunflower_text_muted;
 }
 
 /* Buttons */
 
 button {
-    background: @aurora_surface;
-    color: @aurora_text;
+    background: @sunflower_surface;
+    color: @sunflower_text;
 
-    border: 1px solid @aurora_surface_hover;
+    border: 1px solid @sunflower_surface_hover;
     border-radius: 8px;
 
     box-shadow: none;
@@ -122,47 +122,47 @@ button {
 }
 
 button:hover {
-    background: @aurora_surface_hover;
-    border-color: @aurora_accent;
+    background: @sunflower_surface_hover;
+    border-color: @sunflower_accent;
 }
 
 button:focus,
 button:focus-visible {
-    border-color: @aurora_accent;
-    box-shadow: 0 0 0 2px alpha(@aurora_accent, 0.25);
+    border-color: @sunflower_accent;
+    box-shadow: 0 0 0 2px alpha(@sunflower_accent, 0.25);
 }
 
 button:active,
 button:checked {
-    background: @aurora_accent;
-    color: @aurora_background;
-    border-color: @aurora_accent;
+    background: @sunflower_accent;
+    color: @sunflower_background;
+    border-color: @sunflower_accent;
 }
 
 button:disabled {
-    background: @aurora_background;
-    color: @aurora_text_muted;
+    background: @sunflower_background;
+    color: @sunflower_text_muted;
 }
 
 /* Entries */
 
 entry {
-    background: @aurora_surface;
-    color: @aurora_text;
+    background: @sunflower_surface;
+    color: @sunflower_text;
 
-    border: 1px solid @aurora_surface_hover;
+    border: 1px solid @sunflower_surface_hover;
     border-radius: 8px;
 
     padding: 7px 10px;
 }
 
 entry:hover {
-    border-color: @aurora_text_secondary;
+    border-color: @sunflower_text_secondary;
 }
 
 entry:focus {
-    border-color: @aurora_accent;
-    box-shadow: 0 0 0 2px alpha(@aurora_accent, 0.25);
+    border-color: @sunflower_accent;
+    box-shadow: 0 0 0 2px alpha(@sunflower_accent, 0.25);
 }
 
 /* Lists */
@@ -171,67 +171,67 @@ list,
 listview,
 columnview,
 treeview {
-    background: @aurora_background;
-    color: @aurora_text;
+    background: @sunflower_background;
+    color: @sunflower_text;
 }
 
 row {
     background: transparent;
-    color: @aurora_text;
+    color: @sunflower_text;
 
     border-radius: 7px;
 }
 
 row:hover {
-    background: @aurora_surface;
+    background: @sunflower_surface;
 }
 
 row:selected {
-    background: @aurora_accent;
-    color: @aurora_background;
+    background: @sunflower_accent;
+    color: @sunflower_background;
 }
 
 /* Sidebar */
 
 .sidebar {
-    background: @aurora_surface;
-    color: @aurora_text;
+    background: @sunflower_surface;
+    color: @sunflower_text;
 }
 
 .sidebar row:hover {
-    background: @aurora_surface_hover;
+    background: @sunflower_surface_hover;
 }
 
 .sidebar row:selected {
-    background: @aurora_accent;
-    color: @aurora_background;
+    background: @sunflower_accent;
+    color: @sunflower_background;
 }
 
 /* Menus / popovers */
 
 popover,
 popover.menu {
-    background: @aurora_surface;
-    color: @aurora_text;
+    background: @sunflower_surface;
+    color: @sunflower_text;
 
-    border: 1px solid @aurora_surface_hover;
+    border: 1px solid @sunflower_surface_hover;
     border-radius: 12px;
     box-shadow: 0 6px 16px alpha(black, 0.20),
                 0 2px 4px alpha(black, 0.16);
 }
 
 popover modelbutton {
-    color: @aurora_text;
+    color: @sunflower_text;
     border-radius: 6px;
 }
 
 popover modelbutton:hover {
-    background: @aurora_surface_hover;
+    background: @sunflower_surface_hover;
 }
 
 popover modelbutton:active {
-    background: @aurora_accent;
-    color: @aurora_background;
+    background: @sunflower_accent;
+    color: @sunflower_background;
 }
 
 /* Scrollbars */
@@ -241,7 +241,7 @@ scrollbar {
 }
 
 scrollbar slider {
-    background: @aurora_text_muted;
+    background: @sunflower_text_muted;
     border-radius: 999px;
 
     min-width: 7px;
@@ -249,129 +249,129 @@ scrollbar slider {
 }
 
 scrollbar slider:hover {
-    background: @aurora_text_secondary;
+    background: @sunflower_text_secondary;
 }
 
 scrollbar slider:active {
-    background: @aurora_accent;
+    background: @sunflower_accent;
 }
 
 /* Scale */
 
 scale trough {
-    background: @aurora_surface_hover;
+    background: @sunflower_surface_hover;
     border-radius: 6px;
 }
 
 scale highlight {
-    background: @aurora_accent;
+    background: @sunflower_accent;
     border-radius: 6px;
 }
 
 scale slider {
-    background: @aurora_accent;
+    background: @sunflower_accent;
 }
 
 /* Check / radio */
 
 checkbutton,
 radiobutton {
-    color: @aurora_text;
+    color: @sunflower_text;
 }
 
 check,
 radio {
-    background: @aurora_surface;
-    border: 1px solid @aurora_text_muted;
+    background: @sunflower_surface;
+    border: 1px solid @sunflower_text_muted;
 }
 
 check:checked,
 radio:checked {
-    background: @aurora_accent;
-    color: @aurora_background;
-    border-color: @aurora_accent;
+    background: @sunflower_accent;
+    color: @sunflower_background;
+    border-color: @sunflower_accent;
 }
 
 /* Switch */
 
 switch {
-    background: @aurora_surface_hover;
-    border: 1px solid @aurora_text_muted;
+    background: @sunflower_surface_hover;
+    border: 1px solid @sunflower_text_muted;
     border-radius: 999px;
 }
 
 switch slider {
-    background: @aurora_text;
+    background: @sunflower_text;
     border-radius: 999px;
 }
 
 switch:checked {
-    background: @aurora_accent;
-    border-color: @aurora_accent;
+    background: @sunflower_accent;
+    border-color: @sunflower_accent;
 }
 
 /* Progress */
 
 progressbar trough {
-    background: @aurora_surface_hover;
+    background: @sunflower_surface_hover;
     border-radius: 6px;
 }
 
 progressbar progress {
-    background: @aurora_accent;
+    background: @sunflower_accent;
     border-radius: 6px;
 }
 
 /* Tooltips */
 
 tooltip {
-    background: @aurora_surface;
-    color: @aurora_text;
+    background: @sunflower_surface;
+    color: @sunflower_text;
 
-    border: 1px solid @aurora_surface_hover;
+    border: 1px solid @sunflower_surface_hover;
     border-radius: 8px;
 }
 
 /* Separators */
 
 separator {
-    background: @aurora_surface_hover;
+    background: @sunflower_surface_hover;
 }
 
 /* Links */
 
 *:link,
 *:visited {
-    color: @aurora_accent;
+    color: @sunflower_accent;
 }
 
 *:link:hover,
 *:visited:hover {
-    color: @aurora_cyan;
+    color: @sunflower_cyan;
 }
 
 /* ============================================================
- * AURORA — GTK4 GLOBAL DARK OVERRIDE
+ * SUNFLOWER — GTK4 GLOBAL DARK OVERRIDE
  * ============================================================ */
 
 * {
-    color: @aurora_text;
+    color: @sunflower_text;
 }
 
 /* Windows */
 
 window,
 window.background {
-    background-color: @aurora_background;
-    color: @aurora_text;
+    background-color: @sunflower_background;
+    color: @sunflower_text;
 }
 
 /* Header */
 
 headerbar,
 headerbar.background {
-    background-color: @aurora_surface;
-    color: @aurora_text;
+    background-color: @sunflower_surface;
+    color: @sunflower_text;
 
     border: none;
     box-shadow: none;
@@ -388,60 +388,60 @@ listview,
 columnview,
 stack,
 box {
-    background-color: @aurora_background;
-    color: @aurora_text;
+    background-color: @sunflower_background;
+    color: @sunflower_text;
 }
 
 /* Lists */
 
 row {
     background-color: transparent;
-    color: @aurora_text;
+    color: @sunflower_text;
 }
 
 row:hover {
-    background-color: @aurora_surface;
+    background-color: @sunflower_surface;
 }
 
 row:selected {
-    background-color: @aurora_accent;
-    color: @aurora_background;
+    background-color: @sunflower_accent;
+    color: @sunflower_background;
 }
 
 /* Sidebar */
 
 .sidebar {
-    background-color: @aurora_surface;
-    color: @aurora_text;
+    background-color: @sunflower_surface;
+    color: @sunflower_text;
 }
 
 .sidebar row:hover {
-    background-color: @aurora_surface_hover;
+    background-color: @sunflower_surface_hover;
 }
 
 .sidebar row:selected {
-    background-color: @aurora_accent;
-    color: @aurora_background;
+    background-color: @sunflower_accent;
+    color: @sunflower_background;
 }
 
 /* Buttons */
 
 button {
-    background: @aurora_surface;
-    color: @aurora_text;
+    background: @sunflower_surface;
+    color: @sunflower_text;
 
-    border: 1px solid @aurora_surface_hover;
+    border: 1px solid @sunflower_surface_hover;
     box-shadow: none;
 }
 
 button:hover {
-    background: @aurora_surface_hover;
+    background: @sunflower_surface_hover;
 }
 
 button:active,
 button:checked {
-    background: @aurora_accent;
-    color: @aurora_background;
+    background: @sunflower_accent;
+    color: @sunflower_background;
 }
 
 /* Inputs */
@@ -450,15 +450,15 @@ entry,
 spinbutton,
 dropdown,
 combobox {
-    background: @aurora_surface;
-    color: @aurora_text;
+    background: @sunflower_surface;
+    color: @sunflower_text;
 
-    border-color: @aurora_surface_hover;
+    border-color: @sunflower_surface_hover;
 }
 
 entry:focus,
 spinbutton:focus {
-    border-color: @aurora_accent;
+    border-color: @sunflower_accent;
 }
 
 /* Popovers */
@@ -466,26 +466,26 @@ spinbutton:focus {
 popover,
 popover.background,
 popover.menu {
-    background-color: @aurora_surface;
-    color: @aurora_text;
+    background-color: @sunflower_surface;
+    color: @sunflower_text;
 
-    border: 1px solid @aurora_surface_hover;
+    border: 1px solid @sunflower_surface_hover;
     box-shadow: 0 6px 16px alpha(black, 0.20),
                 0 2px 4px alpha(black, 0.16);
 }
 
 popover modelbutton {
     background: transparent;
-    color: @aurora_text;
+    color: @sunflower_text;
 }
 
 popover modelbutton:hover {
-    background: @aurora_surface_hover;
+    background: @sunflower_surface_hover;
 }
 
 popover modelbutton:active {
-    background: @aurora_accent;
-    color: @aurora_background;
+    background: @sunflower_accent;
+    color: @sunflower_background;
 }
 
 /* Scrollbars */
@@ -495,46 +495,46 @@ scrollbar {
 }
 
 scrollbar slider {
-    background: @aurora_text_muted;
+    background: @sunflower_text_muted;
 }
 
 scrollbar slider:hover {
-    background: @aurora_text_secondary;
+    background: @sunflower_text_secondary;
 }
 
 scrollbar slider:active {
-    background: @aurora_accent;
+    background: @sunflower_accent;
 }
 
 /* Menus */
 
 menubar {
-    background-color: @aurora_background;
-    color: @aurora_text;
+    background-color: @sunflower_background;
+    color: @sunflower_text;
 }
 
 menubar > item {
     background: transparent;
-    color: @aurora_text_secondary;
+    color: @sunflower_text_secondary;
 }
 
 menubar > item:hover {
-    background: @aurora_surface_hover;
-    color: @aurora_text;
+    background: @sunflower_surface_hover;
+    color: @sunflower_text;
 }
 
 /* Tooltips */
 
 tooltip {
-    background-color: @aurora_surface;
-    color: @aurora_text;
+    background-color: @sunflower_surface;
+    color: @sunflower_text;
 
-    border: 1px solid @aurora_surface_hover;
+    border: 1px solid @sunflower_surface_hover;
 }
 
 /* Selection */
 
 selection {
-    background-color: @aurora_accent;
-    color: @aurora_background;
+    background-color: @sunflower_accent;
+    color: @sunflower_background;
 }

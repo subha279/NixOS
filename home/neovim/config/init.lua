@@ -5,14 +5,14 @@ vim.g.maplocalleader = " "
 
 -- Startup Timer
 
-vim.g.aurora_startup_time = vim.uv.hrtime()
+vim.g.sunflower_startup_time = vim.uv.hrtime()
 
 -- Core
 
 require("core.options")
 require("core.autocmds")
 
--- Aurora Theme Manager
+-- Sunflower Theme Manager
 
 require("ui.theme")
 
@@ -86,7 +86,7 @@ end)
 
 if not colorizer_ok then
 	vim.schedule(function()
-		vim.notify("Aurora: Colorizer could not be loaded\n" .. tostring(colorizer_error), vim.log.levels.WARN)
+		vim.notify("Sunflower: Colorizer could not be loaded\n" .. tostring(colorizer_error), vim.log.levels.WARN)
 	end)
 end
 
@@ -126,4 +126,4 @@ require("plugins.alpha")
 
 require("core.keymaps")
 
-require("aurora.theme").watch()
+require("sunflower.theme").watch()

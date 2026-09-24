@@ -1,7 +1,7 @@
 { pkgs, ... }:
 
 {
-  # Aurora Hyprland
+  # Sunflower Hyprland
   # Polkit Qt Environment Override
   xdg.configFile."systemd/user/plasma-polkit-agent.service.d/environment.conf".text = ''
     [Service]
@@ -15,7 +15,7 @@
   xdg.configFile."hypr/config".source = ./config;
   xdg.configFile."hypr/scripts/restore-wallpaper.sh".source = ./scripts/restore-wallpaper.sh;
 
-  # Aurora Desktop Services
+  # Sunflower Desktop Services
   systemd.user.targets.hyprland-session = {
     Unit = {
       Description = "Hyprland compositor session";
@@ -29,7 +29,7 @@
 
   systemd.user.targets.desktop-services = {
     Unit = {
-      Description = "Aurora desktop services";
+      Description = "Sunflower desktop services";
       PartOf = [ "graphical-session.target" ];
       After = [ "graphical-session.target" ];
       Wants = [

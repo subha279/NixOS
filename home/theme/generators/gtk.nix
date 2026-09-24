@@ -21,11 +21,11 @@ let
   });
 
   generatedGtk3Files = lib.mapAttrs' (
-    themeId: file: lib.nameValuePair "aurora/themes/${themeId}/gtk-3.0/gtk.css" file
+    themeId: file: lib.nameValuePair "sunflower/themes/${themeId}/gtk-3.0/gtk.css" file
   ) gtk3Themes;
 
   generatedGtk4Files = lib.mapAttrs' (
-    themeId: file: lib.nameValuePair "aurora/themes/${themeId}/gtk-4.0/gtk.css" file
+    themeId: file: lib.nameValuePair "sunflower/themes/${themeId}/gtk-4.0/gtk.css" file
   ) gtk4Themes;
 
 in

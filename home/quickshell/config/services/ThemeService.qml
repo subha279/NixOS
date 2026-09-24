@@ -4,19 +4,19 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-// Aurora Theme Service
+// Sunflower Theme Service
 
 QtObject {
     id: root
 
     readonly property string home: Quickshell.env("HOME")
-    readonly property string auroraDirectory: root.home + "/.config/aurora"
-    readonly property string switcherPath: root.home + "/.local/bin/aurora-theme"
+    readonly property string sunflowerDirectory: root.home + "/.config/sunflower"
+    readonly property string switcherPath: root.home + "/.local/bin/sunflower-theme"
 
     // Sources
 
     property FileView listFile: FileView {
-        path: root.auroraDirectory + "/themes.list"
+        path: root.sunflowerDirectory + "/themes.list"
         watchChanges: true
         blockLoading: true
         printErrors: false
@@ -24,7 +24,7 @@ QtObject {
     }
 
     property FileView catalogueFile: FileView {
-        path: root.auroraDirectory + "/themes.json"
+        path: root.sunflowerDirectory + "/themes.json"
         watchChanges: true
         blockLoading: true
         printErrors: false
@@ -32,7 +32,7 @@ QtObject {
     }
 
     property FileView activeFile: FileView {
-        path: root.auroraDirectory + "/active-theme"
+        path: root.sunflowerDirectory + "/active-theme"
         watchChanges: true
         blockLoading: true
         printErrors: false
@@ -42,7 +42,7 @@ QtObject {
     // Derived state
 
     // Has to match a theme id that lib/themes.nix actually defines, and the
-    // default core/Theme.qml falls back to. This was "aurora", which is not a
+    // default core/Theme.qml falls back to. This was "sunflower", which is not a
     // real theme, so with no active-theme file the picker marked nothing active.
     readonly property string defaultId: "catppuccin-mocha"
 

@@ -292,13 +292,13 @@ Theming has two halves.
 `lib/themes.nix`. Those are the only three targets enabled; `autoEnable` is off
 so nothing else is themed behind your back.
 
-**The Aurora generator** in `home/theme` owns everything else. It reads the same
+**The Sunflower generator** in `home/theme` owns everything else. It reads the same
 `lib/themes.nix` and writes a Lua, JSON, Kitty, Tmux and Starship file per theme,
 which Hyprland, Quickshell, Kitty, Neovim, tmux and the prompt then read at
 runtime. This is why switching theme does not need a rebuild.
 
 Each target is generated as appearance only, so switching theme re-sources
-colours into a running program without disturbing its keybindings — `aurora-theme`
+colours into a running program without disturbing its keybindings — `sunflower-theme`
 reloads Hyprland, repaints every live Kitty socket, re-sources tmux and nudges
 open Zsh sessions.
 

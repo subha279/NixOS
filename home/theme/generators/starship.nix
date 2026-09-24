@@ -17,7 +17,7 @@ let
         command_timeout = 1000
         scan_timeout = 30
         follow_symlinks = false
-        palette = "aurora"
+        palette = "sunflower"
         format = """\
         $directory\
         ''${custom.giturl}\
@@ -30,7 +30,7 @@ let
         $cmd_duration\
         $character"""
 
-        [palettes.aurora]
+        [palettes.sunflower]
         bg = "${colors.background}"
         surface = "${colors.surface}"
         surface2 = "${colors.surfaceHover}"
@@ -184,7 +184,7 @@ let
   });
 
   generatedStarshipFiles = lib.mapAttrs' (
-    themeId: file: lib.nameValuePair "aurora/themes/${themeId}.starship.toml" file
+    themeId: file: lib.nameValuePair "sunflower/themes/${themeId}.starship.toml" file
   ) starshipThemeFiles;
 
 in

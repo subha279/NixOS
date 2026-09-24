@@ -1,4 +1,4 @@
--- Aurora Conform
+-- Sunflower Conform
 
 local M = {}
 
@@ -8,7 +8,7 @@ function M.setup()
 	local ok, conform = pcall(require, "conform")
 
 	if not ok then
-		vim.notify("Aurora: Conform could not be loaded\n" .. tostring(conform), vim.log.levels.WARN)
+		vim.notify("Sunflower: Conform could not be loaded\n" .. tostring(conform), vim.log.levels.WARN)
 
 		return false
 	end

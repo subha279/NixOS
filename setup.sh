@@ -92,23 +92,23 @@ if [[ "$IS_TTY" -eq 1 ]]; then
     if [[ "$UI_WIDTH" -lt 40 ]]; then UI_WIDTH=40; fi
 fi
 
-# Palette, read from the live Aurora theme
+# Palette, read from the live Sunflower theme
 #
-# ~/.config/aurora/active-theme and themes/<id>.json are the same
+# ~/.config/sunflower/active-theme and themes/<id>.json are the same
 # files core/Theme.qml watches, so the installer wears whatever
 # colourscheme the desktop is currently wearing. Strictly read-only:
 # this participates in no part of the theme pipeline, it only looks
-# at the output. Every lookup carries the built-in aurora value as a
+# at the output. Every lookup carries the built-in sunflower value as a
 # fallback, so a missing or half-written file costs nothing.
 
-AURORA_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/aurora"
+SUNFLOWER_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/sunflower"
 UI_THEME_FILE=""
 
-if [[ -r "$AURORA_DIR/active-theme" ]]; then
-    UI_THEME_ID="$(tr -d '[:space:]' <"$AURORA_DIR/active-theme" 2>/dev/null || printf '')"
+if [[ -r "$SUNFLOWER_DIR/active-theme" ]]; then
+    UI_THEME_ID="$(tr -d '[:space:]' <"$SUNFLOWER_DIR/active-theme" 2>/dev/null || printf '')"
 
-    if [[ -n "$UI_THEME_ID" && -r "$AURORA_DIR/themes/$UI_THEME_ID.json" ]]; then
-        UI_THEME_FILE="$AURORA_DIR/themes/$UI_THEME_ID.json"
+    if [[ -n "$UI_THEME_ID" && -r "$SUNFLOWER_DIR/themes/$UI_THEME_ID.json" ]]; then
+        UI_THEME_FILE="$SUNFLOWER_DIR/themes/$UI_THEME_ID.json"
     fi
 fi
 
@@ -1947,9 +1947,9 @@ validator_run() {
             true
     )"
 
-    if [[ "$THEME_EVAL" == '"aurora"' ]]; then
+    if [[ "$THEME_EVAL" == '"sunflower"' ]]; then
 
-        v_ok "Active theme evaluates correctly: aurora"
+        v_ok "Active theme evaluates correctly: sunflower"
 
     elif [[ -n "$THEME_EVAL" ]]; then
 
@@ -2135,7 +2135,7 @@ validator_run() {
 
     # Wallpaper state location
 
-    if grep -q '\.cache/aurora/current-wallpaper' \
+    if grep -q '\.cache/sunflower/current-wallpaper' \
         "$WALLPAPER_SERVICE" 2>/dev/null; then
 
         v_ok "Wallpaper state uses cache"
@@ -2146,7 +2146,7 @@ validator_run() {
 
     fi
 
-    if grep -q '\.cache/aurora/current-wallpaper' \
+    if grep -q '\.cache/sunflower/current-wallpaper' \
         "$RESTORE_SCRIPT" 2>/dev/null; then
 
         v_ok "Wallpaper restore uses cache"
@@ -2216,11 +2216,11 @@ validator_run() {
 
     generated_files=(
 
-        "$HOME/.config/aurora/active-theme"
-        "$HOME/.config/aurora/active-theme.lua"
-        "$HOME/.config/aurora/active-kitty.conf"
-        "$HOME/.config/aurora/active-tmux.conf"
-        "$HOME/.config/aurora/active-starship.toml"
+        "$HOME/.config/sunflower/active-theme"
+        "$HOME/.config/sunflower/active-theme.lua"
+        "$HOME/.config/sunflower/active-kitty.conf"
+        "$HOME/.config/sunflower/active-tmux.conf"
+        "$HOME/.config/sunflower/active-starship.toml"
 
         "$HOME/.config/quickshell/shell.qml"
         "$HOME/.config/hypr/hyprland.lua"
@@ -2245,10 +2245,10 @@ validator_run() {
 
     section "Generated theme sanity"
 
-    ACTIVE_THEME_LUA="$HOME/.config/aurora/active-theme.lua"
-    ACTIVE_KITTY="$HOME/.config/aurora/active-kitty.conf"
-    ACTIVE_TMUX="$HOME/.config/aurora/active-tmux.conf"
-    ACTIVE_STARSHIP="$HOME/.config/aurora/active-starship.toml"
+    ACTIVE_THEME_LUA="$HOME/.config/sunflower/active-theme.lua"
+    ACTIVE_KITTY="$HOME/.config/sunflower/active-kitty.conf"
+    ACTIVE_TMUX="$HOME/.config/sunflower/active-tmux.conf"
+    ACTIVE_STARSHIP="$HOME/.config/sunflower/active-starship.toml"
 
     # active-theme.lua
 
@@ -2336,7 +2336,7 @@ validator_run() {
 
         # Every Wayland namespace declared by a Quickshell surface needs a matching layer rule.
 
-        for ns in aurora-bar aurora-popup aurora-notifications aurora-launcher; do
+        for ns in sunflower-bar sunflower-popup sunflower-notifications sunflower-launcher; do
 
             if grep -q "namespace = \"\\^${ns}\\\$\"" \
                 "$LAYER_RULES" 2>/dev/null; then

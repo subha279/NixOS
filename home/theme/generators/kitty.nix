@@ -66,6 +66,6 @@ in
   inherit themeToKitty kittyThemeFiles;
 
   generatedKittyFiles = lib.mapAttrs' (
-    themeId: file: lib.nameValuePair "aurora/themes/${themeId}.kitty.conf" file
+    themeId: file: lib.nameValuePair "sunflower/themes/${themeId}.kitty.conf" file
   ) kittyThemeFiles;
 }

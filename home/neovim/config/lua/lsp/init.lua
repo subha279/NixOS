@@ -1,12 +1,12 @@
--- Aurora Native LSP
+-- Sunflower Native LSP
 
 local M = {}
 
--- Aurora Theme
+-- Sunflower Theme
 
-local aurora = require("aurora.theme")
+local sunflower = require("sunflower.theme")
 
-local colors = aurora.colors
+local colors = sunflower.colors
 
 local function set_hl(name, opts)
 	vim.api.nvim_set_hl(0, name, opts)
@@ -366,9 +366,9 @@ configure_diagnostics()
 
 apply_highlights()
 
--- Live Aurora Theme Refresh
+-- Live Sunflower Theme Refresh
 
-aurora.on_change(function()
+sunflower.on_change(function()
 	apply_highlights()
 
 	configure_diagnostics()

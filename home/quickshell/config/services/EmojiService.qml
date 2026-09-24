@@ -52,7 +52,7 @@ QtObject {
             root.items = data;
             root.ready = true;
         } catch (error) {
-            console.warn("Aurora Emoji: failed to parse emoji database:", error);
+            console.warn("Sunflower Emoji: failed to parse emoji database:", error);
 
             root.items = [];
             root.ready = false;

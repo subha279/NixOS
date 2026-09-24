@@ -4,16 +4,16 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-// Aurora Apps Service
+// Sunflower Apps Service
 //
 // Application list and ranking for the launcher.
-// State: ~/.cache/aurora/launcher-usage.json
+// State: ~/.cache/sunflower/launcher-usage.json
 
 QtObject {
     id: root
 
     readonly property string home: Quickshell.env("HOME")
-    readonly property string usagePath: root.home + "/.cache/aurora/launcher-usage.json"
+    readonly property string usagePath: root.home + "/.cache/sunflower/launcher-usage.json"
 
     property var usage: ({})
 
