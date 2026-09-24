@@ -350,6 +350,54 @@ let
       background_opacity ${toString ui.terminalOpacity}
     '';
 
+  themeToTmux =
+    themeId:
+    let
+      theme = themeData.themes.${themeId};
+      colors = theme.colors;
+      fonts = themeData.global.fonts;
+      ui = themeData.global.ui;
+    in
+    ''
+      # ---- Theme palette (Aurora: ${theme.name}) ----
+      set -g @THM_BG "${colors.background}"
+      set -g @THM_FG "${colors.text}"
+      set -g @THM_ACCENT "${colors.accent}"
+      set -g @THM_ACCENT_HOVER "${colors.accentHover}"
+      set -g @THM_ACCENT_ACTIVE "${colors.accentActive}"
+      set -g @THM_ACCENT_MUTED "${colors.accentMuted}"
+      set -g @THM_ACCENT_FG "${colors.accentForeground}"
+      set -g @THM_BORDER "${colors.border}"
+      set -g @THM_BORDER_FOCUS "${colors.borderFocus}"
+      set -g @THM_SURFACE "${colors.surface}"
+      set -g @THM_SURFACE_HOVER "${colors.surfaceHover}"
+      set -g @THM_TEXT_MUTED "${colors.textMuted}"
+      set -g @THM_TEXT_SECONDARY "${colors.textSecondary}"
+
+      # ANSI colors
+      set -g @THM_BLACK "${colors.terminalBlack}"
+      set -g @THM_RED "${colors.terminalRed}"
+      set -g @THM_GREEN "${colors.terminalGreen}"
+      set -g @THM_YELLOW "${colors.terminalYellow}"
+      set -g @THM_BLUE "${colors.terminalBlue}"
+      set -g @THM_MAGENTA "${colors.terminalMagenta}"
+      set -g @THM_CYAN "${colors.terminalCyan}"
+      set -g @THM_WHITE "${colors.terminalWhite}"
+      set -g @THM_BRIGHT_BLACK "${colors.terminalBrightBlack}"
+      set -g @THM_BRIGHT_RED "${colors.terminalBrightRed}"
+      set -g @THM_BRIGHT_GREEN "${colors.terminalBrightGreen}"
+      set -g @THM_BRIGHT_YELLOW "${colors.terminalBrightYellow}"
+      set -g @THM_BRIGHT_BLUE "${colors.terminalBrightBlue}"
+      set -g @THM_BRIGHT_MAGENTA "${colors.terminalBrightMagenta}"
+      set -g @THM_BRIGHT_CYAN "${colors.terminalBrightCyan}"
+      set -g @THM_BRIGHT_WHITE "${colors.terminalBrightWhite}"
+
+      # Options that require LITERAL colors (no #{@VAR} expansion)
+      set -g clock-mode-colour "${colors.terminalBlue}"
+      set -g display-panes-active-colour "${colors.accent}"
+      set -g display-panes-colour "${colors.border}"
+    '';
+
   themeToStarship =
     themeId:
     let
@@ -535,6 +583,10 @@ let
     text = themeToKitty themeId;
   });
 
+  tmuxThemeFiles = lib.genAttrs themeNames (themeId: {
+    text = themeToTmux themeId;
+  });
+
   starshipThemeFiles = lib.genAttrs themeNames (themeId: {
     text = themeToStarship themeId;
   });
@@ -560,6 +612,10 @@ let
   generatedKittyFiles = lib.mapAttrs' (
     themeId: file: lib.nameValuePair "aurora/themes/${themeId}.kitty.conf" file
   ) kittyThemeFiles;
+
+  generatedTmuxFiles = lib.mapAttrs' (
+    themeId: file: lib.nameValuePair "aurora/themes/${themeId}.tmux.conf" file
+  ) tmuxThemeFiles;
 
   generatedStarshipFiles = lib.mapAttrs' (
     themeId: file: lib.nameValuePair "aurora/themes/${themeId}.starship.toml" file
@@ -593,6 +649,7 @@ in
   // generatedLuaFiles
   // generatedJsonFiles
   // generatedKittyFiles
+  // generatedTmuxFiles
   // generatedStarshipFiles
   // generatedGtk3Files
   // generatedGtk4Files
@@ -604,6 +661,7 @@ in
     theme_file="$theme_dir/active-theme"
     active_lua="$theme_dir/active-theme.lua"
     active_kitty="$theme_dir/active-kitty.conf"
+    active_tmux="$theme_dir/active-tmux.conf"
     active_starship="$theme_dir/active-starship.toml"
 
     mkdir -p "$theme_dir"
@@ -632,6 +690,16 @@ in
       ln -sfn \
         "$theme_dir/themes/catppuccin-mocha.kitty.conf" \
         "$active_kitty"
+    fi
+
+    if [[ -f "$theme_dir/themes/$selected.tmux.conf" ]]; then
+      ln -sfn \
+        "$theme_dir/themes/$selected.tmux.conf" \
+        "$active_tmux"
+    else
+      ln -sfn \
+        "$theme_dir/themes/catppuccin-mocha.tmux.conf" \
+        "$active_tmux"
     fi
 
     if [[ -f "$theme_dir/themes/$selected.starship.toml" ]]; then
@@ -676,6 +744,7 @@ in
       ACTIVE_THEME="$CONFIG_DIR/active-theme"
       ACTIVE_LUA="$CONFIG_DIR/active-theme.lua"
       ACTIVE_KITTY="$CONFIG_DIR/active-kitty.conf"
+      ACTIVE_TMUX="$CONFIG_DIR/active-tmux.conf"
       ACTIVE_STARSHIP="$CONFIG_DIR/active-starship.toml"
       THEME_DIR="$CONFIG_DIR/themes"
       GTK3_DIR="$HOME/.config/gtk-3.0"
@@ -715,6 +784,7 @@ in
         theme_lua="$THEME_DIR/$theme_id.lua"
         theme_json="$THEME_DIR/$theme_id.json"
         theme_kitty="$THEME_DIR/$theme_id.kitty.conf"
+        theme_tmux="$THEME_DIR/$theme_id.tmux.conf"
         theme_starship="$THEME_DIR/$theme_id.starship.toml"
 
         if [[ ! -f "$theme_lua" ]]; then
@@ -729,6 +799,11 @@ in
 
         if [[ ! -f "$theme_kitty" ]]; then
           echo "Aurora: generated Kitty theme not found: $theme_id" >&2
+          exit 1
+        fi
+
+        if [[ ! -f "$theme_tmux" ]]; then
+          echo "Aurora: generated Tmux theme not found: $theme_id" >&2
           exit 1
         fi
 
@@ -758,15 +833,16 @@ in
 
         ln -sfn "$theme_lua" "$ACTIVE_LUA"
         ln -sfn "$theme_kitty" "$ACTIVE_KITTY"
+        ln -sfn "$theme_tmux" "$ACTIVE_TMUX"
         ln -sfn "$theme_starship" "$ACTIVE_STARSHIP"
 
         # GTK
         mkdir -p "$GTK3_DIR" "$GTK4_DIR"
 
-        ln -sfn "$THEME_DIR/$selected/gtk-3.0/gtk.css" \
+        ln -sfn "$THEME_DIR/$theme_id/gtk-3.0/gtk.css" \
         "$GTK3_DIR/gtk.css"
 
-        ln -sfn "$THEME_DIR/$selected/gtk-4.0/gtk.css" \
+        ln -sfn "$THEME_DIR/$theme_id/gtk-4.0/gtk.css" \
         "$GTK4_DIR/gtk.css"
 
 
@@ -778,16 +854,8 @@ in
         fi
 
         ln -s \
-        "$THEME_DIR/$selected/kvantum" \
+        "$THEME_DIR/$theme_id/kvantum" \
         "$KVANTUM_THEME"
-
-        mkdir -p "$KVANTUM_DIR"
-
-        if [[ -L "$KVANTUM_THEME" || -e "$KVANTUM_THEME" ]]; then
-        rm -rf "$KVANTUM_THEME"
-        fi
-
-        ln -s "$THEME_DIR/$selected/kvantum" "$KVANTUM_THEME"
 
         # Kvantum
         kvantum_config="$KVANTUM_DIR/kvantum.kvconfig"
@@ -820,6 +888,12 @@ in
               "$theme_kitty" \
               >/dev/null 2>&1 || true
           done
+        fi
+
+        if command -v tmux >/dev/null 2>&1; then
+          # Reload theme palette and status bar in all sessions
+          tmux source-file "$theme_tmux" >/dev/null 2>&1 || true
+          tmux source-file "$HOME/.config/tmux/theme/bar.conf" >/dev/null 2>&1 || true
         fi
 
         AURORA_ZSH_REFRESH_DIR="''${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/aurora-zsh"

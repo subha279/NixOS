@@ -22,11 +22,9 @@
       export STARSHIP_CONFIG="$HOME/.config/aurora/active-starship.toml"
     '';
 
-    profileExtra = ''
-      # Aurora → Hyprland session
-      if [[ -z "''${WAYLAND_DISPLAY:-}" ]] &&
-        [[ -z "''${SSH_CONNECTION:-}" ]] &&
-        [[ "''${XDG_VTNR:-0}" == "1" ]]; then
+profileExtra = ''
+      # Aurora → Hyprland session (only on TTY1, not SSH, not already in Wayland)
+      if [[ -z "''${WAYLAND_DISPLAY:-}" ]] && [[ -z "''${SSH_CONNECTION:-}" ]] && [[ "''${XDG_VTNR:-0}" == "1" ]] && [[ "$(tty)" == "/dev/tty1" ]]; then
         exec start-hyprland
       fi
     '';

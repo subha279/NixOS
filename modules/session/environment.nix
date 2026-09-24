@@ -7,6 +7,7 @@
     MOZ_ENABLE_WAYLAND = "1";
 
     QT_QPA_PLATFORM = "wayland";
+    QT_QPA_PLATFORMTHEME = "kvantum";
 
     SDL_VIDEODRIVER = "wayland";
 

@@ -45,7 +45,15 @@ window.background {
 decoration {
     background-color: @aurora_background;
     border: 1px solid @aurora_surface_hover;
-    box-shadow: none;
+    border-radius: 12px;
+    box-shadow: 0 3px 6px alpha(black, 0.14),
+                0 12px 28px alpha(black, 0.28);
+}
+
+decoration:backdrop {
+    border-color: @aurora_surface;
+    box-shadow: 0 2px 4px alpha(black, 0.10),
+                0 8px 20px alpha(black, 0.20);
 }
 
 /* ============================================================
@@ -118,6 +126,12 @@ button:hover {
     border-color: @aurora_accent;
 }
 
+button:focus,
+button:focus-visible {
+    border-color: @aurora_accent;
+    box-shadow: 0 0 0 2px alpha(@aurora_accent, 0.25);
+}
+
 button:active,
 button:checked {
     background: @aurora_accent;
@@ -148,7 +162,7 @@ entry:hover {
 
 entry:focus {
     border-color: @aurora_accent;
-    box-shadow: 0 0 0 1px @aurora_accent;
+    box-shadow: 0 0 0 2px alpha(@aurora_accent, 0.25);
 }
 
 /* Lists */
@@ -201,7 +215,9 @@ popover.menu {
     color: @aurora_text;
 
     border: 1px solid @aurora_surface_hover;
-    border-radius: 10px;
+    border-radius: 12px;
+    box-shadow: 0 6px 16px alpha(black, 0.20),
+                0 2px 4px alpha(black, 0.16);
 }
 
 popover modelbutton {
@@ -454,7 +470,8 @@ popover.menu {
     color: @aurora_text;
 
     border: 1px solid @aurora_surface_hover;
-    box-shadow: none;
+    box-shadow: 0 6px 16px alpha(black, 0.20),
+                0 2px 4px alpha(black, 0.16);
 }
 
 popover modelbutton {
