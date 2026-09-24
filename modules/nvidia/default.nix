@@ -5,7 +5,7 @@ let
 in
 {
   config =
-    if vars.nvidia.enable then
+    if vars.hardware.nvidia.enable then
       {
         services.xserver.videoDrivers = [
           "modesetting"
@@ -18,8 +18,8 @@ in
           prime = {
             offload.enable = true;
             offload.enableOffloadCmd = true;
-            intelBusId = vars.nvidia.intelBusId;
-            nvidiaBusId = vars.nvidia.nvidiaBusId;
+            intelBusId = vars.hardware.nvidia.intelBusId;
+            nvidiaBusId = vars.hardware.nvidia.nvidiaBusId;
           };
         };
       }

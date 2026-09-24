@@ -1,12 +1,9 @@
-{
+let
   global = {
-
     # Active theme
-
     activeTheme = "catppuccin-mocha";
 
     # Fonts
-
     fonts = {
       interface = {
         name = "Inter";
@@ -25,14 +22,12 @@
     };
 
     # Icons
-
     icons = {
       name = "Colloid-Dark";
       package = "colloid-icon-theme";
     };
 
     # Cursor
-
     cursor = {
       name = "phinger-cursors-dark";
       package = "phinger-cursors";
@@ -40,22 +35,15 @@
     };
 
     # UI
-
     ui = {
-
       borderWidth = 0;
-
       radius = 15;
       radiusSmall = 10;
       radiusLarge = 18;
-
       iconSize = 16;
-
       fontSize = 13;
       fontSizeSmall = 10;
       fontSizeLarge = 16;
-
-      # LIQUID GLASS
 
       glassOpacity = 0.50;
       surfaceOpacity = 0.18;
@@ -63,24 +51,16 @@
       glassGradientOpacity = 0.055;
       glassGrainOpacity = 0.0;
 
-      # Flat glass.
       glassSpecularOpacity = 0.0;
       glassLensOpacity = 0.0;
       glassDepthOpacity = 0.0;
       glassRimOpacity = 0.0;
       glassClarity = 0.14;
 
-      # SHADOWS / WINDOWS
-
       shadowOpacity = 0.24;
-
       windowOpacity = 0.96;
-
       terminalOpacity = 0.52;
-
       editorFloatBlend = 12;
-
-      # CLOCK
 
       clock = {
         hour = "foreground";
@@ -91,645 +71,27 @@
     };
   };
 
-  # THEMES
-
-  themes = {
-
-    # ==========================================================
-    # CATPPUCCIN MOCHA
-    # ==========================================================
-
-    catppuccin-mocha = {
-
-      name = "Catppuccin Mocha";
-
-      description = "Soft pastel dark theme";
-
-      colors = {
-
-        # Base
-        background = "#1E1E2E";
-        backgroundDark = "#181825";
-
-        # Surfaces
-        surface = "#313244";
-        surfaceHover = "#45475A";
-        surfaceActive = "#585B70";
-
-        # Borders
-        border = "#45475A";
-        borderFocus = "#CBA6F7";
-        separator = "#3B3D52";
-
-        # Text
-        text = "#CDD6F4";
-        textSecondary = "#BAC2DE";
-        textMuted = "#9399B2";
-
-        # Accent
-        accent = "#CBA6F7";
-        accentHover = "#B4BEFE";
-        accentActive = "#F5C2E7";
-        accentMuted = "#585B70";
-        accentForeground = "#1E1E2E";
-
-        # Syntax
-        syntax = {
-          comment = "#6C7086";
-          variable = "#CDD6F4";
-          parameter = "#F2CDCD";
-          property = "#89B4FA";
-          func = "#89B4FA";
-          method = "#89B4FA";
-          keyword = "#CBA6F7";
-          keywordControl = "#F38BA8";
-          type = "#F9E2AF";
-          constant = "#FAB387";
-          string = "#A6E3A1";
-          number = "#FAB387";
-          boolean = "#CBA6F7";
-          operator = "#89DCEB";
-          punctuation = "#9399B2";
-          tag = "#F38BA8";
-          attribute = "#F9E2AF";
-          namespace = "#89B4FA";
-          builtin = "#94E2D5";
-          regex = "#F5C2E7";
-          special = "#F5C2E7";
-          macro = "#CBA6F7";
-        };
-
-        # Semantic
-        success = "#A6E3A1";
-        warning = "#F9E2AF";
-        error = "#F38BA8";
-        info = "#89B4FA";
-
-        # ANSI
-        terminalBlack = "#45475A";
-        terminalRed = "#F38BA8";
-        terminalGreen = "#A6E3A1";
-        terminalYellow = "#F9E2AF";
-        terminalBlue = "#89B4FA";
-        terminalMagenta = "#F5C2E7";
-        terminalCyan = "#94E2D5";
-        terminalWhite = "#BAC2DE";
-
-        terminalBrightBlack = "#585B70";
-        terminalBrightRed = "#F38BA8";
-        terminalBrightGreen = "#A6E3A1";
-        terminalBrightYellow = "#F9E2AF";
-        terminalBrightBlue = "#89B4FA";
-        terminalBrightMagenta = "#F5C2E7";
-        terminalBrightCyan = "#94E2D5";
-        terminalBrightWhite = "#CDD6F4";
-      };
-    };
-
-    # ==========================================================
-    # TOKYO NIGHT
-    # ==========================================================
-
-    tokyo-night = {
-
-      name = "Tokyo Night";
-
-      description = "Deep blue violet night theme";
-
-      colors = {
-
-        # Base
-        background = "#1A1B26";
-        backgroundDark = "#16161E";
-
-        # Surfaces
-        surface = "#24283B";
-        surfaceHover = "#292E42";
-        surfaceActive = "#3B4261";
-
-        # Borders
-        border = "#3B4261";
-        borderFocus = "#7AA2F7";
-        separator = "#292E42";
-
-        # Text
-        text = "#C0CAF5";
-        textSecondary = "#A9B1D6";
-        textMuted = "#7982A9";
-
-        # Accent
-        accent = "#7AA2F7";
-        accentHover = "#8DB0FF";
-        accentActive = "#BB9AF7";
-        accentMuted = "#414868";
-        accentForeground = "#1A1B26";
-
-        # Syntax
-        syntax = {
-          comment = "#565F89";
-          variable = "#C0CAF5";
-          parameter = "#E0AF68";
-          property = "#7DCFFF";
-          func = "#7AA2F7";
-          method = "#7DCFFF";
-          keyword = "#BB9AF7";
-          keywordControl = "#F7768E";
-          type = "#2AC3DE";
-          constant = "#FF9E64";
-          string = "#9ECE6A";
-          number = "#FF9E64";
-          boolean = "#BB9AF7";
-          operator = "#89DDFF";
-          punctuation = "#A9B1D6";
-          tag = "#F7768E";
-          attribute = "#E0AF68";
-          namespace = "#7DCFFF";
-          builtin = "#73DACA";
-          regex = "#B4F9F8";
-          special = "#BB9AF7";
-          macro = "#7AA2F7";
-        };
-
-        # Semantic
-        success = "#9ECE6A";
-        warning = "#E0AF68";
-        error = "#F7768E";
-        info = "#7DCFFF";
-
-        # ANSI
-        terminalBlack = "#414868";
-        terminalRed = "#F7768E";
-        terminalGreen = "#9ECE6A";
-        terminalYellow = "#E0AF68";
-        terminalBlue = "#7AA2F7";
-        terminalMagenta = "#BB9AF7";
-        terminalCyan = "#7DCFFF";
-        terminalWhite = "#7982A9";
-
-        terminalBrightBlack = "#565F89";
-        terminalBrightRed = "#FF899D";
-        terminalBrightGreen = "#9FE044";
-        terminalBrightYellow = "#FABA4A";
-        terminalBrightBlue = "#8DB0FF";
-        terminalBrightMagenta = "#C7A9FF";
-        terminalBrightCyan = "#A4DAFF";
-        terminalBrightWhite = "#C0CAF5";
-      };
-    };
-
-    # ==========================================================
-    # GRUVBOX DARK
-    # ==========================================================
-
-    gruvbox = {
-
-      name = "Gruvbox";
-
-      description = "Warm earthy dark theme";
-
-      colors = {
-
-        # Base
-        background = "#282828";
-        backgroundDark = "#1D2021";
-
-        # Surfaces
-        surface = "#3C3836";
-        surfaceHover = "#504945";
-        surfaceActive = "#665C54";
-
-        # Borders
-        border = "#504945";
-        borderFocus = "#D79921";
-        separator = "#45403D";
-
-        # Text
-        text = "#EBDBB2";
-        textSecondary = "#D5C4A1";
-        textMuted = "#A89984";
-
-        # Accent
-        accent = "#D79921";
-        accentHover = "#FABD2F";
-        accentActive = "#FE8019";
-        accentMuted = "#665C54";
-        accentForeground = "#282828";
-
-        # Syntax
-        syntax = {
-          comment = "#928374";
-          variable = "#EBDBB2";
-          parameter = "#D5C4A1";
-          property = "#83A598";
-          func = "#B8BB26";
-          method = "#8EC07C";
-          keyword = "#FB4934";
-          keywordControl = "#FE8019";
-          type = "#FABD2F";
-          constant = "#D3869B";
-          string = "#B8BB26";
-          number = "#D3869B";
-          boolean = "#FE8019";
-          operator = "#8EC07C";
-          punctuation = "#A89984";
-          tag = "#FB4934";
-          attribute = "#FABD2F";
-          namespace = "#83A598";
-          builtin = "#8EC07C";
-          regex = "#D3869B";
-          special = "#FE8019";
-          macro = "#B16286";
-        };
-
-        # Semantic
-        success = "#B8BB26";
-        warning = "#FABD2F";
-        error = "#FB4934";
-        info = "#83A598";
-
-        # ANSI
-        terminalBlack = "#282828";
-        terminalRed = "#CC241D";
-        terminalGreen = "#98971A";
-        terminalYellow = "#D79921";
-        terminalBlue = "#458588";
-        terminalMagenta = "#B16286";
-        terminalCyan = "#689D6A";
-        terminalWhite = "#A89984";
-
-        terminalBrightBlack = "#928374";
-        terminalBrightRed = "#FB4934";
-        terminalBrightGreen = "#B8BB26";
-        terminalBrightYellow = "#FABD2F";
-        terminalBrightBlue = "#83A598";
-        terminalBrightMagenta = "#D3869B";
-        terminalBrightCyan = "#8EC07C";
-        terminalBrightWhite = "#EBDBB2";
-      };
-    };
-
-    # ==========================================================
-    # ONE DARK
-    # ==========================================================
-
-    one-dark = {
-
-      name = "One Dark";
-
-      description = "Classic Atom developer theme";
-
-      colors = {
-
-        # Base
-        background = "#282C34";
-        backgroundDark = "#21252B";
-
-        # Surfaces
-        surface = "#31353F";
-        surfaceHover = "#393F4A";
-        surfaceActive = "#4B5263";
-
-        # Borders
-        border = "#3E4451";
-        borderFocus = "#61AFEF";
-        separator = "#353B45";
-
-        # Text
-        text = "#ABB2BF";
-        textSecondary = "#9DA5B4";
-        textMuted = "#7F848E";
-
-        # Accent
-        accent = "#61AFEF";
-        accentHover = "#56B6C2";
-        accentActive = "#C678DD";
-        accentMuted = "#3E4451";
-        accentForeground = "#282C34";
-
-        # Syntax
-        syntax = {
-          comment = "#5C6370";
-          variable = "#ABB2BF";
-          parameter = "#E5C07B";
-          property = "#61AFEF";
-          func = "#61AFEF";
-          method = "#56B6C2";
-          keyword = "#C678DD";
-          keywordControl = "#E06C75";
-          type = "#E5C07B";
-          constant = "#D19A66";
-          string = "#98C379";
-          number = "#D19A66";
-          boolean = "#C678DD";
-          operator = "#56B6C2";
-          punctuation = "#ABB2BF";
-          tag = "#E06C75";
-          attribute = "#E5C07B";
-          namespace = "#61AFEF";
-          builtin = "#56B6C2";
-          regex = "#56B6C2";
-          special = "#C678DD";
-          macro = "#61AFEF";
-        };
-
-        # Semantic
-        success = "#98C379";
-        warning = "#E5C07B";
-        error = "#E06C75";
-        info = "#61AFEF";
-
-        # ANSI
-        terminalBlack = "#282C34";
-        terminalRed = "#E06C75";
-        terminalGreen = "#98C379";
-        terminalYellow = "#E5C07B";
-        terminalBlue = "#61AFEF";
-        terminalMagenta = "#C678DD";
-        terminalCyan = "#56B6C2";
-        terminalWhite = "#ABB2BF";
-
-        terminalBrightBlack = "#5C6370";
-        terminalBrightRed = "#E06C75";
-        terminalBrightGreen = "#98C379";
-        terminalBrightYellow = "#E5C07B";
-        terminalBrightBlue = "#61AFEF";
-        terminalBrightMagenta = "#C678DD";
-        terminalBrightCyan = "#56B6C2";
-        terminalBrightWhite = "#FFFFFF";
-      };
-    };
-
-    # ==========================================================
-    # EVERFOREST
-    # ==========================================================
-
-    everforest = {
-
-      name = "Everforest";
-
-      description = "Calm green earthy dark theme";
-
-      colors = {
-
-        # Base
-        background = "#2D353B";
-        backgroundDark = "#232A2E";
-
-        # Surfaces
-        surface = "#343F44";
-        surfaceHover = "#3D484D";
-        surfaceActive = "#475258";
-
-        # Borders
-        border = "#4A575D";
-        borderFocus = "#A7C080";
-        separator = "#414B50";
-
-        # Text
-        text = "#D3C6AA";
-        textSecondary = "#9DA9A0";
-        textMuted = "#859289";
-
-        # Accent
-        accent = "#A7C080";
-        accentHover = "#83C092";
-        accentActive = "#D699B6";
-        accentMuted = "#475258";
-        accentForeground = "#2D353B";
-
-        # Syntax
-        syntax = {
-          comment = "#859289";
-          variable = "#D3C6AA";
-          parameter = "#DBBC7F";
-          property = "#7FBBB3";
-          func = "#A7C080";
-          method = "#83C092";
-          keyword = "#D699B6";
-          keywordControl = "#E67E80";
-          type = "#DBBC7F";
-          constant = "#D699B6";
-          string = "#A7C080";
-          number = "#D699B6";
-          boolean = "#D699B6";
-          operator = "#83C092";
-          punctuation = "#9DA9A0";
-          tag = "#E67E80";
-          attribute = "#DBBC7F";
-          namespace = "#7FBBB3";
-          builtin = "#83C092";
-          regex = "#D699B6";
-          special = "#E69875";
-          macro = "#A7C080";
-        };
-
-        # Semantic
-        success = "#A7C080";
-        warning = "#DBBC7F";
-        error = "#E67E80";
-        info = "#7FBBB3";
-
-        # ANSI
-        terminalBlack = "#4B565C";
-        terminalRed = "#E67E80";
-        terminalGreen = "#A7C080";
-        terminalYellow = "#DBBC7F";
-        terminalBlue = "#7FBBB3";
-        terminalMagenta = "#D699B6";
-        terminalCyan = "#83C092";
-        terminalWhite = "#9DA9A0";
-
-        terminalBrightBlack = "#859289";
-        terminalBrightRed = "#F85552";
-        terminalBrightGreen = "#8DA101";
-        terminalBrightYellow = "#DFA000";
-        terminalBrightBlue = "#3A94C5";
-        terminalBrightMagenta = "#DF69BA";
-        terminalBrightCyan = "#35A77C";
-        terminalBrightWhite = "#D3C6AA";
-      };
-    };
-
-    # ==========================================================
-    # ROSÉ PINE
-    # ==========================================================
-
-    rose-pine = {
-
-      name = "Rosé Pine";
-
-      description = "Elegant muted rose dark theme";
-
-      colors = {
-
-        # Base
-        background = "#191724";
-        backgroundDark = "#13111C";
-
-        # Surfaces
-        surface = "#1F1D2E";
-        surfaceHover = "#26233A";
-        surfaceActive = "#403D52";
-
-        # Borders
-        border = "#403D52";
-        borderFocus = "#C4A7E7";
-        separator = "#2A2739";
-
-        # Text
-        text = "#E0DEF4";
-        textSecondary = "#908CAA";
-        textMuted = "#6E6A86";
-
-        # Accent
-        accent = "#C4A7E7";
-        accentHover = "#D5BFF2";
-        accentActive = "#EBBCBA";
-        accentMuted = "#403D52";
-        accentForeground = "#191724";
-
-        # Syntax
-        syntax = {
-          comment = "#6E6A86";
-          variable = "#E0DEF4";
-          parameter = "#F6C177";
-          property = "#9CCFD8";
-          func = "#C4A7E7";
-          method = "#9CCFD8";
-          keyword = "#C4A7E7";
-          keywordControl = "#EB6F92";
-          type = "#F6C177";
-          constant = "#EBBCBA";
-          string = "#9CCFD8";
-          number = "#F6C177";
-          boolean = "#C4A7E7";
-          operator = "#9CCFD8";
-          punctuation = "#908CAA";
-          tag = "#EB6F92";
-          attribute = "#F6C177";
-          namespace = "#31748F";
-          builtin = "#9CCFD8";
-          regex = "#EBBCBA";
-          special = "#EBBCBA";
-          macro = "#C4A7E7";
-        };
-
-        # Semantic
-        success = "#9CCFD8";
-        warning = "#F6C177";
-        error = "#EB6F92";
-        info = "#31748F";
-
-        # ANSI
-        terminalBlack = "#26233A";
-        terminalRed = "#EB6F92";
-        terminalGreen = "#9CCFD8";
-        terminalYellow = "#F6C177";
-        terminalBlue = "#31748F";
-        terminalMagenta = "#C4A7E7";
-        terminalCyan = "#EBBCBA";
-        terminalWhite = "#E0DEF4";
-
-        terminalBrightBlack = "#6E6A86";
-        terminalBrightRed = "#F083A2";
-        terminalBrightGreen = "#A6D5D9";
-        terminalBrightYellow = "#FFD39E";
-        terminalBrightBlue = "#65A6C4";
-        terminalBrightMagenta = "#D7B9F2";
-        terminalBrightCyan = "#F2C8C7";
-        terminalBrightWhite = "#E0DEF4";
-      };
-    };
-
-    # ==========================================================
-    # KANAGAWA
-    # ==========================================================
-
-    kanagawa = {
-
-      name = "Kanagawa";
-
-      description = "Sumi ink woodblock dark theme";
-
-      colors = {
-
-        # Base
-        background = "#1F1F28";
-        backgroundDark = "#16161D";
-
-        # Surfaces
-        surface = "#2A2A37";
-        surfaceHover = "#363646";
-        surfaceActive = "#54546D";
-
-        # Borders
-        border = "#424257";
-        borderFocus = "#7E9CD8";
-        separator = "#363646";
-
-        # Text
-        text = "#DCD7BA";
-        textSecondary = "#C8C093";
-        textMuted = "#727169";
-
-        # Accent
-        accent = "#7E9CD8";
-        accentHover = "#7FB4CA";
-        accentActive = "#957FB8";
-        accentMuted = "#54546D";
-        accentForeground = "#1F1F28";
-
-        # Syntax
-        syntax = {
-          comment = "#727169";
-          variable = "#DCD7BA";
-          parameter = "#E6C384";
-          property = "#7FB4CA";
-          func = "#7E9CD8";
-          method = "#6A9589";
-          keyword = "#957FB8";
-          keywordControl = "#C34043";
-          type = "#E6C384";
-          constant = "#D27E99";
-          string = "#98BB6C";
-          number = "#D27E99";
-          boolean = "#957FB8";
-          operator = "#7FB4CA";
-          punctuation = "#C8C093";
-          tag = "#C34043";
-          attribute = "#E6C384";
-          namespace = "#7FB4CA";
-          builtin = "#6A9589";
-          regex = "#D27E99";
-          special = "#E6C384";
-          macro = "#7E9CD8";
-        };
-
-        # Semantic
-        success = "#98BB6C";
-        warning = "#E6C384";
-        error = "#E82424";
-        info = "#7FB4CA";
-
-        # ANSI
-        terminalBlack = "#16161D";
-        terminalRed = "#C34043";
-        terminalGreen = "#76946A";
-        terminalYellow = "#C0A36E";
-        terminalBlue = "#7E9CD8";
-        terminalMagenta = "#957FB8";
-        terminalCyan = "#6A9589";
-        terminalWhite = "#C8C093";
-
-        terminalBrightBlack = "#727169";
-        terminalBrightRed = "#E82424";
-        terminalBrightGreen = "#98BB6C";
-        terminalBrightYellow = "#E6C384";
-        terminalBrightBlue = "#7FB4CA";
-        terminalBrightMagenta = "#938AA9";
-        terminalBrightCyan = "#7AA89F";
-        terminalBrightWhite = "#DCD7BA";
-      };
-    };
-  };
+  # Automatically load every *.nix file in ./colorschemes.
+  colorschemeDir = ./colorschemes;
+  colorschemeFiles = builtins.filter (name: builtins.match ".*\\.nix" name != null) (
+    builtins.attrNames (builtins.readDir colorschemeDir)
+  );
+
+  themes = builtins.listToAttrs (
+    map (
+      file:
+      let
+        name = builtins.replaceStrings [ ".nix" ] [ "" ] file;
+      in
+      {
+        inherit name;
+        value = import "${colorschemeDir}/${file}";
+      }
+    ) colorschemeFiles
+  );
+
+in
+{
+  inherit global themes;
+  theme = themes.${global.activeTheme};
 }

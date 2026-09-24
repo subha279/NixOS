@@ -9,8 +9,8 @@ in
 
     settings = {
       user = {
-        name = vars.gitUser;
-        email = vars.email;
+        name = vars.user.gitUser;
+        email = vars.user.email;
       };
 
       init.defaultBranch = "main";

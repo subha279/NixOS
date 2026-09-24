@@ -24,11 +24,10 @@
       url = "github:youwen5/zen-browser-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
   };
 
   outputs =
-    {
+    inputs@{
       self,
       nixpkgs,
       nixpkgs-unstable,
@@ -46,10 +45,16 @@
         laptop = nixpkgs.lib.nixosSystem {
           system = "x86_64-linux";
 
+          specialArgs = {
+            inherit vars;
+            inherit inputs;
+          };
+
           modules = [
             {
               nixpkgs.overlays = [
                 apple-fonts.overlays.default
+
                 (final: prev: {
                   zen-browser = zen-browser.packages.${final.system}.default;
                   opencode = nixpkgs-unstable.legacyPackages.${final.system}.opencode;
@@ -66,7 +71,12 @@
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
 
-              home-manager.users.${vars.username} = import ./home;
+              home-manager.extraSpecialArgs = {
+                inherit vars;
+                inherit inputs;
+              };
+
+              home-manager.users.${vars.user.username} = import ./home;
             }
           ];
         };

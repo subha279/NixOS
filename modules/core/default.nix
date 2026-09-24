@@ -4,9 +4,9 @@ let
   vars = import ../../lib/variables.nix;
 in
 {
-  time.timeZone = vars.timezone;
+  time.timeZone = vars.system.timezone;
 
-  i18n.defaultLocale = vars.locale;
+  i18n.defaultLocale = vars.system.locale;
 
   console.keyMap = "us";
 

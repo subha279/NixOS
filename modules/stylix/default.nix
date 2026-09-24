@@ -5,11 +5,8 @@ let
   # Aurora Theme Source
 
   themeData = import ../../lib/themes.nix;
-
-  activeTheme = themeData.themes.${themeData.global.activeTheme};
-
+  activeTheme = themeData.theme;
   colors = activeTheme.colors;
-
   global = themeData.global;
 
   # Helpers
@@ -40,13 +37,10 @@ let
   # Central Fonts
 
   interfaceFont = pkgFromPath global.fonts.interface.package;
-
   terminalFont = pkgFromPath global.fonts.terminal.package;
-
   emojiFont = pkgFromPath global.fonts.emoji.package;
 
   # Central Cursor
-
   cursorPackage = pkgFromPath global.cursor.package;
 
 in
@@ -54,7 +48,6 @@ in
   stylix = {
 
     # Core
-
     enable = true;
 
     # Aurora explicitly owns application-specific theming.
@@ -64,14 +57,11 @@ in
     polarity = if isLight then "light" else "dark";
 
     # STATIC AURORA COLOR SOURCE
-
     base16Scheme = {
-
       scheme = activeTheme.name;
       author = "Aurora (lib/themes.nix)";
 
       # Base ramp
-
       base00 = hex colors.background;
       base01 = hex colors.surface;
       base02 = hex colors.surfaceHover;
@@ -98,7 +88,6 @@ in
     # FONTS
 
     fonts = {
-
       sansSerif = {
         package = interfaceFont;
         name = global.fonts.interface.name;
@@ -128,7 +117,6 @@ in
     };
 
     # CURSOR
-
     cursor = {
       package = cursorPackage;
       name = global.cursor.name;
@@ -136,9 +124,7 @@ in
     };
 
     targets.gtk.enable = false;
-
     targets.qt.enable = false;
-
     targets.fontconfig.enable = true;
   };
 }

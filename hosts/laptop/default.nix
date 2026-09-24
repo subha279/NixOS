@@ -38,5 +38,5 @@ in
     followTheme = true;
   };
 
-  networking.hostName = vars.hostname;
+  networking.hostName = vars.system.hostname;
 }

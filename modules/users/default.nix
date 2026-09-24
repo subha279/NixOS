@@ -4,7 +4,7 @@ let
   vars = import ../../lib/variables.nix;
 in
 {
-  users.users.${vars.username} = {
+  users.users.${vars.user.username} = {
     isNormalUser = true;
 
     shell = pkgs.zsh;

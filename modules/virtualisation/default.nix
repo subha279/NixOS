@@ -31,7 +31,7 @@ in
 
   # User Access
 
-  users.users.${vars.username}.extraGroups = [
+  users.users.${vars.user.username}.extraGroups = [
     "libvirtd"
   ];
 }
