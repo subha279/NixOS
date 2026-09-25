@@ -2153,7 +2153,7 @@ validator_run() {
     #
     # Sunflower is the theme *engine* (the ~/.config/sunflower tree and
     # the generator in home/theme), not a theme id. Valid ids are the
-    # files in lib/colorschemes/ (catppuccin-mocha, tokyo-night, ...),
+    # files in lib/themes/ (catppuccin, gruvbox, sunflower, tokyo-night),
     # so the check resolves the evaluated id against that directory
     # instead of comparing against a stale literal.
 
@@ -2168,13 +2168,13 @@ validator_run() {
 
     THEME_ID="$(printf '%s' "$THEME_EVAL" | tr -d '"')"
 
-    if [[ -n "$THEME_ID" && -f "$ROOT/lib/colorschemes/${THEME_ID}.nix" ]]; then
+    if [[ -n "$THEME_ID" && -f "$ROOT/lib/themes/${THEME_ID}.nix" ]]; then
 
         v_ok "Active theme evaluates correctly: $THEME_ID"
 
     elif [[ -n "$THEME_ID" ]]; then
 
-        v_fail "Active theme '$THEME_ID' has no definition in lib/colorschemes/"
+        v_fail "Active theme '$THEME_ID' has no definition in lib/themes/"
 
     else
 

@@ -1,5 +1,5 @@
 {
-  name = "Catppuccin Mocha";
+  name = "Catppuccin";
   description = "Soft pastel dark theme";
 
   colors = {

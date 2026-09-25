@@ -1,7 +1,7 @@
 let
   global = {
     # Active theme
-    activeTheme = "catppuccin-mocha";
+    activeTheme = "sunflower";
 
     # Fonts
     fonts = {
@@ -71,8 +71,8 @@ let
     };
   };
 
-  # Automatically load every *.nix file in ./colorschemes.
-  colorschemeDir = ./colorschemes;
+  # Automatically load every *.nix file in ./themes.
+  colorschemeDir = ./themes;
   colorschemeFiles = builtins.filter (name: builtins.match ".*\\.nix" name != null) (
     builtins.attrNames (builtins.readDir colorschemeDir)
   );

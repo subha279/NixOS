@@ -12,7 +12,7 @@ Components.LauncherView {
 
     launcherId: "theme"
     promptIcon: Core.Icons.brightness
-    placeholder: "Search colorschemes"
+    placeholder: "Search themes"
 
     cardWidth: 460
     rowHeight: 60
@@ -81,7 +81,7 @@ Components.LauncherView {
                 anchors.centerIn: parent
                 visible: launcher.results.length === 0
 
-                text: "No matching colorschemes"
+                text: "No matching themes"
                 color: Core.Theme.foregroundFaint
                 font.family: Core.Theme.fontMono
                 font.pixelSize: Core.Theme.fontSize
