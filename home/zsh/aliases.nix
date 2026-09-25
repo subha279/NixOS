@@ -38,5 +38,7 @@
 
     # Devlopment
     nd = "nix develop -c zsh";
+    ssh = "TERM=xterm-256color ssh";
+    rebuild = "sudo nixos-rebuild switch --flake '.#sunflower'";
   };
 }
