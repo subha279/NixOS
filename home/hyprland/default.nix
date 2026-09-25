@@ -1,26 +1,41 @@
 { pkgs, ... }:
 
+let
+  # Every file dropped in ./scripts is auto-deployed on rebuild.
+  # - ~/.config/hypr/scripts/<name> for Hyprland (see scriptDir in config/variables.lua)
+  # - ~/.local/bin/<name> on PATH for terminal use
+  scriptNames = builtins.attrNames (builtins.readDir ./scripts);
+  mkScriptAttrs =
+    prefix:
+    builtins.listToAttrs (
+      map (name: {
+        name = "${prefix}/${name}";
+        value = {
+          source = ./scripts + "/${name}";
+          executable = true;
+        };
+      }) scriptNames
+    );
+in
 {
   # Sunflower Hyprland
-  # Polkit Qt Environment Override
-  xdg.configFile."systemd/user/plasma-polkit-agent.service.d/environment.conf".text = ''
-    [Service]
-    Environment=QT_STYLE_OVERRIDE=
-  '';
+  xdg.configFile = {
+    # Polkit Qt Environment Override
+    "systemd/user/plasma-polkit-agent.service.d/environment.conf".text = ''
+      [Service]
+      Environment=QT_STYLE_OVERRIDE=
+    '';
 
-  # Hyprland Lua Configuration
-  xdg.configFile."hypr/hyprland.lua".source = ./hyprland.lua;
+    # Hyprland Lua Configuration
+    "hypr/hyprland.lua".source = ./hyprland.lua;
 
-  # Hyprland Configuration Modules
-  xdg.configFile."hypr/config".source = ./config;
-  xdg.configFile."hypr/scripts/restore-wallpaper.sh" = {
-    source = ./scripts/restore-wallpaper.sh;
-    executable = true;
-  };
-  xdg.configFile."hypr/scripts/workspace" = {
-    source = ./scripts/workspace;
-    executable = true;
-  };
+    # Hyprland Configuration Modules
+    "hypr/config".source = ./config;
+  }
+  // mkScriptAttrs "hypr/scripts";
+
+  # All scripts on PATH, no per-script entries needed.
+  home.file = mkScriptAttrs ".local/bin";
 
   # Sunflower Desktop Services
   systemd.user.targets.hyprland-session = {

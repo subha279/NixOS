@@ -5,6 +5,12 @@ local M = {}
 M.mainMod = "SUPER"
 M.altMod = "ALT"
 
+-- Scripts Directory
+M.scriptDir = os.getenv("HOME") .. "/.config/hypr/scripts"
+
+-- Wallpapers
+M.wallpaperDir = os.getenv("HOME") .. "/Wallpapers"
+
 -- Applications
 M.terminal = "kitty"
 M.browser = "zen"
@@ -22,12 +28,6 @@ M.emoji = "qs ipc call emoji toggle"
 
 -- Screenshot
 M.screenshot = [[grim -g "$(slurp)" - | swappy -f -]]
-
--- Scripts Directory
-M.scriptDir = os.getenv("HOME") .. "/.config/hypr/scripts"
-
--- Wallpapers
-M.wallpaperDir = os.getenv("HOME") .. "/Wallpapers"
 
 -- Audio
 M.volumeUp = "wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"
