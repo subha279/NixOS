@@ -40,6 +40,7 @@
 ## ✨ Features
 
 ### 🖥️ Desktop & Compositor
+
 - **Lua-driven Hyprland**: Modular config structured under `home/hyprland/config/`.
 - **Quickshell Unified Desktop**: Replaces bar, launcher, and notification daemons with a unified QML surface.
 - **Instant IPC Surfaces**: App launcher, theme picker, wallpaper switcher, clipboard history, and emoji picker mapped directly to <kbd>SUPER</kbd> chords.
@@ -47,16 +48,19 @@
 - **Smart Wallpaper Persistence**: Managed state in `~/.cache/sunflower/current-wallpaper` restored via `restore-wallpaper.sh` over `awww`.
 
 ### 🎨 Theme Engine
+
 - **Centralized Palette Engine**: Define colors once in `lib/colorschemes/`, dynamic generation propagates to Lua, JSON, Kitty, tmux, Starship, GTK, and Kvantum.
 - **Instant Runtime Switching**: Press <kbd>SUPER</kbd> + <kbd>C</kbd> to switch colors dynamically without rebuilding your system.
 - **Stylix Base**: Manages Base16 schemes, fonts, and cursors cleanly while disabling intrusive GTK/Qt overrides.
 
 ### 💻 Terminal & Workspaces
+
 - **Kitty & Tmux**: Dynamic theme inclusion (`active-kitty.conf` & `active-tmux.conf`) with `fzf` and `zoxide` shell integration.
 - **Zsh & Starship**: Custom prompt exports directly into generated `active-starship.toml`.
 - **Neovim Ecosystem**: Treesitter, Telescope, completion plugins, and 18 LSP configurations under `home/neovim/config/lsp/`.
 
 ### ⚙️ System Architecture
+
 - **NixOS Flake Host**: `nixosConfigurations.sunflower` backed by 24 system modules and 13 Home Manager modules.
 - **Unified Manager (`setup.sh`)**: Interactive installer, dry runner, validator, updates, backups, and generations rollback manager.
 - **Rich Typography**: JetBrainsMono Nerd Font baseline complemented by Iosevka, Caskaydia Cove, Fira Code, SF Mono, Comic Shanns, Maple Mono, Inter, and Noto Emoji.
@@ -74,7 +78,17 @@ cd ~/Sunflower
 ./setup.sh
 ```
 
+> [!CAUTION]
+> I have no time to fix those right now.
+> So if you are installing using the script you may encounter those errors:
+> You may need to remove `.git` file else the rebild will throw an error.
+> If you failed an install attempt you need to `sudo swapoff -a` `sudo umount -R /mnt` or start clean.
+> And also at the end stage you may get and user name related error please ignore the error simple reboot will work.
+> If you are using this it will be really helpfull if you find raise a issue if any bugs or improvement needed.
+> Check the packages once you may dont need all of them. cause it a holy 7.5 GB. (will be fixed soon)
+
 ### Installation Workflow
+
 1. **Launch Manager**: `./setup.sh` presents an interactive menu. Option `1` triggers system bootstrap.
 2. **Configure Identity**: User, git credentials, hostname, timezone, and local variables are written to `lib/variables.nix`.
 3. **Partition & Build**: Partitioning (1 GiB ESP + ext4 root), hardware generation, flake validation, and target store closure building.
@@ -111,38 +125,38 @@ lib/colorschemes/                           ├─ active-kitty.conf / active-tm
 
 Centralized controls lie within `lib/themes.nix` and `lib/colorschemes/`:
 
-| Action | How to Apply | Effect |
-|---|---|---|
-| **Change Palette** | Press <kbd>SUPER</kbd> + <kbd>C</kbd> | Live runtime theme swap across terminal, shell, & bar |
-| **Set Default Theme** | Edit `global.activeTheme` in `lib/themes.nix` | Persists default palette across system rebuilds |
-| **Create Custom Theme** | Add `.nix` palette in `lib/colorschemes/` | Auto-generated into system-wide configurations |
+| Action                  | How to Apply                                  | Effect                                                |
+| ----------------------- | --------------------------------------------- | ----------------------------------------------------- |
+| **Change Palette**      | Press <kbd>SUPER</kbd> + <kbd>C</kbd>         | Live runtime theme swap across terminal, shell, & bar |
+| **Set Default Theme**   | Edit `global.activeTheme` in `lib/themes.nix` | Persists default palette across system rebuilds       |
+| **Create Custom Theme** | Add `.nix` palette in `lib/colorschemes/`     | Auto-generated into system-wide configurations        |
 
 ---
 
 ## 🧩 Components Matrix
 
-| Component | Target Location | Description / Function |
-|---|---|---|
-| **Host Configuration** | `hosts/sunflower/` | Hardware bindings, imports, and system hostname |
-| **System Modules** | `modules/` | Graphics, power management, fonts, audio, & virtualisation |
-| **Hyprland Compositor** | `home/hyprland/` | Modular Lua configs (keybinds, rules, animations, env) |
-| **Quickshell** | `home/quickshell/config/` | Bar UI, launchers, pickers, & notification daemons |
-| **Theme System** | `home/theme/` | Code generators, activation hooks, & runtime swapper |
-| **Neovim** | `home/neovim/` | LSP configurations, plugins, and custom UI themes |
-| **Identity & Vars** | `lib/variables.nix` | Unified variables (User details, GPU Bus IDs) |
-| **Management CLI** | `setup.sh` | Maintenance, rollback, validation, & installer engine |
+| Component               | Target Location           | Description / Function                                     |
+| ----------------------- | ------------------------- | ---------------------------------------------------------- |
+| **Host Configuration**  | `hosts/sunflower/`        | Hardware bindings, imports, and system hostname            |
+| **System Modules**      | `modules/`                | Graphics, power management, fonts, audio, & virtualisation |
+| **Hyprland Compositor** | `home/hyprland/`          | Modular Lua configs (keybinds, rules, animations, env)     |
+| **Quickshell**          | `home/quickshell/config/` | Bar UI, launchers, pickers, & notification daemons         |
+| **Theme System**        | `home/theme/`             | Code generators, activation hooks, & runtime swapper       |
+| **Neovim**              | `home/neovim/`            | LSP configurations, plugins, and custom UI themes          |
+| **Identity & Vars**     | `lib/variables.nix`       | Unified variables (User details, GPU Bus IDs)              |
+| **Management CLI**      | `setup.sh`                | Maintenance, rollback, validation, & installer engine      |
 
 ---
 
 ## 🛠️ Customization Quick-Guide
 
-| Goal | Target File | Action Required |
-|---|---|---|
-| **Keybindings** | `home/hyprland/config/keybinds.lua` | Edit & run `hyprctl reload` |
-| **System Fonts** | `modules/fonts/default.nix` | Modify packages & rebuild system |
-| **Quickshell Widgets** | `home/quickshell/config/` | Edit QML & run `systemctl --user restart quickshell` |
-| **Terminal Config** | `home/kitty/config/kitty.conf` | Edit config & trigger rebuild |
-| **Shell Aliases** | `home/zsh/aliases.nix` | Modify aliases & restart shell session |
+| Goal                   | Target File                         | Action Required                                      |
+| ---------------------- | ----------------------------------- | ---------------------------------------------------- |
+| **Keybindings**        | `home/hyprland/config/keybinds.lua` | Edit & run `hyprctl reload`                          |
+| **System Fonts**       | `modules/fonts/default.nix`         | Modify packages & rebuild system                     |
+| **Quickshell Widgets** | `home/quickshell/config/`           | Edit QML & run `systemctl --user restart quickshell` |
+| **Terminal Config**    | `home/kitty/config/kitty.conf`      | Edit config & trigger rebuild                        |
+| **Shell Aliases**      | `home/zsh/aliases.nix`              | Modify aliases & restart shell session               |
 
 ---
 
