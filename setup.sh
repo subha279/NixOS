@@ -1,106 +1,61 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-# ============================================================
-# Single entry point: install, update, rebuild, validate,
-# maintenance, rollback and system recovery.
+# ============================================================================
+# Sunflower Installer / System Manager
+# ============================================================================
+# One entry point for:
+#   - Fresh installation from the Sunflower live ISO
+#   - Existing-system configuration
+#   - Update / rebuild / dry-build / rollback
+#   - Validation and maintenance
 #
-# Architecture (modules in this file, in order):
-#   0. Bootstrap  - ROOT/VARS/FLAKE_TARGET, preflight(),
-#                   detect_system(), check_dependencies()
-#   1. Presentation (UI 1-8, TTY-aware, Sunflower-themed, read-only):
-#                   1 capabilities, 2 palette, 3 glyphs,
-#                   4 cursor+primitives, 5 log lines,
-#                   6 sections/steps/kv, 7 prompts, 8 panels/menus/spinner
-#   2. Core state - get_var/set_var_in/backup_config/
-#                   write_hardware_config/detect_nvidia
-#                   (only mutation of lib/variables.nix and
-#                   hosts/sunflower/hardware-configuration.nix;
-#                   everything else stays in Nix/Home Manager)
-#   3. Lifecycle  - flake_check/dry_build/rebuild/update_config/
-#                   rollback/list_generations/refresh_hardware
-#   4. Identity   - install_flow (running system) + test_install
-#                   preview (both map the "Full name" prompt to
-#                   the `name` key in lib/variables.nix)
-#   5. Maintenance - m_* dashboard reusing Lifecycle primitives
-#   6. Validator  - validator_run (read-only checks only)
-#   7. Clean install - ci_* (only path that partitions/formats;
-#                   requires live ISO + root, ends in nixos-install)
-#   8. Dispatch   - menu + main CLI
+# Fresh install flow:
+#   Live ISO -> ask identity -> select disk -> partition -> format -> mount
+#   -> copy Sunflower -> configure variables -> generate hardware config
+#   -> nixos-install -> set user password -> finish
 #
-# What this script deliberately does NOT do (owned by Nix):
-#   directories, git config, Hyprland/Quickshell/themes/fonts/
-#                   shell/apps setup. Those are Home Manager/Sunflower modules under
-#   home/, modules/, lib/themes.nix. This script only bootstraps
-#   identity + hardware, then orchestrates nixos-rebuild/nix.
-# ============================================================
+# IMPORTANT:
+#   --dry-run NEVER partitions, formats, mounts, copies, or installs.
+# ============================================================================
 
-VERSION="1.0"
+VERSION="2.0"
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-VARS="$ROOT/lib/variables.nix"
-FLAKE_TARGET="$ROOT#sunflower"
+VARS_REL="lib/variables.nix"
+FLAKE_NAME="sunflower"
+FLAKE_TARGET="$ROOT#$FLAKE_NAME"
 
-# ============================================================
-# PRESENTATION LAYER — modular UI (submodules UI 1–8)
-#
-# One vocabulary for everything this script prints. The public names
-# below -- info / success / warning / error / run_cmd / section /
-# subsection / step / kv / note / pause / confirm, plus v_ok / v_fail /
-# v_info for the validator, plus panel / verdict / menu_group /
-# menu_item / spinner -- are the whole set.
-#
-# Submodules (in order):
-#   UI 1  capabilities  IS_TTY/UI_COLOR/UI_TRUECOLOR/UI_UNICODE/UI_WIDTH
-#   UI 2  palette       Sunflower theme -> RED/GREEN/.../DIM + RESET/BOLD
-#   UI 3  glyphs        ICON_* + box-drawing + ASCII fallback
-#   UI 4  cursor+primitives  hide/show_cursor, ui_repeat, ui_visible_len,
-#                       clear_screen, hr
-#   UI 5  log lines     die/info/success/warning/error/run_cmd
-#   UI 6  structure     section/subsection/step/kv/note
-#   UI 7  prompts       pause/confirm (return-code contract preserved)
-#   UI 8  blocks        panel/verdict/menu_group/menu_item/spinner
-#
-# Rules for every helper here: respect UI_COLOR (no escapes when off),
-# respect UI_UNICODE (ASCII fallback), never fail under `set -e`
-# except die(), never write to stdout when the message belongs on
-# stderr (error/die only).
-# ============================================================
+CI_TARGET="/mnt"
+CI_ESP_LABEL="EFI"
+CI_ROOT_LABEL="nixos"
+CI_ESP_SIZE="+1G"
+M_KEEP_GENERATIONS=2
 
-# --- UI 1: capabilities --------------------------------------
+CI_DRY_RUN=0
+CI_DISK=""
+CI_ESP=""
+CI_ROOT_PART=""
+CI_MOUNTED=0
 
-# Terminal capabilities
-#
-# None of this was detected before: the script emitted escape codes
-# unconditionally, so `./setup.sh validate | tee log` wrote escape
-# sequences into the file and NO_COLOR was ignored.
+SUNFLOWER_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/sunflower"
+UI_THEME_FILE=""
+
+# ============================================================================
+# UI
+# ============================================================================
 
 if [[ -t 1 ]]; then IS_TTY=1; else IS_TTY=0; fi
 
-# Colour is off when asked for (NO_COLOR), when the terminal says it
-# cannot render it (TERM=dumb), or when stdout is not a terminal at all.
-#
-# Only an *explicit* TERM=dumb disables it. An unset TERM alongside a real
-# tty means a stripped environment rather than a teletype, and every
-# terminal emulator that can give us a tty can also handle basic ANSI --
-# the -t 1 test above is what actually protects pipes and log files.
 UI_COLOR=1
-if [[ -n "${NO_COLOR:-}" ]]; then UI_COLOR=0; fi
-if [[ "${TERM:-}" == "dumb" ]]; then UI_COLOR=0; fi
-if [[ "$IS_TTY" -eq 0 ]]; then UI_COLOR=0; fi
+[[ -n "${NO_COLOR:-}" ]] && UI_COLOR=0
+[[ "${TERM:-}" == "dumb" ]] && UI_COLOR=0
+[[ "$IS_TTY" -eq 0 ]] && UI_COLOR=0
 
-# 24-bit colour is what lets the palette be the actual theme rather
-# than an approximation of it. Without it we fall back to the 3-bit
-# codes this script used to hardcode.
-#
-# COLORTERM is the reliable signal and kitty sets it, but it is lost
-# across sudo and some multiplexers, so a TERM that advertises direct
-# or 256 colour counts too.
 UI_TRUECOLOR=0
 if [[ "$UI_COLOR" -eq 1 ]]; then
     case "${COLORTERM:-}" in
     truecolor | 24bit) UI_TRUECOLOR=1 ;;
     esac
-
     case "${TERM:-}" in
     *-direct* | *-256color | kitty | xterm-kitty | alacritty | foot | wezterm)
         UI_TRUECOLOR=1
@@ -108,95 +63,69 @@ if [[ "$UI_COLOR" -eq 1 ]]; then
     esac
 fi
 
-# Box drawing and the nicer glyphs need a UTF-8 locale.
-#
-# Also dropped without a tty. Strictly, UTF-8 keeps working through a
-# pipe -- but validator output gets redirected into logs, pasted into
-# issues and mailed around, and ASCII survives all of those intact.
 UI_UNICODE=1
 case "${LC_ALL:-${LC_CTYPE:-${LANG:-}}}" in
 *UTF-8* | *utf-8* | *UTF8* | *utf8*) ;;
 *) UI_UNICODE=0 ;;
 esac
-if [[ "${TERM:-}" == "dumb" ]]; then UI_UNICODE=0; fi
-if [[ "$IS_TTY" -eq 0 ]]; then UI_UNICODE=0; fi
+[[ "${TERM:-}" == "dumb" ]] && UI_UNICODE=0
+[[ "$IS_TTY" -eq 0 ]] && UI_UNICODE=0
 
-# Width for the panel frame and the section rules. Clamped: a rule
-# stretched across a 210-column terminal reads as a divider in a
-# spreadsheet, not a heading.
 UI_WIDTH=64
-if [[ "$IS_TTY" -eq 1 ]]; then
-    UI_WIDTH="$(tput cols 2>/dev/null || printf '64')"
-    if [[ "$UI_WIDTH" -gt 74 ]]; then UI_WIDTH=74; fi
-    if [[ "$UI_WIDTH" -lt 40 ]]; then UI_WIDTH=40; fi
-fi
 
-# Re-apply terminal width (e.g. after a resize before re-drawing the
-# menu). Idempotent and read-only; clamps exactly like initialisation.
 ui_refresh_width() {
     UI_WIDTH=64
+
     if [[ "$IS_TTY" -eq 1 ]]; then
         UI_WIDTH="$(tput cols 2>/dev/null || printf '64')"
-        if [[ "$UI_WIDTH" -gt 74 ]]; then UI_WIDTH=74; fi
-        if [[ "$UI_WIDTH" -lt 40 ]]; then UI_WIDTH=40; fi
+
+        if ((UI_WIDTH > 74)); then
+            UI_WIDTH=74
+        fi
+
+        if ((UI_WIDTH < 40)); then
+            UI_WIDTH=40
+        fi
     fi
 }
 
-# --- UI 2: palette (Sunflower theme -> ANSI) -----------------
-
-# Palette, read from the live Sunflower theme
-#
-# ~/.config/sunflower/active-theme and themes/<id>.json are the same
-# files core/Theme.qml watches, so the installer wears whatever
-# colourscheme the desktop is currently wearing. Strictly read-only:
-# this participates in no part of the theme pipeline, it only looks
-# at the output. Every lookup carries the built-in sunflower value as a
-# fallback, so a missing or half-written file costs nothing.
-
-SUNFLOWER_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/sunflower"
-UI_THEME_FILE=""
-
-if [[ -r "$SUNFLOWER_DIR/active-theme" ]]; then
-    UI_THEME_ID="$(tr -d '[:space:]' <"$SUNFLOWER_DIR/active-theme" 2>/dev/null || printf '')"
-
-    if [[ -n "$UI_THEME_ID" && -r "$SUNFLOWER_DIR/themes/$UI_THEME_ID.json" ]]; then
-        UI_THEME_FILE="$SUNFLOWER_DIR/themes/$UI_THEME_ID.json"
+if [[ -r "$SUNFLOWER_CONFIG_DIR/active-theme" ]]; then
+    UI_THEME_ID="$(tr -d '[:space:]' <"$SUNFLOWER_CONFIG_DIR/active-theme" 2>/dev/null || true)"
+    if [[ -n "${UI_THEME_ID:-}" &&
+        -r "$SUNFLOWER_CONFIG_DIR/themes/$UI_THEME_ID.json" ]]; then
+        UI_THEME_FILE="$SUNFLOWER_CONFIG_DIR/themes/$UI_THEME_ID.json"
     fi
 fi
 
-# Pull one "key":"#rrggbb" pair out of the theme JSON. Deliberately
-# grep rather than jq: jq is not guaranteed present on a machine that
-# is still being installed, and this needs exactly one field.
 ui_hex() {
     local key="$1" fallback="$2" hex=""
-
     if [[ -n "$UI_THEME_FILE" ]]; then
-        hex="$(grep -o "\"$key\"[[:space:]]*:[[:space:]]*\"#[0-9a-fA-F]\{6\}\"" "$UI_THEME_FILE" 2>/dev/null |
-            head -1 | grep -o '#[0-9a-fA-F]\{6\}' || printf '')"
+        hex="$(
+            grep -o "\"$key\"[[:space:]]*:[[:space:]]*\"#[0-9a-fA-F]\{6\}\"" \
+                "$UI_THEME_FILE" 2>/dev/null |
+                head -1 |
+                grep -o '#[0-9a-fA-F]\{6\}' || true
+        )"
     fi
-
     printf '%s' "${hex:-$fallback}"
 }
 
-# $1 theme key, $2 fallback hex, $3 basic ANSI code for 16-colour terminals
 ui_fg() {
     local hex
-
-    if [[ "$UI_COLOR" -eq 0 ]]; then
+    [[ "$UI_COLOR" -eq 1 ]] || {
         printf ''
-        return 0
-    fi
+        return
+    }
 
     if [[ "$UI_TRUECOLOR" -eq 1 ]]; then
         hex="$(ui_hex "$1" "$2")"
-
         printf '\033[38;2;%d;%d;%dm' \
-            "$((16#${hex:1:2}))" "$((16#${hex:3:2}))" "$((16#${hex:5:2}))"
-
-        return 0
+            "$((16#${hex:1:2}))" \
+            "$((16#${hex:3:2}))" \
+            "$((16#${hex:5:2}))"
+    else
+        printf '\033[%sm' "$3"
     fi
-
-    printf '\033[%sm' "$3"
 }
 
 if [[ "$UI_COLOR" -eq 1 ]]; then
@@ -207,25 +136,13 @@ else
     BOLD=''
 fi
 
-# Semantic, not literal. The names are historical; the theme role in
-# the trailing comment is what each one actually means. Kept stable on
-# purpose: ~100 printf call sites reference them directly, so updating
-# the values here re-themes the whole script at once.
-RED="$(ui_fg error '#F38BA8' 31)"               # failure
-GREEN="$(ui_fg success '#A6E3A1' 32)"           # success
-YELLOW="$(ui_fg warning '#F9E2AF' 33)"          # warning
-BLUE="$(ui_fg info '#89B4FA' 34)"               # information
-MAGENTA="$(ui_fg terminalMagenta '#F5C2E7' 35)" # a command about to run
-CYAN="$(ui_fg accent '#CBA6F7' 36)"             # chrome: headings, numbers, frames
-DIM="$(ui_fg textMuted '#989CAC' 2)"            # de-emphasised
-
-# --- UI 3: glyphs + box drawing ------------------------------
-
-# Glyphs
-#
-# These literals are the Unicode / Nerd Font set. The block just below
-# them swaps in ASCII when the locale cannot render it, so nothing here
-# needs a conditional of its own.
+RED="$(ui_fg error '#F38BA8' 31)"
+GREEN="$(ui_fg success '#A6E3A1' 32)"
+YELLOW="$(ui_fg warning '#F9E2AF' 33)"
+BLUE="$(ui_fg info '#89B4FA' 34)"
+MAGENTA="$(ui_fg terminalMagenta '#F5C2E7' 35)"
+CYAN="$(ui_fg accent '#CBA6F7' 36)"
+DIM="$(ui_fg textMuted '#989CAC' 2)"
 
 ICON_OK="✓"
 ICON_FAIL="✗"
@@ -246,12 +163,8 @@ UI_BR="╯"
 UI_H="─"
 UI_V="│"
 UI_RULE="─"
-
 UI_SPIN=("⠋" "⠙" "⠹" "⠸" "⠼" "⠴" "⠦" "⠧" "⠇" "⠏")
 
-# ASCII fallback, for a terminal without a UTF-8 locale. Everything
-# above is replaced wholesale rather than conditionally, so the rest of
-# the script only ever refers to the names.
 if [[ "$UI_UNICODE" -eq 0 ]]; then
     ICON_OK="ok"
     ICON_FAIL="x"
@@ -264,7 +177,6 @@ if [[ "$UI_UNICODE" -eq 0 ]]; then
     ICON_GEAR="*"
     ICON_TOOLS=">"
     ICON_SHIELD="+"
-
     UI_TL="+"
     UI_TR="+"
     UI_BL="+"
@@ -272,104 +184,63 @@ if [[ "$UI_UNICODE" -eq 0 ]]; then
     UI_H="-"
     UI_V="|"
     UI_RULE="-"
-
     UI_SPIN=("|" "/" "-" "\\")
 fi
 
-# --- UI 4: cursor + primitives -------------------------------
-#
-# The trap lives here rather than next to the maintenance dashboard,
-# because a Ctrl-C anywhere in the script has to put the cursor back.
-
 hide_cursor() {
-    if [[ "$IS_TTY" -eq 1 ]]; then tput civis 2>/dev/null || true; fi
+    [[ "$IS_TTY" -eq 1 ]] && tput civis 2>/dev/null || true
 }
 
 show_cursor() {
-    if [[ "$IS_TTY" -eq 1 ]]; then tput cnorm 2>/dev/null || true; fi
+    [[ "$IS_TTY" -eq 1 ]] && tput cnorm 2>/dev/null || true
 }
 
 trap show_cursor EXIT INT TERM
 
-# Primitives
-
-# Repeat $1 exactly $2 times.
 ui_repeat() {
     local char="$1" count="$2" out="" i
-
     for ((i = 0; i < count; i++)); do out+="$char"; done
-
     printf '%s' "$out"
 }
 
-# Length of a string with escape sequences discounted, so the panel
-# border lines up whether or not colour is on.
 ui_visible_len() {
     local stripped
-
-    stripped="$(printf '%b' "$1" | sed -e 's/\x1b\[[0-9;]*m//g')"
-
+    stripped="$(printf '%b' "$1" | sed -E 's/\x1b\[[0-9;]*m//g')"
     printf '%s' "${#stripped}"
 }
 
 clear_screen() {
-    if [[ "$IS_TTY" -eq 1 ]]; then clear 2>/dev/null || printf '\033[H\033[2J'; fi
+    [[ "$IS_TTY" -eq 1 ]] && clear 2>/dev/null || true
 }
 
 hr() {
     printf '  %b%s%b\n' "$DIM" "$(ui_repeat "$UI_RULE" "$((UI_WIDTH - 2))")" "$RESET"
 }
 
-# Accent rule used under panel titles and menu groups. Same width
-# discipline as hr(), but tinted so group boundaries read as structure
-# rather than plain dividers.
 hr_accent() {
     printf '  %b%s%b\n' "$CYAN" "$(ui_repeat "$UI_RULE" "$((UI_WIDTH - 2))")" "$RESET"
 }
-
-# --- UI 5: log lines -----------------------------------------
-#
-# Two leading spaces, a coloured glyph, then the message -- the shape
-# this script has always had, so nothing downstream needs re-reading.
 
 die() {
     printf '  %b%s%b %s\n' "$RED" "$ICON_FAIL" "$RESET" "$*" >&2
     exit 1
 }
+
 info() { printf '  %b%s%b %s\n' "$BLUE" "$ICON_INFO" "$RESET" "$*"; }
 success() { printf '  %b%s%b %s\n' "$GREEN" "$ICON_OK" "$RESET" "$*"; }
 warning() { printf '  %b%s%b %s\n' "$YELLOW" "$ICON_WARN" "$RESET" "$*"; }
 error() { printf '  %b%s%b %s\n' "$RED" "$ICON_FAIL" "$RESET" "$*" >&2; }
 run_cmd() { printf '  %b%s%b %b%s%b\n' "$MAGENTA" "$ICON_ARROW" "$RESET" "$DIM" "$*" "$RESET"; }
 
-# --- UI 6: structure (section / subsection / step / kv / note) --
-#
-# section() is the top-level divider (same signature as before, now
-# with a section glyph so headings scan as headings). subsection(),
-# step(), kv() and note() compose inside a section without adding new
-# divider weight.
-
 section() {
     printf '\n  %b%b%s %s%b\n' "$CYAN" "$ICON_SECTION" "$BOLD" "$1" "$RESET"
     hr
 }
 
-# Lighter sub-header: no leading blank line, dimmer rule.
 subsection() {
     printf '\n  %b%s %s%b\n' "$CYAN" "$ICON_STEP" "$1" "$RESET"
 }
 
-# Numbered progress line: step "2/7 — Partitioning".
-# Purely presentational; exit status always 0 so it never trips set -e.
-step() {
-    local cur="$1" total="$2"
-    shift 2 || true
-    printf '  %b[%s/%s]%b %b%s%b %s\n' \
-        "$CYAN" "$cur" "$total" "$RESET" "$BOLD" "$ICON_STEP" "$RESET" "$*"
-}
-
-# Aligned key/value line for reviews and summaries.
-# Usage: kv "Username" "subha"
 kv() {
     local key="$1"
     shift || true
@@ -377,155 +248,73 @@ kv() {
         "$DIM" "$key" "$RESET" "$DIM" "$ICON_DOT" "$RESET" "$*"
 }
 
-# Dim indented hint. Never fails; wraps nothing (caller keeps lines short).
-note() {
-    printf '  %b%s%b %s\n' "$DIM" "$ICON_DOT" "$RESET" "$*"
-}
-
-# --- UI 7: prompts (pause / confirm) --------------------------
-#
-# Contracts preserved: pause() always succeeds; confirm() returns 0 on
-# yes, 1 on no, so `confirm ... || return` and `if confirm` keep working.
-
 pause() {
+    [[ "$IS_TTY" -eq 1 ]] || return 0
     echo
-    printf '  %b%s%b ' "$DIM" "Press Enter to continue..." "$RESET"
+    printf '  %bPress Enter to continue...%b ' "$DIM" "$RESET"
     read -r _ || true
 }
 
 confirm() {
     local prompt="${1:-Continue?}" answer
+    [[ "$IS_TTY" -eq 1 ]] || return 1
     echo
     printf '  %b?%b %s %b[y/N]:%b ' "$YELLOW" "$RESET" "$prompt" "$DIM" "$RESET"
     read -r answer || return 1
     [[ "$answer" =~ ^[Yy]([Ee][Ss])?$ ]]
 }
 
-# --- UI 8: blocks (panel / verdict / menus / progress) --------
-#
-# panel() and verdict() keep their exact signatures. menu_group() and
-# menu_footer() are the only new menu vocabulary so menu() reads as
-# structure instead of repeated ad-hoc printf lines.
-
-# Validator results
-#
-# A distinct shape from the log lines above: a check result, not an
-# event. These used to be defined inside validator_run, which put a
-# hundred-odd call sites behind a function-local definition; the names
-# are kept exactly because those call sites are unchanged.
-
-V_FAILED=0
-
-v_ok() { printf '  %b%s%b %s\n' "$GREEN" "$ICON_OK" "$RESET" "$1"; }
-
-v_fail() {
-    printf '  %b%s%b %s\n' "$RED" "$ICON_FAIL" "$RESET" "$1"
-    V_FAILED=1
+confirm_exact() {
+    local prompt="$1" expected="$2" answer
+    echo
+    printf '  %b!%b %s\n' "$RED" "$RESET" "$prompt"
+    printf '  %bType %s to continue:%b ' "$YELLOW" "$expected" "$RESET"
+    read -r answer || return 1
+    [[ "$answer" == "$expected" ]]
 }
-
-v_info() { printf '  %b%s%b %s\n' "$YELLOW" "$ICON_WARN" "$RESET" "$1"; }
-
-v_separator() { hr; }
-
-# Panel
-#
-# The framed header. $1 is the title, $2 an optional right-aligned tag
-# (the version), and any further arguments become dimmed fact lines
-# inside the frame.
 
 panel() {
     local title="$1" tag="${2:-}"
-    shift || true
-    shift || true
+    shift 2 || true
 
     local inner=$((UI_WIDTH - 2))
     local head=" $title " tail="" pad
-
-    if [[ -n "$tag" ]]; then tail=" $tag "; fi
+    [[ -n "$tag" ]] && tail=" $tag "
 
     pad=$((inner - ${#head} - ${#tail} - 1))
-    if [[ "$pad" -lt 1 ]]; then pad=1; fi
-
+    if ((pad < 1)); then
+        pad=1
+    fi
     printf '%b%s%s%b%s%b%s%s%s%b\n' \
-        "$CYAN" "$UI_TL" "$UI_H" \
-        "$BOLD" "$head" "$RESET$CYAN" \
+        "$CYAN" "$UI_TL" "$UI_H" "$BOLD" "$head" "$RESET$CYAN" \
         "$(ui_repeat "$UI_H" "$pad")" "$tail" "$UI_TR" "$RESET"
 
     local line len
     for line in "$@"; do
         len="$(ui_visible_len "$line")"
-
         pad=$((inner - len - 2))
-        if [[ "$pad" -lt 0 ]]; then pad=0; fi
+        if ((pad < 0)); then
+            pad=0
+        fi
 
-        printf '%b%s%b %b%s%b%s %b%s%b\n' \
+        printf '%b%s%b %s%s%b%s %b%s%b\n' \
             "$CYAN" "$UI_V" "$RESET" \
-            "$DIM" "$line" "$RESET" "$(ui_repeat ' ' "$pad")" \
-            "$CYAN" "$UI_V" "$RESET"
+            "$line" "$(ui_repeat ' ' "$pad")" "$RESET" \
+            "" "$CYAN" "$UI_V" "$RESET"
     done
 
     printf '%b%s%s%s%b\n' \
         "$CYAN" "$UI_BL" "$(ui_repeat "$UI_H" "$inner")" "$UI_BR" "$RESET"
 }
 
-# Verdict
-#
-# The framed one-line result the validator ends on. Same framing as
-# panel() but tinted by outcome and centred, and it respects UI_WIDTH and
-# UI_UNICODE rather than the fixed 62-column unicode box it replaces --
-# which used to survive `| cat` as raw box characters.
-
-verdict() {
-    local tint="$1" icon="$2" msg="$3"
-
-    local inner=$((UI_WIDTH - 2))
-    local body="$icon  $msg"
-    local len=${#body}
-
-    if [[ "$len" -gt "$inner" ]]; then
-        body="${body:0:$inner}"
-        len="$inner"
-    fi
-
-    local left=$(((inner - len) / 2))
-    local right=$((inner - len - left))
-
-    local rule
-    rule="$(ui_repeat "$UI_H" "$inner")"
-
-    printf '%b%s%s%s%b\n' "$tint" "$UI_TL" "$rule" "$UI_TR" "$RESET"
-
-    printf '%b%s%b%s%b%s%b%s%b%s%b\n' \
-        "$tint" "$UI_V" "$RESET" \
-        "$(ui_repeat ' ' "$left")" \
-        "$tint$BOLD" "$body" "$RESET" \
-        "$(ui_repeat ' ' "$right")" \
-        "$tint" "$UI_V" "$RESET"
-
-    printf '%b%s%s%s%b\n' "$tint" "$UI_BL" "$rule" "$UI_BR" "$RESET"
-}
-
-# Spinner
-#
-# Wraps a long operation whose output we do not need to watch, showing
-# an elapsed second count so that a slow `nix flake check` never looks
-# hung. Operations whose output IS the point -- nixos-rebuild switch
-# above all -- are deliberately left streaming to the terminal.
-#
-# Without a TTY it degrades to plain lines, so piped output stays
-# readable and no escape sequences leak into a log file. On failure the
-# captured output is replayed to stderr, so nothing is ever swallowed.
-
 spinner() {
     local label="$1"
     shift
-
     local log rc=0
     log="$(mktemp)"
 
     if [[ "$IS_TTY" -eq 0 ]]; then
         run_cmd "$label"
-
         if "$@" >"$log" 2>&1; then
             success "$label"
         else
@@ -533,7 +322,6 @@ spinner() {
             error "$label"
             cat "$log" >&2
         fi
-
         rm -f "$log"
         return "$rc"
     fi
@@ -543,21 +331,16 @@ spinner() {
     local frame=0 start=$SECONDS
 
     hide_cursor
-
     while kill -0 "$pid" 2>/dev/null; do
         printf '\r  %b%s%b %s %b%ds%b' \
             "$CYAN" "${UI_SPIN[$frame]}" "$RESET" \
             "$label" "$DIM" "$((SECONDS - start))" "$RESET"
-
         frame=$(((frame + 1) % ${#UI_SPIN[@]}))
         sleep 0.08
     done
 
     wait "$pid" || rc=$?
-
     show_cursor
-
-    # Erase the spinner line before the result replaces it.
     printf '\r\033[2K'
 
     if [[ "$rc" -eq 0 ]]; then
@@ -571,45 +354,11 @@ spinner() {
     return "$rc"
 }
 
-need_cmd() { command -v "$1" >/dev/null 2>&1 || die "Required command not found: $1"; }
-
-# ------------------------------------------------------------
-# Bootstrap module: preflight / detect_system / check_dependencies
-#
-# Only three functions are needed here because Nix owns all real
-# configuration. There are deliberately no setup_directories,
-# setup_git, setup_hyprland, setup_quickshell, setup_themes,
-# setup_fonts, setup_shell or setup_apps functions: those would
-# duplicate home/, modules/ and lib/themes.nix as a second config
-# system. This script only validates the environment, detects
-# where it runs, checks commands, then delegates to Nix.
-# ------------------------------------------------------------
-
-# Verify the checkout itself is usable. Idempotent and read-only:
-# fails fast when ROOT/VARS are missing or HOME is unset, so later
-# steps never fail halfway through a mutation.
-preflight() {
-    [[ -n "${ROOT:-}" && -d "$ROOT" ]] || die "Repository root not found."
-    [[ -f "$VARS" ]] || die "Missing $VARS"
-    [[ -n "${HOME:-}" && -d "$HOME" ]] || die "HOME is unset or missing."
+need_cmd() {
+    command -v "$1" >/dev/null 2>&1 ||
+        die "Required command not found: $1"
 }
 
-# Where are we? Returns a short label and never fails:
-# live-installer (Sunflower ISO), nixos (running system), other.
-detect_system() {
-    if ci_is_live_installer 2>/dev/null; then
-        printf 'live-installer\n'
-    elif [[ -e /etc/NIXOS ]] || command -v nixos-rebuild >/dev/null 2>&1; then
-        printf 'nixos\n'
-    else
-        printf 'other\n'
-    fi
-}
-
-# Check one or more commands exist. Thin loop over need_cmd so every
-# lifecycle/maintenance entry point declares its needs in one line
-# instead of scattering ad-hoc `command -v` tests.
-# Usage: check_dependencies nix git nixos-rebuild
 check_dependencies() {
     local cmd
     for cmd in "$@"; do
@@ -617,84 +366,236 @@ check_dependencies() {
     done
 }
 
+# ============================================================================
+# GENERAL HELPERS
+# ============================================================================
+
+is_root() {
+    [[ "$(id -u)" -eq 0 ]]
+}
+
+run_root() {
+    if is_root; then
+        "$@"
+    else
+        sudo "$@"
+    fi
+}
+
+root_cmd() {
+    if is_root; then
+        "$*"
+    else
+        sudo bash -c "$*"
+    fi
+}
+
+is_live_installer() {
+    grep -qsE '^VARIANT_ID="?installer"?' /etc/os-release 2>/dev/null && return 0
+    [[ -d /iso ]] && return 0
+    findmnt -no TARGET /nix/.ro-store >/dev/null 2>&1 && return 0
+    return 1
+}
+
+preflight_repo() {
+    [[ -d "$ROOT" ]] || die "Repository root not found: $ROOT"
+    [[ -f "$ROOT/$VARS_REL" ]] ||
+        die "Missing $ROOT/$VARS_REL"
+}
+
+uptime_human() {
+    local secs d h m
+    [[ -r /proc/uptime ]] || {
+        printf 'unknown'
+        return
+    }
+    read -r secs _ </proc/uptime
+    secs="${secs%%.*}"
+    d=$((secs / 86400))
+    h=$((secs % 86400 / 3600))
+    m=$((secs % 3600 / 60))
+
+    if ((d > 0)); then
+        printf '%dd %dh' "$d" "$h"
+    elif ((h > 0)); then
+        printf '%dh %dm' "$h" "$m"
+    else
+        printf '%dm' "$m"
+    fi
+}
+
+overview_facts() {
+    local nixv
+    nixv="$(nix --version 2>/dev/null | grep -o '[0-9.]\+' | head -1 || true)"
+    printf '%s · %s · nix %s · up %s' \
+        "${USER:-$(whoami 2>/dev/null || echo user)}" \
+        "$(uname -r)" \
+        "${nixv:-?}" \
+        "$(uptime_human)"
+}
+
+# ============================================================================
+# NIX CONFIGURATION
+# ============================================================================
+
 get_var() {
     local key="$1"
-    [[ -f "$VARS" ]] || return 1
-    sed -nE "s/^[[:space:]]*${key}[[:space:]]*=[[:space:]]*\"([^\"]*)\";.*/\1/p" "$VARS" | head -n1
+    [[ -f "$ROOT/$VARS_REL" ]] || return 1
+    sed -nE \
+        "s/^[[:space:]]*${key}[[:space:]]*=[[:space:]]*\"([^\"]*)\";.*/\1/p" \
+        "$ROOT/$VARS_REL" | head -n1
 }
-# Rewrite one `key = "value";` in a variables file.
-#
-# sed rather than python3, because this also runs inside the installer ISO
-# during a clean install and python3 is not something to depend on there.
+
 set_var_in() {
     local file="$1" key="$2" value="$3"
     [[ -f "$file" ]] || die "Missing $file"
 
-    grep -qE "^[[:space:]]*${key}[[:space:]]*=[[:space:]]*\"" "$file" ||
-        die "Could not find variable: $key"
+    grep -qE \
+        "^[[:space:]]*${key}[[:space:]]*=[[:space:]]*\"" "$file" ||
+        die "Could not find variable '$key' in $file"
 
     local esc
     esc="$(printf '%s' "$value" | sed -e 's/[\\&|]/\\&/g')"
 
-    sed -i -E "s|^([[:space:]]*${key}[[:space:]]*=[[:space:]]*)\"[^\"]*\"(;.*)\$|\1\"${esc}\"\2|" "$file"
+    sed -i -E \
+        "s|^([[:space:]]*${key}[[:space:]]*=[[:space:]]*)\"[^\"]*\"(;.*)\$|\1\"${esc}\"\2|" \
+        "$file"
 }
 
-set_var() { set_var_in "$VARS" "$1" "$2"; }
+set_nvidia_in() {
+    local file="$1" value="$2"
+
+    python3 - "$file" "$value" <<'PY'
+import re
+import sys
+
+path, value = sys.argv[1], sys.argv[2]
+text = open(path, encoding="utf-8").read()
+
+pattern = re.compile(
+    r'(?ms)(nvidia\s*=\s*\{.*?^\s*enable\s*=\s*)(true|false)(\s*;)',
+)
+
+match = pattern.search(text)
+if not match:
+    raise SystemExit("Could not find nvidia.enable in variables.nix")
+
+text = text[:match.start(2)] + value + text[match.end(2):]
+open(path, "w", encoding="utf-8").write(text)
+PY
+}
 
 backup_config() {
+    preflight_repo
+
     local stamp backup
     stamp="$(date +%Y%m%d-%H%M%S)"
     backup="$ROOT/.setup-backups/$stamp"
     mkdir -p "$backup"
-    [[ -f "$VARS" ]] && cp -a "$VARS" "$backup/"
+
+    [[ -f "$ROOT/$VARS_REL" ]] &&
+        cp -a "$ROOT/$VARS_REL" "$backup/variables.nix"
+
+    [[ -f "$ROOT/flake.lock" ]] &&
+        cp -a "$ROOT/flake.lock" "$backup/"
+
     [[ -f "$ROOT/hosts/sunflower/hardware-configuration.nix" ]] &&
         cp -a "$ROOT/hosts/sunflower/hardware-configuration.nix" "$backup/"
+
+    {
+        printf 'timestamp=%s\n' "$stamp"
+        printf 'root=%s\n' "$ROOT"
+        if command -v git >/dev/null 2>&1 && git -C "$ROOT" rev-parse HEAD >/dev/null 2>&1; then
+            printf 'git_commit=%s\n' "$(git -C "$ROOT" rev-parse HEAD)"
+        fi
+    } >"$backup/metadata"
+
     success "Backup created: $backup"
 }
 
+configure_variables() {
+    local vars_file="$1"
+    local username="$2"
+    local full_name="$3"
+    local hostname="$4"
+    local git_user="$5"
+    local git_email="$6"
+    local timezone="$7"
+    local locale="$8"
+    local nvidia="$9"
+
+    section "Configuring Sunflower"
+
+    set_var_in "$vars_file" username "$username"
+    set_var_in "$vars_file" name "$full_name"
+    set_var_in "$vars_file" hostname "$hostname"
+    set_var_in "$vars_file" gitUser "$git_user"
+    set_var_in "$vars_file" email "$git_email"
+    set_var_in "$vars_file" timezone "$timezone"
+    set_var_in "$vars_file" locale "$locale"
+    set_nvidia_in "$vars_file" "$nvidia"
+
+    success "Sunflower identity and hardware settings configured."
+}
+
+# ============================================================================
+# EXISTING SYSTEM
+# ============================================================================
+
 flake_check() {
-    preflight
+    preflight_repo
     check_dependencies nix
+
     section "Flake validation"
     run_cmd "nix flake check"
-    nix flake check
+    nix flake check --show-trace
     success "Flake check passed."
 }
 
 dry_build() {
-    preflight
-    check_dependencies nix
+    preflight_repo
+    check_dependencies nix nixos-rebuild
+
     section "Sunflower dry build"
-    run_cmd "nixos-rebuild dry-build --flake .#sunflower"
-    sudo nixos-rebuild dry-build --flake "$FLAKE_TARGET"
+    run_cmd "nixos-rebuild dry-build --flake $FLAKE_TARGET"
+    run_root nixos-rebuild dry-build --flake "$FLAKE_TARGET"
     success "Dry-build passed."
 }
 
 rebuild() {
-    preflight
-    check_dependencies nix
+    preflight_repo
+    check_dependencies nix nixos-rebuild sudo
+
     flake_check
+    dry_build
+
     section "Sunflower rebuild"
-    run_cmd "sudo nixos-rebuild switch --flake .#sunflower"
-    sudo nixos-rebuild switch --flake "$FLAKE_TARGET"
+    run_cmd "nixos-rebuild switch --flake $FLAKE_TARGET"
+    run_root nixos-rebuild switch --flake "$FLAKE_TARGET"
     success "System rebuilt and switched successfully."
 }
 
 update_config() {
-    preflight
+    preflight_repo
     check_dependencies git nix
+
     section "Update configuration"
     cd "$ROOT"
+
     if [[ -n "$(git status --porcelain)" ]]; then
         warning "Working tree contains uncommitted changes."
         git status --short
-        confirm "Continue with update?" || return
+        confirm "Continue with update?" || return 0
     fi
+
     run_cmd "git pull --ff-only"
     git pull --ff-only
+
     run_cmd "nix flake update"
     nix flake update
+
     flake_check
+
     if confirm "Rebuild and switch now?"; then
         rebuild
     else
@@ -703,108 +604,87 @@ update_config() {
 }
 
 rollback() {
+    check_dependencies nixos-rebuild sudo
+
     section "Rollback"
-    warning "This switches to the previous Sunflower generation."
-    confirm "Continue with rollback?" || return
-    sudo nixos-rebuild switch --rollback
+    warning "This switches to the previous system generation."
+    confirm "Continue with rollback?" || return 0
+
+    run_root nixos-rebuild switch --rollback
     success "Rollback completed."
 }
 
 list_generations() {
+    check_dependencies nix-env sudo
+
     section "Sunflower generations"
-    sudo nix-env --list-generations --profile /nix/var/nix/profiles/system
-}
-
-# Write a hardware configuration.
-#
-# $1 is the root to describe: empty means the running system, otherwise a
-# mounted target such as /mnt.
-#
-# That argument is the whole point. nixos-generate-config reports the
-# filesystems of whichever root it is pointed at, so running it without
-# --root from the installer ISO describes the ISO's own overlay and tmpfs
-# mounts. There used to be no way to express the distinction, which is how a
-# clean install could carry the previous machine's UUIDs into the new system.
-write_hardware_config() {
-    local target_root="$1" dest="$2"
-
-    mkdir -p "$(dirname "$dest")"
-
-    if [[ -n "$target_root" ]]; then
-        nixos-generate-config --root "$target_root" --show-hardware-config >"$dest"
-    else
-        # shellcheck disable=SC2024  # sudo is for probing hardware; the target is user-owned
-        sudo nixos-generate-config --show-hardware-config >"$dest"
-    fi
+    run_root nix-env \
+        --list-generations \
+        --profile /nix/var/nix/profiles/system
 }
 
 refresh_hardware() {
-    preflight
-    check_dependencies nixos-generate-config
+    preflight_repo
+    check_dependencies nixos-generate-config sudo
+
     section "Hardware configuration"
 
-    # Regenerating from the installer would describe the installer.
-    if ci_is_live_installer; then
-        warning "This looks like the Sunflower installer environment."
-        warning "Generating here describes the ISO, not the system on disk."
-        info "For a fresh machine use: ./setup.sh clean-install"
-        confirm "Generate anyway?" || return
+    if is_live_installer; then
+        warning "You are running from the Sunflower installer."
+        warning "Generating hardware configuration here describes the live ISO."
+        info "For a fresh installation use: ./setup.sh clean-install"
+        confirm "Generate for the current live environment anyway?" || return 0
     fi
 
     backup_config
-    write_hardware_config "" "$ROOT/hosts/sunflower/hardware-configuration.nix"
+
+    run_cmd "nixos-generate-config --show-hardware-config"
+    if is_root; then
+        nixos-generate-config \
+            --show-hardware-config \
+            >"$ROOT/hosts/sunflower/hardware-configuration.nix"
+    else
+        sudo nixos-generate-config \
+            --show-hardware-config \
+            >"$ROOT/hosts/sunflower/hardware-configuration.nix"
+    fi
+
     success "Hardware configuration regenerated."
     warning "Review the generated file before rebuilding."
 }
 
 detect_nvidia() {
-    command -v lspci >/dev/null 2>&1 && lspci -nn | grep -qi NVIDIA
+    command -v lspci >/dev/null 2>&1 &&
+        lspci -nn 2>/dev/null | grep -qi NVIDIA
 }
 
-install_flow() {
-    # This flow ends in `nixos-rebuild switch`, which needs a running Sunflower.
-    # From the installer ISO it would do a lot of work and then fail at the last
-    # step, so it redirects instead.
-    if ci_is_live_installer; then
-        section "Wrong flow for this environment"
-        warning "This is the Sunflower installer, and this option configures a system"
-        warning "that is already running Sunflower. It ends in nixos-rebuild switch,"
-        warning "which cannot work from here."
-        echo
-        info "For a fresh machine you want the clean installer:"
-        info "  ./setup.sh clean-install --dry-run    review the plan"
-        info "  ./setup.sh clean-install              do it"
-        echo
-        if confirm "Run the clean installer now?"; then
-            clean_install
-            return
-        fi
-        return
+configure_existing_system() {
+    preflight_repo
+    check_dependencies nix python3 git sudo
+
+    if is_live_installer; then
+        die "Use 'clean-install' from the live installer. Existing-system setup is disabled there."
     fi
 
-    preflight
-    check_dependencies nix python3 git
+    section "Sunflower Configuration"
 
-    # Identity key map: the "Full name" prompt writes the `name` key in
-    # lib/variables.nix (user.name). There is no `fullName` key in the
-    # current schema; writing fullName would abort in set_var_in with
-    # "Could not find variable". Nothing in Nix consumes user.name yet
-    # (no GECOS/description field), but the value is preserved for
-    # future use instead of being dropped.
-    section "Sunflower installation / setup"
-    local username="${SUDO_USER:-${USER:-}}" full_name hostname git_user git_email timezone locale
+    local username="${SUDO_USER:-${USER:-}}"
+    local full_name hostname git_user git_email timezone locale
     local nvidia="false"
 
     read -r -p "  Linux username [$username]: " username
     username="${username:-${SUDO_USER:-${USER:-}}}"
-    [[ "$username" =~ ^[a-z_][a-z0-9_-]*[$]?$ ]] || die "Invalid Linux username."
+    [[ "$username" =~ ^[a-z_][a-z0-9_-]*[$]?$ ]] ||
+        die "Invalid Linux username."
 
     read -r -p "  Full name: " full_name
     [[ -n "$full_name" ]] || die "Full name cannot be empty."
 
-    read -r -p "  Hostname [$(hostname -s 2>/dev/null || echo nixos)]: " hostname
-    hostname="${hostname:-$(hostname -s 2>/dev/null || echo nixos)}"
-    [[ "$hostname" =~ ^[a-zA-Z0-9][a-zA-Z0-9.-]*$ ]] || die "Invalid hostname."
+    hostname_default="$(hostname -s 2>/dev/null || echo nixos)"
+    read -r -p "  Hostname [$hostname_default]: " hostname
+    hostname="${hostname:-$hostname_default}"
+    [[ "$hostname" =~ ^[a-zA-Z0-9][a-zA-Z0-9.-]*$ ]] ||
+        die "Invalid hostname."
 
     read -r -p "  Git username: " git_user
     read -r -p "  Git email: " git_email
@@ -818,12 +698,9 @@ install_flow() {
         info "NVIDIA GPU detected."
     else
         read -r -p "  Enable NVIDIA support anyway? [y/N]: " ans
-        if [[ "$ans" =~ ^[Yy]$ ]]; then
-            nvidia=true
-        fi
+        [[ "$ans" =~ ^[Yy]$ ]] && nvidia=true
     fi
 
-    echo
     section "Review"
     kv "Username" "$username"
     kv "Full name" "$full_name"
@@ -833,169 +710,677 @@ install_flow() {
     kv "Timezone" "$timezone"
     kv "Locale" "$locale"
     kv "NVIDIA" "$nvidia"
+
     confirm "Apply these settings?" || {
-        warning "Installation cancelled."
-        return
+        warning "Configuration cancelled."
+        return 0
     }
 
     backup_config
-    set_var username "$username"
-    set_var name "$full_name"
-    set_var hostname "$hostname"
-    set_var gitUser "$git_user"
-    set_var email "$git_email"
-    set_var timezone "$timezone"
-    set_var locale "$locale"
+    configure_variables \
+        "$ROOT/$VARS_REL" \
+        "$username" "$full_name" "$hostname" \
+        "$git_user" "$git_email" "$timezone" "$locale" "$nvidia"
 
-    if grep -qE '^[[:space:]]*enable[[:space:]]*=[[:space:]]*(true|false);' "$VARS"; then
-        python3 - "$VARS" "$nvidia" <<'PY'
-import sys, re
-path, val = sys.argv[1:]
-text = open(path).read()
-m = re.search(r'(?ms)(nvidia\s*=\s*\{.*?)(^\s*enable\s*=\s*)(true|false)(;)', text)
-if m:
-    text = text[:m.start(3)] + val + text[m.end(3):]
-    open(path, "w").write(text)
-PY
+    rebuild
+
+    if id "$username" >/dev/null 2>&1; then
+        info "Set the Linux password for $username."
+        run_root passwd "$username"
     fi
 
-    refresh_hardware
-    flake_check
-    dry_build
+    success "Sunflower configuration completed."
+}
 
-    if confirm "Switch to this configuration now?"; then
-        rebuild
-        if id "$username" >/dev/null 2>&1; then
-            info "Set the Linux password for $username. It is never stored in Nix."
-            sudo passwd "$username"
-        else
-            warning "User '$username' is not currently present. Set its password after activation:"
-            printf '  sudo passwd %q\n' "$username"
-        fi
-        success "Installation completed."
+# ============================================================================
+# MAINTENANCE
+# ============================================================================
+
+m_cleanup_generations() {
+    check_dependencies nix-env sudo
+
+    section "Generations cleanup"
+
+    run_root nix-env \
+        --profile /nix/var/nix/profiles/system \
+        --delete-generations "+$M_KEEP_GENERATIONS"
+
+    success "Old generations cleaned. Keeping the newest $M_KEEP_GENERATIONS."
+}
+
+m_garbage_collect() {
+    check_dependencies nix-collect-garbage sudo
+
+    section "Garbage collection"
+    run_root nix-collect-garbage -d
+    success "Garbage collection completed."
+}
+
+m_optimize_store() {
+    check_dependencies nix-store sudo
+
+    section "Optimizing Nix store"
+    run_root nix-store --optimise
+    success "Nix store optimized."
+}
+
+m_verify_store() {
+    check_dependencies nix-store sudo
+
+    section "Verifying Nix store"
+    run_root nix-store --verify --check-contents
+    success "Nix store verified."
+}
+
+m_maintenance_dashboard() {
+    clear_screen
+
+    panel "Sunflower Maintenance" "v$VERSION" \
+        "Repository: $ROOT" \
+        "Generations kept: $M_KEEP_GENERATIONS"
+
+    echo
+    section "Health"
+
+    if flake_check; then
+        success "Flake: healthy"
     else
-        success "Setup prepared but not switched."
+        error "Flake: failed"
+    fi
+
+    if [[ -e /run/current-system ]]; then
+        info "Current system: $(readlink -f /run/current-system)"
+    fi
+
+    if command -v nix-store >/dev/null 2>&1; then
+        info "Nix store: $(du -sh /nix/store 2>/dev/null | awk '{print $1}' || echo '?')"
+    fi
+
+    if command -v nix-env >/dev/null 2>&1; then
+        list_generations
+    fi
+
+    pause
+}
+
+validator_run() {
+    preflight_repo
+    clear_screen
+
+    panel "Sunflower Configuration Check" "v$VERSION" \
+        "Repository: $ROOT"
+
+    flake_check
+}
+
+free_space() {
+    section "Disk Space Management"
+
+    m_cleanup_generations
+    m_garbage_collect
+
+    if confirm "Optimize the Nix store too?"; then
+        m_optimize_store
     fi
 }
+
+# ============================================================================
+# LIVE INSTALLER
+# ============================================================================
+
+ci_require_live() {
+    is_live_installer ||
+        die "This command must be run from the Sunflower/NixOS live installer."
+
+    check_dependencies \
+        nixos-install \
+        nixos-generate-config \
+        sgdisk \
+        mkfs.fat \
+        mkfs.ext4 \
+        mount \
+        umount \
+        lsblk \
+        findmnt \
+        blkid \
+        chroot \
+        cp \
+        rsync
+}
+
+ci_require_uefi() {
+    if [[ -d /sys/firmware/efi ]]; then
+        success "UEFI boot detected."
+    else
+        warning "The installer is running in BIOS/legacy mode."
+        warning "Sunflower's current installer creates an EFI/GPT layout."
+        warning "Boot the VM/ISO using UEFI firmware."
+        die "UEFI is required for this installer."
+    fi
+}
+
+ci_part_path() {
+    local disk="$1"
+    local part="$2"
+
+    if [[ "$disk" =~ [0-9]$ ]]; then
+        printf '%sp%s\n' "$disk" "$part"
+    else
+        printf '%s%s\n' "$disk" "$part"
+    fi
+}
+
+ci_disk_desc() {
+    local disk="$1"
+    lsblk -dnpo NAME,SIZE,MODEL,TRAN "$disk" 2>/dev/null |
+        sed -E 's/[[:space:]]+/ /g' || true
+}
+
+ci_disk_is_system_root() {
+    local disk="$1"
+    local root_source parent
+
+    root_source="$(findmnt -no SOURCE / 2>/dev/null || true)"
+    [[ -n "$root_source" ]] || return 1
+
+    parent="$(lsblk -no PKNAME "$root_source" 2>/dev/null || true)"
+    [[ "/dev/$parent" == "$disk" ]]
+}
+
+ci_select_disk() {
+    section "Target Disk"
+
+    info "Available disks:"
+    echo
+    lsblk -d -e 7 -o NAME,SIZE,MODEL,TYPE,TRAN 2>/dev/null || true
+    echo
+
+    local disk
+    read -r -p "  Target disk (example: /dev/vda, /dev/sda, /dev/nvme0n1): " disk
+    [[ -b "$disk" ]] || die "Device does not exist: $disk"
+
+    [[ "$(lsblk -dn -o TYPE "$disk")" == "disk" ]] ||
+        die "$disk is not a whole disk."
+
+    if ci_disk_is_system_root "$disk"; then
+        die "$disk appears to contain the currently running system. Refusing to erase it."
+    fi
+
+    CI_DISK="$disk"
+    CI_ESP="$(ci_part_path "$CI_DISK" 1)"
+    CI_ROOT_PART="$(ci_part_path "$CI_DISK" 2)"
+
+    echo
+    panel "Selected Disk" "" \
+        "Device: $CI_DISK" \
+        "Info:   $(ci_disk_desc "$CI_DISK")" \
+        "EFI:    $CI_ESP" \
+        "Root:   $CI_ROOT_PART"
+
+    warning "EVERYTHING on $CI_DISK will be erased."
+    confirm_exact \
+        "This operation destroys all partitions and data on $CI_DISK." \
+        "ERASE $CI_DISK" ||
+        die "Installation cancelled."
+
+    export CI_DISK CI_ESP CI_ROOT_PART
+}
+
+ci_prepare_partitions() {
+    section "Partitioning"
+
+    if ((CI_DRY_RUN)); then
+        info "DRY RUN: would erase the partition table on $CI_DISK."
+        info "DRY RUN: would create a 1 GiB EFI System Partition."
+        info "DRY RUN: would create an ext4 root partition using the remaining space."
+        return 0
+    fi
+
+    run_cmd "sgdisk --zap-all $CI_DISK"
+    sgdisk --zap-all "$CI_DISK"
+
+    run_cmd "sgdisk --clear $CI_DISK"
+    sgdisk --clear "$CI_DISK"
+
+    run_cmd "sgdisk --new=1:0:$CI_ESP_SIZE --typecode=1:ef00 --change-name=1:$CI_ESP_LABEL $CI_DISK"
+    sgdisk \
+        --new=1:0:"$CI_ESP_SIZE" \
+        --typecode=1:ef00 \
+        --change-name=1:"$CI_ESP_LABEL" \
+        "$CI_DISK"
+
+    run_cmd "sgdisk --new=2:0:0 --typecode=2:8300 --change-name=2:$CI_ROOT_LABEL $CI_DISK"
+    sgdisk \
+        --new=2:0:0 \
+        --typecode=2:8300 \
+        --change-name=2:"$CI_ROOT_LABEL" \
+        "$CI_DISK"
+
+    partprobe "$CI_DISK" 2>/dev/null || true
+    udevadm settle 2>/dev/null || true
+
+    [[ -b "$CI_ESP" ]] || die "EFI partition was not created: $CI_ESP"
+    [[ -b "$CI_ROOT_PART" ]] || die "Root partition was not created: $CI_ROOT_PART"
+
+    success "GPT partition table created."
+}
+
+ci_format_partitions() {
+    section "Formatting"
+
+    if ((CI_DRY_RUN)); then
+        info "DRY RUN: would format $CI_ESP as FAT32."
+        info "DRY RUN: would format $CI_ROOT_PART as ext4."
+        return 0
+    fi
+
+    run_cmd "mkfs.fat -F32 -n $CI_ESP_LABEL $CI_ESP"
+    mkfs.fat -F32 -n "$CI_ESP_LABEL" "$CI_ESP"
+
+    run_cmd "mkfs.ext4 -F -L $CI_ROOT_LABEL $CI_ROOT_PART"
+    mkfs.ext4 -F -L "$CI_ROOT_LABEL" "$CI_ROOT_PART"
+
+    success "Partitions formatted."
+}
+
+ci_mount() {
+    section "Mounting target filesystems"
+
+    if ((CI_DRY_RUN)); then
+        info "DRY RUN: would mount $CI_ROOT_PART at $CI_TARGET."
+        info "DRY RUN: would mount $CI_ESP at $CI_TARGET/boot."
+        return 0
+    fi
+
+    mkdir -p "$CI_TARGET"
+
+    if mountpoint -q "$CI_TARGET"; then
+        die "$CI_TARGET is already mounted. Refusing to overwrite it."
+    fi
+
+    run_cmd "mount $CI_ROOT_PART $CI_TARGET"
+    mount "$CI_ROOT_PART" "$CI_TARGET"
+
+    mkdir -p "$CI_TARGET/boot"
+
+    run_cmd "mount $CI_ESP $CI_TARGET/boot"
+    mount "$CI_ESP" "$CI_TARGET/boot"
+
+    CI_MOUNTED=1
+
+    findmnt "$CI_TARGET" >/dev/null ||
+        die "Root filesystem is not mounted correctly."
+
+    findmnt "$CI_TARGET/boot" >/dev/null ||
+        die "EFI filesystem is not mounted correctly."
+
+    success "Target filesystems mounted."
+}
+
+ci_unmount() {
+    ((CI_MOUNTED)) || return 0
+
+    sync || true
+
+    umount -R "$CI_TARGET" 2>/dev/null || {
+        warning "Some target filesystems could not be unmounted automatically."
+    }
+
+    CI_MOUNTED=0
+}
+
+ci_cleanup() {
+    if ((CI_MOUNTED)); then
+        ci_unmount
+    fi
+}
+
+ci_copy_repository() {
+    local target_user="$1"
+    local dest="$CI_TARGET/home/$target_user/Sunflower"
+
+    section "Deploying Sunflower"
+
+    if ((CI_DRY_RUN)); then
+        info "DRY RUN: would copy:"
+        info "  $ROOT"
+        info "to:"
+        info "  $dest"
+        return 0
+    fi
+
+    mkdir -p "$CI_TARGET/home/$target_user"
+
+    [[ ! -e "$dest" ]] ||
+        die "Target Sunflower directory already exists: $dest"
+
+    # Copy CONTENTS, not the directory itself.
+    # This avoids /Sunflower/Sunflower nesting and makes the destination exact.
+    run_cmd "rsync -a --exclude .git $ROOT/ $dest/"
+    rsync -a --exclude .git "$ROOT"/ "$dest"/
+
+    chown -R "$target_user:users" "$CI_TARGET/home/$target_user" 2>/dev/null || true
+
+    success "Sunflower deployed to $dest"
+}
+
+ci_generate_hardware() {
+    local target_repo="$CI_TARGET/home/$1/Sunflower"
+    local hardware="$target_repo/hosts/sunflower/hardware-configuration.nix"
+
+    section "Generating hardware configuration"
+
+    if ((CI_DRY_RUN)); then
+        info "DRY RUN: would generate hardware configuration for the installed system."
+        info "DRY RUN: target: $hardware"
+        return 0
+    fi
+
+    mkdir -p "$(dirname "$hardware")"
+
+    nixos-generate-config \
+        --root "$CI_TARGET" \
+        --show-hardware-config \
+        >"$hardware"
+
+    [[ -s "$hardware" ]] ||
+        die "Generated hardware configuration is empty."
+
+    success "Hardware configuration generated."
+}
+
+ci_install() {
+    local target_user="$1"
+    local target_repo="$CI_TARGET/home/$target_user/Sunflower"
+
+    section "Installing NixOS"
+
+    if ((CI_DRY_RUN)); then
+        info "DRY RUN: would run:"
+        info "nixos-install --flake $target_repo#$FLAKE_NAME"
+        return 0
+    fi
+
+    [[ -f "$target_repo/flake.nix" ]] ||
+        die "Flake not found at $target_repo/flake.nix"
+
+    run_cmd "nixos-install --flake $target_repo#$FLAKE_NAME"
+
+    nixos-install \
+        --flake "$target_repo#$FLAKE_NAME" \
+        --no-root-password
+
+    success "NixOS installation completed."
+}
+
+ci_set_password() {
+    local target_user="$1"
+
+    section "User Password"
+
+    if ((CI_DRY_RUN)); then
+        info "DRY RUN: would create/set the password for $target_user."
+        return 0
+    fi
+
+    # nixos-install has already built the system and therefore the configured
+    # user should exist in the target system.
+    if nixos-enter --root "$CI_TARGET" -- id "$target_user" >/dev/null 2>&1; then
+        info "Set the password for $target_user."
+        nixos-enter --root "$CI_TARGET" -- passwd "$target_user"
+    else
+        warning "User '$target_user' was not found in the installed system."
+        warning "Check variables.nix and the generated NixOS configuration."
+    fi
+}
+
+ci_summary() {
+    local username="$1"
+
+    section "Installation Complete"
+
+    panel "Sunflower" "ready" \
+        "User:     $username" \
+        "Hostname: $(get_var hostname 2>/dev/null || echo configured)" \
+        "Disk:     $CI_DISK" \
+        "Root:     $CI_ROOT_LABEL" \
+        "EFI:      $CI_ESP_LABEL"
+
+    echo
+    success "Your Sunflower dotfiles and configuration were installed."
+    info "The machine is ready to reboot."
+    warning "Remove the installer ISO before rebooting."
+}
+
+collect_install_identity() {
+    local __prefix="$1"
+
+    local username full_name hostname git_user git_email timezone locale
+    local nvidia="false"
+
+    username="subha"
+    read -r -p "  Username [$username]: " value
+    username="${value:-$username}"
+
+    [[ "$username" =~ ^[a-z_][a-z0-9_-]*[$]?$ ]] ||
+        die "Invalid Linux username."
+
+    full_name=""
+    read -r -p "  Full name: " full_name
+    [[ -n "$full_name" ]] ||
+        die "Full name cannot be empty."
+
+    hostname="sunflower"
+    read -r -p "  Hostname [$hostname]: " value
+    hostname="${value:-$hostname}"
+    [[ "$hostname" =~ ^[a-zA-Z0-9][a-zA-Z0-9.-]*$ ]] ||
+        die "Invalid hostname."
+
+    git_user=""
+    read -r -p "  Git username: " git_user
+
+    git_email=""
+    read -r -p "  Git email: " git_email
+
+    timezone="Asia/Kolkata"
+    read -r -p "  Timezone [$timezone]: " value
+    timezone="${value:-$timezone}"
+
+    locale="en_US.UTF-8"
+    read -r -p "  Locale [$locale]: " value
+    locale="${value:-$locale}"
+
+    if detect_nvidia; then
+        nvidia=true
+        info "NVIDIA GPU detected."
+    else
+        read -r -p "  Enable NVIDIA support anyway? [y/N]: " ans
+        [[ "$ans" =~ ^[Yy]$ ]] && nvidia=true
+    fi
+
+    eval "${__prefix}_USERNAME=\$username"
+    eval "${__prefix}_FULL_NAME=\$full_name"
+    eval "${__prefix}_HOSTNAME=\$hostname"
+    eval "${__prefix}_GIT_USER=\$git_user"
+    eval "${__prefix}_GIT_EMAIL=\$git_email"
+    eval "${__prefix}_TIMEZONE=\$timezone"
+    eval "${__prefix}_LOCALE=\$locale"
+    eval "${__prefix}_NVIDIA=\$nvidia"
+}
+
+clean_install() {
+    local arg="${1:-}"
+
+    CI_DRY_RUN=0
+    [[ "$arg" == "--dry-run" ]] && CI_DRY_RUN=1
+
+    ci_require_live
+    ci_require_uefi
+    preflight_repo
+
+    section "Sunflower Clean Installer"
+
+    if ((CI_DRY_RUN)); then
+        panel "DRY RUN" "SAFE" \
+            "No partitions will be erased." \
+            "No filesystems will be formatted." \
+            "No filesystems will be mounted." \
+            "No NixOS installation will be performed."
+        echo
+    fi
+
+    ci_select_disk
+
+    section "Installation Identity"
+    collect_install_identity CI
+
+    section "Review"
+
+    kv "Disk" "$CI_DISK"
+    kv "Username" "$CI_USERNAME"
+    kv "Full name" "$CI_FULL_NAME"
+    kv "Hostname" "$CI_HOSTNAME"
+    kv "Git user" "$CI_GIT_USER"
+    kv "Git email" "$CI_GIT_EMAIL"
+    kv "Timezone" "$CI_TIMEZONE"
+    kv "Locale" "$CI_LOCALE"
+    kv "NVIDIA" "$CI_NVIDIA"
+
+    if ((CI_DRY_RUN)); then
+        echo
+        warning "This is a DRY RUN. No changes will be made."
+        confirm "Show the complete planned installation?" || return 0
+    else
+        echo
+        warning "The selected disk will be completely erased."
+        confirm_exact \
+            "Final confirmation: erase and install Sunflower on $CI_DISK." \
+            "INSTALL SUNFLOWER" ||
+            die "Installation cancelled."
+    fi
+
+    ci_prepare_partitions
+    ci_format_partitions
+    ci_mount
+
+    if ((CI_DRY_RUN)); then
+        ci_copy_repository "$CI_USERNAME"
+        ci_generate_hardware "$CI_USERNAME"
+        ci_install "$CI_USERNAME"
+        ci_set_password "$CI_USERNAME"
+
+        section "Dry Run Complete"
+        success "No changes were made."
+        return 0
+    fi
+
+    # The repository may be on a read-only ISO. Therefore:
+    # 1. copy it to /mnt
+    # 2. modify the COPY
+    # 3. generate hardware config into the COPY
+    ci_copy_repository "$CI_USERNAME"
+
+    local target_repo="$CI_TARGET/home/$CI_USERNAME/Sunflower"
+    local target_vars="$target_repo/$VARS_REL"
+
+    [[ -f "$target_vars" ]] ||
+        die "Target variables file missing: $target_vars"
+
+    configure_variables \
+        "$target_vars" \
+        "$CI_USERNAME" \
+        "$CI_FULL_NAME" \
+        "$CI_HOSTNAME" \
+        "$CI_GIT_USER" \
+        "$CI_GIT_EMAIL" \
+        "$CI_TIMEZONE" \
+        "$CI_LOCALE" \
+        "$CI_NVIDIA"
+
+    ci_generate_hardware "$CI_USERNAME"
+    ci_install "$CI_USERNAME"
+    ci_set_password "$CI_USERNAME"
+
+    # Make sure everything is flushed before unmounting.
+    sync
+    ci_unmount
+
+    ci_summary "$CI_USERNAME"
+}
+
+# ============================================================================
+# INSTALLER PREVIEW
+# ============================================================================
 
 test_install() {
-    # Preview only: no files are read or written beyond prompts, so no
-    # external commands are required. (The old `need_cmd python3` was
-    # spurious; nothing here invokes python3.)
-    section "Installer preview"
-    local username="${SUDO_USER:-${USER:-testuser}}" full_name hostname git_user git_email timezone locale
-    # Was "${username:-$SUDO_USER}", which aborts under set -u whenever the
-    # script is not run through sudo.
-    read -r -p "  Test username [$username]: " username
-    username="${username:-${SUDO_USER:-${USER:-testuser}}}"
-    read -r -p "  Test full name [Test User]: " full_name
-    full_name="${full_name:-Test User}"
-    read -r -p "  Test hostname [nixos-test]: " hostname
-    hostname="${hostname:-nixos-test}"
-    read -r -p "  Test Git username [testuser]: " git_user
-    git_user="${git_user:-testuser}"
-    read -r -p "  Test Git email [test@example.com]: " git_email
-    git_email="${git_email:-test@example.com}"
-    read -r -p "  Test timezone [Asia/Kolkata]: " timezone
-    timezone="${timezone:-Asia/Kolkata}"
-    read -r -p "  Test locale [en_US.UTF-8]: " locale
-    locale="${locale:-en_US.UTF-8}"
+    section "Identity Preview"
+
+    local username="${SUDO_USER:-${USER:-testuser}}"
+    local full_name="Test User"
+    local hostname="sunflower-test"
+    local git_user="testuser"
+    local git_email="test@example.com"
+    local timezone="Asia/Kolkata"
+    local locale="en_US.UTF-8"
+
+    read -r -p "  Username [$username]: " value
+    username="${value:-$username}"
+
+    read -r -p "  Full name [$full_name]: " value
+    full_name="${value:-$full_name}"
+
+    read -r -p "  Hostname [$hostname]: " value
+    hostname="${value:-$hostname}"
+
+    read -r -p "  Git username [$git_user]: " value
+    git_user="${value:-$git_user}"
+
+    read -r -p "  Git email [$git_email]: " value
+    git_email="${value:-$git_email}"
+
+    read -r -p "  Timezone [$timezone]: " value
+    timezone="${value:-$timezone}"
+
+    read -r -p "  Locale [$locale]: " value
+    locale="${value:-$locale}"
+
     echo
     info "No files will be changed."
-    printf '  username = "%s";\n' "$username"
-    # Matches lib/variables.nix (user.name); the prompt stays "Full name".
-    printf '  name = "%s";\n' "$full_name"
-    printf '  hostname = "%s";\n' "$hostname"
-    printf '  gitUser = "%s";\n' "$git_user"
-    printf '  email = "%s";\n' "$git_email"
-    printf '  timezone = "%s";\n' "$timezone"
-    printf '  locale = "%s";\n' "$locale"
-    echo
-    success "Installer preview complete. Nothing was modified."
+
+    kv "Username" "$username"
+    kv "Full name" "$full_name"
+    kv "Hostname" "$hostname"
+    kv "Git user" "$git_user"
+    kv "Git email" "$git_email"
+    kv "Timezone" "$timezone"
+    kv "Locale" "$locale"
+
+    success "Identity preview complete."
 }
 
-system_overview() {
-    # Shares overview_facts() with the menu panel so the one-line
-    # "user · kernel · nix · uptime" summary has one implementation.
-    section "System overview"
-    printf '  %s\n' "$(overview_facts)"
-    printf '  Host:    %s\n' "$(hostname)"
-    printf '  Kernel:  %s\n' "$(uname -r)"
-    printf '  Nix:     %s\n' "$(nix --version 2>/dev/null || echo unavailable)"
-    printf '  Uptime:  %s\n' "$(uptime_human)"
-}
+# ============================================================================
+# MENU
+# ============================================================================
 
-# Uptime, without `uptime -p`
-#
-# -p is a procps extension and the uptime on this system rejects it, so
-# all three call sites used to fall back to their placeholder string.
-# /proc/uptime is always there and needs no external command.
-
-uptime_human() {
-    local secs d h m
-
-    if [[ ! -r /proc/uptime ]]; then
-        printf 'unknown'
-        return
-    fi
-
-    read -r secs _ </proc/uptime
-    secs="${secs%%.*}"
-
-    d=$((secs / 86400))
-    h=$((secs % 86400 / 3600))
-    m=$((secs % 3600 / 60))
-
-    if [[ "$d" -gt 0 ]]; then
-        printf '%dd %dh' "$d" "$h"
-    elif [[ "$h" -gt 0 ]]; then
-        printf '%dh %dm' "$h" "$m"
-    else
-        printf '%dm' "$m"
-    fi
-}
-
-# One compact "user · kernel · nix · uptime" line for the menu panel.
-overview_facts() {
-    local nixv
-    nixv="$(nix --version 2>/dev/null | grep -o '[0-9.]\+' | head -1)"
-
-    printf '%s · %s · nix %s · up %s' \
-        "${USER:-$(whoami 2>/dev/null || echo user)}" \
-        "$(uname -r)" \
-        "${nixv:-?}" \
-        "$(uptime_human)"
-}
-
-# One menu row: number, label, dimmed description. The number keeps its
-# colour so the eye can jump to it; the label is padded to a fixed
-# column so the descriptions line up. Column widened to 24 so
-# "Configure identity" no longer pushes its description out of line.
 menu_item() {
     local num="$1" label="$2" desc="${3:-}"
 
     if [[ -z "$desc" ]]; then
-        printf '   %b%2s%b  %s\n' \
-            "$CYAN" "$num" "$RESET" "$label"
+        printf '   %b%2s%b  %s\n' "$CYAN" "$num" "$RESET" "$label"
     else
         printf '   %b%2s%b  %-24s%b%s%b\n' \
             "$CYAN" "$num" "$RESET" "$label" "$DIM" "$desc" "$RESET"
     fi
 }
 
-# Group heading inside the menu: glyph + letterspaced title + accent
-# rule. Replaces the ad-hoc `printf MAIN/SYSTEM/...` lines so menu()
-# reads as structure.
 menu_group() {
     local icon="$1" title="$2"
-
     echo
     printf '  %b%s%b  %b%b%s%b\n' \
         "$CYAN" "$icon" "$RESET" "$CYAN" "$BOLD" "$title" "$RESET"
     hr_accent
 }
 
-# Closing hint rendered once at the end of the menu.
 menu_footer() {
     echo
     printf '  %b%s%b  Type a number and press Enter %b(0 to exit)%b\n' \
@@ -1011,66 +1396,56 @@ menu() {
         panel "Sunflower Configuration Manager" "v$VERSION" "$(overview_facts)"
         echo
 
-        if ci_is_live_installer; then
-            printf '  %b%s%b %b%bInstaller environment detected — choose 1 to install Sunflower.%b\n' \
+        if is_live_installer; then
+            printf '  %b%s%b %b%bLive installer detected — use Fresh Install.%b\n' \
                 "$YELLOW" "$ICON_WARN" "$RESET" "$YELLOW" "$BOLD" "$RESET"
             hr
         fi
 
-        # The first three are the whole lifecycle, in the order they are used:
-        # install the machine, keep it current, reclaim space. Everything below
-        # them is a tool you reach for only when you need it.
-        menu_group "$ICON_SECTION" "MAIN"
-        menu_item 1 "Install Sunflower" "fresh install, partitions the disk"
-        menu_item 2 "Upgrade" "git pull, flake update, rebuild"
-        menu_item 3 "Free disk space" "old generations, GC, optimise"
+        menu_group "$ICON_SECTION" "INSTALLATION"
+        menu_item 1 "Fresh Install" "partition + install Sunflower"
+        menu_item 2 "Install Dry-Run" "preview installation, change nothing"
+        menu_item 3 "Identity Preview" "preview identity prompts"
 
         menu_group "$ICON_GEAR" "SYSTEM"
-        menu_item 4 "Rebuild / Switch" "validate then switch"
-        menu_item 5 "Dry rebuild" "build without switching"
-        menu_item 6 "Check flake" "evaluate the flake"
-        menu_item 7 "Rollback" "previous generation"
-        menu_item 8 "List generations" "system profile history"
-        menu_item 9 "Refresh hardware" "regenerate hardware config"
-        menu_item 10 "Configure identity" "on an already-installed system"
+        menu_item 4 "Rebuild / Switch" "validate + dry-build + switch"
+        menu_item 5 "Dry Rebuild" "build without switching"
+        menu_item 6 "Check Flake" "evaluate the flake"
+        menu_item 7 "Rollback" "previous system generation"
+        menu_item 8 "List Generations" "system profile history"
+        menu_item 9 "Refresh Hardware" "regenerate hardware config"
+        menu_item 10 "Configure Identity" "configure installed system"
 
-        menu_group "$ICON_SHIELD" "CHECKS & MAINTENANCE"
-        menu_item 11 "Configuration check" "full validator"
-        menu_item 12 "Maintenance dashboard" "guarded full cleanup"
-        menu_item 13 "Garbage collection" "reclaim store space"
-        menu_item 14 "Optimize store" "deduplicate the store"
-        menu_item 15 "Verify store" "check store integrity"
-        menu_item 16 "Systemd health" "failed units"
-        menu_item 17 "Store usage" "disk footprint"
-
-        menu_group "$ICON_TOOLS" "INSTALLER TOOLS"
-        menu_item 18 "Install dry-run" "plan the install, change nothing"
-        menu_item 19 "Verify boot" "re-check an install mounted at /mnt"
-        menu_item 20 "Identity preview" "preview the prompts only"
+        menu_group "$ICON_SHIELD" "MAINTENANCE"
+        menu_item 11 "Configuration Check" "flake validation"
+        menu_item 12 "Maintenance Dashboard" "read-only system health"
+        menu_item 13 "Free Disk Space" "generations + GC"
+        menu_item 14 "Optimize Store" "deduplicate the store"
+        menu_item 15 "Verify Store" "check store integrity"
 
         echo
         hr
-        menu_item 0 "Exit" ""
+        menu_item 0 "Exit"
         menu_footer
         echo
 
         local choice
         printf '  %b%s%b Select: ' "$CYAN" "$ICON_ARROW" "$RESET"
         read -r choice || choice=""
+
         case "$choice" in
         1)
             clean_install
             pause
             ;;
         2)
-            update_config
+            clean_install --dry-run
             pause
             ;;
         3)
-            free_space
+            test_install
             pause
             ;;
-
         4)
             rebuild
             pause
@@ -1096,17 +1471,16 @@ menu() {
             pause
             ;;
         10)
-            install_flow
+            configure_existing_system
             pause
             ;;
-
         11)
             validator_run
             pause
             ;;
         12) m_maintenance_dashboard ;;
         13)
-            m_garbage_collect
+            free_space
             pause
             ;;
         14)
@@ -1117,28 +1491,6 @@ menu() {
             m_verify_store
             pause
             ;;
-        16)
-            m_systemd_health
-            pause
-            ;;
-        17)
-            m_store_usage
-            pause
-            ;;
-
-        18)
-            clean_install --dry-run
-            pause
-            ;;
-        19)
-            verify_boot
-            pause
-            ;;
-        20)
-            test_install
-            pause
-            ;;
-
         0)
             clear_screen
             exit 0
@@ -1151,3156 +1503,86 @@ menu() {
     done
 }
 
-# Integrated maintenance dashboard (from cleanup.sh)
-M_SUN_DIR="$ROOT"
-M_FLAKE_TARGET="$ROOT#sunflower"
-M_KEEP_GENERATIONS=2
-M_ICON_OK="✓"
-M_ICON_INFO="ℹ"
-M_ICON_CLEAN="✦"
-M_ICON_FLAKE=""
-M_ICON_GIT=""
-M_ICON_SYSTEM="⚙"
-M_ICON_DISK="▣"
-M_ICON_TRASH="✕"
-M_ICON_CHECK="✓"
-
-# The maintenance dashboard used to carry its own copy of the log and
-# framing helpers (m_section, m_info, m_run, m_header, ...). They are
-# gone; it now speaks the shared vocabulary defined at the top of the
-# file. The M_ICON_* and M_* configuration values above stay, because
-# the printf call sites in this section reference the icons directly.
-
-# Safety
-
-m_check_environment() {
-
-    section "Environment"
-
-    if [[ $EUID -eq 0 ]]; then
-        error "Do not run this script with sudo."
-        echo
-        echo "  Run it as your normal user:"
-        echo
-        echo "    ./setup.sh maintain"
-        echo
-        exit 1
-    fi
-
-    if [[ ! -d "$M_SUN_DIR" ]]; then
-        error "Sunflower directory not found:"
-        echo "    $M_SUN_DIR"
-        exit 1
-    fi
-
-    if ! command -v nix >/dev/null 2>&1; then
-        error "Nix command not found."
-        exit 1
-    fi
-
-    if ! command -v nixos-rebuild >/dev/null 2>&1; then
-        error "nixos-rebuild not found."
-        exit 1
-    fi
-
-    if ! command -v git >/dev/null 2>&1; then
-        error "git command not found."
-        exit 1
-    fi
-
-    success "Sunflower environment detected."
-    info "Configuration: $M_SUN_DIR"
-    info "Flake target:  $M_FLAKE_TARGET"
-}
-
-# Git
-
-m_check_git() {
-
-    section "${M_ICON_GIT} Git status"
-
-    cd "$M_SUN_DIR"
-
-    if [[ -n "$(git status --porcelain)" ]]; then
-
-        warning "Working tree contains uncommitted changes."
-
-        echo
-        git status --short
-
-        echo
-        printf '%b\n' "${YELLOW}  This is allowed, but review your changes before continuing.${RESET}"
-
-    else
-
-        success "Working tree is clean."
-
-    fi
-}
-
-# Flake check
-#
-# Thin wrapper over flake_check so there is one copy of the actual
-# `nix flake check` step. The icon header is kept for dashboard
-# consistency; the work itself is delegated.
-
-m_check_flake() {
-
-    section "${M_ICON_FLAKE} Flake validation"
-
-    if flake_check; then
-        return 0
-    else
-        error "Flake check failed."
-        return 1
-    fi
-}
-
-# Dry build
-#
-# Same pattern: one copy of the dry-build step lives in dry_build().
-
-m_dry_build() {
-
-    section "${M_ICON_CHECK} Sunflower configuration"
-
-    # dry_build() already prints its own section and runs the sudo
-    # dry-build; calling it keeps output slightly more verbose but
-    # guarantees both paths validate identically.
-    if dry_build; then
-        return 0
-    fi
-
-    error "Dry-build failed."
-    return 1
-}
-
-# Generation information
-
-m_get_generations() {
-
-    sudo nix-env \
-        --list-generations \
-        --profile /nix/var/nix/profiles/system
-}
-
-m_get_current_generation() {
-
-    m_get_generations |
-        awk '/\(current\)/ {print $1}'
-}
-
-# Generation dashboard
-
-m_generation_status() {
-
-    section "${M_ICON_SYSTEM} System generations"
-
-    local output
-    local current
-    local total
-
-    output="$(m_get_generations)"
-    current="$(echo "$output" | awk '/\(current\)/ {print $1}')"
-    total="$(echo "$output" | awk 'NF {count++} END {print count+0}')"
-
-    echo
-    printf '  %b Current generation: %b%s%b\n' \
-        "${GREEN}${M_ICON_OK}${RESET}" \
-        "${BOLD}" \
-        "$current" \
-        "${RESET}"
-
-    printf '  %b Total generations:  %b%s%b\n' \
-        "${BLUE}${M_ICON_INFO}${RESET}" \
-        "${BOLD}" \
-        "$total" \
-        "${RESET}"
-
-    printf '  %b Keeping:            %b%s%b\n' \
-        "${CYAN}${M_ICON_CLEAN}${RESET}" \
-        "${BOLD}" \
-        "$M_KEEP_GENERATIONS" \
-        "${RESET}"
-
-    echo
-}
-
-# Generation cleanup
-
-m_cleanup_generations() {
-
-    section "${M_ICON_CLEAN} Generation cleanup"
-
-    local output
-    local current
-    local generations
-    local total
-    local delete_count
-    local old_generations
-
-    output="$(m_get_generations)"
-
-    current="$(echo "$output" | awk '/\(current\)/ {print $1}')"
-
-    mapfile -t generations < <(
-        echo "$output" |
-            awk '{print $1}'
-    )
-
-    total="${#generations[@]}"
-
-    if ((total <= M_KEEP_GENERATIONS)); then
-        success "Nothing to remove."
-        info "Only $total generation(s) exist."
-        return
-    fi
-
-    delete_count=$((total - M_KEEP_GENERATIONS))
-
-    old_generations=(
-        "${generations[@]:0:$delete_count}"
-    )
-
-    echo
-    warning "Old generations selected for removal:"
-    echo
-
-    for generation in "${old_generations[@]}"; do
-        printf '    %b generation %s%b\n' \
-            "${RED}${M_ICON_TRASH}${RESET}" \
-            "$generation" \
-            "${RESET}"
-    done
-
-    echo
-    info "Current generation $current is protected."
-    info "Newest $M_KEEP_GENERATIONS generations will remain."
-
-    if confirm "Remove these generations?"; then
-
-        run_cmd "Removing old generations..."
-
-        sudo nix-env \
-            --profile /nix/var/nix/profiles/system \
-            --delete-generations \
-            "${old_generations[@]}"
-
-        success "Old generations removed."
-
-    else
-
-        warning "Generation cleanup cancelled."
-
-    fi
-}
-
-# Garbage collection
-
-m_garbage_collect() {
-
-    section "${M_ICON_TRASH} Garbage collection"
-
-    info "Scanning for unreachable store paths..."
-
-    local dead_paths
-    dead_paths="$(
-        nix-store --gc --print-dead 2>/dev/null || true
-    )"
-
-    if [[ -z "$dead_paths" ]]; then
-
-        success "No unreachable store paths found."
-        return
-
-    fi
-
-    local count
-    count="$(echo "$dead_paths" | wc -l)"
-
-    info "Approximately $count unreachable paths found."
-
-    if confirm "Run garbage collection?"; then
-
-        run_cmd "Running Nix garbage collection..."
-
-        sudo nix-collect-garbage
-
-        success "Garbage collection completed."
-
-    else
-
-        warning "Garbage collection cancelled."
-
-    fi
-}
-
-# Store optimization
-
-m_optimize_store() {
-
-    section "${M_ICON_FLAKE} Store optimization"
-
-    if confirm "Optimize the Nix store?"; then
-
-        run_cmd "Optimizing Nix store..."
-
-        sudo nix-store --optimise
-
-        success "Nix store optimization completed."
-
-    else
-
-        warning "Store optimization skipped."
-
-    fi
-}
-
-# Store verification
-
-m_verify_store() {
-
-    section "${M_ICON_CHECK} Store verification"
-
-    warning "This can take a while."
-
-    if ! confirm "Verify Nix store contents?"; then
-        warning "Store verification skipped."
-        return
-    fi
-
-    # The one operation in this script that a spinner genuinely improves:
-    # it runs for minutes, prints nothing at all while it succeeds, and
-    # prints the corrupt paths when it does not -- which spinner replays to
-    # stderr. The other long operations here (nix-collect-garbage,
-    # --optimise, flake check, dry-build) each end on a summary line worth
-    # reading, so they stay streaming.
-    if spinner "Verifying Nix store" sudo nix-store --verify --check-contents; then
-        success "Nix store verification passed."
-    else
-        error "Nix store verification reported problems."
-    fi
-}
-
-# Systemd
-
-m_systemd_health() {
-
-    section "${M_ICON_SYSTEM} Systemd health"
-
-    local failed
-
-    failed="$(
-        systemctl \
-            --failed \
-            --no-legend \
-            --no-pager ||
-            true
-    )"
-
-    if [[ -z "$failed" ]]; then
-
-        success "No failed systemd units."
-
-    else
-
-        warning "Failed systemd units detected:"
-        echo
-        systemctl --failed --no-pager
-
-    fi
-}
-
-# Disk usage
-
-m_store_usage() {
-
-    section "${M_ICON_DISK} Nix store"
-
-    local usage
-
-    usage="$(du -sh /nix/store 2>/dev/null | awk '{print $1}')"
-
-    echo
-    printf '  %b Nix store size: %b%s%b\n' \
-        "${CYAN}${M_ICON_DISK}${RESET}" \
-        "${BOLD}" \
-        "$usage" \
-        "${RESET}"
-
-    echo
-
-    df -h /nix
-}
-
-# System overview
-
-m_system_overview() {
-
-    section "${M_ICON_SYSTEM} System overview"
-
-    local hostname
-    local kernel
-    local nix_version
-    local uptime
-
-    hostname="$(hostname)"
-    kernel="$(uname -r)"
-    nix_version="$(nix --version)"
-    uptime="$(uptime_human)"
-
-    printf '  %b Host:       %s\n' "${CYAN}${M_ICON_SYSTEM}${RESET}" "$hostname"
-    printf '  %b Kernel:     %s\n' "${BLUE}${M_ICON_INFO}${RESET}" "$kernel"
-    printf '  %b Nix:        %s\n' "${MAGENTA}${M_ICON_FLAKE}${RESET}" "$nix_version"
-    printf '  %b Uptime:     %s\n' "${GREEN}${M_ICON_OK}${RESET}" "$uptime"
-}
-
-# Full maintenance is implemented by m_maintenance_dashboard above.
-m_maintenance_dashboard() {
-    clear_screen
-    panel "Sunflower Maintenance" "v$VERSION" "System maintenance dashboard"
-    echo
-    m_check_environment
-    m_check_git
-    echo
-    if ! m_check_flake; then
-        error "Maintenance stopped."
-        pause
-        return
-    fi
-    if ! m_dry_build; then
-        error "Maintenance stopped."
-        echo
-        echo "Fix the Sunflower configuration before cleanup."
-        pause
-        return
-    fi
-    m_generation_status
-    m_cleanup_generations
-    m_garbage_collect
-    m_optimize_store
-    m_verify_store
-    m_systemd_health
-    m_store_usage
-    echo
-    section "Final configuration check"
-    run_cmd "Running final dry-build..."
-    if sudo nixos-rebuild dry-build --flake "$M_FLAKE_TARGET"; then
-        success "Final dry-build passed."
-    else
-        error "Final dry-build failed."
-    fi
-    echo
-    hr
-    echo
-    printf '%b\n' "${GREEN}${BOLD}  ${M_ICON_OK} Maintenance complete${RESET}"
-    echo
-    printf '  %b Current generation: %s\n' "${GREEN}${M_ICON_SYSTEM}${RESET}" "$(m_get_current_generation)"
-    printf '  %b Generations kept:  %s\n' "${CYAN}${M_ICON_CLEAN}${RESET}" "$M_KEEP_GENERATIONS"
-    echo
-    printf '%b\n' "${DIM}  Your Sunflower configuration was not modified.${RESET}"
-    echo
-    pause
-}
-
-validator_run() {
-
-    # Integrated configuration validator (from check.sh)
-    #
-    # These four resets stay inside the function rather than moving up to the
-    # initialisers, because the menu can run the validator twice in one
-    # process and a stale V_FAILED from the first run would make the second
-    # report a failure it never found. v_ok / v_fail / v_info / v_separator
-    # now come from the shared definitions at the top of the file.
-    V_FAILED=0
-    V_FLAKE_LOG=""
-    V_NVIM_LOG=""
-    V_LUA_LOG=""
-
-    # Header
-
-    clear_screen
-
-    panel "Sunflower Configuration Check" "" \
-        "Repository: $ROOT" \
-        "Branch:     $(git branch --show-current 2>/dev/null || printf 'unknown')"
-
-    # 1. Repository
-
-    section "Repository"
-
-    if git rev-parse --show-toplevel >/dev/null 2>&1; then
-        v_ok "Git repository detected"
-    else
-        v_fail "Not inside a Git repository"
-    fi
-
-    # 2. Flake
-
-    section "Flake"
-
-    V_FLAKE_LOG="$(mktemp)"
-
-    if nix flake check --no-build >"$V_FLAKE_LOG" 2>&1; then
-
-        v_ok "Flake evaluation passed"
-
-        if grep -qi "dirty" "$V_FLAKE_LOG"; then
-            v_info "Git tree is dirty"
-        fi
-
-    else
-
-        v_fail "Flake check failed"
-
-        printf "\n"
-        cat "$V_FLAKE_LOG"
-
-    fi
-
-    # 3. Nix syntax
-
-    section "Nix files"
-
-    NIX_FAILED=0
-    NIX_COUNT=0
-
-    while IFS= read -r -d '' file; do
-
-        NIX_COUNT=$((NIX_COUNT + 1))
-
-        if ! nix-instantiate --parse "$file" >/dev/null 2>&1; then
-
-            printf "  ${RED}✗${RESET} Invalid Nix syntax: %s\n" "$file"
-
-            NIX_FAILED=1
-
-        fi
-
-    done < <(
-        find . \
-            -type f \
-            -name '*.nix' \
-            -not -path './.git/*' \
-            -print0
-    )
-
-    if [[ "$NIX_FAILED" -eq 0 ]]; then
-
-        v_ok "All $NIX_COUNT Nix files parse correctly"
-
-    else
-
-        v_fail "Nix syntax errors detected"
-
-    fi
-
-    # 4. Required files
-
-    section "Required files"
-
-    required_files=(
-
-        "flake.nix"
-
-        "hosts/sunflower/default.nix"
-        "hosts/sunflower/hardware-configuration.nix"
-
-        "home/default.nix"
-
-        "home/neovim/default.nix"
-        "home/neovim/config/init.lua"
-
-        "home/hyprland/default.nix"
-        "home/hyprland/hyprland.lua"
-
-        "home/quickshell/default.nix"
-        "home/quickshell/config/shell.qml"
-
-        # Theme architecture
-        "lib/themes.nix"
-        "home/theme/default.nix"
-
-        # Wallpaper
-        "home/hyprland/scripts/restore-wallpaper.sh"
-
-    )
-
-    for file in "${required_files[@]}"; do
-
-        if [[ -f "$file" ]]; then
-
-            v_ok "$file"
-
-        else
-
-            v_fail "Missing: $file"
-
-        fi
-
-    done
-
-    # 5. Neovim files
-
-    section "Neovim"
-
-    nvim_files=(
-
-        "home/neovim/config/init.lua"
-
-        "home/neovim/config/lua/core/options.lua"
-        "home/neovim/config/lua/core/keymaps.lua"
-        "home/neovim/config/lua/core/autocmds.lua"
-
-        "home/neovim/config/lua/lsp/init.lua"
-
-    )
-
-    for file in "${nvim_files[@]}"; do
-
-        if [[ -f "$file" ]]; then
-
-            v_ok "$file"
-
-        else
-
-            v_fail "Missing Neovim file: $file"
-
-        fi
-
-    done
-
-    # 6. Real Neovim configuration
-
-    section "Neovim configuration"
-
-    V_NVIM_LOG="$(mktemp)"
-
-    if command -v nvim >/dev/null 2>&1; then
-
-        if nvim \
-            --headless \
-            -u "$ROOT/home/neovim/config/init.lua" \
-            '+qa!' \
-            >"$V_NVIM_LOG" 2>&1; then
-
-            v_ok "Neovim configuration loads"
-
-        else
-
-            v_fail "Neovim configuration failed to load"
-
-            if [[ -s "$V_NVIM_LOG" ]]; then
-                cat "$V_NVIM_LOG"
-            fi
-
-        fi
-
-    else
-
-        v_fail "Neovim is not available"
-
-    fi
-
-    # 7. Lua
-
-    section "Lua"
-
-    V_LUA_LOG="$(mktemp)"
-
-    if command -v nvim >/dev/null 2>&1; then
-
-        if nvim \
-            --headless \
-            -u NONE \
-            "+lua local files = vim.fn.glob('$ROOT/home/**/*.lua', false, true); for _, f in ipairs(files) do local fn, err = loadfile(f); if not fn then error(f .. ': ' .. err) end end" \
-            '+qa!' \
-            >"$V_LUA_LOG" 2>&1; then
-
-            v_ok "Lua files parse correctly"
-
-        else
-
-            v_fail "Lua syntax errors detected"
-
-            cat "$V_LUA_LOG"
-
-        fi
-
-    else
-
-        v_info "Neovim unavailable — Lua check skipped"
-
-    fi
-
-    # 8. Quickshell
-
-    section "Quickshell"
-
-    if command -v qs >/dev/null 2>&1; then
-
-        if systemctl --user is-active --quiet quickshell.service; then
-
-            v_ok "Quickshell service is running"
-
-        else
-
-            v_info "Quickshell service is not currently running"
-
-        fi
-
-    else
-
-        v_fail "Quickshell (qs) is not available"
-
-    fi
-
-    # 9. Hyprland
-
-    section "Hyprland"
-
-    if command -v hyprctl >/dev/null 2>&1; then
-
-        HYPR_ERRORS="$(hyprctl configerrors 2>/dev/null || true)"
-
-        if [[ -z "$HYPR_ERRORS" ]] ||
-            grep -qiE "no errors|no error" <<<"$HYPR_ERRORS"; then
-
-            v_ok "No Hyprland configuration errors reported"
-
-        else
-
-            v_fail "Hyprland configuration errors detected"
-
-            printf '%s\n' "$HYPR_ERRORS"
-
-        fi
-
-    else
-
-        v_info "hyprctl unavailable — Hyprland check skipped"
-
-    fi
-
-    # 10. Desktop dependencies
-
-    section "Desktop dependencies"
-
-    desktop_commands=(
-
-        git
-
-        kitty
-
-        qs
-
-        nmcli
-        nm-applet
-        blueman-applet
-
-        brightnessctl
-
-        wpctl
-
-        notify-send
-
-        awww
-
-    )
-
-    for cmd in "${desktop_commands[@]}"; do
-
-        if command -v "$cmd" >/dev/null 2>&1; then
-
-            v_ok "$cmd"
-
-        else
-
-            v_fail "Missing command: $cmd"
-
-        fi
-
-    done
-
-    # 11. Neovim declarations
-
-    section "Neovim packages"
-
-    NVIM_CONFIG="$ROOT/home/neovim/default.nix"
-
-    if [[ -f "$NVIM_CONFIG" ]]; then
-
-        if grep -q "programs.neovim" "$NVIM_CONFIG"; then
-
-            v_ok "Neovim is managed by Home Manager"
-
-        else
-
-            v_fail "programs.neovim declaration not found"
-
-        fi
-
-        # Plugins
-
-        nvim_plugins=(
-
-            "blink-cmp"
-            "nvim-lspconfig"
-            "nvim-treesitter"
-
-            "telescope-nvim"
-            "plenary-nvim"
-
-            "nvim-web-devicons"
-
-            "gitsigns-nvim"
-            "conform-nvim"
-            "nvim-lint"
-
-            "trouble-nvim"
-            "which-key-nvim"
-
-            "lualine-nvim"
-            "snacks-nvim"
-            "nvim-tree-lua"
-
-        )
-
-        for plugin in "${nvim_plugins[@]}"; do
-
-            if grep -q "$plugin" "$NVIM_CONFIG"; then
-
-                v_ok "Plugin declared: $plugin"
-
-            else
-
-                v_fail "Plugin not declared: $plugin"
-
-            fi
-
-        done
-
-        # Development tools
-
-        nvim_tools=(
-
-            "lua-language-server"
-            "stylua"
-
-            "typescript-language-server"
-            "pyright"
-
-            "bash-language-server"
-            "yaml-language-server"
-
-            "tailwindcss-language-server"
-            "dockerfile-language-server"
-
-            "prettier"
-            "ruff"
-
-        )
-
-        for tool in "${nvim_tools[@]}"; do
-
-            if grep -q "$tool" "$NVIM_CONFIG"; then
-
-                v_ok "Neovim tool declared: $tool"
-
-            else
-
-                v_info "Neovim tool not declared directly: $tool"
-
-            fi
-
-        done
-
-    else
-
-        v_fail "Neovim Home Manager configuration missing"
-
-    fi
-
-    # 12. Configuration ownership
-
-    section "Configuration ownership"
-
-    # Neovim
-
-    if grep -q "programs.neovim" \
-        "$ROOT/home/neovim/default.nix" 2>/dev/null; then
-
-        v_ok "Neovim is owned by Home Manager"
-
-    else
-
-        v_fail "Neovim is not owned by Home Manager"
-
-    fi
-
-    # Launcher
-
-    if grep -qE '^[[:space:]]*fuzzel[[:space:]]*$' \
-        "$ROOT/modules/desktop/applications.nix" 2>/dev/null; then
-
-        v_fail "Fuzzel package is still declared by the desktop module"
-
-    else
-
-        v_ok "Fuzzel package is no longer declared"
-
-    fi
-
-    launcher_surfaces=(
-
-        "home/quickshell/config/components/LauncherView.qml"
-
-        "home/quickshell/config/modules/AppLauncher.qml"
-        "home/quickshell/config/modules/WallpaperPicker.qml"
-        "home/quickshell/config/modules/ThemePicker.qml"
-
-        "home/quickshell/config/services/AppsService.qml"
-        "home/quickshell/config/services/WallpaperService.qml"
-        "home/quickshell/config/services/ThemeService.qml"
-
-    )
-
-    for surface in "${launcher_surfaces[@]}"; do
-
-        if [[ -f "$ROOT/$surface" ]]; then
-
-            v_ok "Launcher surface present: $surface"
-
-        else
-
-            v_fail "Launcher surface missing: $surface"
-
-        fi
-
-    done
-
-    # Kitty
-
-    if grep -q "programs.kitty" \
-        "$ROOT/home/kitty/default.nix" 2>/dev/null; then
-
-        v_ok "Kitty is owned by Home Manager"
-
-    else
-
-        v_fail "Kitty Home Manager configuration not found"
-
-    fi
-
-    # Quickshell
-
-    if grep -q "quickshell" \
-        "$ROOT/home/quickshell/default.nix" 2>/dev/null; then
-
-        v_ok "Quickshell is managed by Home Manager"
-
-    else
-
-        v_fail "Quickshell Home Manager configuration not found"
-
-    fi
-
-    # 13. Theme architecture
-
-    section "Theme"
-
-    THEME_CONFIG="$ROOT/lib/themes.nix"
-    THEME_GENERATOR="$ROOT/home/theme/default.nix"
-
-    # Central theme database
-
-    if [[ -f "$THEME_CONFIG" ]]; then
-
-        v_ok "Central theme database exists"
-
-    else
-
-        v_fail "Central theme database missing"
-
-    fi
-
-    # Declarative active theme
-
-    if grep -qE '^[[:space:]]*activeTheme[[:space:]]*=' \
-        "$THEME_CONFIG" 2>/dev/null; then
-
-        v_ok "Theme selection is declarative"
-
-    else
-
-        v_fail "Declarative activeTheme is missing"
-
-    fi
-
-    # Theme generator
-
-    if [[ -f "$THEME_GENERATOR" ]]; then
-
-        v_ok "theme generator exists"
-
-    else
-
-        v_fail "theme generator missing"
-
-    fi
-
-    # Validate activeTheme using Nix
-    #
-    # Sunflower is the theme *engine* (the ~/.config/sunflower tree and
-    # the generator in home/theme), not a theme id. Valid ids are the
-    # files in lib/themes/ (catppuccin, gruvbox, sunflower, tokyo-night),
-    # so the check resolves the evaluated id against that directory
-    # instead of comparing against a stale literal.
-
-    THEME_EVAL="$(
-        nix-instantiate \
-            --eval \
-            --expr \
-            '(import ./lib/themes.nix).global.activeTheme' \
-            2>/dev/null ||
-            true
-    )"
-
-    THEME_ID="$(printf '%s' "$THEME_EVAL" | tr -d '"')"
-
-    if [[ -n "$THEME_ID" && -f "$ROOT/lib/themes/${THEME_ID}.nix" ]]; then
-
-        v_ok "Active theme evaluates correctly: $THEME_ID"
-
-    elif [[ -n "$THEME_ID" ]]; then
-
-        v_fail "Active theme '$THEME_ID' has no definition in lib/themes/"
-
-    else
-
-        v_fail "Could not evaluate global.activeTheme"
-
-    fi
-
-    # Required theme fields
-
-    theme_fields=(
-
-        "background"
-        "surface"
-        "surfaceHover"
-        "surfaceActive"
-
-        "border"
-        "borderFocus"
-        "separator"
-
-        "text"
-        "textSecondary"
-        "textMuted"
-
-        "accent"
-        "accentHover"
-        "accentActive"
-        "accentMuted"
-        "accentForeground"
-
-        "success"
-        "warning"
-        "error"
-        "info"
-
-    )
-
-    for field in "${theme_fields[@]}"; do
-
-        if grep -qE "^[[:space:]]*${field}[[:space:]]*=" \
-            "$THEME_CONFIG" 2>/dev/null; then
-
-            v_ok "Theme color defined: $field"
-
-        else
-
-            v_fail "Theme color missing: $field"
-
-        fi
-
-    done
-
-    # 14. Central fonts / UI
-
-    section "Global typography"
-
-    # Interface font
-
-    if grep -qE '^[[:space:]]*interface[[:space:]]*=' \
-        "$THEME_CONFIG" 2>/dev/null; then
-
-        v_ok "Central interface font defined"
-
-    else
-
-        v_fail "Central interface font missing"
-
-    fi
-
-    # Terminal font
-
-    if grep -qE '^[[:space:]]*terminal[[:space:]]*=' \
-        "$THEME_CONFIG" 2>/dev/null; then
-
-        v_ok "Central terminal font defined"
-
-    else
-
-        v_fail "Central terminal font missing"
-
-    fi
-
-    # Emoji font
-
-    if grep -qE '^[[:space:]]*emoji[[:space:]]*=' \
-        "$THEME_CONFIG" 2>/dev/null; then
-
-        v_ok "Central emoji font defined"
-
-    else
-
-        v_fail "Central emoji font missing"
-
-    fi
-
-    # UI font size
-
-    if grep -qE '^[[:space:]]*fontSize[[:space:]]*=' \
-        "$THEME_CONFIG" 2>/dev/null; then
-
-        v_ok "Central UI font size defined"
-
-    else
-
-        v_fail "Central UI font size missing"
-
-    fi
-
-    # Detect hard-coded terminal font in Kitty
-
-    KITTY_CONFIG="$ROOT/home/kitty/config/kitty.conf"
-
-    if [[ -f "$KITTY_CONFIG" ]]; then
-
-        if grep -qE \
-            '^[[:space:]]*font_family[[:space:]]+' \
-            "$KITTY_CONFIG"; then
-
-            v_fail "Kitty contains a hard-coded font_family"
-
-        else
-
-            v_ok "Kitty font family is centrally managed"
-
-        fi
-
-        if grep -qE \
-            '^[[:space:]]*font_size[[:space:]]+' \
-            "$KITTY_CONFIG"; then
-
-            v_fail "Kitty contains a hard-coded font_size"
-
-        else
-
-            v_ok "Kitty font size is centrally managed"
-
-        fi
-
-    else
-
-        v_fail "Kitty configuration missing"
-
-    fi
-
-    # 15. Wallpaper / theme separation
-
-    section "Wallpaper / theme separation"
-
-    WALLPAPER_SERVICE="$ROOT/home/quickshell/config/services/WallpaperService.qml"
-    RESTORE_SCRIPT="$ROOT/home/hyprland/scripts/restore-wallpaper.sh"
-
-    # Wallpaper picker
-
-    if grep -qiE \
-        'wallust|wallust run|\.cache/wallust|stylix-colors' \
-        "$WALLPAPER_SERVICE" 2>/dev/null; then
-
-        v_fail "Wallpaper picker still contains legacy theme generation"
-
-    else
-
-        v_ok "Wallpaper picker is independent from Wallust"
-
-    fi
-
-    # Wallpaper restore
-
-    if grep -qiE \
-        'wallust|wallust run|\.cache/wallust|stylix-colors' \
-        "$RESTORE_SCRIPT" 2>/dev/null; then
-
-        v_fail "Wallpaper restore still contains legacy theme generation"
-
-    else
-
-        v_ok "Wallpaper restore is independent from Wallust"
-
-    fi
-
-    # Wallpaper state location
-
-    if grep -q '\.cache/sunflower/current-wallpaper' \
-        "$WALLPAPER_SERVICE" 2>/dev/null; then
-
-        v_ok "Wallpaper state uses cache"
-
-    else
-
-        v_fail "Wallpaper picker does not use wallpaper state"
-
-    fi
-
-    if grep -q '\.cache/sunflower/current-wallpaper' \
-        "$RESTORE_SCRIPT" 2>/dev/null; then
-
-        v_ok "Wallpaper restore uses cache"
-
-    else
-
-        v_fail "Wallpaper restore does not use wallpaper state"
-
-    fi
-
-    # Legacy Wallust directory
-
-    if [[ ! -d "$ROOT/home/hyprland/wallust" ]]; then
-
-        v_ok "Legacy Wallust configuration removed"
-
-    else
-
-        v_fail "Legacy Wallust configuration still exists"
-
-    fi
-
-    # Legacy generated cache
-
-    if [[ -d "$HOME/.cache/wallust" ]]; then
-
-        v_info "Legacy ~/.cache/wallust still exists"
-
-    else
-
-        v_ok "Legacy Wallust cache removed"
-
-    fi
-
-    # Repository-wide legacy references
-
-    LEGACY_REFS="$(
-        grep -RInE \
-            'wallust|wallust-wayland|wallust\.run|wallust run|\.cache/wallust|stylix-colors' \
-            home \
-            modules \
-            lib \
-            scripts \
-            --exclude-dir=.git \
-            --exclude='*.lock' \
-            --exclude='check.sh' \
-            2>/dev/null ||
-            true
-    )"
-
-    if [[ -z "$LEGACY_REFS" ]]; then
-
-        v_ok "No legacy Wallust/stylix-colors references in active configuration"
-
-    else
-
-        v_fail "Legacy Wallust/stylix-colors references remain"
-
-        printf "\n"
-        printf '%s\n' "$LEGACY_REFS"
-
-    fi
-
-    # 16. Generated configuration
-
-    section "Generated configuration"
-
-    generated_files=(
-
-        "$HOME/.config/sunflower/active-theme"
-        "$HOME/.config/sunflower/active-theme.lua"
-        "$HOME/.config/sunflower/active-kitty.conf"
-        "$HOME/.config/sunflower/active-tmux.conf"
-        "$HOME/.config/sunflower/active-starship.toml"
-
-        "$HOME/.config/quickshell/shell.qml"
-        "$HOME/.config/hypr/hyprland.lua"
-
-    )
-
-    for file in "${generated_files[@]}"; do
-
-        if [[ -e "$file" ]]; then
-
-            v_ok "$file"
-
-        else
-
-            v_info "Not currently generated: $file"
-
-        fi
-
-    done
-
-    # 17. Generated theme sanity
-
-    section "Generated theme sanity"
-
-    ACTIVE_THEME_LUA="$HOME/.config/sunflower/active-theme.lua"
-    ACTIVE_KITTY="$HOME/.config/sunflower/active-kitty.conf"
-    ACTIVE_TMUX="$HOME/.config/sunflower/active-tmux.conf"
-    ACTIVE_STARSHIP="$HOME/.config/sunflower/active-starship.toml"
-
-    # active-theme.lua
-
-    if [[ -f "$ACTIVE_THEME_LUA" ]]; then
-
-        if grep -q 'colors' "$ACTIVE_THEME_LUA"; then
-
-            v_ok "Generated Lua theme contains colors"
-
-        else
-
-            v_fail "Generated Lua theme has no colors"
-
-        fi
-
-    else
-
-        v_info "Lua theme not generated yet"
-
-    fi
-
-    # Kitty theme
-
-    if [[ -f "$ACTIVE_KITTY" ]]; then
-
-        if grep -q '^foreground ' "$ACTIVE_KITTY" &&
-            grep -q '^background ' "$ACTIVE_KITTY"; then
-
-            v_ok "Generated Kitty theme contains core colors"
-
-        else
-
-            v_fail "Generated Kitty theme is incomplete"
-
-        fi
-
-    else
-
-        v_info "Kitty theme not generated yet"
-
-    fi
-
-    # Tmux theme
-
-    if [[ -f "$ACTIVE_TMUX" ]]; then
-
-        if grep -q '^set -g status-style ' "$ACTIVE_TMUX" &&
-            grep -q '^set -g window-status-current-format ' "$ACTIVE_TMUX"; then
-
-            v_ok "Generated Tmux theme contains core styles"
-
-        else
-
-            v_fail "Generated Tmux theme is incomplete"
-
-        fi
-
-    else
-
-        v_info "Tmux theme not generated yet"
-
-    fi
-
-    # Starship theme
-
-    if [[ -f "$ACTIVE_STARSHIP" ]]; then
-
-        v_ok "Generated Starship theme exists"
-
-    else
-
-        v_info "Starship theme not generated yet"
-
-    fi
-
-    # 18. layer rules
-
-    section "layer rules"
-
-    LAYER_RULES="$ROOT/home/hyprland/config/layerules.lua"
-
-    if [[ -f "$LAYER_RULES" ]]; then
-
-        v_ok "Layer rules file exists"
-
-        # Every Wayland namespace declared by a Quickshell surface needs a matching layer rule.
-
-        for ns in sunflower-bar sunflower-popup sunflower-notifications sunflower-launcher; do
-
-            if grep -q "namespace = \"\\^${ns}\\\$\"" \
-                "$LAYER_RULES" 2>/dev/null; then
-
-                v_ok "Layer rule declared: $ns"
-
-            else
-
-                v_fail "Layer rule missing: $ns"
-
-            fi
-
-        done
-
-    else
-
-        v_fail "Hyprland layer rules file not found"
-
-    fi
-
-    # 18b. Notification delivery
-
-    section "Notification delivery"
-
-    NOTIF_SERVER="$ROOT/home/quickshell/config/services/NotificationServer.qml"
-    QUICKSHELL_NIX="$ROOT/home/quickshell/default.nix"
-    NOTIF_MODULE="$ROOT/modules/notifications/default.nix"
-
-    if [[ -f "$NOTIF_SERVER" ]]; then
-
-        # services/qmldir registers NotificationServer.qml as a composite type called NotificationServer.
-
-        if grep -q "import Quickshell.Services.Notifications as " "$NOTIF_SERVER" 2>/dev/null; then
-
-            v_ok "Notification server import is aliased"
-
-        else
-
-            v_fail "Notification server import is not aliased (daemon will not bind)"
-
-        fi
-
-        if grep -qE "^[[:space:]]+NotificationServer \{" "$NOTIF_SERVER" 2>/dev/null; then
-
-            v_fail "Unqualified NotificationServer instantiation (shadows itself)"
-
-        else
-
-            v_ok "Notification server instantiated through its namespace"
-
-        fi
-
-    else
-
-        v_fail "NotificationServer.qml not found"
-
-    fi
-
-    if grep -q "org.freedesktop.Notifications.service" "$QUICKSHELL_NIX" 2>/dev/null; then
-
-        v_ok "D-Bus activation declared for org.freedesktop.Notifications"
-
-    else
-
-        v_fail "No D-Bus activation: apps that notify before the shell starts lose it"
-
-    fi
-
-    if grep -q "WantedBy" "$QUICKSHELL_NIX" 2>/dev/null; then
-
-        v_ok "quickshell.service is bound to the graphical session"
-
-    else
-
-        v_fail "quickshell.service has no Install section and will never autostart"
-
-    fi
-
-    if grep -q "libnotify" "$QUICKSHELL_NIX" 2>/dev/null; then
-
-        v_ok "notify-send available in the user profile"
-
-    else
-
-        v_fail "libnotify missing: notify-send unavailable to scripts and keybinds"
-
-    fi
-
-    if grep -q "impl.portal.Notification" "$NOTIF_MODULE" 2>/dev/null; then
-
-        v_ok "Portal notification backend declared"
-
-    else
-
-        v_fail "Portal notification backend missing: sandboxed apps cannot notify"
-
-    fi
-
-    # 19. theme ownership
-
-    section "Theme ownership"
-
-    # Hyprland
-
-    HYPR_THEME="$ROOT/home/hyprland/config/theme.lua"
-
-    if [[ -f "$HYPR_THEME" ]]; then
-
-        if grep -q 'active-theme.lua' "$HYPR_THEME" 2>/dev/null; then
-
-            v_ok "Hyprland consumes active theme"
-
-        else
-
-            v_fail "Hyprland theme does not consume active theme"
-
-        fi
-
-    else
-
-        v_fail "Hyprland theme module missing"
-
-    fi
-
-    # Neovim
-
-    if grep -Rql \
-        'active-theme.lua' \
-        "$ROOT/home/neovim/config/lua" \
-        --include='*.lua' \
-        2>/dev/null; then
-
-        v_ok "Neovim theme modules consume active theme"
-
-    else
-
-        v_fail "Neovim does not reference active theme"
-
-    fi
-
-    # Quickshell
-
-    QUICKSHELL_ROOT="$ROOT/home/quickshell"
-
-    if grep -Rql \
-        'active-theme' \
-        "$QUICKSHELL_ROOT" \
-        --include='*.qml' \
-        --include='*.nix' \
-        2>/dev/null; then
-
-        v_ok "Quickshell consumes theme data"
-
-    else
-
-        v_info "Could not verify Quickshell theme consumption"
-
-    fi
-
-    # 20. Git status
-
-    section "Git status"
-
-    if git diff --quiet && git diff --cached --quiet; then
-
-        v_ok "Working tree clean"
-
-    else
-
-        v_info "Uncommitted changes detected"
-
-        printf "\n"
-
-        git status --short
-
-    fi
-
-    # Final result
-
-    printf "\n"
-
-    v_separator
-
-    printf "\n"
-
-    V_RESULT=0
-
-    if [[ "$V_FAILED" -eq 0 ]]; then
-
-        verdict "$GREEN" "$ICON_OK" "Configuration is healthy"
-
-        printf "\n"
-        printf '%b%s%b\n' "$DIM" "Safe to run:" "$RESET"
-        printf '  %b%s%b\n' "$CYAN" "sudo nixos-rebuild switch --flake .#sunflower" "$RESET"
-
-        V_RESULT=0
-
-    else
-
-        verdict "$RED" "$ICON_FAIL" "Problems require attention"
-
-        printf "\n"
-        printf '%b%s%b\n' "$YELLOW" "Fix the problems above before rebuilding." "$RESET"
-
-        V_RESULT=1
-
-    fi
-
-    rm -f "${V_FLAKE_LOG:-}" "${V_NVIM_LOG:-}" "${V_LUA_LOG:-}" 2>/dev/null || true
-
-    return "$V_RESULT"
-
-}
-
-# ============================================================
-# CLEAN INSTALLATION
-#
-# A different workflow from install_flow. That one configures a system that
-# is ALREADY installed and ends in nixos-rebuild switch. This one runs from
-# the official installer ISO, owns the disk, and ends in nixos-install.
-# Both are kept, because they are not the same job.
-#
-# Two environments exist during a clean install and must never be confused:
-#
-#   /       the live installer
-#   /mnt    the system being installed
-#
-# Anything describing filesystems is evaluated against /mnt, and anything
-# concerning boot is verified against /mnt too.
-#
-# Boot persistence is treated as part of installation, not as cleanup. This
-# repository sets efiInstallAsRemovable = true together with
-# efi.canTouchEfiVariables = false, so GRUB is written only to
-# \EFI\BOOT\BOOTX64.EFI and registers no NVRAM entry of its own. A leftover
-# entry from a previous install therefore outranks it and the firmware boots
-# the old system. This installer refuses to report success while such an
-# entry is still present.
-# ============================================================
-
-CI_TARGET="/mnt"
-CI_ESP_LABEL="EFI"
-CI_ROOT_LABEL="nixos"
-CI_ESP_SGDISK_SIZE="+1G"
-CI_REPO_URL="https://github.com/subha279/Sunflower.git"
-CI_DRY_RUN=0
-
-CI_DISK=""
-CI_ESP=""
-CI_ROOT_PART=""
-CI_USER=""
-CI_DEST=""
-
-# Resolved by ci_preflight, because these tools are not named the same way in
-# every environment and the ISO does not guarantee one particular partitioner.
-CI_PARTITIONER=""
-CI_MKFS_FAT=""
-
-# Set while install-time swap is active, so it can be torn down on any exit.
-CI_SWAPFILE=""
-
-# Absolute path to the installed system closure built in the target store.
-CI_SYSTEM_PATH=""
-
-# The ISO does not necessarily enable flakes, and this repository only turns
-# them on for the system it installs.
-CI_NIX_FLAGS=(--extra-experimental-features "nix-command flakes")
-
-# A dry run must be reviewable on any machine, including one with no
-# partitioning or installation tools at all, so a missing tool is reported
-# rather than fatal.
-ci_need_cmd() {
-    if [[ "$CI_DRY_RUN" -eq 1 ]]; then
-        command -v "$1" >/dev/null 2>&1 ||
-            warning "absent here, required for a real run: $1"
-        return 0
-    fi
-    need_cmd "$1"
-}
-
-ci_run() {
-    if [[ "$CI_DRY_RUN" -eq 1 ]]; then
-        printf '  %b%s%b %b[dry-run]%b %s\n' \
-            "$MAGENTA" "$ICON_ARROW" "$RESET" "$DIM" "$RESET" "$*"
-        return 0
-    fi
-    run_cmd "$*"
-    "$@"
-}
-
-# Everything this needs, checked in one pass before anything is touched.
-#
-# Discovering a missing mkfs after the partition table has already been
-# written is the worst possible moment to find out, so the whole toolchain is
-# resolved up front. Where a tool has more than one common name, or where two
-# different tools would do, the alternative is accepted rather than demanded,
-# so a stock installer ISO needs nothing installed.
-# Can we reach the binary cache?
-#
-# Checked explicitly because the alternative is discovering it as a wall of nix
-# download errors after the disk has already been repartitioned.
-ci_check_network() {
-    local ok=0
-
-    if command -v curl >/dev/null 2>&1; then
-        curl -fsS --max-time 12 -o /dev/null https://cache.nixos.org/nix-cache-info 2>/dev/null && ok=1
-    elif command -v ping >/dev/null 2>&1; then
-        ping -c1 -W3 cache.nixos.org >/dev/null 2>&1 && ok=1
-    else
-        v_info "neither curl nor ping available; connectivity not tested"
-        return 0
-    fi
-
-    if [[ "$ok" -eq 1 ]]; then
-        v_ok "cache.nixos.org reachable"
-        return 0
-    fi
-
-    v_fail "cannot reach cache.nixos.org"
-    warning "This install downloads almost everything; it cannot run offline."
-    info "Wired is usually automatic. If not:  sudo dhcpcd"
-    info "Wi-Fi, easiest:  nmcli device wifi connect <SSID> password <password>"
-    info "Wi-Fi, fallback: sudo systemctl start wpa_supplicant"
-    info "                 then wpa_cli -i <iface>"
-    return 1
-}
-
-ci_preflight() {
-    section "Preflight"
-
-    local -a missing=()
-    local c
-
-    for c in lsblk findmnt blkid wipefs mount umount mountpoint awk sed grep chown stat; do
-        command -v "$c" >/dev/null 2>&1 || missing+=("$c")
-    done
-
-    for c in nix nixos-generate-config nixos-install nixos-enter; do
-        command -v "$c" >/dev/null 2>&1 || missing+=("$c")
-    done
-
-    # Either partitioner is fine.
-    if command -v sgdisk >/dev/null 2>&1; then
-        CI_PARTITIONER="sgdisk"
-    elif command -v parted >/dev/null 2>&1; then
-        CI_PARTITIONER="parted"
-    else
-        missing+=("sgdisk or parted")
-    fi
-
-    # dosfstools has used both names.
-    if command -v mkfs.fat >/dev/null 2>&1; then
-        CI_MKFS_FAT="mkfs.fat"
-    elif command -v mkfs.vfat >/dev/null 2>&1; then
-        CI_MKFS_FAT="mkfs.vfat"
-    else
-        missing+=("mkfs.fat or mkfs.vfat")
-    fi
-
-    command -v mkfs.ext4 >/dev/null 2>&1 || missing+=("mkfs.ext4")
-
-    if [[ "${#missing[@]}" -gt 0 ]]; then
-        for c in "${missing[@]}"; do error "missing: $c"; done
-        echo
-        error "A stock Sunflower installer ISO provides all of these."
-        info "If one really is absent, borrow it without installing anything:"
-        info "  nix-shell -p gptfdisk dosfstools e2fsprogs efibootmgr util-linux"
-
-        if [[ "$CI_DRY_RUN" -eq 1 ]]; then
-            CI_PARTITIONER="${CI_PARTITIONER:-sgdisk}"
-            CI_MKFS_FAT="${CI_MKFS_FAT:-mkfs.fat}"
-            warning "Dry run continues so the plan can still be reviewed."
-            return 0
-        fi
-        return 1
-    fi
-
-    v_ok "partitioner: $CI_PARTITIONER"
-    v_ok "fat filesystem tool: $CI_MKFS_FAT"
-
-    # Advisory here. ci_handle_stale_efi treats a missing efibootmgr as a
-    # verification failure, which is where it actually matters.
-    if command -v efibootmgr >/dev/null 2>&1; then
-        v_ok "efibootmgr present"
-    else
-        v_info "efibootmgr absent; stale UEFI entries could not be cleaned"
-    fi
-
-    if command -v git >/dev/null 2>&1; then
-        v_ok "git present"
-    else
-        v_info "git absent; the repository must already be on disk"
-    fi
-
-    # Reported rather than gated. The writable half of the ISO's /nix/store is a
-    # tmpfs in RAM, so this number is what the build has to fit in until swap is
-    # added on the target after mounting.
-    local ram_kb
-    ram_kb="$(awk '/^MemTotal:/{print $2}' /proc/meminfo 2>/dev/null || printf 0)"
-    if [[ "$ram_kb" -gt 0 ]]; then
-        v_info "RAM $((ram_kb / 1024 / 1024)) GiB; the ISO store is RAM-backed until swap is added"
-    fi
-
-    if ! ci_check_network; then
-        [[ "$CI_DRY_RUN" -eq 1 ]] && {
-            warning "Dry run continues anyway."
-            return 0
-        }
-        return 1
-    fi
-
-    success "Toolchain complete; nothing needs installing."
-}
-
-# Is this the Sunflower installation ISO?
-#
-# This used to accept any overlay, tmpfs or squashfs root, which was wrong: a
-# container has an overlay root too, so `install` inside one would have decided
-# it was in an installer and offered to partition a disk. Testing caught it.
-#
-# Now it looks only for markers the ISO actually brings with it.
-# VARIANT_ID=installer is set by the installation-CD module itself and is the
-# most direct evidence; /iso and the read-only store are its own mounts.
-ci_is_live_installer() {
-    grep -qsE '^VARIANT_ID="?installer"?' /etc/os-release && return 0
-    [[ -d /iso ]] && return 0
-    findmnt -no TARGET /nix/.ro-store >/dev/null 2>&1 && return 0
-    return 1
-}
-
-ci_require_live() {
-    command -v nixos-install >/dev/null 2>&1 ||
-        die "nixos-install not found. Run this from the Sunflower installer ISO."
-
-    ci_is_live_installer && return 0
-
-    error "This is not the Sunflower installer environment."
-    error "No VARIANT_ID=installer, no /iso, no read-only store mount."
-    die "Refusing to partition a disk from anything but the installer ISO."
-}
-
-ci_disk_desc() {
-    lsblk -dnpo SIZE,MODEL,TRAN "$1" 2>/dev/null |
-        sed -E 's/[[:space:]]+/ /g; s/^ //; s/ $//' || true
-}
-
-# nvme0n1 -> nvme0n1p1, sda -> sda1
-ci_part_path() {
-    if [[ "$1" =~ [0-9]$ ]]; then printf '%sp%s\n' "$1" "$2"; else printf '%s%s\n' "$1" "$2"; fi
-}
-
-# Disks the live environment itself came from. Never candidates.
-ci_installer_disks() {
-    local src pk
-    {
-        findmnt -no SOURCE /iso 2>/dev/null || true
-        findmnt -no SOURCE /nix/.ro-store 2>/dev/null || true
-        lsblk -rno NAME,FSTYPE,LABEL 2>/dev/null |
-            awk '$2=="iso9660" || $3 ~ /^NIXOS_ISO/ {print "/dev/"$1}' || true
-    } | while read -r src; do
-        [[ "$src" == /dev/* ]] || continue
-        pk="$(lsblk -no PKNAME "$src" 2>/dev/null | head -n1)"
-        if [[ -n "$pk" ]]; then printf '/dev/%s\n' "$pk"; else printf '%s\n' "$src"; fi
-    done | sort -u
-}
-
-ci_candidate_disks() {
-    local protected dev rm
-    protected=" $(ci_installer_disks | tr '\n' ' ') "
-
-    lsblk -dprno NAME,TYPE,RM 2>/dev/null |
-        awk '$2=="disk"{print $1" "$3}' |
-        while read -r dev rm; do
-            case "$protected" in *" $dev "*) continue ;; esac
-            printf '%s %s\n' "$dev" "$rm"
-        done
-}
-
-# Every probe here is advisory and must never abort the run under set -e.
-# Failing to describe the disks is reported, then handled by
-# ci_select_target_disk, which is the function allowed to refuse.
-ci_show_disks() {
-    section "Block devices"
-
-    if ! lsblk -o NAME,SIZE,TYPE,FSTYPE,LABEL,MOUNTPOINTS,MODEL,TRAN 2>/dev/null &&
-        ! lsblk -o NAME,SIZE,TYPE,FSTYPE,LABEL,MOUNTPOINT,MODEL,TRAN 2>/dev/null &&
-        ! lsblk 2>/dev/null; then
-        warning "lsblk could not enumerate block devices here."
-    fi
-
-    echo
-    local dev
-    while read -r dev; do
-        [[ -n "$dev" ]] && info "installer media, protected: $dev  $(ci_disk_desc "$dev")"
-    done < <(ci_installer_disks || true)
-}
-
-ci_select_target_disk() {
-    need_cmd lsblk
-
-    local -a fixed=() removable=()
-    local dev rm
-
-    while read -r dev rm; do
-        [[ -n "$dev" ]] || continue
-        if [[ "$rm" == "1" ]]; then removable+=("$dev"); else fixed+=("$dev"); fi
-    done < <(ci_candidate_disks || true)
-
-    local d
-    for d in ${removable[@]+"${removable[@]}"}; do
-        warning "Ignoring removable disk: $d  $(ci_disk_desc "$d")"
-    done
-
-    if [[ "${#fixed[@]}" -eq 0 ]]; then
-        error "No fixed disk found that is not the installer media."
-        error "Refusing to guess a target."
-        return 1
-    fi
-
-    if [[ "${#fixed[@]}" -eq 1 ]]; then
-        CI_DISK="${fixed[0]}"
-        info "Target disk: $CI_DISK  $(ci_disk_desc "$CI_DISK")"
-    else
-        section "Multiple candidate disks"
-        local i=1
-        for d in "${fixed[@]}"; do
-            printf '   %b%2s%b  %s  %s\n' "$CYAN" "$i" "$RESET" "$d" "$(ci_disk_desc "$d")"
-            i=$((i + 1))
-        done
-        echo
-        local pick
-        read -r -p "  Select target disk number: " pick
-        [[ "$pick" =~ ^[0-9]+$ ]] || {
-            error "Not a number."
-            return 1
-        }
-        ((pick >= 1 && pick <= ${#fixed[@]})) || {
-            error "Out of range."
-            return 1
-        }
-        CI_DISK="${fixed[$((pick - 1))]}"
-    fi
-
-    if [[ ! -b "$CI_DISK" ]]; then
-        if [[ "$CI_DRY_RUN" -eq 1 ]]; then
-            warning "$CI_DISK is not a block device here; continuing because this is a dry run."
-        else
-            error "Not a block device: $CI_DISK"
-            return 1
-        fi
-    fi
-
-    CI_ESP="$(ci_part_path "$CI_DISK" 1)"
-    CI_ROOT_PART="$(ci_part_path "$CI_DISK" 2)"
-}
-
-ci_confirm_destroy() {
-    echo
-    hr
-    warning "EVERY PARTITION ON $CI_DISK WILL BE ERASED."
-    echo
-    printf '  Disk   : %s  %s\n' "$CI_DISK" "$(ci_disk_desc "$CI_DISK")"
-    printf '  Layout : %-18s 1 GiB     fat32  label=%-6s -> %s/boot\n' \
-        "$CI_ESP" "$CI_ESP_LABEL" "$CI_TARGET"
-    printf '           %-18s remainder ext4   label=%-6s -> %s\n' \
-        "$CI_ROOT_PART" "$CI_ROOT_LABEL" "$CI_TARGET"
-    hr
-    echo
-
-    local answer
-    read -r -p "  Type the disk path to confirm ($CI_DISK): " answer
-    [[ "$answer" == "$CI_DISK" ]] || {
-        warning "Did not match. Aborted."
-        return 1
-    }
-
-    read -r -p "  Type ERASE to proceed: " answer
-    [[ "$answer" == "ERASE" ]] || {
-        warning "Aborted."
-        return 1
-    }
-}
-
-ci_release_target() {
-    section "Releasing target"
-
-    info "Disabling any active swap on the target."
-
-    while read -r swap_path; do
-        [[ -n "$swap_path" ]] || continue
-
-        if [[ "$swap_path" == "$CI_TARGET"/* ]]; then
-            info "Disabling swap: $swap_path"
-            swapoff "$swap_path" || {
-                error "Could not disable target swap: $swap_path"
-                return 1
-            }
-        fi
-    done < <(swapon --show=NAME --noheadings 2>/dev/null || true)
-
-    local attempt
-    for attempt in 1 2 3; do
-        if ! mountpoint -q "$CI_TARGET" 2>/dev/null; then
-            break
-        fi
-
-        info "Unmounting target tree (attempt $attempt/3)."
-
-        if umount -R "$CI_TARGET"; then
-            break
-        fi
-
-        sleep 1
-    done
-
-    if mountpoint -q "$CI_TARGET" 2>/dev/null; then
-        error "Could not fully unmount $CI_TARGET."
-        warning "Refusing to repartition a mounted target."
-        findmnt -R "$CI_TARGET" || true
-        return 1
-    fi
-
-    local p
-    while read -r p; do
-        [[ -n "$p" && "$p" != "$CI_DISK" ]] || continue
-
-        if findmnt -no TARGET --source "$p" >/dev/null 2>&1; then
-            if ! umount -R "$p"; then
-                error "Could not unmount target partition: $p"
-                return 1
-            fi
-        fi
-
-        if [[ "$(lsblk -no FSTYPE "$p" 2>/dev/null)" == "swap" ]]; then
-            if swapon --show=NAME --noheadings 2>/dev/null | grep -Fxq "$p"; then
-                if ! swapoff "$p"; then
-                    error "Could not disable target swap: $p"
-                    return 1
-                fi
-            fi
-        fi
-    done < <(lsblk -lnpo NAME "$CI_DISK" 2>/dev/null || true)
-
-    if findmnt -R "$CI_TARGET" >/dev/null 2>&1; then
-        error "Target is still mounted after release."
-        findmnt -R "$CI_TARGET" || true
-        return 1
-    fi
-
-    success "Target released."
-}
-
-ci_wait_for_part() {
-    [[ "$CI_DRY_RUN" -eq 1 ]] && return 0
-
-    local p="$1"
-    local i=0
-
-    while [[ ! -b "$p" ]]; do
-        i=$((i + 1))
-
-        if ((i > 60)); then
-            error "Partition never appeared: $p"
-            return 1
-        fi
-
-        sleep 0.1
-        udevadm settle >/dev/null 2>&1 || true
-    done
-}
-
-ci_partition() {
-    section "Partitioning $CI_DISK"
-
-    ci_run wipefs -a "$CI_DISK"
-
-    # Both branches produce the same result: a 1 MiB-aligned 1 GiB EF00 ESP,
-    # then the remainder as Linux filesystem.
-    if [[ "$CI_PARTITIONER" == "parted" ]]; then
-        ci_run parted -s "$CI_DISK" mklabel gpt
-        ci_run parted -s "$CI_DISK" mkpart "$CI_ESP_LABEL" fat32 1MiB 1025MiB
-        ci_run parted -s "$CI_DISK" set 1 esp on
-        ci_run parted -s "$CI_DISK" mkpart "$CI_ROOT_LABEL" ext4 1025MiB 100%
-    else
-        ci_run sgdisk --zap-all "$CI_DISK"
-        ci_run sgdisk \
-            --new="1:0:$CI_ESP_SGDISK_SIZE" --typecode=1:ef00 --change-name=1:"$CI_ESP_LABEL" \
-            --new=2:0:0 --typecode=2:8300 --change-name=2:"$CI_ROOT_LABEL" \
-            "$CI_DISK"
-    fi
-
-    # partprobe ships with parted and udevadm with systemd; neither is worth
-    # requiring, because ci_wait_for_part is what actually guarantees the nodes.
-    if command -v partprobe >/dev/null 2>&1; then
-        ci_run partprobe "$CI_DISK" || true
-    fi
-    if command -v udevadm >/dev/null 2>&1; then
-        ci_run udevadm settle || true
-    fi
-
-    ci_wait_for_part "$CI_ESP" || return 1
-    ci_wait_for_part "$CI_ROOT_PART" || return 1
-
-    success "GPT written by $CI_PARTITIONER: 1 GiB ESP plus ext4 root."
-}
-
-ci_format() {
-    section "Formatting"
-
-    ci_run "$CI_MKFS_FAT" -F32 -n "$CI_ESP_LABEL" "$CI_ESP" ||
-        {
-            error "Failed to format EFI partition: $CI_ESP"
-            return 1
-        }
-
-    ci_run mkfs.ext4 -F -L "$CI_ROOT_LABEL" "$CI_ROOT_PART" ||
-        {
-            error "Failed to format root partition: $CI_ROOT_PART"
-            return 1
-        }
-
-    if [[ "$CI_DRY_RUN" -eq 0 ]]; then
-        [[ "$(blkid -s TYPE -o value "$CI_ESP" 2>/dev/null)" == "vfat" ]] ||
-            {
-                error "EFI partition is not vfat after formatting."
-                return 1
-            }
-
-        [[ "$(blkid -s TYPE -o value "$CI_ROOT_PART" 2>/dev/null)" == "ext4" ]] ||
-            {
-                error "Root partition is not ext4 after formatting."
-                return 1
-            }
-
-        [[ "$(blkid -s LABEL -o value "$CI_ESP" 2>/dev/null)" == "$CI_ESP_LABEL" ]] ||
-            {
-                error "EFI partition label is incorrect after formatting."
-                return 1
-            }
-
-        [[ "$(blkid -s LABEL -o value "$CI_ROOT_PART" 2>/dev/null)" == "$CI_ROOT_LABEL" ]] ||
-            {
-                error "Root partition label is incorrect after formatting."
-                return 1
-            }
-    fi
-
-    success "Filesystems created."
-}
-
-ci_mount() {
-    section "Mounting"
-
-    ci_run mkdir -p "$CI_TARGET"
-    ci_run mount "$CI_ROOT_PART" "$CI_TARGET"
-    ci_run mkdir -p "$CI_TARGET/boot"
-    ci_run mount "$CI_ESP" "$CI_TARGET/boot"
-
-    if [[ "$CI_DRY_RUN" -eq 0 ]]; then
-        mountpoint -q "$CI_TARGET" || {
-            error "$CI_TARGET is not a mountpoint."
-            return 1
-        }
-        mountpoint -q "$CI_TARGET/boot" || {
-            error "$CI_TARGET/boot is not a mountpoint."
-            return 1
-        }
-
-        [[ "$(findmnt -no FSTYPE "$CI_TARGET")" == "ext4" ]] ||
-            {
-                error "$CI_TARGET is not ext4."
-                return 1
-            }
-        [[ "$(findmnt -no FSTYPE "$CI_TARGET/boot")" == "vfat" ]] ||
-            {
-                error "$CI_TARGET/boot is not vfat."
-                return 1
-            }
-
-        lsblk -o NAME,SIZE,FSTYPE,LABEL,MOUNTPOINTS "$CI_DISK" 2>/dev/null || lsblk "$CI_DISK" || true
-        df -h "$CI_TARGET" "$CI_TARGET/boot" || true
-    fi
-
-    success "Mounted."
-}
-
-# Install-time swap and scratch space on the target.
-#
-# The writable layer of the ISO's /nix/store is a tmpfs, so every path this
-# build downloads or produces is held in RAM until nixos-install copies it to
-# the target. A closure this size, Hyprland and Quickshell and Neovim and
-# Stylix and the font set, is a well known way to run a live installer out of
-# memory partway through.
-#
-# Swap on the freshly mounted target lets that tmpfs spill to disk instead.
-# Both the swapfile and the scratch directory exist only for the install and
-# are removed afterwards, so hardware-configuration.nix keeps
-# swapDevices = [ ] and nothing is left behind.
-ci_setup_swap() {
-    section "Install-time swap"
-
-    if [[ "$CI_DRY_RUN" -eq 1 ]]; then
-        run_cmd "fallocate + mkswap + swapon $CI_TARGET/.setup-swapfile"
-        run_cmd "TMPDIR=$CI_TARGET/.setup-tmp"
-        info "Both removed again once the install finishes."
-        return 0
-    fi
-
-    export TMPDIR="$CI_TARGET/.setup-tmp"
-    mkdir -p "$TMPDIR"
-
-    local avail_kb size_g
-    avail_kb="$(df -Pk "$CI_TARGET" | awk 'NR==2{print $4}')"
-    size_g=$((avail_kb / 1024 / 1024 / 4))
-    ((size_g > 8)) && size_g=8
-
-    if ((size_g < 2)); then
-        v_info "too little free space for install-time swap; continuing without it"
-        return 0
-    fi
-
-    local f="$CI_TARGET/.setup-swapfile"
-
-    if ! fallocate -l "${size_g}G" "$f" 2>/dev/null; then
-        if ! dd if=/dev/zero of="$f" bs=1M count=$((size_g * 1024)) status=none 2>/dev/null; then
-            v_info "could not create a swapfile; continuing without it"
-            rm -f "$f"
-            return 0
-        fi
-    fi
-
-    chmod 600 "$f"
-
-    if mkswap "$f" >/dev/null 2>&1 && swapon "$f" 2>/dev/null; then
-        CI_SWAPFILE="$f"
-        success "${size_g} GiB install-time swap active, scratch space on the target."
-    else
-        v_info "could not enable swap; continuing without it"
-        rm -f "$f"
-    fi
-}
-
-ci_teardown_swap() {
-    if [[ -n "$CI_SWAPFILE" ]]; then
-        swapoff "$CI_SWAPFILE" 2>/dev/null || true
-        rm -f "$CI_SWAPFILE"
-        CI_SWAPFILE=""
-        info "Install-time swap removed."
-    fi
-
-    if [[ -n "${TMPDIR:-}" && "$TMPDIR" == "$CI_TARGET/.setup-tmp" ]]; then
-        rm -rf "$TMPDIR" 2>/dev/null || true
-        unset TMPDIR
-    fi
-}
-
-ci_place_repo() {
-    section "Repository"
-
-    CI_DEST="$CI_TARGET/home/$CI_USER/Sunflower"
-    ci_run mkdir -p "$CI_DEST"
-
-    if [[ -d "$ROOT/.git" ]]; then
-        info "Copying this checkout, preserving history and uncommitted work."
-        ci_run cp -a "$ROOT/." "$CI_DEST/"
-    else
-        ci_need_cmd git
-        info "Cloning $CI_REPO_URL"
-        ci_run git clone "$CI_REPO_URL" "$CI_DEST"
-    fi
-
-    if [[ "$CI_DRY_RUN" -eq 0 ]]; then
-        [[ -f "$CI_DEST/flake.nix" ]] || {
-            error "No flake.nix at $CI_DEST"
-            return 1
-        }
-        [[ -d "$CI_DEST/hosts/sunflower" ]] || {
-            error "No hosts/sunflower at $CI_DEST"
-            return 1
-        }
-    fi
-
-    success "Repository at $CI_DEST"
-}
-
-# Identity is collected and applied in two separate steps, on purpose.
-#
-# Collecting happens before anything on disk is touched, so every question is
-# answered before the destructive part begins. Applying happens after the
-# repository has been placed, because the file that must be edited is the copy
-# inside the target, not the one on the USB.
-#
-# They were one step before, which was a bug: the destination path is derived
-# from the username, so changing the username at the prompt left the
-# repository under the old name while ownership was fixed on the new one.
-
-# Nix keys in lib/variables.nix. The "Full name" prompt maps to `name`
-# (user.name). There is no `fullName` key; the old list used fullName
-# and every run aborted in set_var_in with "Could not find variable".
-CI_ID_KEYS=(username name hostname gitUser email timezone locale)
-declare -A CI_ID=()
-
-# Human labels for the identity prompts, so the `name` key still asks
-# as "Full name" and the rest stay self-describing.
-ci_id_label() {
-    case "$1" in
-    username) printf 'Linux username' ;;
-    name) printf 'Full name' ;;
-    hostname) printf 'Hostname' ;;
-    gitUser) printf 'Git username' ;;
-    email) printf 'Git email' ;;
-    timezone) printf 'Timezone' ;;
-    locale) printf 'Locale' ;;
-    *) printf '%s' "$1" ;;
-    esac
-}
-
-ci_collect_identity() {
-    section "Identity"
-    info "Asked now, before anything on disk is touched."
-
-    local cur ans k label
-    for k in "${CI_ID_KEYS[@]}"; do
-        cur="$(sed -nE "s/^[[:space:]]*${k}[[:space:]]*=[[:space:]]*\"([^\"]*)\";.*/\1/p" "$VARS" | head -n1)"
-        label="$(ci_id_label "$k")"
-        read -r -p "  $label [$cur]: " ans
-        ans="${ans:-$cur}"
-
-        case "$k" in
-        username)
-            [[ "$ans" =~ ^[a-z_][a-z0-9_-]*$ ]] || die "Invalid Linux username: $ans"
-            ;;
-        hostname)
-            [[ "$ans" =~ ^[a-zA-Z0-9][a-zA-Z0-9.-]*$ ]] || die "Invalid hostname: $ans"
-            ;;
-        esac
-
-        CI_ID["$k"]="$ans"
-    done
-
-    CI_USER="${CI_ID[username]}"
-    CI_DEST="$CI_TARGET/home/$CI_USER/Sunflower"
-
-    if detect_nvidia; then
-        info "NVIDIA GPU detected; the nvidia module stays enabled."
-    else
-        warning "No NVIDIA GPU detected, but lib/variables.nix sets nvidia.enable = true."
-        info "Review lib/variables.nix if this machine has no NVIDIA card."
-    fi
-
-    info "Repository will be installed to /home/$CI_USER/Sunflower"
-}
-
-ci_apply_identity() {
-    section "Applying identity"
-
-    local vars="$CI_DEST/lib/variables.nix" k
-
-    if [[ "$CI_DRY_RUN" -eq 1 ]]; then
-        for k in "${CI_ID_KEYS[@]}"; do
-            run_cmd "$k = \"${CI_ID[$k]}\"  in ${vars#"$CI_TARGET"}"
-        done
-        return 0
-    fi
-
-    [[ -f "$vars" ]] || {
-        error "Missing $vars"
-        return 1
-    }
-
-    for k in "${CI_ID_KEYS[@]}"; do
-        set_var_in "$vars" "$k" "${CI_ID[$k]}"
-    done
-
-    success "Identity written to ${vars#"$CI_TARGET"}"
-}
-
-ci_generate_hardware() {
-    ci_need_cmd nixos-generate-config
-    section "Hardware configuration for the target"
-
-    local dest="$CI_DEST/hosts/sunflower/hardware-configuration.nix"
-
-    if [[ "$CI_DRY_RUN" -eq 1 ]]; then
-        run_cmd "nixos-generate-config --root $CI_TARGET --show-hardware-config > $dest"
-        info "The --root flag is what makes this describe the target rather than the ISO."
-        return 0
-    fi
-
-    write_hardware_config "$CI_TARGET" "$dest" ||
-        {
-            error "Hardware generation failed."
-            return 1
-        }
-
-    # A flake built from a git tree ignores untracked files. Staging this
-    # guarantees the build sees the freshly generated version rather than
-    # whatever UUIDs happen to be committed.
-    #
-    # safe.directory is set because the clone on the USB may have been made by a
-    # non-root user while this runs as root, and git would otherwise refuse the
-    # repository as "dubious ownership" and skip the staging silently.
-    if [[ -d "$CI_DEST/.git" ]] && command -v git >/dev/null 2>&1; then
-        git -C "$CI_DEST" -c safe.directory='*' \
-            add -- hosts/sunflower/hardware-configuration.nix 2>/dev/null || true
-    fi
-
-    success "Generated against $CI_TARGET."
-}
-
-# Extract one filesystem block from a generated hardware configuration.
-ci_fs_block() {
-    awk -v key="fileSystems.\"$2\"" '
-    index($0, key) { inblk = 1 }
-    inblk         { print }
-    inblk && /\};/ { inblk = 0 }
-  ' "$1"
-}
-
-ci_fs_uuid() {
-    ci_fs_block "$1" "$2" | sed -nE 's|.*by-uuid/([^"]+)".*|\1|p' | head -n1
-}
-
-ci_fs_type() {
-    ci_fs_block "$1" "$2" | sed -nE 's|.*fsType[[:space:]]*=[[:space:]]*"([^"]+)".*|\1|p' | head -n1
-}
-
-ci_verify_hardware() {
-    section "Hardware configuration verification"
-
-    local f="$CI_DEST/hosts/sunflower/hardware-configuration.nix"
-    if [[ ! -f "$f" ]]; then
-        v_fail "missing $f"
-        return 1
-    fi
-    v_ok "hardware-configuration.nix present"
-
-    local want_root want_boot got_root got_boot
-    want_root="$(blkid -s UUID -o value "$CI_ROOT_PART" 2>/dev/null || printf '')"
-    want_boot="$(blkid -s UUID -o value "$CI_ESP" 2>/dev/null || printf '')"
-    got_root="$(ci_fs_uuid "$f" "/")"
-    got_boot="$(ci_fs_uuid "$f" "/boot")"
-
-    if [[ -n "$want_root" && "$got_root" == "$want_root" ]]; then
-        v_ok "root UUID matches $CI_ROOT_PART  ($want_root)"
-    else
-        v_fail "root UUID mismatch: config=${got_root:-none} target=${want_root:-unknown}"
-    fi
-
-    if [[ -n "$want_boot" && "$got_boot" == "$want_boot" ]]; then
-        v_ok "boot UUID matches $CI_ESP  ($want_boot)"
-    else
-        v_fail "boot UUID mismatch: config=${got_boot:-none} target=${want_boot:-unknown}"
-    fi
-
-    if [[ "$(ci_fs_type "$f" "/")" == "ext4" ]]; then
-        v_ok "root fsType is ext4"
-    else
-        v_fail "root fsType is not ext4"
-    fi
-
-    if [[ "$(ci_fs_type "$f" "/boot")" == "vfat" ]]; then
-        v_ok "boot fsType is vfat"
-    else
-        v_fail "boot fsType is not vfat"
-    fi
-
-    if grep -q 'hostPlatform = lib.mkDefault "x86_64-linux"' "$f"; then
-        v_ok "hostPlatform is x86_64-linux"
-    else
-        v_fail "hostPlatform is not x86_64-linux"
-    fi
-
-    if grep -q '"nvme"' "$f"; then
-        v_ok "nvme present in initrd modules"
-    else
-        v_info "nvme absent from initrd modules; expected only on a non-NVMe target"
-    fi
-}
-
-ci_validate_flake() {
-    ci_need_cmd nix
-    section "Flake validation"
-
-    if [[ "$CI_DRY_RUN" -eq 1 ]]; then
-        run_cmd "nix flake check --no-build $CI_DEST"
-        return 0
-    fi
-
-    local cache="$CI_TARGET/.nix-cache"
-    local tmp="$CI_TARGET/.nix-tmp"
-
-    mkdir -p "$cache" "$tmp"
-    chmod 700 "$cache" "$tmp"
-
-    info "Using target-disk cache: $cache"
-    info "Using target-disk temporary space: $tmp"
-
-    XDG_CACHE_HOME="$cache" \
-        TMPDIR="$tmp" \
-        NIX_CONFIG="experimental-features = nix-command flakes" \
-        nix "${CI_NIX_FLAGS[@]}" flake check --no-build "$CI_DEST" ||
-        {
-            error "Flake check failed."
-            return 1
-        }
-
-    success "Flake evaluates."
-}
-
-ci_prepare_target_store() {
-    section "Target Nix store"
-
-    local store="$CI_TARGET/nix/store"
-
-    if [[ "$CI_DRY_RUN" -eq 1 ]]; then
-        run_cmd "mkdir -p $CI_TARGET/nix/store $CI_TARGET/nix/var/nix"
-        run_cmd "nix --store $CI_TARGET store info"
-        info "The system build will use the disk-backed target store."
-        return 0
-    fi
-
-    mkdir -p "$store" "$CI_TARGET/nix/var/nix"
-    chmod 755 "$CI_TARGET/nix" "$store" "$CI_TARGET/nix/var/nix"
-
-    nix "${CI_NIX_FLAGS[@]}" --store "$CI_TARGET" store info >/dev/null || {
-        error "Target Nix store is not usable: $CI_TARGET"
-        return 1
-    }
-
-    success "Target Nix store ready at $store."
-}
-
-ci_build_system() {
-    section "Build .#sunflower in target store"
-
-    local attr="$CI_DEST#nixosConfigurations.sunflower.config.system.build.toplevel"
-
-    if [[ "$CI_DRY_RUN" -eq 1 ]]; then
-        run_cmd "nix --store $CI_TARGET build --no-link --print-out-paths $attr"
-        info "The system build will use the disk-backed target store."
-        return 0
-    fi
-
-    local result
-
-    result="$(
-        nix "${CI_NIX_FLAGS[@]}" \
-            --store "$CI_TARGET" \
-            build \
-            --no-link \
-            --print-out-paths \
-            "$attr"
-    )" || {
-        error "Build of .#sunflower failed."
-        return 1
-    }
-
-    result="$(printf '%s\n' "$result" | tail -n1)"
-
-    [[ "$result" == /nix/store/* ]] || {
-        error "Build returned an unexpected store path: $result"
-        return 1
-    }
-
-    [[ -e "$CI_TARGET$result" ]] || {
-        error "Built system path does not exist: $result"
-        return 1
-    }
-
-    CI_SYSTEM_PATH="$result"
-
-    success "System closure built in the target store."
-    info "System path: $result"
-}
-
-ci_install() {
-    ci_need_cmd nixos-install
-    section "Installing Sunflower"
-
-    if [[ "$CI_DRY_RUN" -eq 1 ]]; then
-        run_cmd "nixos-install --root $CI_TARGET --store-path /nix/store/<system-closure> --no-channel-copy"
-        info "Installing the already-built closure from the target Nix store."
-        return 0
-    fi
-
-    [[ -n "$CI_SYSTEM_PATH" ]] || {
-        error "No target-store system closure was built."
-        return 1
-    }
-
-    nix "${CI_NIX_FLAGS[@]}" \
-        --store "$CI_TARGET" \
-        path-info "$CI_SYSTEM_PATH" >/dev/null || {
-        error "System closure is not present in the target Nix store: $CI_SYSTEM_PATH"
-        return 1
-    }
-
-    info "Installing the already-built closure."
-    info "Source: $CI_SYSTEM_PATH"
-
-    run_cmd "nixos-install --root $CI_TARGET --store-path $CI_SYSTEM_PATH --no-channel-copy"
-
-    nixos-install \
-        --root "$CI_TARGET" \
-        --store-path "$CI_SYSTEM_PATH" \
-        --no-channel-copy || {
-        error "nixos-install failed."
-        return 1
-    }
-
-    success "Sunflower installed from the target-store closure."
-}
-
-ci_cleanup_installer_artifacts() {
-    section "Installer cleanup"
-
-    if [[ "$CI_DRY_RUN" -eq 1 ]]; then
-        run_cmd "swapoff $CI_TARGET/.setup-swapfile"
-        run_cmd "rm -rf $CI_TARGET/.nix-cache $CI_TARGET/.nix-tmp"
-        run_cmd "rm -rf $CI_TARGET/.nix-root-cache $CI_TARGET/.setup-tmp"
-        run_cmd "rm -f $CI_TARGET/.setup-swapfile $CI_TARGET/.nixos-build-swap"
-        run_cmd "rm -rf $CI_TARGET/backup-usb"
-        info "Installer-only files will be removed from the target."
-        return 0
-    fi
-
-    if [[ -e "$CI_TARGET/.setup-swapfile" ]]; then
-        swapoff "$CI_TARGET/.setup-swapfile" 2>/dev/null || true
-    fi
-
-    if [[ -e "$CI_TARGET/.nixos-build-swap" ]]; then
-        swapoff "$CI_TARGET/.nixos-build-swap" 2>/dev/null || true
-    fi
-
-    rm -rf \
-        "$CI_TARGET/.nix-cache" \
-        "$CI_TARGET/.nix-tmp" \
-        "$CI_TARGET/.nix-root-cache" \
-        "$CI_TARGET/.setup-tmp" \
-        "$CI_TARGET/backup-usb"
-
-    rm -f \
-        "$CI_TARGET/.setup-swapfile" \
-        "$CI_TARGET/.nixos-build-swap"
-
-    success "Installer-only files cleaned up."
-}
-
-ci_fix_ownership() {
-    section "Ownership"
-
-    if [[ "$CI_DRY_RUN" -eq 1 ]]; then
-        run_cmd "chown -R $CI_USER $CI_TARGET/home/$CI_USER"
-        return 0
-    fi
-
-    local uid gid
-    uid="$(nixos-enter --root "$CI_TARGET" -- id -u "$CI_USER" 2>/dev/null | tr -dc '0-9')"
-    gid="$(nixos-enter --root "$CI_TARGET" -- id -g "$CI_USER" 2>/dev/null | tr -dc '0-9')"
-
-    if [[ -z "$uid" || -z "$gid" ]]; then
-        error "Could not resolve uid/gid for $CI_USER inside the target."
-        return 1
-    fi
-
-    ci_run chown -R "$uid:$gid" "$CI_TARGET/home/$CI_USER"
-    success "$CI_TARGET/home/$CI_USER owned by $CI_USER ($uid:$gid)."
-}
-
-ci_set_password() {
-    section "Password"
-    info "Set interactively inside the installed system."
-    info "Never written to Nix, to variables.nix, or to any log."
-
-    if [[ "$CI_DRY_RUN" -eq 1 ]]; then
-        run_cmd "nixos-enter --root $CI_TARGET -- passwd $CI_USER"
-        return 0
-    fi
-
-    local i
-    for i in 1 2 3; do
-        if nixos-enter --root "$CI_TARGET" -- passwd "$CI_USER"; then
-            success "Password set for $CI_USER."
-            return 0
-        fi
-        warning "passwd failed, attempt $i of 3."
-    done
-
-    error "Could not set a password for $CI_USER."
-    warning "This configuration defines no initialPassword and no display manager,"
-    warning "so $CI_USER cannot log in until a password exists."
-    warning "After reboot, log in as root and run: passwd $CI_USER"
-    return 1
-}
-
-ci_verify_bootloader() {
-    section "Bootloader"
-
-    local fb="$CI_TARGET/boot/EFI/BOOT/BOOTX64.EFI"
-
-    if [[ -f "$fb" ]]; then
-        v_ok "fallback loader present at /boot/EFI/BOOT/BOOTX64.EFI"
-    else
-        v_fail "missing $fb"
-        return 1
-    fi
-
-    if grep -qa "systemd-boot" "$fb"; then
-        v_fail "fallback loader is systemd-boot, not GRUB"
-    elif grep -qa "GRUB" "$fb"; then
-        v_ok "fallback loader identifies as GRUB"
-    else
-        v_fail "cannot identify the fallback loader as GRUB"
-    fi
-
-    local cfg="$CI_TARGET/boot/grub/grub.cfg"
-    if [[ -f "$cfg" ]]; then
-        v_ok "grub.cfg present"
-    else
-        v_fail "missing $cfg"
-        return 1
-    fi
-
-    if grep -q "menuentry" "$cfg"; then
-        v_ok "grub.cfg has menu entries"
-    else
-        v_fail "grub.cfg has no menuentry"
-    fi
-
-    if grep -q "nixos-system" "$cfg"; then
-        v_ok "grub.cfg boots a Sunflower system closure"
-    else
-        v_fail "grub.cfg references no Sunflower system closure"
-    fi
-
-    local sys
-    sys="$(readlink -f "$CI_TARGET/nix/var/nix/profiles/system" 2>/dev/null || printf '')"
-    if [[ -n "$sys" ]] && grep -q -- "${sys##*/}" "$cfg"; then
-        v_ok "grub.cfg references the installed generation"
-    else
-        v_info "grub.cfg does not name the current system profile; check the menu on first boot"
-    fi
-
-    if [[ -d "$CI_TARGET/boot/EFI/systemd" ]]; then
-        v_info "$CI_TARGET/boot/EFI/systemd still exists on the new ESP"
-    fi
-}
-
-ci_efi_entries() { efibootmgr -v 2>/dev/null || true; }
-
-# Read efibootmgr -v on stdin, print NUM|LABEL for entries that are stale
-# Sunflower systemd-boot loaders and nothing else.
-#
-# Deliberately narrow. Only an entry naming systemd-bootx64.efi, or carrying
-# the label systemd itself writes, is ever a candidate. Anything belonging to
-# another operating system is skipped before matching, so a Windows or distro
-# entry cannot be selected even if its path happened to mention systemd.
-ci_parse_stale_efi() {
-    local line num label
-    while IFS= read -r line; do
-        [[ "$line" =~ ^Boot([0-9A-Fa-f]{4})\*?[[:space:]]+(.*)$ ]] || continue
-        num="${BASH_REMATCH[1]}"
-        label="${BASH_REMATCH[2]}"
-
-        case "$label" in
-        *Microsoft* | *microsoft* | *Windows* | *windows* | *bootmgfw* | \
-            *Ubuntu* | *ubuntu* | *Fedora* | *fedora* | *Debian* | *debian* | \
-            *grubx64* | *shimx64* | *opensuse* | *Arch*)
-            continue
-            ;;
-        esac
-
-        if printf '%s' "$label" | grep -qiE 'systemd-bootx64\.efi|Linux Boot Manager'; then
-            printf '%s|%s\n' "$num" "$label"
-        fi
-    done
-}
-
-ci_handle_stale_efi() {
-    section "UEFI boot entries"
-
-    if [[ ! -d /sys/firmware/efi ]]; then
-        v_fail "not booted in UEFI mode; this configuration is UEFI only"
-        return 1
-    fi
-
-    if ! command -v efibootmgr >/dev/null 2>&1; then
-        v_fail "efibootmgr unavailable, cannot inspect UEFI boot entries"
-        warning "GRUB here is installed only to the removable fallback path and creates"
-        warning "no NVRAM entry, so a leftover entry can still win the boot."
-        warning "From any live environment run: efibootmgr -v"
-        warning "Then delete stale Sunflower entries with: efibootmgr -b <NUM> -B"
-        return 1
-    fi
-
-    local out
-    out="$(ci_efi_entries)"
-    printf '%s\n' "$out" | sed 's/^/    /'
-    echo
-
-    local -a stale=()
-    local line num
-    while IFS= read -r line; do
-        [[ -n "$line" ]] && stale+=("$line")
-    done < <(printf '%s\n' "$out" | ci_parse_stale_efi)
-
-    if [[ "${#stale[@]}" -eq 0 ]]; then
-        v_ok "no stale systemd-boot entry in NVRAM"
-        return 0
-    fi
-
-    warning "These NVRAM entries point at the old systemd-boot loader:"
-    for line in "${stale[@]}"; do
-        printf '    Boot%s  %s\n' "${line%%|*}" "${line#*|}"
-    done
-    echo
-    info "This repository installs GRUB with efiInstallAsRemovable = true and"
-    info "efi.canTouchEfiVariables = false, so GRUB lives only at"
-    info "\\EFI\\BOOT\\BOOTX64.EFI and registers no NVRAM entry of its own."
-    info "While an entry above exists and is ordered ahead of the fallback, the"
-    info "firmware will keep booting the previous installation."
-    echo
-
-    if [[ "$CI_DRY_RUN" -eq 1 ]]; then
-        run_cmd "efibootmgr -b <NUM> -B   for each entry above"
-        return 0
-    fi
-
-    if ! confirm "Delete the entries listed above?"; then
-        v_fail "stale systemd-boot entry left in place; this machine may boot the old system"
-        return 1
-    fi
-
-    for line in "${stale[@]}"; do
-        num="${line%%|*}"
-        ci_run efibootmgr -b "$num" -B || warning "Could not delete Boot$num"
-    done
-
-    out="$(ci_efi_entries)"
-    if printf '%s' "$out" | ci_parse_stale_efi | grep -q .; then
-        v_fail "a systemd-boot entry survived deletion"
-        return 1
-    fi
-
-    success "Stale entries removed."
-    printf '%s\n' "$out" | sed 's/^/    /'
-}
-
-ci_final_verify() {
-    V_FAILED=0
-    section "Final verification"
-
-    # Explicit if/else (not `A && v_ok || v_fail`): v_ok/v_fail always
-    # succeed, so the &&/|| form would misreport if later refactored to
-    # return non-zero, and shellcheck SC2015 flags it as fragile.
-    if mountpoint -q "$CI_TARGET"; then v_ok "$CI_TARGET mounted"; else v_fail "$CI_TARGET not mounted"; fi
-    if mountpoint -q "$CI_TARGET/boot"; then v_ok "$CI_TARGET/boot mounted"; else v_fail "$CI_TARGET/boot not mounted"; fi
-
-    if [[ -d "$CI_TARGET/etc" ]]; then v_ok "$CI_TARGET/etc exists"; else v_fail "$CI_TARGET/etc missing"; fi
-
-    if [[ -d "$CI_TARGET/home/$CI_USER" ]]; then
-        v_ok "$CI_TARGET/home/$CI_USER exists"
-    else
-        v_fail "$CI_TARGET/home/$CI_USER missing"
-    fi
-
-    if [[ -f "$CI_DEST/flake.nix" ]]; then
-        v_ok "repository present at ${CI_DEST#"$CI_TARGET"}"
-    else
-        v_fail "repository missing at $CI_DEST"
-    fi
-
-    local owner
-    owner="$(stat -c '%U:%G' "$CI_TARGET/home/$CI_USER" 2>/dev/null || printf '')"
-    if [[ -z "$owner" ]]; then
-        v_fail "cannot read ownership of $CI_TARGET/home/$CI_USER"
-    elif [[ "$owner" == "root:root" ]]; then
-        v_fail "$CI_TARGET/home/$CI_USER is still root:root"
-    else
-        v_ok "home ownership is $owner"
-    fi
-
-    # Each group records its own failures into V_FAILED. None may abort the
-    # aggregate, otherwise a single early failure hides every later check and
-    # the verdict never prints.
-    ci_verify_hardware || true
-    ci_verify_bootloader || true
-    ci_handle_stale_efi || true
-
-    echo
-    if [[ "$V_FAILED" -eq 0 ]]; then
-        verdict "$GREEN" "$ICON_OK" "Installation verified"
-        return 0
-    fi
-
-    verdict "$RED" "$ICON_FAIL" "Installation NOT verified"
-    error "Do not reboot expecting the new configuration until the failures above are resolved."
-    return 1
-}
-
-ci_on_error() {
-    echo
-    ci_teardown_swap || true
-    error "Clean installation stopped at line $1."
-    warning "The target is left mounted at $CI_TARGET so it can be inspected."
-    warning "Nothing was rebooted and no bootloader claim has been made."
-    info "To retry, re-run: ./setup.sh clean-install"
-}
-
-clean_install() {
-    CI_DRY_RUN=0
-    [[ "${1:-}" == "--dry-run" || "${1:-}" == "-n" ]] && CI_DRY_RUN=1
-
-    clear_screen
-    panel "Sunflower Clean Installation" "v$VERSION" \
-        "Flake target : .#sunflower" \
-        "Repository   : the git checkout, never /etc/nixos" \
-        "Bootloader   : GRUB at \\EFI\\BOOT\\BOOTX64.EFI"
-    echo
-
-    if [[ "$CI_DRY_RUN" -eq 1 ]]; then
-        warning "Dry run. Detection and planning only; nothing is written."
-    else
-        ci_require_live
-
-        # The graphical ISO logs in as an unprivileged user, so this is a normal
-        # thing to hit rather than a mistake. Say what to do about it.
-        if [[ "$(id -u)" -ne 0 ]]; then
-            error "A clean installation has to run as root."
-            info "Re-run it as:  sudo ./setup.sh"
-            die "Not running as root."
-        fi
-
-        trap 'ci_on_error $LINENO' ERR
-    fi
-
-    # The installer ISO does not enable flakes, and nixos-install shells out to
-    # nix itself, so passing a flag to our own nix calls is not enough. NIX_CONFIG
-    # reaches every nix invocation in this process tree, including that one.
-    export NIX_CONFIG="experimental-features = nix-command flakes"
-
-    ci_preflight || return 1
-
-    ci_collect_identity
-
-    ci_show_disks
-    ci_select_target_disk || return 1
-
-    if [[ "$CI_DRY_RUN" -eq 0 ]]; then
-        ci_confirm_destroy || return 1
-        ci_release_target
-        ci_partition || return 1
-        ci_format || return 1
-        ci_mount || return 1
-        ci_setup_swap
-        ci_place_repo || return 1
-    else
-        info "Would partition, format and mount $CI_DISK."
-        ci_setup_swap
-        info "Would place the repository at $CI_DEST."
-    fi
-
-    ci_apply_identity || return 1
-    ci_generate_hardware || return 1
-    ci_prepare_target_store || return 1
-
-    if [[ "$CI_DRY_RUN" -eq 1 ]]; then
-        ci_validate_flake
-        ci_build_system
-        ci_install
-        ci_fix_ownership
-        ci_set_password
-        ci_handle_stale_efi || true
-
-        section "Verification that a real run performs"
-        info "target mounts, /etc, home directory, repository presence"
-        info "generated UUIDs against the real target partitions"
-        info "GRUB fallback binary identity and grub.cfg contents"
-        info "stale systemd-boot NVRAM entries"
-        info "home ownership is not root:root"
-        echo
-        verdict "$CYAN" "$ICON_INFO" "Dry run complete, nothing changed"
-        return 0
-    fi
-
-    ci_verify_hardware
-    if [[ "$V_FAILED" -ne 0 ]]; then
-        die "Hardware configuration does not describe the target. Stopping before install."
-    fi
-
-    ci_validate_flake || return 1
-    ci_build_system || return 1
-    ci_install || return 1
-
-    # Nothing after this point needs the extra memory, and leaving a swapfile on
-    # a system whose configuration declares no swap would be a surprise.
-    ci_teardown_swap
-
-    ci_fix_ownership || return 1
-    ci_set_password || true
-
-    ci_final_verify || return 1
-    ci_cleanup_installer_artifacts || return 1
-
-    echo
-    success "Clean installation complete."
-    info "Reboot into GRUB, then the newest generation of ${CI_DEST#"$CI_TARGET"}."
-    # Explicit if (not `confirm ... && reboot`): under `set -e` with the
-    # ERR trap armed, a declined confirmation must be a normal No, not
-    # an error path through ci_on_error.
-    if confirm "Reboot now?"; then
-        reboot
-    fi
-}
-
-# Reclaim disk space.
-#
-# Composed from the maintenance functions rather than reimplementing them, so
-# there is one copy of each destructive step and each keeps its own
-# confirmation. Deliberately does not run the dry-build gate that the full
-# maintenance dashboard imposes: this is the quick "I need space now" path, and
-# nothing here touches the configuration.
-free_space() {
-    clear_screen
-    panel "Free disk space" "v$VERSION" \
-        "Old generations, garbage collection, store optimisation"
-    echo
-
-    info "The configuration is never modified. Only build artefacts and old"
-    info "generations are removed, and each step asks first."
-    echo
-
-    section "Before"
-    m_store_usage
-
-    m_generation_status
-    m_cleanup_generations
-    m_garbage_collect
-    m_optimize_store
-
-    section "After"
-    m_store_usage
-
-    echo
-    success "Cleanup complete."
-}
-
-# Re-run the post-install verification against whatever is mounted at /mnt.
-# Shared by the menu and the CLI so there is one copy.
-verify_boot() {
-    CI_USER="$(get_var username || printf '')"
-    CI_DEST="$CI_TARGET/home/$CI_USER/Sunflower"
-    CI_ROOT_PART="$(findmnt -no SOURCE "$CI_TARGET" 2>/dev/null || printf '')"
-    CI_ESP="$(findmnt -no SOURCE "$CI_TARGET/boot" 2>/dev/null || printf '')"
-    ci_final_verify
-}
+# ============================================================================
+# CLI
+# ============================================================================
 
 usage() {
     cat <<EOF
-Sunflower Configuration Manager v$VERSION
+Sunflower v$VERSION
 
 Usage:
-  ./setup.sh                         Interactive menu
-  ./setup.sh install                 Install this machine (see below)
-  ./setup.sh upgrade                 Pull repo + update flake inputs + rebuild
-  ./setup.sh free-space              Old generations, GC, store optimisation
+  ./setup.sh
+  ./setup.sh clean-install
+  ./setup.sh clean-install --dry-run
 
-  ./setup.sh clean-install           Force the fresh installer
-  ./setup.sh clean-install --dry-run Plan a fresh install, change nothing
-  ./setup.sh verify-boot             Re-verify an installation mounted at /mnt
-  ./setup.sh configure               Identity pass on an existing install
-  ./setup.sh rebuild                 Validate + rebuild/switch
-  ./setup.sh dry                     Dry rebuild
-  ./setup.sh check                   Flake check
-  ./setup.sh validate                Full configuration validator
-  ./setup.sh maintain                Full maintenance dashboard
-  ./setup.sh rollback                Roll back one generation
-  ./setup.sh hardware                Regenerate hardware config
-  ./setup.sh generations             List system generations
-  ./setup.sh gc                      Garbage collection
-  ./setup.sh optimize                Optimize Nix store
-  ./setup.sh verify-store            Verify Nix store contents
-  ./setup.sh systemd                 Check failed systemd units
-  ./setup.sh store                   Show Nix store usage
-  ./setup.sh test-install            Safe installer preview
-  ./setup.sh help                   Show this help
-  ./setup.sh version                Show version
+Existing system:
+  ./setup.sh install
+  ./setup.sh update
+  ./setup.sh rebuild
+  ./setup.sh dry-build
+  ./setup.sh validate
+  ./setup.sh rollback
+  ./setup.sh generations
+  ./setup.sh hardware
+  ./setup.sh maintain
+  ./setup.sh free-space
 
-What 'install' does depends on where you run it:
-  from the installer ISO   partitions the disk and runs nixos-install
-  on a running Sunflower       identity pass, ends in nixos-rebuild switch
+Installer:
+  clean-install             Fresh UEFI installation
+  clean-install --dry-run   SAFE preview; never modifies the disk
 
-Typical life of a machine:
-  1. Boot the installer, clone this repo, ./setup.sh, choose 1.
-  2. Reboot into it. Later, ./setup.sh and choose 2 to upgrade.
-  3. When the disk fills up, choose 3.
-
-Nothing needs installing first. The installer ISO already carries every
-tool this uses, and preflight says so before anything is touched.
-
-Password handling:
-  Linux passwords are never written to Nix. Setup uses 'passwd' interactively.
 EOF
 }
 
 main() {
-    cd "$ROOT"
-    case "${1:-menu}" in
-    menu) menu ;;
-    # `install` means "install this machine" in whichever environment you are
-    # standing in. From the ISO that is a fresh install; on a running Sunflower it
-    # is the identity/setup pass it has always been, so nobody's habit breaks.
+    if [[ $# -eq 0 ]]; then
+        menu
+        return
+    fi
+
+    case "$1" in
     install)
-        if ci_is_live_installer; then clean_install; else install_flow; fi
+        configure_existing_system
         ;;
-    clean-install | clean_install)
-        shift || true
-        clean_install "${1:-}"
+    clean-install)
+        clean_install "${2:-}"
         ;;
-    configure | identity) install_flow ;;
-    verify-boot | verify-install) verify_boot ;;
-    upgrade | update) update_config ;;
-    free-space | freespace | space) free_space ;;
-    rebuild | switch) rebuild ;;
-    dry | dry-build) dry_build ;;
-    check) flake_check ;;
-    validate | validator) validator_run ;;
-    maintain | maintenance | cleanup) m_maintenance_dashboard ;;
-    rollback) rollback ;;
-    hardware | hw) refresh_hardware ;;
-    generations | list-generations) list_generations ;;
-    gc | garbage-collect) m_garbage_collect ;;
-    optimize | optimise) m_optimize_store ;;
-    verify-store | verify) m_verify_store ;;
-    systemd) m_systemd_health ;;
-    store | store-usage) m_store_usage ;;
-    test-install) test_install ;;
-    help | -h | --help) usage ;;
-    version | -v | --version) printf '%s\n' "$VERSION" ;;
-    *)
-        error "Unknown command: $1"
+    rebuild)
+        rebuild
+        ;;
+    dry-build)
+        dry_build
+        ;;
+    update)
+        update_config
+        ;;
+    rollback)
+        rollback
+        ;;
+    validate)
+        validator_run
+        ;;
+    generations | list-generations)
+        list_generations
+        ;;
+    hardware | refresh-hardware)
+        refresh_hardware
+        ;;
+    maintain)
+        m_maintenance_dashboard
+        ;;
+    free-space)
+        free_space
+        ;;
+    preview | identity-preview)
+        test_install
+        ;;
+    help | -h | --help)
         usage
-        exit 2
+        ;;
+    *)
+        die "Unknown command: $1. Use --help."
         ;;
     esac
 }
