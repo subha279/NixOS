@@ -1,0 +1,181 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+# Project Launcher
+# Configuration
+PROJECT_ROOTS=(
+    "$HOME/"
+    "$HOME/Sunflower"
+    "$HOME/Projects"
+    "$HOME/projects"
+)
+
+EDITOR="${EDITOR:-nvim}"
+TERMINAL="${TERMINAL:-kitty}"
+FILE_MANAGER="${FILE_MANAGER:-thunar}"
+
+# Preferred multiplexer:
+# auto | tmux | zellij | none
+MULTIPLEXER="${MULTIPLEXER:-auto}"
+
+# Helpers
+die() {
+    printf 'error: %s\n' "$*" >&2
+    exit 1
+}
+
+command_exists() {
+    command -v "$1" >/dev/null 2>&1
+}
+
+# Project Discovery
+find_projects() {
+    local root
+    for root in "${PROJECT_ROOTS[@]}"; do
+        [[ -d "$root" ]] || continue
+        printf '%s\n' "$root"
+        find "$root" \
+            -mindepth 1 \
+            -maxdepth 1 \
+            -type d \
+            ! -name '.git' \
+            2>/dev/null
+    done | sort -u
+}
+
+# Selection
+if [[ $# -gt 0 ]]; then
+    selected="$1"
+else
+    command_exists fzf || die "fzf is not installed"
+    selected="$(
+        find_projects |
+            fzf \
+                --height 60% \
+                --layout=reverse \
+                --border \
+                --prompt='Project ❯ ' \
+                --preview='
+                if [[ -d {}/.git ]]; then
+                    printf "\033[1;36mGit:\033[0m\n"
+                    git -C {} status --short --branch 2>/dev/null
+                    printf "\n\033[1;36mFiles:\033[0m\n"
+                fi
+                eza --tree --level=2 --icons {} 2>/dev/null ||
+                ls -la {}
+            '
+    )"
+fi
+
+[[ -n "${selected:-}" ]] || exit 0
+selected="$(realpath "$selected")"
+[[ -d "$selected" ]] ||
+    die "not a directory: $selected"
+
+# Session Name
+if [[ -d "$selected/.git" ]]; then
+    project_name="$(basename "$selected")"
+else
+    project_name="$(basename "$selected")"
+fi
+
+# Safe session name
+session_name="$(
+    printf '%s' "$project_name" |
+        tr '[:upper:]' '[:lower:]' |
+        tr -cs '[:alnum:]_-' '_' |
+        sed 's/^_*//;s/_*$//'
+)"
+[[ -n "$session_name" ]] || session_name="project"
+
+# Multiplexer Detection
+detect_multiplexer() {
+    case "$MULTIPLEXER" in
+    tmux)
+        echo "tmux"
+        ;;
+
+    zellij)
+        echo "zellij"
+        ;;
+
+    none)
+        echo "none"
+        ;;
+
+    auto)
+        if [[ -n "${TMUX:-}" ]]; then
+            echo "tmux"
+        elif [[ -n "${ZELLIJ:-}" ]]; then
+            echo "zellij"
+        elif command_exists tmux; then
+            echo "tmux"
+        elif command_exists zellij; then
+            echo "zellij"
+        else
+            echo "none"
+        fi
+        ;;
+
+    *)
+        die "invalid MULTIPLEXER: $MULTIPLEXER"
+        ;;
+    esac
+}
+
+# tmux Backend
+launch_tmux() {
+    if ! tmux has-session -t "$session_name" 2>/dev/null; then
+        tmux new-session \
+            -d \
+            -s "$session_name" \
+            -c "$selected"
+    fi
+
+    if [[ -n "${TMUX:-}" ]]; then
+        tmux switch-client -t "$session_name"
+    else
+        tmux attach-session -t "$session_name"
+    fi
+}
+
+# Zellij Backend
+launch_zellij() {
+    if [[ -n "${ZELLIJ:-}" ]]; then
+        zellij action switch-mode normal
+        cd "$selected"
+        return
+    fi
+    zellij attach "$session_name" 2>/dev/null ||
+        zellij --session "$session_name" options \
+            --cwd "$selected"
+}
+
+# Standalone Backend
+launch_standalone() {
+    if command_exists "$TERMINAL"; then
+        "$TERMINAL" \
+            --working-directory "$selected" \
+            >/dev/null 2>&1 &
+        return
+    fi
+    cd "$selected"
+    if command_exists "$EDITOR"; then
+        exec "$EDITOR" .
+    fi
+}
+
+# Launch
+multiplexer="$(detect_multiplexer)"
+case "$multiplexer" in
+tmux)
+    launch_tmux
+    ;;
+zellij)
+    launch_zellij
+    ;;
+none)
+    launch_standalone
+    ;;
+esac

@@ -3,34 +3,26 @@
 local M = {}
 
 -- Paths
-
 local SUNFLOWER_DIR = vim.fn.expand("~/.config/sunflower")
-
 M.id_path = SUNFLOWER_DIR .. "/active-theme"
-
 -- Symlink to the generated theme for the active id.
 M.theme_path = SUNFLOWER_DIR .. "/active-theme.lua"
 
 -- Load / cache
-
 local cached = nil
 local cache_valid = false
 
 local function load()
 	local ok, theme = pcall(dofile, M.theme_path)
-
 	if not ok then
 		return nil
 	end
-
 	if type(theme) ~= "table" then
 		return nil
 	end
-
 	if type(theme.colors) ~= "table" then
 		return nil
 	end
-
 	return theme
 end
 
@@ -39,19 +31,16 @@ function M.get()
 		cached = load()
 		cache_valid = true
 	end
-
 	return cached
 end
 
 function M.colors()
 	local theme = M.get()
-
 	return theme and theme.colors or {}
 end
 
 function M.ui()
 	local theme = M.get()
-
 	return theme and theme.ui or {}
 end
 
@@ -79,14 +68,12 @@ function M.id()
 end
 
 -- Subscribers
-
 local subscribers = {}
 
 function M.on_change(fn)
 	if type(fn) ~= "function" then
 		return
 	end
-
 	subscribers[#subscribers + 1] = fn
 end
 
@@ -113,13 +100,11 @@ function M.refresh()
 			api.tree.reload()
 		end
 	end)
-
 	vim.cmd("redraw!")
 	vim.cmd("redrawstatus!")
 end
 
 -- Watcher
-
 local watching = false
 
 function M.watch()
@@ -128,11 +113,8 @@ function M.watch()
 	end
 
 	watching = true
-
 	local last_id = M.id()
-
 	local timer = vim.uv.new_timer()
-
 	if not timer then
 		return
 	end
@@ -142,7 +124,6 @@ function M.watch()
 		500,
 		vim.schedule_wrap(function()
 			local current = M.id()
-
 			if current == nil then
 				return
 			end
@@ -155,9 +136,7 @@ function M.watch()
 			if current == last_id then
 				return
 			end
-
 			last_id = current
-
 			M.refresh()
 		end)
 	)

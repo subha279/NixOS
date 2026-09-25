@@ -72,7 +72,6 @@ dashboard.section.footer.val = {
 dashboard.section.header.opts.hl = "AlphaHeader"
 dashboard.section.buttons.opts.hl = "AlphaButtons"
 dashboard.section.footer.opts.hl = "AlphaFooter"
-
 dashboard.opts.layout = {
 	{
 		type = "padding",
@@ -97,9 +96,7 @@ dashboard.opts.layout = {
 }
 
 apply_theme()
-
 alpha.setup(dashboard.opts)
-
 vim.api.nvim_create_autocmd("FileType", {
 	pattern = "alpha",
 
@@ -124,7 +121,6 @@ vim.api.nvim_create_autocmd("FileType", {
 
 sunflower.on_change(function()
 	apply_theme()
-
 	if vim.bo.filetype == "alpha" then
 		dashboard.section.footer.val = {
 			"",
