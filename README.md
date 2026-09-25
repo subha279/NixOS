@@ -79,13 +79,18 @@ cd ~/Sunflower
 ```
 
 > [!CAUTION]
-> I have no time to fix those right now.
-> So if you are installing using the script you may encounter those errors:
-> You may need to remove `.git` file else the rebild will throw an error.
-> If you failed an install attempt you need to `sudo swapoff -a` `sudo umount -R /mnt` or start clean.
-> And also at the end stage you may get and user name related error please ignore the error simple reboot will work.
-> If you are using this it will be really helpfull if you find raise a issue if any bugs or improvement needed.
-> Check the packages once you may dont need all of them. cause it a holy 7.5 GB. (will be fixed soon)
+> **Important installation warnings and known issues:**
+>
+> - **Existing Git Repository:** You may need to remove the `.git` file before running the script, otherwise the rebuild will fail.
+> - **Failed Install Clean-up:** If an installation attempt fails, you must run the following commands to clear the environment before trying again (or start with a completely fresh environment):
+>   ```bash
+>   sudo swapoff -a
+>   sudo umount -R /mnt
+>   ```
+> - **Username Error:** You may see a username-related error during the final stage. Please ignore this error; a simple system reboot will resolve it.
+> - **Large Download Size:** Review the package list before installing. The total size is currently a massive **7.5 GB**, as it includes extra packages you might not need. (A fix to optimize this size is coming soon).
+>
+> **Contributions Welcome:** If you run into any other bugs or have ideas for improvements, please raise an issue on the repository to help make the script better!
 
 ### Installation Workflow
 
