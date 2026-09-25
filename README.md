@@ -9,7 +9,6 @@
     <a href="https://github.com/subha279/Sunflower"><img src="https://img.shields.io/badge/NixOS-26.05-7E7DFF?style=flat-square&logo=nixos&logoColor=white" alt="NixOS Base"></a>
     <a href="https://github.com/subha279/Sunflower"><img src="https://img.shields.io/badge/Hyprland-Lua-58E1FF?style=flat-square&logo=lua&logoColor=white" alt="Hyprland Lua"></a>
     <a href="https://github.com/subha279/Sunflower"><img src="https://img.shields.io/badge/Quickshell-QML-BB86FC?style=flat-square&logo=qt&logoColor=white" alt="Quickshell QML"></a>
-    <a href="https://github.com/subha279/Sunflower"><img src="https://img.shields.io/badge/Theme-Catppuccin-CBA6F7?style=flat-square&logo=palette&logoColor=white" alt="Sunflower Themes"></a>
   </p>
 
   <p align="center">
@@ -50,8 +49,6 @@
 ### 🎨 Theme Engine
 - **Centralized Palette Engine**: Define colors once in `lib/colorschemes/`, dynamic generation propagates to Lua, JSON, Kitty, tmux, Starship, GTK, and Kvantum.
 - **Instant Runtime Switching**: Press <kbd>SUPER</kbd> + <kbd>C</kbd> to switch colors dynamically without rebuilding your system.
-- **7 Built-in Palettes**: 
-  `catppuccin-mocha` *(default)* · `tokyo-night` · `gruvbox` · `one-dark` · `everforest` · `rose-pine` · `kanagawa`
 - **Stylix Base**: Manages Base16 schemes, fonts, and cursors cleanly while disabling intrusive GTK/Qt overrides.
 
 ### 💻 Terminal & Workspaces

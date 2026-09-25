@@ -1,84 +1,84 @@
 {
   name = "Sunflower";
-  description = "Warm golden sunflower night theme";
+  description = "Warm golden sunflower night theme (Eye-friendly edition)";
 
   colors = {
 
     # Base
-    background = "#17130B";
-    backgroundDark = "#100D07";
+    background = "#171410";
+    backgroundDark = "#110F0C";
 
     # Surfaces
-    surface = "#211B0F";
-    surfaceHover = "#2B2313";
-    surfaceActive = "#403417";
+    surface = "#211D17";
+    surfaceHover = "#2C261F";
+    surfaceActive = "#3B3227";
 
     # Borders
-    border = "#403417";
-    borderFocus = "#F2C94C";
-    separator = "#2B2313";
+    border = "#3B3227";
+    borderFocus = "#E6B43B";
+    separator = "#2C261F";
 
     # Text
-    text = "#FFF4D6";
-    textSecondary = "#DCCB9A";
-    textMuted = "#8F805A";
+    text = "#EDE3D2";
+    textSecondary = "#C2B6A1";
+    textMuted = "#7A7060";
 
     # Accent
-    accent = "#F2C94C";
-    accentHover = "#FFD95A";
-    accentActive = "#FFB938";
-    accentMuted = "#66531F";
-    accentForeground = "#17130B";
+    accent = "#E6B43B";
+    accentHover = "#F5C247";
+    accentActive = "#D49E2D";
+    accentMuted = "#4D3E1E";
+    accentForeground = "#171410";
 
     # Syntax
     syntax = {
-      comment = "#756844";
-      variable = "#FFF4D6";
-      parameter = "#FFB938";
-      property = "#E8D58A";
-      func = "#F2C94C";
-      method = "#E6B84A";
-      keyword = "#FFD95A";
-      keywordControl = "#E9824A";
-      type = "#D9C36A";
-      constant = "#FFB454";
-      string = "#B8C96B";
-      number = "#F5A742";
-      boolean = "#FFD95A";
-      operator = "#E8C95A";
-      punctuation = "#DCCB9A";
-      tag = "#E9824A";
-      attribute = "#FFB938";
-      namespace = "#D9C36A";
-      builtin = "#C6D47A";
-      regex = "#E8D58A";
-      special = "#FFD95A";
-      macro = "#F2C94C";
+      comment = "#7A7060";
+      variable = "#EDE3D2";
+      parameter = "#DFC491";
+      property = "#D3B88C";
+      func = "#E6B43B";
+      method = "#D9A536";
+      keyword = "#E58A56";
+      keywordControl = "#E06C53";
+      type = "#D4A76A";
+      constant = "#E57C62";
+      string = "#98B06F";
+      number = "#E09553";
+      boolean = "#E57C62";
+      operator = "#C7B28B";
+      punctuation = "#A89C87";
+      tag = "#E06C53";
+      attribute = "#E6B43B";
+      namespace = "#7AA89F";
+      builtin = "#739B8B";
+      regex = "#BFA46E";
+      special = "#D9A536";
+      macro = "#D87A56";
     };
 
     # Semantic
-    success = "#B8C96B";
-    warning = "#F2C94C";
-    error = "#E96B56";
-    info = "#D9C36A";
+    success = "#98B06F";
+    warning = "#E6B43B";
+    error = "#E05C50";
+    info = "#6A9589";
 
     # ANSI
-    terminalBlack = "#403417";
-    terminalRed = "#E96B56";
-    terminalGreen = "#B8C96B";
-    terminalYellow = "#F2C94C";
-    terminalBlue = "#D9C36A";
-    terminalMagenta = "#C9A95C";
-    terminalCyan = "#D8C77A";
-    terminalWhite = "#DCCB9A";
+    terminalBlack = "#3B3227";
+    terminalRed = "#E05C50";
+    terminalGreen = "#98B06F";
+    terminalYellow = "#E6B43B";
+    terminalBlue = "#6A90B8";
+    terminalMagenta = "#B886A9";
+    terminalCyan = "#7AA89F";
+    terminalWhite = "#C2B6A1";
 
-    terminalBrightBlack = "#756844";
-    terminalBrightRed = "#FF806B";
-    terminalBrightGreen = "#C9DD7A";
-    terminalBrightYellow = "#FFD95A";
-    terminalBrightBlue = "#E8D58A";
-    terminalBrightMagenta = "#E0BF6A";
-    terminalBrightCyan = "#E8DA91";
-    terminalBrightWhite = "#FFF4D6";
+    terminalBrightBlack = "#7A7060";
+    terminalBrightRed = "#F0786C";
+    terminalBrightGreen = "#ACCA80";
+    terminalBrightYellow = "#F5C247";
+    terminalBrightBlue = "#85A8D0";
+    terminalBrightMagenta = "#CE9CBD";
+    terminalBrightCyan = "#8FC2B7";
+    terminalBrightWhite = "#EDE3D2";
   };
 }
