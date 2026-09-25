@@ -65,4 +65,4 @@ hl.bind("XF86AudioPlay", hl.dsp.exec_cmd(vars.mediaPlay), { locked = true })
 hl.bind("XF86AudioPause", hl.dsp.exec_cmd(vars.mediaPlay), { locked = true })
 
 -- Open Project Dir with terminal Multiplexer
-hl.bind(mainMod .. " + SHIFT + P", hl.dsp.exec_cmd(vars.scriptDir .. "/workspace"))
+hl.bind(mainMod .. " + SHIFT + P", hl.dsp.exec_cmd(vars.terminal .. " -- " .. vars.scriptDir .. "/workspace"))

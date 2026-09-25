@@ -13,7 +13,14 @@
 
   # Hyprland Configuration Modules
   xdg.configFile."hypr/config".source = ./config;
-  xdg.configFile."hypr/scripts/restore-wallpaper.sh".source = ./scripts/restore-wallpaper.sh;
+  xdg.configFile."hypr/scripts/restore-wallpaper.sh" = {
+    source = ./scripts/restore-wallpaper.sh;
+    executable = true;
+  };
+  xdg.configFile."hypr/scripts/workspace" = {
+    source = ./scripts/workspace;
+    executable = true;
+  };
 
   # Sunflower Desktop Services
   systemd.user.targets.hyprland-session = {
