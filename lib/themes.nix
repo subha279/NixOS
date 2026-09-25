@@ -85,7 +85,7 @@ let
       in
       {
         inherit name;
-        value = import "${colorschemeDir}/${file}";
+        value = import (colorschemeDir + "/${file}");
       }
     ) colorschemeFiles
   );
