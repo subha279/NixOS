@@ -11,5 +11,5 @@ hl.on("hyprland.start", function()
 	)
 
 	-- Wallpaper
-	hl.exec_cmd("sleep 1 && ~/.config/hypr/scripts/restore-wallpaper.sh")
+	hl.exec_cmd("~/.config/hypr/scripts/restore-wallpaper.sh")
 end)

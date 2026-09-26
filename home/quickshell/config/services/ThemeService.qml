@@ -44,7 +44,7 @@ QtObject {
     // Has to match a theme id that lib/themes.nix actually defines, and the
     // default core/Theme.qml falls back to. This was "sunflower", which is not a
     // real theme, so with no active-theme file the picker marked nothing active.
-    readonly property string defaultId: "catppuccin-mocha"
+    readonly property string defaultId: "catppuccin"
 
     readonly property string activeId: {
         const raw = root.activeFile.text()

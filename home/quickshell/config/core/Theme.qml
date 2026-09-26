@@ -19,7 +19,7 @@ QtObject {
         path: theme.activeThemePath
 
         watchChanges: true
-        blockLoading: false
+        blockLoading: true
 
         onFileChanged: {
             this.reload();
@@ -29,7 +29,7 @@ QtObject {
 
     // Active Theme ID
 
-    readonly property string activeTheme: activeThemeFile.loaded ? activeThemeFile.text().trim() : "catppuccin-mocha"
+    readonly property string activeTheme: activeThemeFile.loaded ? activeThemeFile.text().trim() : "catppuccin"
 
     // Active Theme JSON
 
