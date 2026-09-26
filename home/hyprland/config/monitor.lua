@@ -3,10 +3,10 @@
 -- Laptop Display
 hl.monitor({
 	output = "eDP-1",
---	mode = "1920x1080@60.00800",
---	position = "0x0",
---	scale = 1.25,
-    disabled = true
+	--	mode = "1920x1080@60.00800",
+	--	position = "0x0",
+	--	scale = 1.25,
+	disabled = true,
 })
 
 -- External Acer VG240Y M3

@@ -7,15 +7,8 @@ in
   time.timeZone = vars.system.timezone;
   i18n.defaultLocale = vars.system.locale;
   console.keyMap = "us";
-
-  # Use Cloudflare DNS instead of ISP DNS.
-  networking.networkmanager.dns = "none";
-  networking.nameservers = [
-    "1.1.1.1"
-    "1.0.0.1"
-  ];
-
   networking.enableIPv6 = false;
+  networking.networkmanager.dns = "default";
   nix.settings = {
     experimental-features = [
       "nix-command"
@@ -33,7 +26,6 @@ in
     stalled-download-timeout = 90;
     cores = 0;
     max-jobs = "auto";
-
   };
 
   nix.gc = {

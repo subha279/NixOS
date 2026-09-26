@@ -2,7 +2,15 @@
 
 {
   networking = {
-    networkmanager.enable = true;
+    networkmanager = {
+      enable = true;
+      wifi.powersave = false;
+      settings = {
+        connection = {
+          "wifi.powersave" = "0";
+        };
+      };
+    };
   };
 
   # Boot Speed
