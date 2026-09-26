@@ -7,17 +7,14 @@
 
 let
   cfg = config.hardware.kreoRgb;
-
   kreoRgbTheme = pkgs.writeShellApplication {
     name = "kreo-rgb-theme";
-
     runtimeInputs = [
       kreoRgb
     ];
 
     text = ''
       set -euo pipefail
-
       if [ "$#" -ne 1 ]; then
         echo "Usage: kreo-rgb-theme <hex-color>" >&2
         exit 1
@@ -29,14 +26,12 @@ let
 
   kreoRgb = pkgs.writeShellApplication {
     name = "kreo-rgb";
-
     runtimeInputs = [
       pkgs.hidapitester
     ];
 
     text = ''
       set -euo pipefail
-
       VIDPID="320F/5055"
       USAGE_PAGE="0xFF1C"
       USAGE="0x0092"
@@ -45,7 +40,6 @@ let
         local r="$1"
         local g="$2"
         local b="$3"
-
         hidapitester \
           --vidpid "$VIDPID" \
           --usagePage "$USAGE_PAGE" \
@@ -63,7 +57,6 @@ let
           echo "Invalid color: $1" >&2
           exit 1
         fi
-
         R=$((16#''${hex:0:2}))
         G=$((16#''${hex:2:2}))
         B=$((16#''${hex:4:2}))
@@ -91,7 +84,6 @@ let
           exit 1
           ;;
       esac
-
       send_rgb "$R" "$G" "$B"
     '';
   };
@@ -100,7 +92,6 @@ in
 {
   options.hardware.kreoRgb = {
     enable = lib.mkEnableOption "Kreo Hive RGB support";
-
     followTheme = lib.mkOption {
       type = lib.types.bool;
       default = false;

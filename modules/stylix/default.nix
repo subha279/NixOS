@@ -3,14 +3,12 @@
 let
 
   # Sunflower Theme Source
-
   themeData = import ../../lib/themes.nix;
   activeTheme = themeData.theme;
   colors = activeTheme.colors;
   global = themeData.global;
 
   # Helpers
-
   # themes.nix stores colors as "#RRGGBB"; base16 wants them bare.
   hex = lib.removePrefix "#";
 
@@ -18,9 +16,7 @@ let
   pkgFromPath = path: lib.getAttrFromPath (lib.splitString "." path) pkgs;
 
   # Polarity Detection
-
   hexToInt = s: (builtins.fromTOML "v = 0x${s}").v;
-
   bgHex = hex colors.background;
 
   # Perceived brightness, ITU-R BT.601.
@@ -35,7 +31,6 @@ let
   isLight = bgBrightness > 127;
 
   # Central Fonts
-
   interfaceFont = pkgFromPath global.fonts.interface.package;
   terminalFont = pkgFromPath global.fonts.terminal.package;
   emojiFont = pkgFromPath global.fonts.emoji.package;
@@ -66,7 +61,6 @@ in
       base01 = hex colors.surface;
       base02 = hex colors.surfaceHover;
       base03 = hex colors.textMuted; # was border -> comments were invisible
-
       base04 = hex colors.textSecondary; # was textMuted -> ramp was shifted
       base05 = hex colors.text;
       # base06/base07 are the bright end of the foreground ramp.
@@ -74,7 +68,6 @@ in
       base07 = hex colors.terminalBrightWhite;
 
       # Semantic
-
       base08 = hex colors.error;
       base09 = hex colors.warning;
       base0A = hex colors.terminalYellow; # was a duplicate of warning
@@ -86,7 +79,6 @@ in
     };
 
     # FONTS
-
     fonts = {
       sansSerif = {
         package = interfaceFont;

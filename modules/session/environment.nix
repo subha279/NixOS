@@ -3,16 +3,11 @@
 {
   environment.sessionVariables = {
     NIXOS_OZONE_WL = "1";
-
     MOZ_ENABLE_WAYLAND = "1";
-
     QT_QPA_PLATFORM = "wayland";
     QT_QPA_PLATFORMTHEME = "kvantum";
-
     SDL_VIDEODRIVER = "wayland";
-
     CLUTTER_BACKEND = "wayland";
-
     XDG_SESSION_TYPE = "wayland";
   };
 }

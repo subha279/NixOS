@@ -14,11 +14,8 @@
     };
 
     mime.enable = true;
-
     autostart.enable = true;
-
     icons.enable = true;
-
     menus.enable = true;
 
     # Default Applications
@@ -26,13 +23,9 @@
     mime.defaultApplications =
       let
         browser = "zen.desktop";
-
         images = "org.kde.gwenview.desktop";
-
         video = "mpv.desktop";
-
         files = "thunar.desktop";
-
         archive = "org.gnome.FileRoller.desktop";
       in
       {

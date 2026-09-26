@@ -14,34 +14,26 @@
 
     plugins = with pkgs.vimPlugins; [
       # Completion
-
       blink-cmp
 
       # Syntax / Treesitter
-
       nvim-treesitter.withAllGrammars
       nvim-colorizer-lua
 
       # Search / Navigation
-
       telescope-nvim
-
       telescope-fzf-native-nvim
-
       plenary-nvim
       nvim-web-devicons
 
       # Git
-
       gitsigns-nvim
 
       # Formatting / Linting
-
       conform-nvim
       nvim-lint
 
       # UI
-
       which-key-nvim
       lualine-nvim
       snacks-nvim
@@ -60,7 +52,6 @@
 
       # QML language server, formatter, and linter.
       qt6.qtdeclarative
-
       lua-language-server
       rust-analyzer
       typescript-language-server
@@ -76,7 +67,6 @@
       taplo
 
       # Formatters
-
       stylua
       prettier
       ruff
@@ -87,14 +77,12 @@
       rustfmt
 
       # C / C++ development
-
       gcc
       gdb
       cmake
       pkg-config
 
       # Git / VCS
-
       lazygit
     ];
   };

@@ -6,7 +6,6 @@ in
 {
   imports = [
     ./hardware-configuration.nix
-
     ../../modules/core
     ../../modules/boot
     ../../modules/networking

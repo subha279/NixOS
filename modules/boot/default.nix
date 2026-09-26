@@ -11,13 +11,11 @@
       # Install GRUB to the UEFI fallback path:
       # /EFI/BOOT/BOOTX64.EFI
       efiInstallAsRemovable = true;
-
       configurationLimit = 10;
     };
 
     # Don't depend on UEFI NVRAM entries.
     efi.canTouchEfiVariables = false;
-
     timeout = 1;
   };
 

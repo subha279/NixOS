@@ -6,9 +6,7 @@ in
 {
   users.users.${vars.user.username} = {
     isNormalUser = true;
-
     shell = pkgs.zsh;
-
     extraGroups = [
       "wheel"
       "networkmanager"
@@ -17,6 +15,5 @@ in
   };
 
   programs.zsh.enable = true;
-
   security.sudo.enable = true;
 }
